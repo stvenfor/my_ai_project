@@ -15,9 +15,9 @@ class HomeBannerListModel {
 
   HomeBannerListModel.fromJson(dynamic json) {
     if (json != null && json is List) {
-      json.forEach((jsonObj) {
+      for (final jsonObj in json) {
         bannerList?.add(HomeBannerModel.fromJson(jsonObj));
-      });
+      }
     }
   }
 }

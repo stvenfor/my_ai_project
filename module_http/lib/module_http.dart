@@ -1,7 +1,8 @@
 library module_http;
 
-/// A Calculator.
-class Calculator {
-  /// Returns [value] plus 1.
-  int addOne(int value) => value + 1;
-}
+export 'package:dio/dio.dart';
+
+export 'http/http.dart';
+export 'http/log_print_interceptor.dart';
+export 'http/my_interceptor.dart';
+export 'http/rsp_interceptor.dart';

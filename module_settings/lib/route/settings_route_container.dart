@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:module_route/container/mixin_router_container.dart';
 import 'package:module_route/route/route_path.dart';
+import 'package:module_settings/mine/mine_http_test_page.dart';
 import 'package:module_settings/mine/mine_page.dart';
 import 'package:module_settings/settings/settings_page.dart';
 
@@ -12,6 +13,7 @@ mixin SettingsRouteContainer on MixinRouterContainer {
     //注册当前模块路由
     Map<String, WidgetBuilder> appRoutes = {};
     appRoutes[RoutePath.mine] = (context) => MinePage();
+    appRoutes[RoutePath.mineHttpTest] = (context) => MineHttpTestPage();
     appRoutes[RoutePath.settings] = (context) => SettingsPage();
 
     //合并其他模块路由

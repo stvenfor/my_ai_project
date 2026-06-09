@@ -10,6 +10,7 @@ class RoutePath{
   static const String live = '/live';
   static const String pay = '/pay';
   static const String mine = '/mine';
+  static const String mineHttpTest = '/mine/http_test';
   static const String settings = '/settings';
   static const String video = '/video';
 }

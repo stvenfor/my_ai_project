@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 ///知识体系明细列表数据
 class KnowledgeDetailListModel {
   KnowledgeDetailListModel({

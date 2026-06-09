@@ -1,44 +1,35 @@
 import 'package:module_http/module_http.dart';
 
-class RepositoryApi {
-  static const String baseUrl = 'https://www.wanandroid.com/';
+class MineHttpConfig {
+  static const String baseUrl = 'https://www.wanandroid.com';
+  static const String harmonyIndexPath = '/harmony/index/json';
 
-  static const String banner = 'banner/json';
-  static const String homeTopList = 'article/top/json';
-  static const String knowledgeTree = 'tree/json';
-  static const String hotKey = 'hotkey/json';
-  static const String commonWebsite = 'friend/json';
-
-  static String homeList(int page) => 'article/list/$page/json';
-
-  static String knowledgeDetailList({
-    required int page,
-    required int cid,
-  }) {
-    return 'article/list/$page/json?cid=$cid';
-  }
-
-  static String search(int page) => 'article/query/$page/json';
-
-  static void initHttp({
-    HttpHeaderProvider? headerProvider,
-    HttpResponseHook? responseHook,
-    bool enableLog = false,
-  }) {
+  static void init({bool enableLog = false}) {
     HttpManager.instance.init(
       HttpClientConfig(
         baseUrl: baseUrl,
-        headerProvider: headerProvider,
-        responseHook: responseHook,
-        responseParser: const WanAndroidResponseParser(),
+        headerProvider: const MineHeaderProvider(),
+        responseParser: const MineResponseParser(),
         enableLog: enableLog,
       ),
     );
   }
 }
 
-class WanAndroidResponseParser implements HttpResponseParser {
-  const WanAndroidResponseParser();
+class MineHeaderProvider implements HttpHeaderProvider {
+  const MineHeaderProvider();
+
+  @override
+  Map<String, dynamic> getHeaders(RequestOptions options) {
+    return const {
+      Headers.acceptHeader: Headers.jsonContentType,
+      Headers.contentTypeHeader: Headers.jsonContentType,
+    };
+  }
+}
+
+class MineResponseParser implements HttpResponseParser {
+  const MineResponseParser();
 
   @override
   HttpResult<T> parse<T>(
@@ -46,7 +37,8 @@ class WanAndroidResponseParser implements HttpResponseParser {
     JsonConverter<T>? converter,
   }) {
     final rawData = response.data;
-    if (rawData is! Map<String, dynamic> || !rawData.containsKey('errorCode')) {
+    if (rawData is! Map<String, dynamic> ||
+        !rawData.containsKey('errorCode')) {
       return const DefaultHttpResponseParser().parse<T>(
         response,
         converter: converter,
@@ -56,11 +48,10 @@ class WanAndroidResponseParser implements HttpResponseParser {
     final errorCode = rawData['errorCode'];
     final errorMsg = rawData['errorMsg']?.toString();
     final data = rawData['data'];
-    final success = errorCode == 0;
 
-    if (!success) {
+    if (errorCode != 0) {
       throw HttpRequestException(
-        message: errorMsg?.isNotEmpty == true ? errorMsg! : '业务请求失败',
+        message: errorMsg?.isNotEmpty == true ? errorMsg! : '请求失败',
         code: errorCode?.toString(),
         statusCode: response.statusCode,
         data: rawData,
