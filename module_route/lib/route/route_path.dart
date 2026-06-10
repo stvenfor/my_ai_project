@@ -1,7 +1,9 @@
 class RoutePath{
   //启动页
   static const String splash = '/';
+  static const String main = '/main';
   static const String home = '/home';
+  static const String homeLearningReport = '/home/learning_report';
   static const String login = '/login';
   static const String register = '/register';
   static const String chat = '/chat';

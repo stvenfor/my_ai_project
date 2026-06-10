@@ -5,4 +5,5 @@ export 'package:dio/dio.dart';
 export 'http/http.dart';
 export 'http/log_print_interceptor.dart';
 export 'http/my_interceptor.dart';
+export 'http/retry_interceptor.dart';
 export 'http/rsp_interceptor.dart';

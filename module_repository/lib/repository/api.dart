@@ -24,6 +24,7 @@ class RepositoryApi {
     HttpHeaderProvider? headerProvider,
     HttpResponseHook? responseHook,
     bool enableLog = false,
+    int maxRetries = 0,
   }) {
     HttpManager.instance.init(
       HttpClientConfig(
@@ -32,6 +33,7 @@ class RepositoryApi {
         responseHook: responseHook,
         responseParser: const WanAndroidResponseParser(),
         enableLog: enableLog,
+        maxRetries: maxRetries,
       ),
     );
   }

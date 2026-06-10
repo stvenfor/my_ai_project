@@ -1,7 +1,4 @@
 library module_chat;
 
-/// A Calculator.
-class Calculator {
-  /// Returns [value] plus 1.
-  int addOne(int value) => value + 1;
-}
+export 'chat/view/chat_page.dart';
+export 'chat_module.dart';

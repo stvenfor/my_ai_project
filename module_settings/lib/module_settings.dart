@@ -1,7 +1,5 @@
 library module_settings;
 
-/// A Calculator.
-class Calculator {
-  /// Returns [value] plus 1.
-  int addOne(int value) => value + 1;
-}
+export 'mine/view/mine_page.dart';
+export 'settings/view/settings_page.dart';
+export 'settings_module.dart';

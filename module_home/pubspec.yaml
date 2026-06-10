@@ -1,0 +1,27 @@
+name: module_home
+description: Home module for flutter_module_sample.
+publish_to: 'none'
+version: 0.0.1
+
+environment:
+  sdk: '>=3.0.3 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  get: ^4.7.3
+  module_common_ui:
+    path: ../module_common_ui
+  module_http:
+    path: ../module_http
+  module_route:
+    path: ../module_route
+  module_utils:
+    path: ../module_utils
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:

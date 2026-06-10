@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 
 import 'log_print_interceptor.dart';
 import 'my_interceptor.dart';
+import 'retry_interceptor.dart';
 import 'rsp_interceptor.dart';
 
 typedef JsonConverter<T> = T Function(dynamic json);
@@ -51,6 +52,7 @@ class HttpClientConfig {
     this.errorConverter,
     this.responseHook,
     this.interceptors = const [],
+    this.maxRetries = 0,
     this.validateStatus,
     this.logger,
   });
@@ -68,6 +70,7 @@ class HttpClientConfig {
   final HttpErrorConverter? errorConverter;
   final HttpResponseHook? responseHook;
   final List<Interceptor> interceptors;
+  final int maxRetries;
   final ValidateStatus? validateStatus;
   final void Function(String message)? logger;
 }
@@ -258,6 +261,12 @@ class HttpManager {
     }
 
     _dio!.interceptors.addAll(config.interceptors);
+
+    if (config.maxRetries > 0) {
+      _dio!.interceptors.add(
+        RetryInterceptor(dio: _dio!, maxRetries: config.maxRetries),
+      );
+    }
 
     if (config.enableLog) {
       _dio!.interceptors.add(LogPrintInterceptor(logger: config.logger));

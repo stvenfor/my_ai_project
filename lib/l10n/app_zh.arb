@@ -1,0 +1,21 @@
+{
+  "@@locale": "zh",
+  "appTitle": "Flutter 模块化示例",
+  "@appTitle": {
+    "description": "应用标题"
+  },
+  "tabHome": "首页",
+  "tabChat": "聊天",
+  "tabCommunity": "社区",
+  "tabMine": "我的",
+  "settingsTitle": "设置",
+  "settingsTheme": "深色模式",
+  "settingsThemeDesc": "切换浅色 / 深色主题",
+  "settingsLanguage": "语言",
+  "settingsLanguageDesc": "切换应用显示语言",
+  "settingsImmersive": "沉浸式模式",
+  "settingsImmersiveDesc": "透明状态栏与导航栏，全屏显示",
+  "languageZh": "简体中文",
+  "languageEn": "English",
+  "splashLoading": "正在进入应用..."
+}
