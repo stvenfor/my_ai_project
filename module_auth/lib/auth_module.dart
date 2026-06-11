@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:module_auth/user/binding/auth_binding.dart';
 import 'package:module_auth/user/view/login_page.dart';
+import 'package:module_auth/user/view/login_password_page.dart';
 import 'package:module_auth/user/view/register_page.dart';
 import 'package:module_route/module/feature_module.dart';
 import 'package:module_route/route/route_path.dart';
@@ -16,6 +17,7 @@ class AuthModule extends FeatureModule {
   @override
   Map<String, WidgetBuilder> routes() => {
         RoutePath.login: (_) => const LoginPage(),
+        RoutePath.loginPassword: (_) => const LoginPasswordPage(),
         RoutePath.register: (_) => const RegisterPage(),
       };
 }

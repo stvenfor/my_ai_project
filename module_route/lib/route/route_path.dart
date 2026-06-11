@@ -5,6 +5,7 @@ class RoutePath{
   static const String home = '/home';
   static const String homeLearningReport = '/home/learning_report';
   static const String login = '/login';
+  static const String loginPassword = '/login/password';
   static const String register = '/register';
   static const String chat = '/chat';
   static const String community = '/community';
