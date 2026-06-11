@@ -6,6 +6,7 @@ export 'container/uri_intercept_container.dart';
 export 'module/feature_module.dart';
 export 'module/module_host_context.dart';
 export 'module/module_registry.dart';
+export 'module/module_standalone_config.dart';
 export 'module/module_standalone_runner.dart';
 export 'module/module_tab_item.dart';
 export 'mixin_router_utils.dart';

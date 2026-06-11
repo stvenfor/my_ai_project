@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:module_auth/user/binding/auth_binding.dart';
+import 'package:module_auth/user/controller/auth_controller.dart';
+import 'package:module_auth/session/auth_session.dart';
 import 'package:module_common_ui/module_common_ui.dart';
-import 'package:module_core/core.dart';
 import 'package:module_route/module/module_registry.dart';
 import 'package:module_route/route/route_path.dart';
 import 'package:module_sample/l10n/app_localizations.dart';
@@ -17,7 +19,10 @@ class _MainPageState extends State<MainPage> {
   int _currentIndex = 0;
 
   Future<void> _logout() async {
-    await Get.find<UserService>().clearUser();
+    await AuthSession.logout();
+    if (!Get.isRegistered<AuthController>()) {
+      AuthBinding().dependencies();
+    }
     Get.offAllNamed(RoutePath.login);
   }
 

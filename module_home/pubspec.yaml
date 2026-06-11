@@ -16,6 +16,8 @@ dependencies:
     path: ../module_core
   module_http:
     path: ../module_http
+  module_repository:
+    path: ../module_repository
   module_route:
     path: ../module_route
   module_utils:
@@ -27,3 +29,4 @@ dev_dependencies:
   flutter_lints: ^2.0.0
 
 flutter:
+  uses-material-design: true

@@ -244,6 +244,15 @@ class HttpManager {
   }
 
   void init(HttpClientConfig config, {Dio? dio}) {
+    _applyConfig(config, dio: dio);
+  }
+
+  /// 切换 baseUrl / 拦截器等配置时重新初始化。
+  void reinit(HttpClientConfig config, {Dio? dio}) {
+    _applyConfig(config, dio: dio);
+  }
+
+  void _applyConfig(HttpClientConfig config, {Dio? dio}) {
     _config = config;
     _dio = dio ?? Dio(_createBaseOptions(config));
     _dio!

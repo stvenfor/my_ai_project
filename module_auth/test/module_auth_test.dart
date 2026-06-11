@@ -1,12 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:module_auth/module_auth.dart';
+import 'package:module_auth/session/auth_session.dart';
 
 void main() {
-  test('adds one to input values', () {
-    final calculator = Calculator();
-    expect(calculator.addOne(2), 3);
-    expect(calculator.addOne(-7), -6);
-    expect(calculator.addOne(0), 1);
+  test('AuthSession 未注册时 isLoggedIn 为 false', () {
+    expect(AuthSession.isLoggedIn, isFalse);
+    expect(AuthSession.maybeService, isNull);
   });
 }

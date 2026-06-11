@@ -1,8 +1,7 @@
 import 'package:module_http/module_http.dart';
+import 'package:module_repository/repository/app_http_bootstrap.dart';
 
 class RepositoryApi {
-  static const String baseUrl = 'https://www.wanandroid.com/';
-
   static const String banner = 'banner/json';
   static const String homeTopList = 'article/top/json';
   static const String knowledgeTree = 'tree/json';
@@ -26,17 +25,15 @@ class RepositoryApi {
     bool enableLog = false,
     int maxRetries = 0,
   }) {
-    HttpManager.instance.init(
-      HttpClientConfig(
-        baseUrl: baseUrl,
-        headerProvider: headerProvider,
-        responseHook: responseHook,
-        responseParser: const WanAndroidResponseParser(),
-        enableLog: enableLog,
-        maxRetries: maxRetries,
-      ),
+    AppHttpBootstrap.initialize(
+      headerProvider: headerProvider,
+      responseHook: responseHook,
+      enableLog: enableLog,
+      maxRetries: maxRetries,
     );
   }
+
+  static String get baseUrl => AppHttpBootstrap.resolveBaseUrl();
 }
 
 class WanAndroidResponseParser implements HttpResponseParser {

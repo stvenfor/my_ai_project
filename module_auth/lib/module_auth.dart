@@ -1,7 +1,6 @@
+/// 登录模块：UI + 会话持久化 + 独立运行。
 library module_auth;
 
-/// A Calculator.
-class Calculator {
-  /// Returns [value] plus 1.
-  int addOne(int value) => value + 1;
-}
+export 'auth_module.dart';
+export 'session/auth_session.dart';
+export 'user/controller/auth_controller.dart';

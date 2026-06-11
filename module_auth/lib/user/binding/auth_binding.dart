@@ -4,6 +4,6 @@ import 'package:module_auth/user/controller/auth_controller.dart';
 class AuthBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<AuthController>(AuthController.new);
+    Get.lazyPut<AuthController>(AuthController.new, fenix: true);
   }
 }

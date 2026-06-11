@@ -184,13 +184,13 @@ class HomeQuickActionGrid extends StatelessWidget {
           crossAxisCount: 2,
           mainAxisSpacing: 12.h,
           crossAxisSpacing: 12.w,
-          childAspectRatio: 1.6,
+          childAspectRatio: 1.15,
         ),
         itemCount: actions.length,
         itemBuilder: (context, index) {
           final action = actions[index];
           return Container(
-            padding: EdgeInsets.all(12.w),
+            padding: EdgeInsets.all(10.w),
             decoration: BoxDecoration(
               color: HomeDashboardTheme.cardWhite,
               borderRadius: BorderRadius.circular(12.r),
@@ -205,25 +205,32 @@ class HomeQuickActionGrid extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(action.emoji, style: TextStyle(fontSize: 22.sp)),
-                SizedBox(height: 8.h),
+                Text(action.emoji, style: TextStyle(fontSize: 20.sp)),
+                SizedBox(height: 6.h),
                 Text(
                   action.title,
                   style: TextStyle(
-                    fontSize: 14.sp,
+                    fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                SizedBox(height: 4.h),
-                Text(
-                  action.subtitle,
-                  style: TextStyle(fontSize: 11.sp, color: HomeDashboardTheme.textGray),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                SizedBox(height: 2.h),
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: Text(
+                      action.subtitle,
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        color: HomeDashboardTheme.textGray,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 ),
-                const Spacer(),
                 Text(
                   action.actionLabel,
                   style: TextStyle(

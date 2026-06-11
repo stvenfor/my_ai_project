@@ -1,7 +1,7 @@
 #!/bin/sh
 # This is a generated file; do not edit or check into version control.
-export "FLUTTER_ROOT=/Users/gongsensen/AndroidStudioProjects/Flutter-Env/flutter-3.10.6"
-export "FLUTTER_APPLICATION_PATH=/Users/gongsensen/GSS-Personal/module_sample/module_chat"
+export "FLUTTER_ROOT=/Users/qpy/fvm/versions/custom_3.35-ohos"
+export "FLUTTER_APPLICATION_PATH=/Users/qpy/Desktop/personal/flutter_module_sample/module_chat"
 export "COCOAPODS_PARALLEL_CODE_SIGN=true"
 export "FLUTTER_TARGET=lib/main.dart"
 export "FLUTTER_BUILD_DIR=build"

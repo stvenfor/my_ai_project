@@ -2,17 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:module_auth/user/controller/auth_controller.dart';
 import 'package:module_auth/user/theme/auth_theme.dart';
+import 'package:module_auth/user/view/login_footer_links.dart';
 
 class LoginPasswordPage extends GetView<AuthController> {
   const LoginPasswordPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+
     return Scaffold(
       backgroundColor: Colors.white,
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        scrolledUnderElevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
           color: AuthTheme.titleBlack,
@@ -20,12 +25,12 @@ class LoginPasswordPage extends GetView<AuthController> {
         ),
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 28),
+        child: SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(28, 16, 28, 24 + bottomInset),
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 16),
               const Text(
                 '请输入你的密码',
                 style: TextStyle(
@@ -35,26 +40,25 @@ class LoginPasswordPage extends GetView<AuthController> {
                 ),
               ),
               const SizedBox(height: 40),
-              Obx(
-                () => TextField(
-                  obscureText: true,
-                  keyboardType: TextInputType.number,
-                  onChanged: controller.updatePassword,
-                  style: const TextStyle(fontSize: 18),
-                  decoration: const InputDecoration(
-                    hintText: '6-16位密码',
-                    hintStyle: TextStyle(color: AuthTheme.inputHint),
-                    border: UnderlineInputBorder(
-                      borderSide: BorderSide(color: AuthTheme.dividerGray),
-                    ),
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: AuthTheme.dividerGray),
-                    ),
-                    focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: AuthTheme.primaryBlue),
-                    ),
-                    contentPadding: EdgeInsets.only(bottom: 8),
+              TextField(
+                autofocus: true,
+                obscureText: true,
+                keyboardType: TextInputType.visiblePassword,
+                onChanged: controller.updatePassword,
+                style: const TextStyle(fontSize: 18),
+                decoration: const InputDecoration(
+                  hintText: '6-16位密码',
+                  hintStyle: TextStyle(color: AuthTheme.inputHint),
+                  border: UnderlineInputBorder(
+                    borderSide: BorderSide(color: AuthTheme.dividerGray),
                   ),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: AuthTheme.dividerGray),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: AuthTheme.primaryBlue),
+                  ),
+                  contentPadding: EdgeInsets.only(bottom: 8),
                 ),
               ),
               const SizedBox(height: 40),
@@ -94,47 +98,7 @@ class LoginPasswordPage extends GetView<AuthController> {
                 ),
               ),
               const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton(
-                    onPressed: () {},
-                    child: const Text(
-                      '短信验证码登录',
-                      style: TextStyle(color: AuthTheme.linkGray, fontSize: 13),
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      TextButton(
-                        onPressed: () {},
-                        child: const Text(
-                          '我要注册',
-                          style: TextStyle(
-                            color: AuthTheme.linkGray,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        width: 1,
-                        height: 12,
-                        color: AuthTheme.dividerGray,
-                      ),
-                      TextButton(
-                        onPressed: () {},
-                        child: const Text(
-                          '忘记密码',
-                          style: TextStyle(
-                            color: AuthTheme.linkGray,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+              const LoginFooterLinks(),
             ],
           ),
         ),

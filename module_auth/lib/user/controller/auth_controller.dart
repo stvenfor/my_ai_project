@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:module_auth/session/auth_session.dart';
 import 'package:module_core/core.dart';
 import 'package:module_route/route/route_path.dart';
 
@@ -43,13 +44,15 @@ class AuthController extends GetxController {
   }
 
   void _showToast(String message) {
-    Get.showSnackbar(
-      GetSnackBar(
-        message: message,
+    final context = Get.context;
+    if (context == null) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
         duration: const Duration(seconds: 2),
         backgroundColor: const Color(0xCC333333),
-        margin: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
-        borderRadius: 8,
       ),
     );
   }
@@ -86,7 +89,7 @@ class AuthController extends GetxController {
       );
       await _userService.setUser(user);
       if (standaloneMode) {
-        _showToast('登录成功');
+        Get.offAllNamed(RoutePath.authDevHome);
       } else {
         Get.offAllNamed(RoutePath.main);
       }
@@ -95,5 +98,10 @@ class AuthController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  Future<void> logout() async {
+    await AuthSession.logout();
+    Get.offAllNamed(RoutePath.login);
   }
 }

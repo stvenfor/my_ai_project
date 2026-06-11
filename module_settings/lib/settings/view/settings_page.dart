@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:module_core/core.dart';
 import 'package:module_settings/settings/viewmodel/settings_viewmodel.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -20,6 +21,7 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     final config = _vm.config;
+    final envService = _vm.envService;
 
     return Scaffold(
       appBar: AppBar(title: const Text('设置')),
@@ -27,6 +29,19 @@ class _SettingsPageState extends State<SettingsPage> {
           ? const Center(child: Text('应用配置未初始化'))
           : ListView(
               children: [
+                if (envService != null)
+                  Obx(
+                    () => ListTile(
+                      title: const Text('运行环境'),
+                      subtitle: Text(
+                        '${envService.config.label} · ${envService.baseUrl}',
+                      ),
+                      trailing: const Icon(Icons.chevron_right_rounded),
+                      onTap: () => _showEnvironmentPicker(
+                        envService.currentEnv.value,
+                      ),
+                    ),
+                  ),
                 SwitchListTile(
                   title: const Text('深色模式'),
                   subtitle: const Text('切换浅色 / 深色主题'),
@@ -56,6 +71,33 @@ class _SettingsPageState extends State<SettingsPage> {
       'en' => 'English',
       _ => '简体中文',
     };
+  }
+
+  void _showEnvironmentPicker(AppEnv current) {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (final env in AppEnv.values)
+                ListTile(
+                  title: Text(env.label),
+                  subtitle: Text(EnvConfig.of(env).baseUrl),
+                  trailing: current == env
+                      ? const Icon(Icons.check_rounded, color: Colors.blue)
+                      : null,
+                  onTap: () {
+                    _refreshAfter(() => _vm.setEnvironment(env));
+                    Navigator.pop(context);
+                  },
+                ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   void _showLanguagePicker(String currentCode) {

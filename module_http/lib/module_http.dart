@@ -2,6 +2,7 @@ library module_http;
 
 export 'package:dio/dio.dart';
 
+export 'http/env_header_interceptor.dart';
 export 'http/http.dart';
 export 'http/log_print_interceptor.dart';
 export 'http/my_interceptor.dart';

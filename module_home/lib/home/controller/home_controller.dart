@@ -22,6 +22,9 @@ class HomeController extends BaseViewModel {
     super.onInit();
     _updateGreeting(_userService.currentUser.value);
     ever(_userService.currentUser, _updateGreeting);
+    if (Get.isRegistered<EnvironmentService>()) {
+      ever(Get.find<EnvironmentService>().currentEnv, (_) => refreshDashboard());
+    }
     refreshDashboard();
   }
 

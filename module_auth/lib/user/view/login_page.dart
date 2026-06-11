@@ -3,29 +3,49 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:module_auth/user/controller/auth_controller.dart';
 import 'package:module_auth/user/theme/auth_theme.dart';
+import 'package:module_auth/user/view/login_footer_links.dart';
 
-class LoginPage extends GetView<AuthController> {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final phoneController = TextEditingController(text: '18614031080');
+  State<LoginPage> createState() => _LoginPageState();
+}
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      controller.updatePhone(phoneController.text);
-    });
+class _LoginPageState extends State<LoginPage> {
+  late final TextEditingController _phoneController;
+  late final AuthController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = Get.find<AuthController>();
+    _phoneController = TextEditingController(text: '18614031080');
+    _controller.updatePhone(_phoneController.text);
+  }
+
+  @override
+  void dispose() {
+    _phoneController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
 
     return Scaffold(
       backgroundColor: Colors.white,
+      resizeToAvoidBottomInset: true,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 28),
+        child: SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(28, 48, 28, 24 + bottomInset),
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 48),
               Text(
-                controller.greeting,
+                _controller.greeting,
                 style: const TextStyle(
                   fontSize: 26,
                   fontWeight: FontWeight.bold,
@@ -57,7 +77,7 @@ class LoginPage extends GetView<AuthController> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: TextField(
-                      controller: phoneController,
+                      controller: _phoneController,
                       keyboardType: TextInputType.phone,
                       inputFormatters: [
                         FilteringTextInputFormatter.digitsOnly,
@@ -82,15 +102,16 @@ class LoginPage extends GetView<AuthController> {
                         ),
                         contentPadding: EdgeInsets.only(bottom: 8),
                       ),
-                      onChanged: controller.updatePhone,
+                      onChanged: _controller.updatePhone,
                     ),
                   ),
-                  if (phoneController.text.isNotEmpty)
+                  if (_phoneController.text.isNotEmpty)
                     IconButton(
                       icon: const Icon(Icons.cancel, color: AuthTheme.textGray),
                       onPressed: () {
-                        phoneController.clear();
-                        controller.updatePhone('');
+                        _phoneController.clear();
+                        _controller.updatePhone('');
+                        setState(() {});
                       },
                     ),
                 ],
@@ -104,9 +125,9 @@ class LoginPage extends GetView<AuthController> {
                       width: 24,
                       height: 24,
                       child: Checkbox(
-                        value: controller.agreedPrivacy.value,
+                        value: _controller.agreedPrivacy.value,
                         activeColor: AuthTheme.primaryBlue,
-                        onChanged: controller.togglePrivacy,
+                        onChanged: _controller.togglePrivacy,
                         shape: const CircleBorder(),
                       ),
                     ),
@@ -137,7 +158,7 @@ class LoginPage extends GetView<AuthController> {
                 width: double.infinity,
                 height: 48,
                 child: FilledButton(
-                  onPressed: controller.goToPasswordPage,
+                  onPressed: _controller.goToPasswordPage,
                   style: FilledButton.styleFrom(
                     backgroundColor: AuthTheme.primaryBlue,
                     shape: RoundedRectangleBorder(
@@ -151,47 +172,7 @@ class LoginPage extends GetView<AuthController> {
                 ),
               ),
               const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton(
-                    onPressed: () {},
-                    child: const Text(
-                      '短信验证码登录',
-                      style: TextStyle(color: AuthTheme.linkGray, fontSize: 13),
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      TextButton(
-                        onPressed: () {},
-                        child: const Text(
-                          '我要注册',
-                          style: TextStyle(
-                            color: AuthTheme.linkGray,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        width: 1,
-                        height: 12,
-                        color: AuthTheme.dividerGray,
-                      ),
-                      TextButton(
-                        onPressed: () {},
-                        child: const Text(
-                          '忘记密码',
-                          style: TextStyle(
-                            color: AuthTheme.linkGray,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+              const LoginFooterLinks(),
             ],
           ),
         ),
