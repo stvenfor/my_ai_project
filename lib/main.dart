@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:module_core/core.dart';
+import 'package:module_core/service/user_service_impl.dart';
 import 'package:module_global_cache/module_global_cache.dart';
 import 'package:module_http/module_http.dart';
 import 'package:module_repository/repository/api.dart';
@@ -24,6 +26,12 @@ class AppInitializer {
 
     await SpManager.init();
     await AppDatabase.init();
+
+    // 2. 全局 UserService（仅壳工程注册实现类）
+    await Get.putAsync<UserService>(
+      UserServiceImpl.create,
+      permanent: true,
+    );
 
     ModuleRegistry.registerAll(buildEnabledModules());
 

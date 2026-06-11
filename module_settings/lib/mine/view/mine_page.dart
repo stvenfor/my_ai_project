@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:module_settings/mine/controller/mine_controller.dart';
 import 'package:module_settings/mine/model/level_card_model.dart';
-import 'package:module_settings/mine/viewmodel/mine_viewmodel.dart';
 
-class MinePage extends GetView<MineViewModel> {
+class MinePage extends GetView<MineController> {
   const MinePage({
     super.key,
     this.showBackButton = true,
@@ -19,7 +19,10 @@ class MinePage extends GetView<MineViewModel> {
         top: false,
         child: Column(
           children: [
-            _MineHeader(showBackButton: showBackButton),
+            _MineHeader(
+              showBackButton: showBackButton,
+              controller: controller,
+            ),
             Expanded(
               child: Obx(
                 () => ListView.separated(
@@ -44,36 +47,92 @@ class MinePage extends GetView<MineViewModel> {
 }
 
 class _MineHeader extends StatelessWidget {
-  const _MineHeader({required this.showBackButton});
+  const _MineHeader({
+    required this.showBackButton,
+    required this.controller,
+  });
 
   final bool showBackButton;
+  final MineController controller;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 114,
       color: Colors.white,
-      padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-      child: Stack(
-        alignment: Alignment.center,
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).padding.top + 12,
+        left: 20,
+        right: 20,
+        bottom: 16,
+      ),
+      child: Column(
         children: [
-          if (showBackButton)
-            Positioned(
-              left: 20,
-              child: IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                iconSize: 34,
-                color: const Color(0xFF2F3034),
-                onPressed: () => Get.back<void>(),
-                tooltip: '返回',
-              ),
+          SizedBox(
+            height: 44,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                if (showBackButton)
+                  Positioned(
+                    left: 0,
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                      iconSize: 34,
+                      color: const Color(0xFF2F3034),
+                      onPressed: () => Get.back<void>(),
+                      tooltip: '返回',
+                    ),
+                  ),
+                const Text(
+                  '我的',
+                  style: TextStyle(
+                    color: Color(0xFF2B2D31),
+                    fontSize: 30,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ),
-          const Text(
-            'Level 1 知识卡片',
-            style: TextStyle(
-              color: Color(0xFF2B2D31),
-              fontSize: 30,
-              fontWeight: FontWeight.w500,
+          ),
+          const SizedBox(height: 16),
+          Obx(
+            () => Row(
+              children: [
+                CircleAvatar(
+                  radius: 28,
+                  backgroundColor: const Color(0xFFEEF5F4),
+                  backgroundImage: controller.avatarUrl.value != null
+                      ? NetworkImage(controller.avatarUrl.value!)
+                      : null,
+                  child: controller.avatarUrl.value == null
+                      ? const Icon(Icons.person_outline_rounded, size: 32)
+                      : null,
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        controller.displayName.value,
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF2B2D31),
+                        ),
+                      ),
+                      if (controller.userId.value != null)
+                        Text(
+                          'ID: ${controller.userId.value}',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Color(0xFF8A8D93),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         ],

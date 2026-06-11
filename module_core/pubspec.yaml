@@ -1,5 +1,5 @@
-name: module_auth
-description: Auth module.
+name: module_core
+description: Core shared library — user model and UserService contract.
 publish_to: 'none'
 version: 0.0.1
 
@@ -9,13 +9,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  equatable: ^2.0.7
   get: ^4.7.3
-  module_core:
-    path: ../module_core
-  module_route:
-    path: ../module_route
-  module_utils:
-    path: ../module_utils
+  shared_preferences: ^2.5.3
 
 dev_dependencies:
   flutter_test:

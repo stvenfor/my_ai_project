@@ -12,6 +12,8 @@ dependencies:
   get: ^4.7.3
   module_common_ui:
     path: ../module_common_ui
+  module_core:
+    path: ../module_core
   module_http:
     path: ../module_http
   module_route:

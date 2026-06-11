@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:module_sample/l10n/app_localizations.dart';
 import 'package:get/get.dart';
+import 'package:module_core/core.dart';
 import 'package:module_route/route/route_path.dart';
 
 class SplashPage extends StatefulWidget {
@@ -14,11 +15,14 @@ class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _enterMain());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _routeByAuth());
   }
 
-  void _enterMain() {
-    Get.offNamed(RoutePath.main);
+  void _routeByAuth() {
+    final userService = Get.find<UserService>();
+    Get.offNamed(
+      userService.isLoggedIn ? RoutePath.main : RoutePath.login,
+    );
   }
 
   @override

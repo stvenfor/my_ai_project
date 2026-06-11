@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:module_common_ui/module_common_ui.dart';
+import 'package:module_core/core.dart';
 import 'package:module_route/module/module_registry.dart';
+import 'package:module_route/route/route_path.dart';
 import 'package:module_sample/l10n/app_localizations.dart';
 
 class MainPage extends StatefulWidget {
@@ -12,6 +15,11 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   int _currentIndex = 0;
+
+  Future<void> _logout() async {
+    await Get.find<UserService>().clearUser();
+    Get.offAllNamed(RoutePath.login);
+  }
 
   List<_TabConfig> get _tabs {
     final l10n = AppLocalizations.of(context);
@@ -50,6 +58,16 @@ class _MainPageState extends State<MainPage> {
 
     return AdaptiveScaffold(
       phone: Scaffold(
+        appBar: AppBar(
+          title: Text(tabs[safeIndex].label),
+          actions: [
+            IconButton(
+              onPressed: _logout,
+              icon: const Icon(Icons.logout_rounded),
+              tooltip: '退出登录',
+            ),
+          ],
+        ),
         body: IndexedStack(
           index: safeIndex,
           children: pages,
@@ -70,6 +88,16 @@ class _MainPageState extends State<MainPage> {
         ),
       ),
       tablet: Scaffold(
+        appBar: AppBar(
+          title: Text(tabs[safeIndex].label),
+          actions: [
+            IconButton(
+              onPressed: _logout,
+              icon: const Icon(Icons.logout_rounded),
+              tooltip: '退出登录',
+            ),
+          ],
+        ),
         body: Row(
           children: [
             NavigationRail(

@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:module_home/home/viewmodel/home_viewmodel.dart';
+import 'package:module_home/home/controller/home_controller.dart';
 import 'package:module_route/route/route_path.dart';
 import 'package:module_utils/module_utils.dart';
 
 class HomeBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<HomeViewModel>(HomeViewModel.new);
+    Get.lazyPut<HomeController>(HomeController.new);
   }
 }
 
-class HomePage extends GetView<HomeViewModel> {
+class HomePage extends GetView<HomeController> {
   const HomePage({super.key});
 
   static const _gridEntries = [
@@ -43,6 +43,40 @@ class HomePage extends GetView<HomeViewModel> {
 
         return CustomScrollView(
           slivers: [
+            SliverToBoxAdapter(
+              child: Obx(
+                () => Container(
+                  margin: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 8.h),
+                  padding: EdgeInsets.all(16.w),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.person_rounded,
+                        size: 36.sp,
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      ),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: Text(
+                          controller.userGreeting.value,
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w600,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onPrimaryContainer,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
             SliverToBoxAdapter(
               child: Padding(
                 padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 8.h),

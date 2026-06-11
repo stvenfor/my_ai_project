@@ -20,6 +20,8 @@ dependencies:
   get: ^4.7.3
   intl: any
 
+  module_core:
+    path: ./module_core
   module_auth:
     path: ./module_auth
   module_chat:
