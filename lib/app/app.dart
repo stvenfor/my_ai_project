@@ -40,11 +40,11 @@ class App extends StatelessWidget {
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             initialRoute: RoutePath.splash,
             getPages: AppPages.routes(),
-            builder: (context, child) {
-              return ModuleUtilsInitializer.wrapApp(
+            builder: UiKitInitializer.appBuilder(
+              inner: (context, child) => ModuleUtilsInitializer.wrapApp(
                 builder: (_, __) => child ?? const SizedBox.shrink(),
-              );
-            },
+              ),
+            ),
           ),
         );
       },

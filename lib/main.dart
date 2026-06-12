@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:module_auth/session/auth_session.dart';
+import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_core/core.dart';
 import 'package:module_core/service/environment_service_impl.dart';
 import 'package:module_global_cache/module_global_cache.dart';
@@ -28,6 +29,8 @@ class AppInitializer {
     await AppDatabase.init();
 
     await AuthSession.register();
+
+    await UiKitInitializer.initialize();
 
     await Get.putAsync<EnvironmentService>(
       EnvironmentServiceImpl.create,

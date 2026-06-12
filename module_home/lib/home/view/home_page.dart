@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_home/home/controller/home_controller.dart';
 import 'package:module_home/home/theme/home_dashboard_theme.dart';
 import 'package:module_home/home/view/widgets/home_dashboard_widgets.dart';
 import 'package:module_route/route/route_path.dart';
-import 'package:module_utils/module_utils.dart';
 
 class HomeBinding extends Bindings {
   @override
@@ -21,29 +21,30 @@ class HomePage extends GetView<HomeController> {
     return Scaffold(
       backgroundColor: HomeDashboardTheme.background,
       body: Obx(() {
-        if (controller.isLoading.value && controller.dashboard.value == null) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
         final data = controller.dashboard.value;
         if (data == null) {
-          return Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(controller.errorMessage.value ?? '加载失败'),
-                SizedBox(height: 12.h),
-                FilledButton(
-                  onPressed: controller.refreshDashboard,
-                  child: const Text('重试'),
-                ),
-              ],
-            ),
-          );
+          if (controller.errorMessage.value != null) {
+            return Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(controller.errorMessage.value ?? '加载失败'),
+                  SizedBox(height: 12.h),
+                  FilledButton(
+                    onPressed: controller.retryInitialLoad,
+                    child: const Text('重试'),
+                  ),
+                ],
+              ),
+            );
+          }
+          return const SizedBox.shrink();
         }
 
-        return CustomScrollView(
-          slivers: [
+        return AppRefreshView(
+          onRefresh: controller.refreshDashboard,
+          child: CustomScrollView(
+            slivers: [
             SliverToBoxAdapter(
               child: ColoredBox(
                 color: HomeDashboardTheme.bannerDark,
@@ -69,7 +70,6 @@ class HomePage extends GetView<HomeController> {
                     Obx(
                       () => HomeGreetingSection(
                         greeting: controller.userGreeting.value,
-                        onRefresh: controller.refreshDashboard,
                       ),
                     ),
                     HomeQuickActionGrid(actions: data.quickActions),
@@ -93,7 +93,8 @@ class HomePage extends GetView<HomeController> {
                 ),
               ),
             ),
-          ],
+            ],
+          ),
         );
       }),
     );

@@ -136,33 +136,21 @@ class HomeGreetingSection extends StatelessWidget {
   const HomeGreetingSection({
     super.key,
     required this.greeting,
-    required this.onRefresh,
   });
 
   final String greeting;
-  final VoidCallback onRefresh;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.fromLTRB(16.w, 20.h, 16.w, 8.h),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              greeting,
-              style: TextStyle(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.bold,
-                color: HomeDashboardTheme.titleBlack,
-              ),
-            ),
-          ),
-          IconButton(
-            onPressed: onRefresh,
-            icon: Icon(Icons.refresh_rounded, size: 22.sp),
-          ),
-        ],
+      child: Text(
+        greeting,
+        style: TextStyle(
+          fontSize: 18.sp,
+          fontWeight: FontWeight.bold,
+          color: HomeDashboardTheme.titleBlack,
+        ),
       ),
     );
   }

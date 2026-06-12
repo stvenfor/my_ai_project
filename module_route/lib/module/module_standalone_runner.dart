@@ -72,7 +72,13 @@ class ModuleStandaloneRunner {
             .toList(),
         builder: (context, child) {
           return ModuleUtilsInitializer.wrapApp(
-            builder: (_, __) => child ?? const SizedBox.shrink(),
+            builder: (_, innerChild) {
+              final content = innerChild ?? const SizedBox.shrink();
+              if (config.innerAppBuilder != null) {
+                return config.innerAppBuilder!(context, content);
+              }
+              return content;
+            },
           );
         },
       ),

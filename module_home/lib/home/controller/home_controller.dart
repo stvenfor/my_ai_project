@@ -5,10 +5,14 @@ import 'package:module_home/home/model/home_dashboard_model.dart';
 import 'package:module_home/home/repository/home_repository.dart';
 
 class HomeController extends BaseViewModel {
-  HomeController({HomeRepository? repository})
-      : _repository = repository ?? HomeRepository();
+  HomeController({
+    HomeRepository? repository,
+    AppLoading? loading,
+  })  : _repository = repository ?? HomeRepository(),
+        _loading = loading ?? Get.find<AppLoading>();
 
   final HomeRepository _repository;
+  final AppLoading _loading;
   final UserService _userService = Get.find<UserService>();
 
   final userGreeting = '早上好'.obs;
@@ -25,7 +29,7 @@ class HomeController extends BaseViewModel {
     if (Get.isRegistered<EnvironmentService>()) {
       ever(Get.find<EnvironmentService>().currentEnv, (_) => refreshDashboard());
     }
-    refreshDashboard();
+    _loadInitial();
   }
 
   void _updateGreeting(User? user) {
@@ -48,6 +52,25 @@ class HomeController extends BaseViewModel {
 
   void selectMetricTab(int index) => selectedMetricTab.value = index;
 
+  /// 错误页重试（走首次加载流程，含全局 Loading）。
+  Future<void> retryInitialLoad() => _loadInitial();
+
+  /// 首次进入：全局 Loading（EasyLoading 遮罩）。
+  Future<void> _loadInitial() async {
+    await _loading.run(
+      () async {
+        errorMessage.value = null;
+        try {
+          dashboard.value = await _repository.loadDashboard();
+        } catch (error) {
+          errorMessage.value = error.toString();
+        }
+      },
+      message: '加载中',
+    );
+  }
+
+  /// 下拉刷新 / 环境切换 / 用户变更：仅 EasyRefresh 动画，不弹全局 Loading。
   Future<void> refreshDashboard() async {
     await runAsync(() async {
       dashboard.value = await _repository.loadDashboard();

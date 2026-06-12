@@ -1,4 +1,5 @@
 /// 模块独立运行配置。
+import 'package:flutter/widgets.dart';
 import 'package:module_core/env/app_env.dart';
 
 class ModuleStandaloneConfig {
@@ -11,6 +12,7 @@ class ModuleStandaloneConfig {
     this.resolveInitialRoute,
     this.onSetup,
     this.onEnvironmentChanged,
+    this.innerAppBuilder,
   });
 
   final bool enableHttpLog;
@@ -29,4 +31,7 @@ class ModuleStandaloneConfig {
 
   /// 环境切换后重建 HTTP（独立运行时在 main_dev 中传入 AppHttpBootstrap.reinitialize）。
   final Future<void> Function(AppEnv env)? onEnvironmentChanged;
+
+  /// 在 ScreenUtil 之内追加一层 App builder（如 EasyLoading.init）。
+  final Widget Function(BuildContext context, Widget? child)? innerAppBuilder;
 }

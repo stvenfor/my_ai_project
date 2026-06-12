@@ -26,8 +26,9 @@ module_sample/                 # 壳工程（完整 App）
 
 | 服务 | 注册位置 | 说明 |
 |------|----------|------|
-| `UserService` | 壳工程 `main.dart` | 登录态读写；登录模块写入，业务模块只读 |
+| `UserService` | 壳工程 `main.dart`（`AuthSession.register()`） | 登录态读写；登录模块写入，业务模块只读 |
 | `EnvironmentService` | 壳工程 `main.dart` | 测试/预发/线上环境；持久化 + HTTP 重建 |
+| `AppLoading` | 壳工程 `main.dart`（`UiKitInitializer.initialize()`） | 全局 Loading / Toast；业务通过接口调用 |
 | `AppController` | `AppBinding` | 主题、语言、沉浸式 |
 
 业务模块通过 `Get.find<UserService>()` / `Get.find<EnvironmentService>()` 获取，**不要**自行 `new` 实现类。
@@ -50,12 +51,13 @@ flutter run
 main()
   → ModuleUtilsInitializer（日志、SP、ScreenUtil）
   → SpManager / AppDatabase
-  → UserServiceImpl（恢复登录态）
+  → AuthSession.register（UserService + 恢复登录态）
+  → UiKitInitializer.initialize（AppLoading + EasyLoading 配置）
   → EnvironmentServiceImpl（恢复环境）
   → ModuleRegistry.bootstrap（各模块 HTTP 等）
   → AppHttpBootstrap.initialize（全局 Dio）
   → AppBinding + 各模块 Binding
-  → runApp(App)
+  → runApp(App) → GetMaterialApp.builder 内 UiKitInitializer.appBuilder
 ```
 
 ### 2.3 页面分流
@@ -283,10 +285,129 @@ class HomeBinding extends Bindings {
 [`module_core/lib/core.dart`](../module_core/lib/core.dart) **只导出**：
 
 - `User` / `UserService`
+- `AppLoading`
 - `AppEnv` / `EnvConfig` / `EnvironmentService`
 - `MockUserService` / `DefaultEnvironmentService`（dev 用）
 
-**不导出** `UserServiceImpl`、`EnvironmentServiceImpl`（仅壳工程 import）。
+**不导出** `UserServiceImpl`、`EnvironmentServiceImpl`（仅壳工程 / auth 模块 import）。
+
+---
+
+## 5.5 Loading 与下拉刷新（UiKit）
+
+### 架构
+
+| 层级 | 模块 | 内容 |
+|------|------|------|
+| 契约 | `module_core` | `AppLoading` 抽象 |
+| 实现 | `module_common_ui/kit/` | `EasyLoadingAppLoading`、`AppRefreshView`、`UiKitInitializer` |
+| 壳接入 | `lib/main.dart` + `lib/app/app.dart` | `initialize()` + `appBuilder()` |
+| 业务示例 | `module_home` | 首页首次 Loading + 下拉刷新 |
+
+业务模块 **不要** 直接 `import flutter_easyloading` / `flutter_easyrefresh`，只依赖 `module_common_ui` 与 `module_core`。
+
+### 壳工程接入（已完成）
+
+```dart
+// lib/main.dart
+await UiKitInitializer.initialize();
+
+// lib/app/app.dart — GetMaterialApp.builder
+builder: UiKitInitializer.appBuilder(
+  inner: (context, child) => ModuleUtilsInitializer.wrapApp(
+    builder: (_, __) => child ?? const SizedBox.shrink(),
+  ),
+),
+```
+
+### 模块 pubspec
+
+```yaml
+dependencies:
+  module_common_ui:
+    path: ../module_common_ui
+  module_core:
+    path: ../module_core
+```
+
+### Controller：区分「首次加载」与「下拉刷新」
+
+推荐策略（Home 模块已采用）：
+
+| 场景 | Loading 方式 |
+|------|----------------|
+| 首次进入 / 错误重试 | `AppLoading.run(..., message: '加载中')` 全局遮罩 |
+| 下拉刷新 / 静默刷新 | `runAsync` 或普通 await，**不**调 `AppLoading` |
+| 加载失败 | 保留页面内错误 UI + 重试按钮（不用 `showError` toast） |
+
+```dart
+class HomeController extends BaseViewModel {
+  HomeController({AppLoading? loading})
+      : _loading = loading ?? Get.find<AppLoading>();
+
+  final AppLoading _loading;
+
+  Future<void> _loadInitial() async {
+    await _loading.run(
+      () async {
+        errorMessage.value = null;
+        try {
+          dashboard.value = await _repository.loadDashboard();
+        } catch (error) {
+          errorMessage.value = error.toString();
+        }
+      },
+      message: '加载中',
+    );
+  }
+
+  Future<void> refreshDashboard() async {
+    await runAsync(() async {
+      dashboard.value = await _repository.loadDashboard();
+    });
+  }
+
+  Future<void> retryInitialLoad() => _loadInitial();
+}
+```
+
+也可使用静态门面：`UiKitInitializer.loading.run(...)`（与 `Get.find<AppLoading>()` 等价）。
+
+### View：AppRefreshView 包裹滚动区域
+
+```dart
+return AppRefreshView(
+  onRefresh: controller.refreshDashboard,
+  child: CustomScrollView(
+    slivers: [ /* ... */ ],
+  ),
+);
+```
+
+- 不需要上拉加载时 **不要** 传 `enableLoad`（默认 `false`）。
+- 首次加载中且尚无数据时，页面 body 可返回 `SizedBox.shrink()`，由全局 EasyLoading 负责展示。
+
+### 独立运行（module_home 示例）
+
+```dart
+// module_home/lib/main_dev.dart
+ModuleStandaloneConfig(
+  onSetup: () async => UiKitInitializer.initialize(),
+  innerAppBuilder: UiKitInitializer.wrapChild,
+  // ...
+)
+```
+
+未调用 `UiKitInitializer.initialize()` 时，独立运行模块内 `AppLoading` 为 Noop，全局 Loading 不生效。
+
+### 替换第三方库
+
+只需修改 `module_common_ui/lib/kit/` 内：
+
+- `easy_loading_service.dart`（Loading 实现）
+- `app_refresh_view.dart`（Refresh 封装）
+
+业务模块代码无需改动。
 
 ---
 
@@ -394,6 +515,9 @@ git worktree list
 | 环境切换 UI | `module_settings/lib/settings/view/settings_page.dart` |
 | 独立运行 Runner | `module_route/lib/module/module_standalone_runner.dart` |
 | 登录 Controller | `module_auth/lib/user/controller/auth_controller.dart` |
+| UiKit 入口 | `module_common_ui/lib/kit/ui_kit_initializer.dart` |
+| AppLoading 契约 | `module_core/lib/service/app_loading.dart` |
+| Home Loading/Refresh 示例 | `module_home/lib/home/controller/home_controller.dart` |
 | 路由常量 | `module_route/lib/route/route_path.dart` |
 | 模块运行脚本 | `scripts/run_module.sh` |
 
