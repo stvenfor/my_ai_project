@@ -1,0 +1,22 @@
+name: module_pay
+description: Pay module.
+publish_to: 'none'
+version: 0.0.1
+
+environment:
+  sdk: '>=3.0.3 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  module_route:
+    path: ../../route
+  module_utils:
+    path: ../../toolkit
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:

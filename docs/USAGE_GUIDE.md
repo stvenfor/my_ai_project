@@ -11,15 +11,17 @@
 ```
 module_sample/                 # 壳工程（完整 App）
 ├── lib/main.dart              # 启动入口 + 全局 DI
-├── lib/config/module_manifest.dart   # 模块启用清单
-├── module_core/               # 共享：User、EnvironmentService
-├── module_route/              # 路由 + FeatureModule 契约 + 独立运行 Runner
-├── module_http/               # Dio 封装
-├── module_repository/         # 统一 HTTP Bootstrap
-├── module_auth/               # 登录
-├── module_home/               # 首页
-├── module_settings/           # 我的 / 设置
-└── scripts/run_module.sh      # 模块独立运行脚本
+├── lib/config/module_manifest.dart
+├── packages/
+│   ├── core/                  # 契约：User、AppLoading、EnvironmentService
+│   ├── route/                 # FeatureModule、Registry、独立运行 Runner
+│   ├── network/               # Dio + AppHttpBootstrap
+│   ├── storage/               # sqflite、AppSettings
+│   ├── toolkit/               # 工具封装（Log/SP/CacheImage/Svg/Lottie…）
+│   ├── ui/                    # 主题、UiKit、BaseViewModel
+│   └── features/              # 业务模块
+│       ├── auth/ home/ settings/ chat/ …
+└── scripts/run_module.sh
 ```
 
 ### 1.1 核心服务（GetX DI）
@@ -27,7 +29,7 @@ module_sample/                 # 壳工程（完整 App）
 | 服务 | 注册位置 | 说明 |
 |------|----------|------|
 | `UserService` | 壳工程 `main.dart`（`AuthSession.register()`） | 登录态读写；登录模块写入，业务模块只读 |
-| `EnvironmentService` | 壳工程 `main.dart` | 测试/预发/线上环境；持久化 + HTTP 重建 |
+| `EnvironmentService` | 壳工程 `main.dart`（`EnvironmentSession.register()`） | 测试/预发/线上；实现在 settings 模块 |
 | `AppLoading` | 壳工程 `main.dart`（`UiKitInitializer.initialize()`） | 全局 Loading / Toast；业务通过接口调用 |
 | `AppController` | `AppBinding` | 主题、语言、沉浸式 |
 
@@ -53,7 +55,7 @@ main()
   → SpManager / AppDatabase
   → AuthSession.register（UserService + 恢复登录态）
   → UiKitInitializer.initialize（AppLoading + EasyLoading 配置）
-  → EnvironmentServiceImpl（恢复环境）
+  → EnvironmentSession.register（settings 模块，恢复环境）
   → ModuleRegistry.bootstrap（各模块 HTTP 等）
   → AppHttpBootstrap.initialize（全局 Dio）
   → AppBinding + 各模块 Binding
@@ -224,7 +226,7 @@ final baseUrl = Get.find<EnvironmentService>().baseUrl;
 final env = Get.find<EnvironmentService>().currentEnv.value;
 
 // 不依赖 GetX 时（Repository 层）
-import 'package:module_repository/repository/app_http_bootstrap.dart';
+import 'package:module_http/module_http.dart';
 final url = AppHttpBootstrap.resolveBaseUrl();
 ```
 
@@ -409,6 +411,15 @@ ModuleStandaloneConfig(
 
 业务模块代码无需改动。
 
+业务模块 **不要** 直接 `import cached_network_image` 等第三方库，统一使用 `packages/toolkit` 封装：
+
+```dart
+import 'package:module_utils/module_utils.dart';
+
+CacheImageUtils.network(url, width: 48.w, height: 48.w, fit: BoxFit.cover);
+CacheImageUtils.circle(avatarUrl, size: 56);
+```
+
 ---
 
 ## 6. Git Worktree 并行开发
@@ -510,8 +521,10 @@ git worktree list
 | 壳工程启动 | `lib/main.dart` |
 | 模块清单 | `lib/config/module_manifest.dart` |
 | 环境配置 | `module_core/lib/env/env_config.dart` |
-| 环境服务实现 | `module_core/lib/service/environment_service_impl.dart` |
-| HTTP 统一初始化 | `module_repository/lib/repository/app_http_bootstrap.dart` |
+| 环境服务实现 | `packages/features/settings/lib/env/environment_service_impl.dart` |
+| HTTP 统一初始化 | `packages/network/lib/http/app_http_bootstrap.dart` |
+| 工具模块 | `packages/toolkit/lib/utils/cache_image_utils.dart` |
+| WanAndroid 遗留演示 | `packages/features/home/lib/legacy/wanandroid/` |
 | 环境切换 UI | `module_settings/lib/settings/view/settings_page.dart` |
 | 独立运行 Runner | `module_route/lib/module/module_standalone_runner.dart` |
 | 登录 Controller | `module_auth/lib/user/controller/auth_controller.dart` |

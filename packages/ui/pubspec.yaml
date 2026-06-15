@@ -1,0 +1,26 @@
+name: module_common_ui
+description: Shared UI utilities for flutter_module_sample.
+publish_to: 'none'
+version: 0.0.1
+
+environment:
+  sdk: '>=3.0.3 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_screenutil: ^5.9.3
+  flutter_easyloading: ^3.0.5
+  flutter_easyrefresh: ^2.2.2
+  get: ^4.7.3
+  module_core:
+    path: ../core
+  module_utils:
+    path: ../toolkit
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:

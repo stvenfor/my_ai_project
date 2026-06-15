@@ -8,22 +8,16 @@
 
 ```
 module_sample（主工程壳）
-├── lib/
-│   ├── main.dart                 # 启动入口
-│   ├── app/                      # GetX 全局 App、Controller、路由
-│   ├── config/module_manifest.dart  # ★ 模块启用清单（注释即可移除模块）
-│   ├── pages/                    # Splash、Main（Tab 容器）
-│   ├── route/                    # 壳路由（不含业务）
-│   └── l10n/                     # 国际化 ARB
-│
-├── module_route                  # 路由基础设施 + FeatureModule 契约
-├── module_common_ui              # 主题、ScreenUtil、响应式、BaseViewModel
-├── module_http                   # Dio 封装、拦截器、重试
-├── module_global_cache           # SharedPreferences、sqflite、AppSettings
-│
-└── module_*（业务模块）
-    ├── home / chat / community / settings  … Tab 模块
-    └── auth / friend / live / pay / video   … 纯路由模块
+├── lib/                         # 启动、manifest、Splash/Main
+├── packages/
+│   ├── core/                    # 契约 + 跨模块模型
+│   ├── route/                   # 路由基础设施 + FeatureModule
+│   ├── network/                 # Dio + AppHttpBootstrap
+│   ├── storage/                 # sqflite、AppSettings
+│   ├── toolkit/                 # 第三方工具封装（唯一安装点）
+│   ├── ui/                      # 主题、Loading/Refresh、BaseViewModel
+│   └── features/                # 业务模块（禁止互依赖）
+│       ├── home / settings / auth / chat / …
 ```
 
 **设计原则：**
@@ -262,8 +256,8 @@ dart run build_runner build
 
 | 模块 | 用途 |
 |------|------|
-| `module_utils` | **工具统一入口**：`ModuleUtilsInitializer` 启动注册；Html/Svg/Lottie/日志/SP/ScreenUtil 等 |
-| `module_common_ui` | 主题、沉浸式、响应式布局（ScreenUtil 委托 module_utils） |
+| `module_utils`（packages/toolkit） | **工具统一入口**：Log/SP/CacheImage/Svg/Lottie/Html/ScreenUtil |
+| `module_common_ui`（packages/ui） | 主题、UiKit、BaseViewModel |
 | `module_route` | `RoutePath`、`FeatureModule`、`ModuleRegistry` |
 | `module_http` | 统一 Dio 客户端 |
 
@@ -329,7 +323,7 @@ module_utils:
 | pay | module_pay | — | `/pay` | 占位 | — |
 | video | module_video | — | `/video` | 占位 | — |
 
-基础设施模块（不参与 manifest）：`module_http`、`module_route`、`module_common_ui`、`module_global_cache`、`module_repository`（仅全局 initHttp 可选）
+基础设施模块（不参与 manifest）：`packages/network`、`packages/route`、`packages/ui`、`packages/storage`、`packages/toolkit`
 
 ---
 

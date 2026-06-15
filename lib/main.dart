@@ -4,16 +4,16 @@ import 'package:get/get.dart';
 import 'package:module_auth/session/auth_session.dart';
 import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_core/core.dart';
-import 'package:module_core/service/environment_service_impl.dart';
 import 'package:module_global_cache/module_global_cache.dart';
+import 'package:module_home/legacy/wanandroid/wanandroid_api.dart';
 import 'package:module_http/module_http.dart';
-import 'package:module_repository/repository/app_http_bootstrap.dart';
 import 'package:module_route/module/module_host_context.dart';
 import 'package:module_route/module/module_registry.dart';
 import 'package:module_sample/app/app.dart';
 import 'package:module_sample/app/app_binding.dart';
 import 'package:module_sample/app/app_controller.dart';
 import 'package:module_sample/config/module_manifest.dart';
+import 'package:module_settings/env/environment_session.dart';
 import 'package:module_utils/module_utils.dart';
 
 class AppInitializer {
@@ -32,10 +32,7 @@ class AppInitializer {
 
     await UiKitInitializer.initialize();
 
-    await Get.putAsync<EnvironmentService>(
-      EnvironmentServiceImpl.create,
-      permanent: true,
-    );
+    await EnvironmentSession.register();
     _wireEnvironmentHttpRefresh();
 
     ModuleRegistry.registerAll(buildEnabledModules());
@@ -50,6 +47,7 @@ class AppInitializer {
       AppHttpBootstrap.initialize(
         enableLog: hostContext.enableHttpLog,
         maxRetries: hostContext.httpMaxRetries,
+        responseParser: const WanAndroidResponseParser(),
       );
     }
 
@@ -69,6 +67,7 @@ class AppInitializer {
       AppHttpBootstrap.reinitialize(
         enableLog: kDebugMode,
         maxRetries: 3,
+        responseParser: const WanAndroidResponseParser(),
       );
     };
   }

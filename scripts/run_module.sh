@@ -16,11 +16,11 @@ fi
 shift || true
 
 case "$MODULE" in
-  auth) DIR="module_auth" ;;
-  home) DIR="module_home" ;;
-  mine|settings) DIR="module_settings" ;;
-  chat) DIR="module_chat" ;;
-  community) DIR="module_community" ;;
+  auth) DIR="packages/features/auth" ;;
+  home) DIR="packages/features/home" ;;
+  mine|settings) DIR="packages/features/settings" ;;
+  chat) DIR="packages/features/chat" ;;
+  community) DIR="packages/features/community" ;;
   *)
     echo "未知模块: $MODULE"
     exit 1

@@ -14,50 +14,40 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^1.0.2
-  cached_network_image: ^3.4.1
   json_annotation: ^4.12.0
-  audioplayers: ^6.7.1
   get: ^4.7.3
   intl: any
 
   module_core:
-    path: ./module_core
+    path: ./packages/core
   module_auth:
-    path: ./module_auth
+    path: ./packages/features/auth
   module_chat:
-    path: ./module_chat
+    path: ./packages/features/chat
   module_common_ui:
-    path: ./module_common_ui
+    path: ./packages/ui
   module_community:
-    path: ./module_community
+    path: ./packages/features/community
   module_friend:
-    path: ./module_friend
+    path: ./packages/features/friend
   module_global_cache:
-    path: ./module_global_cache
+    path: ./packages/storage
   module_home:
-    path: ./module_home
+    path: ./packages/features/home
   module_http:
-    path: ./module_http
+    path: ./packages/network
   module_live:
-    path: ./module_live
-  module_log:
-    path: ./module_log
+    path: ./packages/features/live
   module_pay:
-    path: ./module_pay
-  module_repository:
-    path: ./module_repository
-  module_res:
-    path: ./module_res
+    path: ./packages/features/pay
   module_route:
-    path: ./module_route
-  module_sdk:
-    path: ./module_sdk
+    path: ./packages/route
   module_settings:
-    path: ./module_settings
+    path: ./packages/features/settings
   module_utils:
-    path: ./module_utils
+    path: ./packages/toolkit
   module_video:
-    path: ./module_video
+    path: ./packages/features/video
 
 dev_dependencies:
   flutter_test:
