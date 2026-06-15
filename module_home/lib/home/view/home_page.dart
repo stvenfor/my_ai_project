@@ -55,8 +55,20 @@ class HomePage extends GetView<HomeController> {
                       const HomeSearchBar(),
                       const HomeBannerSection(),
                       HomeFeatureGrid(items: data.features),
-                      SizedBox(height: 16.h),
+                     SizedBox(height: 16.h),
                     ],
+                  ),
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Container(
+                height: 20.h,
+                decoration: BoxDecoration(
+                  color: HomeDashboardTheme.bannerDark,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(24.r),
+                    bottomRight: Radius.circular(24.r),
                   ),
                 ),
               ),

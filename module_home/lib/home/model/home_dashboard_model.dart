@@ -1,8 +1,9 @@
 class HomeFeatureItem {
-  const HomeFeatureItem({required this.label, required this.emoji});
+  const HomeFeatureItem({required this.label, this.emoji, this.imageUrl});
 
   final String label;
-  final String emoji;
+  final String? emoji;
+  final String? imageUrl;
 }
 
 class HomeQuickAction {
@@ -10,13 +11,15 @@ class HomeQuickAction {
     required this.title,
     required this.subtitle,
     required this.actionLabel,
-    required this.emoji,
+    this.emoji,
+    this.imageUrl,
   });
 
   final String title;
   final String subtitle;
   final String actionLabel;
-  final String emoji;
+  final String? emoji;
+  final String? imageUrl;
 }
 
 class HomeMetric {
@@ -41,12 +44,14 @@ class HomeMetricDetail {
 class HomeServiceItem {
   const HomeServiceItem({
     required this.label,
-    required this.emoji,
+    this.emoji,
+    this.imageUrl,
     this.badge,
   });
 
   final String label;
-  final String emoji;
+  final String? emoji;
+  final String? imageUrl;
   final String? badge;
 }
 
@@ -55,6 +60,7 @@ class HomeContactItem {
     required this.title,
     required this.subtitle,
     this.emoji,
+    this.imageUrl,
     this.isAvatar = false,
     this.trailingType,
   });
@@ -62,6 +68,7 @@ class HomeContactItem {
   final String title;
   final String subtitle;
   final String? emoji;
+  final String? imageUrl;
   final bool isAvatar;
   /// chat | phone | chevron
   final String? trailingType;
