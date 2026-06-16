@@ -1,0 +1,4 @@
+enum MessageReadStatus {
+  unread,
+  read,
+}

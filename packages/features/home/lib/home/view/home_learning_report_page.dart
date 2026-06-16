@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_home/home/theme/home_report_theme.dart';
 import 'package:module_utils/module_utils.dart';
 
@@ -68,33 +69,20 @@ class HomeLearningReportPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppPageScaffold(
       backgroundColor: HomeReportColors.background,
-      appBar: AppBar(
+      navBar: AppNavBar(
+        title: '学习报告',
+        showBackButton: true,
+        onBack: () => Get.back<void>(),
         backgroundColor: HomeReportColors.background,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, size: 20.sp),
-          onPressed: () => Get.back<void>(),
-        ),
-        title: Text(
-          '学习报告',
-          style: TextStyle(
-            color: HomeReportColors.titleWhite,
-            fontSize: 17.sp,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        centerTitle: true,
+        foregroundColor: HomeReportColors.titleWhite,
       ),
-      body: SafeArea(
-        bottom: false,
-        child: Stack(
-          children: [
-            SingleChildScrollView(
-              padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 120.h),
-              child: Column(
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 120.h),
+            child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _SectionHeader(
@@ -124,8 +112,7 @@ class HomeLearningReportPage extends StatelessWidget {
               bottom: MediaQuery.paddingOf(context).bottom + 88.h,
               child: const _ParentAssistantChip(),
             ),
-          ],
-        ),
+        ],
       ),
     );
   }

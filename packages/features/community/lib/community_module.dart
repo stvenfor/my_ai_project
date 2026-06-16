@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:module_community/community/view/community_page.dart';
+import 'package:module_community/community/view/publish_page.dart';
 import 'package:module_community/community/viewmodel/community_viewmodel.dart';
 import 'package:module_route/module/feature_module.dart';
 import 'package:module_route/module/module_host_context.dart';
@@ -27,6 +28,7 @@ class CommunityModule extends FeatureModule {
   @override
   Map<String, WidgetBuilder> routes() => {
         RoutePath.community: (_) => const CommunityPage(),
+        RoutePath.communityPublish: (_) => const PublishPage(),
       };
 
   @override

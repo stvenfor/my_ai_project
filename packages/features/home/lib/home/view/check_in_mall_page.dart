@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_home/home/theme/check_in_mall_theme.dart';
 import 'package:module_utils/module_utils.dart';
 
@@ -59,11 +60,12 @@ class _CheckInMallPageState extends State<CheckInMallPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppPageScaffold(
+      layout: AppPageLayout.edgeToEdge,
       backgroundColor: CheckInMallTheme.background,
       body: CustomScrollView(
         slivers: [
-          _buildHeader(),
+          SliverToBoxAdapter(child: _buildHeader(context)),
           SliverToBoxAdapter(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -82,36 +84,23 @@ class _CheckInMallPageState extends State<CheckInMallPage> {
     );
   }
 
-  Widget _buildHeader() {
-    return SliverAppBar(
-      backgroundColor: CheckInMallTheme.primaryBlue,
-      expandedHeight: 180.h,
-      pinned: true,
-      elevation: 0,
-      leading: IconButton(
-        icon: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20.sp),
-        onPressed: () => Get.back<void>(),
-      ),
-      title: Text(
-        '签到商城',
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 17.sp,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      centerTitle: true,
-      flexibleSpace: FlexibleSpaceBar(
-        background: SafeArea(
-          child: Column(
-            children: [
-              SizedBox(height: 56.h),
-              _buildNoticeBar(),
-              SizedBox(height: 16.h),
-              _buildStatsRow(),
-            ],
+  Widget _buildHeader(BuildContext context) {
+    return ColoredBox(
+      color: CheckInMallTheme.primaryBlue,
+      child: Column(
+        children: [
+          AppNavBar(
+            title: '签到商城',
+            showBackButton: true,
+            onBack: () => Get.back<void>(),
+            style: AppNavBarStyle.transparent,
+            foregroundColor: Colors.white,
           ),
-        ),
+          _buildNoticeBar(),
+          SizedBox(height: 16.h),
+          _buildStatsRow(),
+          SizedBox(height: 16.h),
+        ],
       ),
     );
   }

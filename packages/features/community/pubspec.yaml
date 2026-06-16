@@ -10,8 +10,11 @@ dependencies:
   flutter:
     sdk: flutter
   get: ^4.7.3
+  photo_view: ^0.15.0
   module_common_ui:
     path: ../../ui
+  module_core:
+    path: ../../core
   module_route:
     path: ../../route
   module_utils:

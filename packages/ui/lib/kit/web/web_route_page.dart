@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_common_ui/kit/web/app_web_view_page.dart';
 import 'package:module_core/core.dart';
 import 'package:module_route/route/route_path.dart';
@@ -18,8 +19,8 @@ class WebRoutePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final config = resolveConfig();
     if (config == null) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('网页')),
+      return AppPageScaffold(
+        navBar: const AppNavBar(title: '网页', showBackButton: true),
         body: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,

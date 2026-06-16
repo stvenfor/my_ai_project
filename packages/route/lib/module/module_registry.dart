@@ -52,6 +52,13 @@ class ModuleRegistry {
         .toList();
   }
 
+  /// Tab / 模块 ViewModel 在 [Get.offAllNamed] 后可能被销毁，进入主页前需重新注册。
+  static void ensureBindings() {
+    for (final binding in collectBindings()) {
+      binding.dependencies();
+    }
+  }
+
   static FeatureModule? findById(String moduleId) {
     for (final module in _modules) {
       if (module.moduleId == moduleId) return module;

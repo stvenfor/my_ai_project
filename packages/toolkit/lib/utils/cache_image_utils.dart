@@ -5,6 +5,32 @@ import 'package:flutter/material.dart';
 class CacheImageUtils {
   CacheImageUtils._();
 
+  static bool isValidNetworkUrl(String? url) {
+    if (url == null || url.trim().isEmpty) return false;
+    try {
+      final uri = Uri.parse(url.trim());
+      return uri.hasScheme && uri.host.isNotEmpty;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  static Widget _fallback({
+    double? width,
+    double? height,
+    IconData icon = Icons.person,
+  }) {
+    final w = width ?? height ?? 48;
+    final h = height ?? width ?? 48;
+    return Container(
+      width: w,
+      height: h,
+      color: const Color(0xFFE0E0E0),
+      alignment: Alignment.center,
+      child: Icon(icon, size: (w * 0.45).clamp(16, 32), color: Colors.grey),
+    );
+  }
+
   static Widget network(
     String url, {
     double? width,
@@ -16,15 +42,21 @@ class CacheImageUtils {
     BlendMode? colorBlendMode,
     BorderRadius? borderRadius,
   }) {
+    if (!isValidNetworkUrl(url)) {
+      return _fallback(width: width, height: height);
+    }
+
     Widget image = CachedNetworkImage(
-      imageUrl: url,
+      imageUrl: url.trim(),
       width: width,
       height: height,
       fit: fit,
       color: color,
       colorBlendMode: colorBlendMode,
-      placeholder: placeholder,
-      errorWidget: errorWidget,
+      placeholder: placeholder ??
+          (_, __) => _fallback(width: width, height: height),
+      errorWidget: errorWidget ??
+          (_, __, ___) => _fallback(width: width, height: height),
     );
 
     if (borderRadius != null) {

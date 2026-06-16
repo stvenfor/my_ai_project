@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart' hide WebMessage;
 import 'package:get/get.dart';
+import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_core/core.dart';
 
 /// 统一 WebView 页面：支持本地 asset 与远程 URL，内置 JS Bridge。
@@ -28,66 +29,60 @@ class _AppWebViewPageState extends State<AppWebViewPage> {
   @override
   Widget build(BuildContext context) {
     final config = widget.config;
-    return Scaffold(
-      appBar: config.showAppBar
-          ? AppBar(
-              title: Text(config.displayTitle),
-              automaticallyImplyLeading: config.showBackButton,
-              leading: config.showBackButton
-                  ? IconButton(
-                      icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                      onPressed: () => Get.back<void>(),
-                    )
-                  : null,
+    return AppPageScaffold(
+      layout: config.showAppBar
+          ? AppPageLayout.standard
+          : AppPageLayout.edgeToEdge,
+      navBar: config.showAppBar
+          ? AppNavBar(
+              title: config.displayTitle,
+              showBackButton: config.showBackButton,
+              onBack: config.showBackButton ? () => Get.back<void>() : null,
             )
           : null,
-      body: SafeArea(
-        top: !config.showAppBar,
-        bottom: true,
-        child: Column(
-          children: [
-            if (_progress > 0 && _progress < 1)
-              LinearProgressIndicator(value: _progress),
-            Expanded(
-              child: _error != null
-                  ? _ErrorBody(
-                      message: _error!,
-                      onRetry: () => setState(() {
-                        _error = null;
-                        _reloadKey++;
-                      }),
-                    )
-                  : InAppWebView(
-                      key: ValueKey(_reloadKey),
-                      initialSettings: InAppWebViewSettings(
-                        javaScriptEnabled: widget.config.enableJavaScript,
-                        transparentBackground: true,
-                        useHybridComposition: true,
-                      ),
-                      initialFile:
-                          widget.config.loadType == WebPageLoadType.asset
-                              ? widget.config.assetPath
-                              : null,
-                      initialUrlRequest:
-                          widget.config.loadType == WebPageLoadType.url
-                              ? URLRequest(
-                                  url: WebUri(widget.config.url!),
-                                )
-                              : null,
-                      onWebViewCreated: _onWebViewCreated,
-                      onLoadStop: _onLoadStop,
-                      onProgressChanged: (_, progress) {
-                        setState(() => _progress = progress / 100);
-                      },
-                      onReceivedError: (controller, request, error) {
-                        if (request.isForMainFrame ?? false) {
-                          setState(() => _error = error.description);
-                        }
-                      },
+      body: Column(
+        children: [
+          if (_progress > 0 && _progress < 1)
+            LinearProgressIndicator(value: _progress),
+          Expanded(
+            child: _error != null
+                ? _ErrorBody(
+                    message: _error!,
+                    onRetry: () => setState(() {
+                      _error = null;
+                      _reloadKey++;
+                    }),
+                  )
+                : InAppWebView(
+                    key: ValueKey(_reloadKey),
+                    initialSettings: InAppWebViewSettings(
+                      javaScriptEnabled: widget.config.enableJavaScript,
+                      transparentBackground: true,
+                      useHybridComposition: true,
                     ),
-            ),
-          ],
-        ),
+                    initialFile:
+                        widget.config.loadType == WebPageLoadType.asset
+                            ? widget.config.assetPath
+                            : null,
+                    initialUrlRequest:
+                        widget.config.loadType == WebPageLoadType.url
+                            ? URLRequest(
+                                url: WebUri(widget.config.url!),
+                              )
+                            : null,
+                    onWebViewCreated: _onWebViewCreated,
+                    onLoadStop: _onLoadStop,
+                    onProgressChanged: (_, progress) {
+                      setState(() => _progress = progress / 100);
+                    },
+                    onReceivedError: (controller, request, error) {
+                      if (request.isForMainFrame ?? false) {
+                        setState(() => _error = error.description);
+                      }
+                    },
+                  ),
+          ),
+        ],
       ),
     );
   }

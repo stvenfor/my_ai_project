@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_auth/user/controller/auth_controller.dart';
 import 'package:module_core/core.dart';
 import 'package:module_route/route/route_path.dart';
@@ -13,13 +14,13 @@ class AuthDevHomePage extends GetView<AuthController> {
   Widget build(BuildContext context) {
     final userService = Get.find<UserService>();
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Auth 独立运行'),
+    return AppPageScaffold(
+      navBar: AppNavBar(
+        title: 'Auth 独立运行',
         actions: [
           TextButton(
             onPressed: controller.logout,
-            child: const Text('登出', style: TextStyle(color: Colors.white)),
+            child: const Text('登出'),
           ),
         ],
       ),

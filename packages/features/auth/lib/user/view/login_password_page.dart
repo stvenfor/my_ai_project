@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_auth/user/controller/auth_controller.dart';
 import 'package:module_auth/user/theme/auth_theme.dart';
 import 'package:module_auth/user/view/login_footer_links.dart';
@@ -11,22 +12,17 @@ class LoginPasswordPage extends GetView<AuthController> {
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
 
-    return Scaffold(
+    return AppPageScaffold(
       backgroundColor: Colors.white,
       resizeToAvoidBottomInset: true,
-      appBar: AppBar(
+      navBar: AppNavBar(
+        showBackButton: true,
+        onBack: () => Get.back<void>(),
         backgroundColor: Colors.white,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-          color: AuthTheme.titleBlack,
-          onPressed: () => Get.back<void>(),
-        ),
+        foregroundColor: AuthTheme.titleBlack,
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(28, 16, 28, 24 + bottomInset),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(28, 16, 28, 24 + bottomInset),
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -102,7 +98,6 @@ class LoginPasswordPage extends GetView<AuthController> {
             ],
           ),
         ),
-      ),
     );
   }
 }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:module_chat/chat/models/conversation_model.dart';
+import 'package:module_chat/chat/view/chat_detail_page.dart';
 import 'package:module_chat/chat/view/chat_page.dart';
 import 'package:module_chat/chat/viewmodel/chat_viewmodel.dart';
 import 'package:module_route/module/feature_module.dart';
@@ -27,6 +29,15 @@ class ChatModule extends FeatureModule {
   @override
   Map<String, WidgetBuilder> routes() => {
         RoutePath.chat: (_) => const ChatPage(),
+        RoutePath.chatDetail: (_) {
+          final args = Get.arguments;
+          if (args is! ConversationModel) {
+            return const Scaffold(
+              body: Center(child: Text('缺少会话参数')),
+            );
+          }
+          return ChatDetailPage(conversation: args);
+        },
       };
 
   @override

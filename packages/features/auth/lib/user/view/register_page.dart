@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_auth/user/controller/auth_controller.dart';
 import 'package:module_auth/user/theme/auth_theme.dart';
 import 'package:module_route/route/route_path.dart';
@@ -34,43 +35,43 @@ class _RegisterPageState extends State<RegisterPage>
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
 
-    return Scaffold(
+    return AppPageScaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
+      navBar: AppNavBar(
+        title: '注册',
+        showBackButton: true,
+        onBack: () => Get.back<void>(),
         backgroundColor: Colors.white,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-          color: AuthTheme.titleBlack,
-          onPressed: () => Get.back<void>(),
-        ),
-        title: const Text('注册', style: TextStyle(color: AuthTheme.titleBlack)),
-        bottom: TabBar(
-          controller: _tabController,
-          labelColor: AuthTheme.primaryBlue,
-          unselectedLabelColor: AuthTheme.textGray,
-          indicatorColor: AuthTheme.primaryBlue,
-          tabs: const [
-            Tab(text: '邮箱注册'),
-            Tab(text: '手机注册'),
-          ],
-        ),
+        foregroundColor: AuthTheme.titleBlack,
       ),
-      body: SafeArea(
-        child: TabBarView(
-          controller: _tabController,
-          children: [
-            _EmailRegisterForm(
-              controller: _controller,
-              bottomInset: bottomInset,
+      body: Column(
+        children: [
+          TabBar(
+            controller: _tabController,
+            labelColor: AuthTheme.primaryBlue,
+            unselectedLabelColor: AuthTheme.textGray,
+            indicatorColor: AuthTheme.primaryBlue,
+            tabs: const [
+              Tab(text: '邮箱注册'),
+              Tab(text: '手机注册'),
+            ],
+          ),
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _EmailRegisterForm(
+                  controller: _controller,
+                  bottomInset: bottomInset,
+                ),
+                _PhoneRegisterForm(
+                  controller: _controller,
+                  bottomInset: bottomInset,
+                ),
+              ],
             ),
-            _PhoneRegisterForm(
-              controller: _controller,
-              bottomInset: bottomInset,
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

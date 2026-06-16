@@ -11,22 +11,25 @@ class MineHttpTestPage extends GetView<MineHttpTestViewModel> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppPageScaffold(
       backgroundColor: const Color(0xFFEEF5F4),
-      body: SafeArea(
-        top: false,
-        child: Column(
+      navBar: AppNavBar(
+        title: controller.args.title,
+        showBackButton: true,
+        onBack: () => Get.back<void>(),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh_rounded),
+            color: const Color(0xFF53D65B),
+            onPressed: controller.loadData,
+            tooltip: '重新请求',
+          ),
+        ],
+      ),
+      body: Obx(
+        () => ListView(
+          padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
           children: [
-            _TestHeader(
-              title: controller.args.title,
-              onBack: () => Get.back<void>(),
-              onRefresh: controller.loadData,
-            ),
-            Expanded(
-              child: Obx(
-                () => ListView(
-                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
-                  children: [
                     _RequestInfoCard(
                       baseUrl: MineHttpConfig.baseUrl,
                       path: MineHttpConfig.harmonyIndexPath,
@@ -53,66 +56,8 @@ class MineHttpTestPage extends GetView<MineHttpTestViewModel> {
                         ),
                       ),
                     ],
-                  ],
-                ),
-              ),
-            ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _TestHeader extends StatelessWidget {
-  const _TestHeader({
-    required this.title,
-    required this.onBack,
-    required this.onRefresh,
-  });
-
-  final String title;
-  final VoidCallback onBack;
-  final VoidCallback onRefresh;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 114,
-      color: Colors.white,
-      padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Positioned(
-            left: 12,
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new_rounded),
-              iconSize: 34,
-              color: const Color(0xFF2F3034),
-              onPressed: onBack,
-              tooltip: '返回',
-            ),
-          ),
-          Text(
-            title,
-            style: const TextStyle(
-              color: Color(0xFF2B2D31),
-              fontSize: 28,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          Positioned(
-            right: 8,
-            child: IconButton(
-              icon: const Icon(Icons.refresh_rounded),
-              iconSize: 30,
-              color: const Color(0xFF53D65B),
-              onPressed: onRefresh,
-              tooltip: '重新请求',
-            ),
-          ),
-        ],
       ),
     );
   }

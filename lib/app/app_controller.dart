@@ -23,7 +23,7 @@ class AppController extends GetxController implements AppConfigController {
       settings.languageCode,
       settings.countryCode,
     );
-    _immersiveMode.value = settings.immersiveMode;
+    _immersiveMode.value = true;
     await _applySystemUi();
   }
 
@@ -53,14 +53,13 @@ class AppController extends GetxController implements AppConfigController {
 
   @override
   Future<void> toggleImmersive() async {
-    _immersiveMode.value = !_immersiveMode.value;
-    await _persist();
-    await _applySystemUi();
+    // 沉浸式固定开启，不再提供切换。
+    await setImmersive(true);
   }
 
   @override
   Future<void> setImmersive(bool enabled) async {
-    _immersiveMode.value = enabled;
+    _immersiveMode.value = true;
     await _persist();
     await _applySystemUi();
   }
@@ -92,7 +91,7 @@ class AppController extends GetxController implements AppConfigController {
         themeMode: _themeMode.value.name,
         languageCode: _locale.value.languageCode,
         countryCode: _locale.value.countryCode,
-        immersiveMode: _immersiveMode.value,
+        immersiveMode: true,
       ),
     );
   }

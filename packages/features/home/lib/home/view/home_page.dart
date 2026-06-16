@@ -9,7 +9,7 @@ import 'package:module_route/route/route_path.dart';
 class HomeBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<HomeController>(HomeController.new);
+    Get.lazyPut<HomeController>(HomeController.new, fenix: true);
   }
 }
 
@@ -18,7 +18,8 @@ class HomePage extends GetView<HomeController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppPageScaffold(
+      layout: AppPageLayout.mainTabRoot,
       backgroundColor: HomeDashboardTheme.background,
       body: Obx(() {
         final data = controller.dashboard.value;
@@ -46,10 +47,10 @@ class HomePage extends GetView<HomeController> {
           child: CustomScrollView(
             slivers: [
             SliverToBoxAdapter(
-              child: ColoredBox(
+                child: ColoredBox(
                 color: HomeDashboardTheme.bannerDark,
-                child: SafeArea(
-                  bottom: false,
+                child: Padding(
+                  padding: EdgeInsets.only(top: AppSafeInsets.top(context)),
                   child: Column(
                     children: [
                       const HomeSearchBar(),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_auth/user/controller/auth_controller.dart';
 import 'package:module_auth/user/theme/auth_theme.dart';
 import 'package:module_auth/user/view/login_footer_links.dart';
@@ -39,12 +40,17 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
 
-    return Scaffold(
+    return AppPageScaffold(
+      layout: AppPageLayout.edgeToEdge,
       backgroundColor: Colors.white,
       resizeToAvoidBottomInset: true,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(28, 48, 28, 24 + bottomInset),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(
+          28,
+          AppSafeInsets.top(context) + 48,
+          28,
+          24 + bottomInset,
+        ),
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -169,7 +175,6 @@ class _LoginPageState extends State<LoginPage> {
             ],
           ),
         ),
-      ),
     );
   }
 

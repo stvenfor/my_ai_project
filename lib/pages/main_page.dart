@@ -4,7 +4,6 @@ import 'package:module_auth/user/binding/auth_binding.dart';
 import 'package:module_auth/user/controller/auth_controller.dart';
 import 'package:module_auth/session/auth_session.dart';
 import 'package:module_common_ui/module_common_ui.dart';
-import 'package:module_core/core.dart';
 import 'package:module_route/module/module_registry.dart';
 import 'package:module_route/route/route_path.dart';
 import 'package:module_sample/l10n/app_localizations.dart';
@@ -19,12 +18,10 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   int _currentIndex = 0;
 
-  Future<void> _logout() async {
-    await AuthSession.logout();
-    if (!Get.isRegistered<AuthController>()) {
-      AuthBinding().dependencies();
-    }
-    Get.offAllNamed(RoutePath.login);
+  @override
+  void initState() {
+    super.initState();
+    ModuleRegistry.ensureBindings();
   }
 
   void _goLogin() {
@@ -79,77 +76,53 @@ class _MainPageState extends State<MainPage> {
     final safeIndex = _currentIndex.clamp(0, tabs.length - 1);
     final pages = tabs.map((tab) => tab.page).toList();
 
-    final userService = Get.find<UserService>();
-
-    return AdaptiveScaffold(
-      phone: Scaffold(
-        appBar: AppBar(
-          title: Text(tabs[safeIndex].label),
-          actions: [
-            Obx(() {
-              final loggedIn = userService.isLoggedIn;
-              return IconButton(
-                onPressed: loggedIn ? _logout : _goLogin,
-                icon: Icon(loggedIn ? Icons.logout_rounded : Icons.login_rounded),
-                tooltip: loggedIn ? '退出登录' : '登录',
-              );
-            }),
-          ],
+    return ImmersiveAnnotated(
+      child: AdaptiveScaffold(
+        phone: Scaffold(
+          extendBody: true,
+          body: IndexedStack(
+            index: safeIndex,
+            children: pages,
+          ),
+          bottomNavigationBar: NavigationBar(
+            selectedIndex: safeIndex,
+            onDestinationSelected: (index) => _onTabSelected(index, tabs),
+            destinations: [
+              for (final tab in tabs)
+                NavigationDestination(
+                  icon: Icon(tab.icon),
+                  selectedIcon: Icon(tab.selectedIcon),
+                  label: tab.label,
+                ),
+            ],
+          ),
         ),
-        body: IndexedStack(
-          index: safeIndex,
-          children: pages,
-        ),
-        bottomNavigationBar: NavigationBar(
-          selectedIndex: safeIndex,
-          onDestinationSelected: (index) => _onTabSelected(index, tabs),
-          destinations: [
-            for (final tab in tabs)
-              NavigationDestination(
-                icon: Icon(tab.icon),
-                selectedIcon: Icon(tab.selectedIcon),
-                label: tab.label,
+        tablet: Scaffold(
+          extendBody: true,
+          body: Row(
+            children: [
+              NavigationRail(
+                selectedIndex: safeIndex,
+                onDestinationSelected: (index) => _onTabSelected(index, tabs),
+                labelType: NavigationRailLabelType.all,
+                destinations: [
+                  for (final tab in tabs)
+                    NavigationRailDestination(
+                      icon: Icon(tab.icon),
+                      selectedIcon: Icon(tab.selectedIcon),
+                      label: Text(tab.label),
+                    ),
+                ],
               ),
-          ],
-        ),
-      ),
-      tablet: Scaffold(
-        appBar: AppBar(
-          title: Text(tabs[safeIndex].label),
-          actions: [
-            Obx(() {
-              final loggedIn = userService.isLoggedIn;
-              return IconButton(
-                onPressed: loggedIn ? _logout : _goLogin,
-                icon: Icon(loggedIn ? Icons.logout_rounded : Icons.login_rounded),
-                tooltip: loggedIn ? '退出登录' : '登录',
-              );
-            }),
-          ],
-        ),
-        body: Row(
-          children: [
-            NavigationRail(
-              selectedIndex: safeIndex,
-              onDestinationSelected: (index) => _onTabSelected(index, tabs),
-              labelType: NavigationRailLabelType.all,
-              destinations: [
-                for (final tab in tabs)
-                  NavigationRailDestination(
-                    icon: Icon(tab.icon),
-                    selectedIcon: Icon(tab.selectedIcon),
-                    label: Text(tab.label),
-                  ),
-              ],
-            ),
-            const VerticalDivider(width: 1),
-            Expanded(
-              child: IndexedStack(
-                index: safeIndex,
-                children: pages,
+              const VerticalDivider(width: 1),
+              Expanded(
+                child: IndexedStack(
+                  index: safeIndex,
+                  children: pages,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

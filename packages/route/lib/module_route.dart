@@ -10,5 +10,6 @@ export 'module/module_standalone_config.dart';
 export 'module/module_standalone_runner.dart';
 export 'module/module_tab_item.dart';
 export 'mixin_router_utils.dart';
+export 'route/login_redirect.dart';
 export 'route/route_path.dart';
 export 'route/route_utils.dart';

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:module_route/module/feature_module.dart';
 import 'package:module_route/route/route_path.dart';
+import 'package:module_video/short_video/view/short_video_page.dart';
 import 'package:module_video/videos/view/video_page.dart';
 
 class VideoModule extends FeatureModule {
@@ -10,5 +11,6 @@ class VideoModule extends FeatureModule {
   @override
   Map<String, WidgetBuilder> routes() => {
         RoutePath.video: (_) => const VideoPage(),
+        RoutePath.shortVideo: (_) => const ShortVideoPage(),
       };
 }

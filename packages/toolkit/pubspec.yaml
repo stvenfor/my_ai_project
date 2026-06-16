@@ -19,6 +19,7 @@ dependencies:
   rx_event_bus: ^2.0.1
   shared_preferences: ^2.5.5
   cached_network_image: ^3.4.1
+  video_player: ^2.9.2
 
 dev_dependencies:
   flutter_test:

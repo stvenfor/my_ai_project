@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_core/core.dart';
 import 'package:module_settings/settings/viewmodel/settings_viewmodel.dart';
 
@@ -23,8 +24,8 @@ class _SettingsPageState extends State<SettingsPage> {
     final config = _vm.config;
     final envService = _vm.envService;
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('设置')),
+    return AppPageScaffold(
+      navBar: const AppNavBar(title: '设置', showBackButton: true),
       body: config == null
           ? const Center(child: Text('应用配置未初始化'))
           : ListView(
@@ -47,13 +48,6 @@ class _SettingsPageState extends State<SettingsPage> {
                   subtitle: const Text('切换浅色 / 深色主题'),
                   value: config.themeMode == ThemeMode.dark,
                   onChanged: (_) => _refreshAfter(_vm.toggleTheme),
-                ),
-                SwitchListTile(
-                  title: const Text('沉浸式模式'),
-                  subtitle: const Text('透明状态栏与导航栏，全屏显示'),
-                  value: config.immersiveMode,
-                  onChanged: (value) =>
-                      _refreshAfter(() => _vm.setImmersive(value)),
                 ),
                 ListTile(
                   title: const Text('语言'),

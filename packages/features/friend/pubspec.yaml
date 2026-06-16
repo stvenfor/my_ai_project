@@ -9,6 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  module_common_ui:
+    path: ../../ui
   module_route:
     path: ../../route
   module_utils:

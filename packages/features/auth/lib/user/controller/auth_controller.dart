@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:get/get.dart';
 import 'package:module_auth/session/auth_session.dart';
 import 'package:module_core/core.dart';
+import 'package:module_route/module/module_registry.dart';
+import 'package:module_route/route/login_redirect.dart';
 import 'package:module_route/route/route_path.dart';
 import 'package:module_utils/module_utils.dart';
 
@@ -148,10 +150,18 @@ class AuthController extends GetxController {
       await _refreshUserSession();
     }
     if (!_userService.isLoggedIn) return;
+
+    final redirect = LoginRedirect.takePending();
+
     if (standaloneMode) {
       Get.offAllNamed(RoutePath.authDevHome);
-    } else {
-      Get.offAllNamed(RoutePath.main);
+      return;
+    }
+
+    ModuleRegistry.ensureBindings();
+    Get.offAllNamed(RoutePath.main);
+    if (redirect != null) {
+      Future.microtask(() => Get.toNamed(redirect));
     }
   }
 
