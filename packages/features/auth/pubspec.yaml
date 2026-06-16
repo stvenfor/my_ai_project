@@ -16,6 +16,10 @@ dependencies:
     path: ../../route
   module_utils:
     path: ../../toolkit
+  module_common_ui:
+    path: ../../ui
+  module_supabase:
+    path: ../../infrastructure/supabase
 
 dev_dependencies:
   flutter_test:

@@ -51,7 +51,10 @@ class ModuleStandaloneRunner {
     binding?.dependencies();
 
     final tab = module.mainTab;
-    final routes = module.routes();
+    final routes = {
+      ...module.routes(),
+      ...?config.extraRoutes,
+    };
     final initialRoute = config.resolveInitialRoute?.call() ??
         config.initialRoute ??
         (tab == null && routes.isNotEmpty ? routes.keys.first : null);

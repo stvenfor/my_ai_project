@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:module_auth/user/controller/auth_controller.dart';
 import 'package:module_auth/user/theme/auth_theme.dart';
 import 'package:module_auth/user/view/login_footer_links.dart';
+import 'package:module_core/core.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -13,6 +14,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  late final TextEditingController _emailController;
   late final TextEditingController _phoneController;
   late final AuthController _controller;
 
@@ -20,12 +22,15 @@ class _LoginPageState extends State<LoginPage> {
   void initState() {
     super.initState();
     _controller = Get.find<AuthController>();
-    _phoneController = TextEditingController(text: '18614031080');
+    _emailController = TextEditingController();
+    _phoneController = TextEditingController();
+    _controller.updateEmail(_emailController.text);
     _controller.updatePhone(_phoneController.text);
   }
 
   @override
   void dispose() {
+    _emailController.dispose();
     _phoneController.dispose();
     super.dispose();
   }
@@ -53,68 +58,33 @@ class _LoginPageState extends State<LoginPage> {
                   height: 1.3,
                 ),
               ),
-              const SizedBox(height: 48),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 10,
+              const SizedBox(height: 32),
+              Obx(
+                () => SegmentedButton<AuthCredentialMode>(
+                  segments: const [
+                    ButtonSegment(
+                      value: AuthCredentialMode.email,
+                      label: Text('邮箱登录'),
+                      icon: Icon(Icons.mail_outline, size: 18),
                     ),
-                    decoration: BoxDecoration(
-                      color: AuthTheme.countryCodeBg,
-                      borderRadius: BorderRadius.circular(6),
+                    ButtonSegment(
+                      value: AuthCredentialMode.phone,
+                      label: Text('短信登录'),
+                      icon: Icon(Icons.sms_outlined, size: 18),
                     ),
-                    child: const Text(
-                      '+86',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: AuthTheme.titleBlack,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TextField(
-                      controller: _phoneController,
-                      keyboardType: TextInputType.phone,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                        LengthLimitingTextInputFormatter(11),
-                      ],
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w500,
-                        letterSpacing: 1.2,
-                      ),
-                      decoration: const InputDecoration(
-                        hintText: '请输入手机号',
-                        hintStyle: TextStyle(color: AuthTheme.inputHint),
-                        border: UnderlineInputBorder(
-                          borderSide: BorderSide(color: AuthTheme.dividerGray),
-                        ),
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: AuthTheme.dividerGray),
-                        ),
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: AuthTheme.primaryBlue),
-                        ),
-                        contentPadding: EdgeInsets.only(bottom: 8),
-                      ),
-                      onChanged: _controller.updatePhone,
-                    ),
-                  ),
-                  if (_phoneController.text.isNotEmpty)
-                    IconButton(
-                      icon: const Icon(Icons.cancel, color: AuthTheme.textGray),
-                      onPressed: () {
-                        _phoneController.clear();
-                        _controller.updatePhone('');
-                        setState(() {});
-                      },
-                    ),
-                ],
+                  ],
+                  selected: {_controller.credentialMode.value},
+                  onSelectionChanged: (selection) {
+                    _controller.switchCredentialMode(selection.first);
+                  },
+                ),
+              ),
+              const SizedBox(height: 32),
+              Obx(
+                () => _controller.credentialMode.value ==
+                        AuthCredentialMode.email
+                    ? _buildEmailForm()
+                    : _buildPhoneForm(),
               ),
               const SizedBox(height: 24),
               Obx(
@@ -154,22 +124,45 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               const SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: FilledButton(
-                  onPressed: _controller.goToPasswordPage,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AuthTheme.primaryBlue,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4),
+              Obx(
+                () {
+                  final isEmail =
+                      _controller.credentialMode.value == AuthCredentialMode.email;
+                  return SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: FilledButton(
+                      onPressed: _controller.isLoading.value
+                          ? null
+                          : isEmail
+                              ? _controller.goToPasswordPage
+                              : _controller.sendPhoneOtpAndGo,
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AuthTheme.primaryBlue,
+                        disabledBackgroundColor: AuthTheme.buttonDisabled,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                      child: _controller.isLoading.value
+                          ? const SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : Text(
+                              isEmail ? '下一步' : '获取验证码',
+                              style: const TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                     ),
-                  ),
-                  child: const Text(
-                    '下一步',
-                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
-                  ),
-                ),
+                  );
+                },
               ),
               const SizedBox(height: 20),
               const LoginFooterLinks(),
@@ -177,6 +170,81 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildEmailForm() {
+    return TextField(
+      controller: _emailController,
+      keyboardType: TextInputType.emailAddress,
+      autocorrect: false,
+      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+      decoration: const InputDecoration(
+        hintText: '请输入邮箱',
+        hintStyle: TextStyle(color: AuthTheme.inputHint),
+        prefixIcon: Icon(Icons.mail_outline, color: AuthTheme.textGray),
+        border: UnderlineInputBorder(
+          borderSide: BorderSide(color: AuthTheme.dividerGray),
+        ),
+        enabledBorder: UnderlineInputBorder(
+          borderSide: BorderSide(color: AuthTheme.dividerGray),
+        ),
+        focusedBorder: UnderlineInputBorder(
+          borderSide: BorderSide(color: AuthTheme.primaryBlue),
+        ),
+        contentPadding: EdgeInsets.only(bottom: 8),
+      ),
+      onChanged: _controller.updateEmail,
+    );
+  }
+
+  Widget _buildPhoneForm() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            color: AuthTheme.countryCodeBg,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: const Text(
+            '+86',
+            style: TextStyle(fontSize: 16, color: AuthTheme.titleBlack),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: TextField(
+            controller: _phoneController,
+            keyboardType: TextInputType.phone,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(11),
+            ],
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w500,
+              letterSpacing: 1.2,
+            ),
+            decoration: const InputDecoration(
+              hintText: '请输入手机号',
+              hintStyle: TextStyle(color: AuthTheme.inputHint),
+              border: UnderlineInputBorder(
+                borderSide: BorderSide(color: AuthTheme.dividerGray),
+              ),
+              enabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: AuthTheme.dividerGray),
+              ),
+              focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: AuthTheme.primaryBlue),
+              ),
+              contentPadding: EdgeInsets.only(bottom: 8),
+            ),
+            onChanged: _controller.updatePhone,
+          ),
+        ),
+      ],
     );
   }
 }

@@ -28,9 +28,24 @@ class AppInitializer {
     await SpManager.init();
     await AppDatabase.init();
 
+    if (!SupabaseConfig.useMockAuth) {
+      LogUtils.i(
+        '[Supabase] host=${SupabaseConfig.urlHost} '
+        'configured=${SupabaseConfig.isConfigured} '
+        'placeholder=${SupabaseConfig.usesPlaceholder}',
+      );
+      final issue = SupabaseConfig.configurationIssue;
+      if (issue != null) {
+        LogUtils.w('[Supabase] $issue');
+      }
+    }
+
     await AuthSession.register();
 
     await UiKitInitializer.initialize();
+
+    final webRegistry = await WebKitInitializer.initialize();
+    WebKitCoreHandlers.register(webRegistry);
 
     await EnvironmentSession.register();
     _wireEnvironmentHttpRefresh();

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_settings/mine/api/mine_http_config.dart';
 import 'package:module_settings/mine/model/harmony_index_model.dart';
 import 'package:module_settings/mine/viewmodel/mine_http_test_viewmodel.dart';
@@ -464,9 +465,7 @@ class _ArticleCard extends StatelessWidget {
             onPressed: () {
               Clipboard.setData(ClipboardData(text: link));
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('链接已复制')),
-              );
+              UiKitInitializer.toast('链接已复制');
             },
             child: const Text('复制'),
           ),

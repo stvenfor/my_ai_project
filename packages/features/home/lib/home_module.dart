@@ -4,6 +4,8 @@ import 'package:module_home/home/api/home_http_config.dart';
 import 'package:module_home/home/view/check_in_mall_page.dart';
 import 'package:module_home/home/view/home_learning_report_page.dart';
 import 'package:module_home/home/view/home_page.dart';
+import 'package:module_home/home/web/home_web_handlers.dart';
+import 'package:module_core/core.dart';
 import 'package:module_route/module/feature_module.dart';
 import 'package:module_route/module/module_host_context.dart';
 import 'package:module_route/module/module_tab_item.dart';
@@ -39,6 +41,9 @@ class HomeModule extends FeatureModule {
       enableLog: context.enableHttpLog,
       maxRetries: context.httpMaxRetries,
     );
+    if (Get.isRegistered<WebBridgeRegistry>()) {
+      HomeWebHandlers.register(Get.find<WebBridgeRegistry>());
+    }
     if (context.isStandalone) {
       HomeBinding().dependencies();
     }

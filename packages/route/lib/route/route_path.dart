@@ -7,6 +7,7 @@ class RoutePath{
   static const String homeCheckInMall = '/home/check_in_mall';
   static const String login = '/login';
   static const String loginPassword = '/login/password';
+  static const String loginOtp = '/login/otp';
   static const String authDevHome = '/auth/dev_home';
   static const String register = '/register';
   static const String chat = '/chat';
@@ -18,4 +19,7 @@ class RoutePath{
   static const String mineHttpTest = '/mine/http_test';
   static const String settings = '/settings';
   static const String video = '/video';
+
+  /// 通用 Web 容器页（[AppWebViewPage]），通过 Get.arguments 传入 [WebPageConfig]。
+  static const String web = '/web';
 }

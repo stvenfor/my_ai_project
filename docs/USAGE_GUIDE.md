@@ -13,7 +13,8 @@ module_sample/                 # 壳工程（完整 App）
 ├── lib/main.dart              # 启动入口 + 全局 DI
 ├── lib/config/module_manifest.dart
 ├── packages/
-│   ├── core/                  # 契约：User、AppLoading、EnvironmentService
+│   ├── core/                  # 契约：User、AuthService、AppLoading、EnvironmentService
+│   ├── infrastructure/supabase/  # Supabase 实现（Auth + Profile）
 │   ├── route/                 # FeatureModule、Registry、独立运行 Runner
 │   ├── network/               # Dio + AppHttpBootstrap
 │   ├── storage/               # sqflite、AppSettings
@@ -28,9 +29,11 @@ module_sample/                 # 壳工程（完整 App）
 
 | 服务 | 注册位置 | 说明 |
 |------|----------|------|
-| `UserService` | 壳工程 `main.dart`（`AuthSession.register()`） | 登录态读写；登录模块写入，业务模块只读 |
-| `EnvironmentService` | 壳工程 `main.dart`（`EnvironmentSession.register()`） | 测试/预发/线上；实现在 settings 模块 |
+| `AuthService` | `AuthSession.register()` | 登录/注册/登出；Mock 或 Supabase 实现 |
+| `UserService` | `AuthSession.register()` | 登录态快照；业务模块只读 |
+| `EnvironmentService` | `EnvironmentSession.register()` | 测试/预发/线上；实现在 settings 模块 |
 | `AppLoading` | 壳工程 `main.dart`（`UiKitInitializer.initialize()`） | 全局 Loading / Toast；业务通过接口调用 |
+| `WebBridgeRegistry` | 壳工程 `main.dart`（`WebKitInitializer.initialize()`） | H5 ↔ Flutter 桥接；各模块注册 action handler |
 | `AppController` | `AppBinding` | 主题、语言、沉浸式 |
 
 业务模块通过 `Get.find<UserService>()` / `Get.find<EnvironmentService>()` 获取，**不要**自行 `new` 实现类。
@@ -43,9 +46,16 @@ module_sample/                 # 壳工程（完整 App）
 
 ```bash
 cd /path/to/flutter_module_sample
+cp .env.example .env   # 填入 Supabase URL 与 anon key
 flutter pub get
-flutter run
+flutter run --dart-define-from-file=.env
 ```
+
+> Supabase Dashboard → Authentication → Providers → Email：关闭 **Confirm email**（注册后不强制验证）。
+
+> SQL：依次执行 [`001_profiles_rls.sql`](../supabase/migrations/001_profiles_rls.sql)、[`002_phone_otp_profiles.sql`](../supabase/migrations/002_phone_otp_profiles.sql)。
+
+> Supabase Dashboard → Authentication → Providers：开启 **Email**（关闭 Confirm email）与 **Phone**（配置 SMS）。
 
 ### 2.2 启动流程
 
@@ -53,8 +63,9 @@ flutter run
 main()
   → ModuleUtilsInitializer（日志、SP、ScreenUtil）
   → SpManager / AppDatabase
-  → AuthSession.register（UserService + 恢复登录态）
+  → AuthSession.register（AuthService + UserService；Supabase 或 Mock）
   → UiKitInitializer.initialize（AppLoading + EasyLoading 配置）
+  → WebKitInitializer.initialize（WebBridgeRegistry + 内置 handler）
   → EnvironmentSession.register（settings 模块，恢复环境）
   → ModuleRegistry.bootstrap（各模块 HTTP 等）
   → AppHttpBootstrap.initialize（全局 Dio）
@@ -66,24 +77,32 @@ main()
 
 | 场景 | 路径 |
 |------|------|
-| Splash | `/` |
-| 未登录 | `/login` → 手机号页 → `/login/password` 密码页 |
+| Splash | `/` → 始终进入 `/main`（游客模式） |
+| 游客 | `/main` 可浏览首页/聊天/我的；点 **社区** Tab 跳转登录 |
+| 登录 | `/login` → **邮箱** 密码页 / **手机** 验证码页 |
+| 注册 | `/register`（邮箱+密码 / 手机+短信） |
 | 已登录 | `/main`（Tab：首页 / 聊天 / 社区 / 我的） |
 | 设置 | `/settings`（含环境切换） |
 | 学习报告 | 首页入口 → `/home/learning_report` |
 
 ### 2.4 登录与登出
 
-**登录（i车商流程）**
+**登录（双通道）**
 
-1. 输入手机号（默认演示号 `18614031080`）→ 勾选隐私 → **下一步**
-2. 输入 6–16 位密码 → **登录**
-3. 成功后 `UserService.setUser()` 并跳转 Tab 主页
+1. **邮箱 + 密码**：登录页选「邮箱登录」→ 输入邮箱 → 密码页登录
+2. **手机 + 短信验证码**：登录页选「短信登录」→ 输入手机号 → 获取验证码 → 输入 6 位 OTP
 
-**登出**
+**注册**
 
-- 主页 AppBar 右上角 **退出登录**
-- 调用 `UserService.clearUser()` → 跳转登录页
+- **邮箱注册**：`/register` → 邮箱 Tab → 邮箱 + 密码
+- **手机注册**：`/register` → 手机 Tab → 短信验证码（首次验证自动建号）
+
+> Supabase 控制台需开启 **Phone** Provider 并配置 SMS（Twilio 等）；Mock 模式验证码固定为 `123456`。
+
+**登出 / 登录**
+
+- 主页 AppBar：已登录显示 **退出**；游客显示 **登录**
+- 登出调用 `AuthSession.logout()` → 跳转登录页
 
 > `AuthController` 使用 `lazyPut(..., fenix: true)`，登出后再次进入登录页可自动重建。
 
@@ -106,7 +125,7 @@ main()
 
 | 模块 | 目录 | 入口 | 说明 |
 |------|------|------|------|
-| 登录 | `module_auth` | `lib/main_dev.dart` | 注入 MockUserService，standalone 登录成功 Toast |
+| 登录 | `packages/features/auth` | `lib/main_dev.dart` | `USE_MOCK_AUTH=true`，Mock 认证 |
 | 首页 | `module_home` | `lib/main_dev.dart` | 注入 Mock 用户 + 默认环境 |
 | 我的/设置 | `module_settings` | `lib/main_dev.dart` | 注入 Mock 用户 + 默认环境 |
 | 聊天 | `module_chat` | `lib/main_dev.dart` | 基础 Runner |
@@ -260,8 +279,20 @@ flowchart LR
 ### 5.1 壳工程注册（唯一创建点）
 
 ```dart
-await Get.putAsync<UserService>(UserServiceImpl.create, permanent: true);
+await AuthSession.register(); // 读取 .env 中 USE_MOCK_AUTH
 await Get.putAsync<EnvironmentService>(EnvironmentServiceImpl.create, permanent: true);
+```
+
+### 5.1.1 Supabase 配置（`.env`）
+
+| 变量 | 说明 |
+|------|------|
+| `SUPABASE_URL` | Supabase Project URL |
+| `SUPABASE_ANON_KEY` | anon public key（可进客户端，安全靠 RLS） |
+| `USE_MOCK_AUTH` | `true` Mock；`false` 连接 Supabase |
+
+```bash
+flutter run --dart-define-from-file=.env
 ```
 
 ### 5.2 业务模块只依赖接口
@@ -286,12 +317,13 @@ class HomeBinding extends Bindings {
 
 [`module_core/lib/core.dart`](../module_core/lib/core.dart) **只导出**：
 
-- `User` / `UserService`
+- `User` / `UserService` / `AuthService` / `AuthFailure`
+- `SupabaseConfig`
 - `AppLoading`
 - `AppEnv` / `EnvConfig` / `EnvironmentService`
-- `MockUserService` / `DefaultEnvironmentService`（dev 用）
+- `MockUserService` / `MockAuthService` / `DefaultEnvironmentService`（dev 用）
 
-**不导出** `UserServiceImpl`、`EnvironmentServiceImpl`（仅壳工程 / auth 模块 import）。
+**不导出** `UserServiceImpl`、`SupabaseAuthService`（分别在 auth / infrastructure 模块）。
 
 ---
 
@@ -419,6 +451,100 @@ import 'package:module_utils/module_utils.dart';
 CacheImageUtils.network(url, width: 48.w, height: 48.w, fit: BoxFit.cover);
 CacheImageUtils.circle(avatarUrl, size: 56);
 ```
+
+---
+
+## 5.6 WebView 与 H5 桥接（WebKit）
+
+### 分层（方案 C）
+
+| 层级 | 说明 |
+|------|------|
+| **Core action** | `WebBridgeActions.coreActions`，壳工程 `WebKitCoreHandlers` **统一注册** |
+| **Module action** | `WebBridgeActions.moduleActions`，各模块 `onRegister` 用 `registerModule` **扩展** |
+| **常量表** | `packages/core/lib/web/web_bridge_actions.dart`，新增 action 先在此声明 |
+
+### Action 常量表
+
+| 常量 | 类型 | 说明 |
+|------|------|------|
+| `showToast` | Core | 全局 Toast |
+| `closeWithResult` | Core | 关闭 Web 页并回传结果 |
+| `getEnvironment` | Core | 读取当前环境 |
+| `switchEnvironment` | Core | 切换环境 |
+| `getUserInfo` | Core | 读取登录用户 |
+| `refreshDashboard` | Module (home) | 刷新首页数据 |
+
+业务模块 **禁止** 用 `registerModule` 注册 Core action（运行时会抛错）。
+
+### 启动注册
+
+```dart
+// lib/main.dart
+await WebKitInitializer.initialize();
+WebKitCoreHandlers.register(webRegistry);  // Core 统一注册
+await ModuleRegistry.bootstrap(hostContext); // 各模块 registerModule 扩展
+```
+
+### 打开 H5（推荐 Get 命名路由）
+
+```dart
+import 'package:get/get.dart';
+import 'package:module_common_ui/module_common_ui.dart';
+import 'package:module_route/route/route_path.dart';
+
+Get.toNamed(
+  RoutePath.web,
+  arguments: WebPageConfig.asset(
+    assetPath: WebBridgeAssets.testBridge,
+    title: 'Web 桥接测试',
+    showAppBar: true,
+    params: {'storeName': 'xxx'},
+  ),
+);
+
+// 远程 URL、全屏 H5
+Get.toNamed(
+  RoutePath.web,
+  arguments: WebPageConfig.url(
+    url: 'https://example.com',
+    showAppBar: false,
+    params: {'token': 'xxx'},
+  ),
+);
+```
+
+> `WebNavigator` 已标记 `@Deprecated`，请统一使用 `Get.toNamed(RoutePath.web, ...)`。
+
+### 模块扩展 handler
+
+```dart
+// 1. 先在 WebBridgeActions 声明 moduleActions
+static const myAction = 'myAction';
+
+// 2. 模块 onRegister 注册
+registry.registerModule(WebBridgeActions.refreshDashboard, (message) async {
+  await Get.find<HomeController>().refreshDashboard();
+  return {'ok': true};
+});
+```
+
+### H5 调用约定
+
+```javascript
+window.flutter_inappwebview.callHandler('AppBridge', {
+  action: 'showToast',  // 对应 WebBridgeActions 常量
+  payload: { text: 'Hello' }
+});
+```
+
+Flutter 注入参数：`window.__FLUTTER_PARAMS__`，事件：`flutterReady`。
+
+测试入口：首页 **销售顾问** → `assets/web/test_bridge.html`。
+
+### 替换 flutter_inappwebview
+
+只需修改 `packages/ui/lib/kit/web/` 内实现；Core/Module action 常量表与 H5 协议不变。
 
 ---
 

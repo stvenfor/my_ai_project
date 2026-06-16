@@ -24,11 +24,8 @@ class SettingsViewModel extends GetxController {
     final service = envService;
     if (service == null) return;
     await service.setEnv(env);
-    Get.snackbar(
-      '环境已切换',
-      '当前：${service.config.label} · ${service.baseUrl}',
-      snackPosition: SnackPosition.BOTTOM,
-      duration: const Duration(seconds: 2),
+    UiKitInitializer.toastInfo(
+      '环境已切换：${service.config.label} · ${service.baseUrl}',
     );
   }
 }

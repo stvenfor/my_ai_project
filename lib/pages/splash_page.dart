@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:module_sample/l10n/app_localizations.dart';
 import 'package:get/get.dart';
-import 'package:module_core/core.dart';
 import 'package:module_route/route/route_path.dart';
 
 class SplashPage extends StatefulWidget {
@@ -19,10 +18,8 @@ class _SplashPageState extends State<SplashPage> {
   }
 
   void _routeByAuth() {
-    final userService = Get.find<UserService>();
-    Get.offNamed(
-      userService.isLoggedIn ? RoutePath.main : RoutePath.login,
-    );
+    // 游客模式：无论是否登录均进入主页，社区 Tab 单独拦截登录。
+    Get.offNamed(RoutePath.main);
   }
 
   @override

@@ -1,24 +1,49 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
+
 import 'package:get/get.dart';
 import 'package:module_auth/session/auth_session.dart';
 import 'package:module_core/core.dart';
 import 'package:module_route/route/route_path.dart';
+import 'package:module_utils/module_utils.dart';
 
 class AuthController extends GetxController {
-  AuthController({UserService? userService})
-      : _userService = userService ?? Get.find<UserService>();
+  AuthController({
+    AuthService? authService,
+    UserService? userService,
+    AppLoading? loading,
+  })  : _authService = authService ?? _resolveAuthService(),
+        _userService = userService ?? Get.find<UserService>(),
+        _loading = loading ?? Get.find<AppLoading>();
 
   /// 独立运行 main_dev 时设为 true
   static bool standaloneMode = false;
 
+  final AuthService _authService;
   final UserService _userService;
+  final AppLoading _loading;
+
+  static AuthService _resolveAuthService() {
+    if (Get.isRegistered<AuthService>()) {
+      return Get.find<AuthService>();
+    }
+    throw StateError('AuthService 未注册，请先调用 AuthSession.register()');
+  }
 
   final isLoading = false.obs;
   final agreedPrivacy = true.obs;
-  final phone = ''.obs;
-  final password = ''.obs;
+  final credentialMode = AuthCredentialMode.email.obs;
 
+  final email = '454655062@qq.com'.obs;
+  final phone = '13477525645'.obs;
+  final password = '123456'.obs;
+  final confirmPassword = '123456'.obs;
+  final displayName = ''.obs;
+  final otpCode = ''.obs;
+  final otpCooldownSeconds = 0.obs;
+
+  String _pendingEmail = '';
   String _pendingPhone = '';
+  Timer? _otpTimer;
 
   String get greeting {
     final hour = DateTime.now().hour;
@@ -27,34 +52,107 @@ class AuthController extends GetxController {
     return '晚上好，欢迎使用i车商';
   }
 
+  static const minPasswordLength = 8;
+  static const maxPasswordLength = 16;
+
   bool get isPasswordValid =>
-      password.value.length >= 6 && password.value.length <= 16;
+      password.value.length >= minPasswordLength &&
+      password.value.length <= maxPasswordLength;
+
+  bool get isRegisterPasswordMatch =>
+      password.value == confirmPassword.value && isPasswordValid;
+
+  bool get canResendOtp => otpCooldownSeconds.value <= 0 && !isLoading.value;
+
+  bool get isOtpValid => RegExp(r'^\d{6}$').hasMatch(otpCode.value.trim());
+
+  void switchCredentialMode(AuthCredentialMode mode) {
+    credentialMode.value = mode;
+  }
+
+  void updateEmail(String value) => email.value = value.trim();
 
   void updatePhone(String value) => phone.value = value;
 
   void updatePassword(String value) => password.value = value;
 
+  void updateConfirmPassword(String value) => confirmPassword.value = value;
+
+  void updateDisplayName(String value) => displayName.value = value.trim();
+
+  void updateOtpCode(String value) => otpCode.value = value;
+
   void togglePrivacy(bool? value) {
     if (value != null) agreedPrivacy.value = value;
   }
 
-  bool _validatePhone(String raw) {
-    final digits = raw.replaceAll(RegExp(r'\s+'), '');
-    return RegExp(r'^1[3-9]\d{9}$').hasMatch(digits);
+  bool validateEmail(String raw) {
+    return RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+        .hasMatch(raw.trim());
   }
 
-  void _showToast(String message) {
-    final context = Get.context;
-    if (context == null) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
-        duration: const Duration(seconds: 2),
-        backgroundColor: const Color(0xCC333333),
-      ),
-    );
+  bool validatePhone(String raw) => PhoneAuthUtils.isValidChinaMobile(raw);
+
+  void _showToast(String message) => _loading.showToast(message);
+
+  void _showAuthFailure(Object error) {
+    final message =
+        error is AuthFailure ? error.message : '操作失败：$error';
+    if (error is EmailConfirmationRequiredFailure) {
+      _loading.showInfo(message);
+    } else {
+      _loading.showError(message);
+    }
+  }
+
+  void _logRegister(String message, {Object? error, String level = 'info'}) {
+    final line = error == null
+        ? '[AuthRegister] $message'
+        : '[AuthRegister] $message | $error';
+    switch (level) {
+      case 'error':
+        LogUtils.e(line);
+      case 'success':
+        LogUtils.i(line);
+      default:
+        LogUtils.i(line);
+    }
+  }
+
+  void _showRegisterToast(String message) {
+    _logRegister('toast: $message');
+    _showToast(message);
+  }
+
+  void _showRegisterAuthFailure(Object error) {
+    final message = error is AuthFailure
+        ? error.message
+        : '操作失败，请稍后重试';
+    _logRegister('toast: $message', error: error, level: 'error');
+    _showAuthFailure(error is AuthFailure ? error : UnknownAuthFailure(message));
+  }
+
+  void _showRegisterSuccess(String message) {
+    _logRegister('toast: $message', level: 'success');
+    _loading.showSuccess(message);
+  }
+
+  Future<void> _refreshUserSession() async {
+    if (_userService is SessionRefreshable) {
+      await (_userService as SessionRefreshable).refreshSession();
+    }
+  }
+
+  Future<void> _navigateAfterAuth() async {
+    if (!_userService.isLoggedIn) {
+      await _refreshUserSession();
+    }
+    if (!_userService.isLoggedIn) return;
+    if (standaloneMode) {
+      Get.offAllNamed(RoutePath.authDevHome);
+    } else {
+      Get.offAllNamed(RoutePath.main);
+    }
   }
 
   Future<void> goToPasswordPage() async {
@@ -62,46 +160,177 @@ class AuthController extends GetxController {
       _showToast('请先阅读并同意隐私条款');
       return;
     }
-    final digits = phone.value.replaceAll(RegExp(r'\s+'), '');
-    if (!_validatePhone(digits)) {
-      _showToast('手机号不正确');
+    if (!validateEmail(email.value)) {
+      _showToast('请输入有效的邮箱');
       return;
     }
-    _pendingPhone = digits;
+    _pendingEmail = email.value.trim();
     await Get.toNamed(RoutePath.loginPassword);
   }
 
-  Future<void> loginWithPassword() async {
-    if (!isPasswordValid) {
-      _showToast('请输入6-16位密码');
+  Future<void> sendPhoneOtpAndGo({bool fromRegister = false}) async {
+    void toast(String message) =>
+        fromRegister ? _showRegisterToast(message) : _showToast(message);
+    void fail(Object error) =>
+        fromRegister ? _showRegisterAuthFailure(error) : _showAuthFailure(error);
+
+    if (!agreedPrivacy.value) {
+      toast('请先阅读并同意隐私条款');
+      return;
+    }
+    if (!validatePhone(phone.value)) {
+      toast('请输入有效的手机号');
       return;
     }
 
     isLoading.value = true;
     try {
-      await Future<void>.delayed(const Duration(seconds: 1));
-      final user = User(
-        id: 'u_$_pendingPhone',
-        name: '用户${_pendingPhone.substring(7)}',
-        avatar:
-            'https://api.dicebear.com/7.x/avataaars/png?seed=$_pendingPhone',
-        token: 'mock_token_${DateTime.now().millisecondsSinceEpoch}',
-      );
-      await _userService.setUser(user);
-      if (standaloneMode) {
-        Get.offAllNamed(RoutePath.authDevHome);
-      } else {
-        Get.offAllNamed(RoutePath.main);
-      }
+      _pendingPhone = PhoneAuthUtils.normalizeDigits(phone.value);
+      await _authService.sendPhoneOtp(phone: _pendingPhone);
+      _startOtpCooldown(60);
+      toast('验证码已发送');
+      await Get.toNamed(RoutePath.loginOtp);
     } catch (error) {
-      _showToast('登录失败：$error');
+      fail(error);
     } finally {
       isLoading.value = false;
     }
   }
 
+  Future<void> resendPhoneOtp() async {
+    if (!canResendOtp) return;
+    final targetPhone =
+        _pendingPhone.isNotEmpty ? _pendingPhone : phone.value;
+    if (!validatePhone(targetPhone)) {
+      _showToast('手机号无效');
+      return;
+    }
+
+    isLoading.value = true;
+    try {
+      await _authService.sendPhoneOtp(phone: targetPhone);
+      _startOtpCooldown(60);
+      _showToast('验证码已重新发送');
+    } catch (error) {
+      _showAuthFailure(error);
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> verifyPhoneOtp() async {
+    if (!isOtpValid) {
+      _showToast('请输入 6 位验证码');
+      return;
+    }
+
+    final targetPhone =
+        _pendingPhone.isNotEmpty ? _pendingPhone : phone.value;
+    if (!validatePhone(targetPhone)) {
+      _showToast('手机号无效');
+      return;
+    }
+
+    isLoading.value = true;
+    try {
+      await _authService.verifyPhoneOtp(
+        phone: targetPhone,
+        otp: otpCode.value.trim(),
+      );
+      await _navigateAfterAuth();
+    } catch (error) {
+      _showAuthFailure(error);
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> loginWithPassword() async {
+    if (!isPasswordValid) {
+      _showToast('请输入8-16位密码');
+      return;
+    }
+
+    isLoading.value = true;
+    try {
+      await _authService.signInWithEmail(
+        email: _pendingEmail.isNotEmpty ? _pendingEmail : email.value.trim(),
+        password: password.value,
+      );
+      await _navigateAfterAuth();
+    } catch (error) {
+      _showAuthFailure(error);
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> registerWithEmail() async {
+    if (!agreedPrivacy.value) {
+      _showRegisterToast('请先阅读并同意隐私条款');
+      return;
+    }
+    if (!validateEmail(email.value)) {
+      _showRegisterToast('请输入有效的邮箱');
+      return;
+    }
+    if (!isRegisterPasswordMatch) {
+      _showRegisterToast('两次密码不一致或长度不符合要求');
+      return;
+    }
+
+    isLoading.value = true;
+    _logRegister(
+      'start: email=${email.value.trim()}, displayName=${displayName.value.isEmpty ? '(空)' : displayName.value}',
+    );
+    try {
+      await _authService.signUpWithEmail(
+        email: email.value.trim(),
+        password: password.value,
+        displayName: displayName.value.isEmpty ? null : displayName.value,
+      );
+      await _refreshUserSession();
+      _showRegisterSuccess('注册成功');
+      await _navigateAfterAuth();
+    } catch (error) {
+      _showRegisterAuthFailure(error);
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  /// 手机号注册：发送 OTP（Supabase 首次验证自动创建账号）。
+  Future<void> registerWithPhone() async {
+    _logRegister('start: phone=${phone.value}');
+    await sendPhoneOtpAndGo(fromRegister: true);
+  }
+
+  void _startOtpCooldown(int seconds) {
+    _otpTimer?.cancel();
+    otpCooldownSeconds.value = seconds;
+    _otpTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (otpCooldownSeconds.value <= 1) {
+        otpCooldownSeconds.value = 0;
+        timer.cancel();
+      } else {
+        otpCooldownSeconds.value--;
+      }
+    });
+  }
+
   Future<void> logout() async {
     await AuthSession.logout();
     Get.offAllNamed(RoutePath.login);
+  }
+
+  String get maskedPendingPhone {
+    if (_pendingPhone.length != 11) return _pendingPhone;
+    return '${_pendingPhone.substring(0, 3)}****${_pendingPhone.substring(7)}';
+  }
+
+  @override
+  void onClose() {
+    _otpTimer?.cancel();
+    super.onClose();
   }
 }

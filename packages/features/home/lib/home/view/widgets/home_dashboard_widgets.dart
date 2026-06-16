@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:module_common_ui/module_common_ui.dart';
+import 'package:module_home/home/controller/home_controller.dart';
 import 'package:module_home/home/model/home_dashboard_model.dart';
 import 'package:module_home/home/theme/home_dashboard_theme.dart';
 import 'package:module_route/route/route_path.dart';
@@ -136,6 +138,25 @@ class HomeFeatureGrid extends StatelessWidget {
   void _onFeatureTap(HomeFeatureItem item) {
     if (item.label == '生活服务') {
       Get.toNamed(RoutePath.homeCheckInMall);
+      return;
+    }
+    if (item.label == '销售顾问') {
+      final dashboard = Get.isRegistered<HomeController>()
+          ? Get.find<HomeController>().dashboard.value
+          : null;
+      Get.toNamed(
+        RoutePath.web,
+        arguments: WebPageConfig.asset(
+          assetPath: WebBridgeAssets.testBridge,
+          title: 'Web 桥接测试',
+          params: {
+            'from': 'home',
+            'feature': item.label,
+            'storeName': dashboard?.storeName ?? '',
+            'timestamp': DateTime.now().millisecondsSinceEpoch,
+          },
+        ),
+      );
     }
   }
 

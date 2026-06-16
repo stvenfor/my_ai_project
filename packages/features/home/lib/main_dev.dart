@@ -8,7 +8,12 @@ Future<void> main() => ModuleStandaloneRunner.run(
       config: ModuleStandaloneConfig(
         injectMockUser: true,
         injectDefaultEnvironment: true,
-        onSetup: () async => UiKitInitializer.initialize(),
+        onSetup: () async {
+          await UiKitInitializer.initialize();
+          final registry = await WebKitInitializer.initialize();
+          WebKitCoreHandlers.register(registry);
+        },
         innerAppBuilder: UiKitInitializer.wrapChild,
+        extraRoutes: WebKitRoutes.routes(),
       ),
     );

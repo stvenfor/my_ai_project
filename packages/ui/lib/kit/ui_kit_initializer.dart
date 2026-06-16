@@ -18,6 +18,18 @@ class UiKitInitializer {
   static AppLoading get loading =>
       Get.isRegistered<AppLoading>() ? Get.find<AppLoading>() : _loading;
 
+  /// 轻提示（普通 toast）。
+  static void toast(String message) => loading.showToast(message);
+
+  /// 成功提示。
+  static void toastSuccess(String message) => loading.showSuccess(message);
+
+  /// 错误提示。
+  static void toastError(String message) => loading.showError(message);
+
+  /// 信息提示。
+  static void toastInfo(String message) => loading.showInfo(message);
+
   /// 注册 [AppLoading] 并配置 EasyLoading 样式（幂等）。
   static Future<AppLoading> initialize({
     UiKitConfig config = const UiKitConfig(),

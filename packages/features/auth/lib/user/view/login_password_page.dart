@@ -47,7 +47,7 @@ class LoginPasswordPage extends GetView<AuthController> {
                 onChanged: controller.updatePassword,
                 style: const TextStyle(fontSize: 18),
                 decoration: const InputDecoration(
-                  hintText: '6-16位密码',
+                  hintText: '8-16位密码',
                   hintStyle: TextStyle(color: AuthTheme.inputHint),
                   border: UnderlineInputBorder(
                     borderSide: BorderSide(color: AuthTheme.dividerGray),

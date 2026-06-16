@@ -46,6 +46,8 @@ dependencies:
     path: ./packages/features/settings
   module_utils:
     path: ./packages/toolkit
+  module_supabase:
+    path: ./packages/infrastructure/supabase
   module_video:
     path: ./packages/features/video
 
@@ -62,6 +64,7 @@ flutter:
   assets:
     - assets/images/
     - assets/lotties/
+    - assets/web/
 
 dependency_overrides:
   rxdart: ^0.27.7

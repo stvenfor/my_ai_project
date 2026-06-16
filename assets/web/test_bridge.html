@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Web Bridge 测试</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f0f4f8;
+      color: #1a1a2e;
+      padding: 16px;
+      line-height: 1.5;
+    }
+    h1 { font-size: 20px; margin-bottom: 8px; }
+    .subtitle { color: #666; font-size: 13px; margin-bottom: 20px; }
+    section {
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    section h2 { font-size: 14px; color: #888; margin-bottom: 8px; }
+    pre {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 12px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .btn-group { display: flex; flex-direction: column; gap: 10px; }
+    button {
+      padding: 12px 16px;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      background: #2563eb;
+      color: #fff;
+    }
+    button.secondary { background: #64748b; }
+    button.success { background: #16a34a; }
+    button.danger { background: #dc2626; }
+    #log { max-height: 200px; overflow-y: auto; font-size: 11px; color: #444; }
+    .waiting { color: #94a3b8; font-style: italic; }
+  </style>
+</head>
+<body>
+  <h1>Flutter ↔ H5 桥接测试</h1>
+  <p class="subtitle">Core 统一注册 + Module 扩展（action 见 WebBridgeActions 常量表）</p>
+
+  <section>
+    <h2>Flutter 注入参数 (__FLUTTER_PARAMS__)</h2>
+    <pre id="params" class="waiting">等待 Flutter 注入...</pre>
+  </section>
+
+  <section>
+    <h2>操作</h2>
+    <div class="btn-group">
+      <button onclick="sendToast()">Core：showToast</button>
+      <button class="secondary" onclick="getUserInfo()">Core：getUserInfo</button>
+      <button class="secondary" onclick="refreshDashboard()">Module：refreshDashboard</button>
+      <button class="secondary" onclick="getEnvironment()">Core：getEnvironment</button>
+      <button class="success" onclick="switchEnvironment()">Core：switchEnvironment</button>
+      <button class="danger" onclick="closePage()">Core：closeWithResult</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>通信日志</h2>
+    <pre id="log"></pre>
+  </section>
+
+  <script>
+    function log(msg) {
+      var el = document.getElementById('log');
+      var time = new Date().toLocaleTimeString();
+      el.textContent = '[' + time + '] ' + msg + '\n' + el.textContent;
+    }
+
+    function renderParams() {
+      var params = window.__FLUTTER_PARAMS__ || {};
+      document.getElementById('params').textContent = JSON.stringify(params, null, 2);
+      document.getElementById('params').classList.remove('waiting');
+    }
+
+    function callBridge(action, payload) {
+      if (!window.flutter_inappwebview) {
+        log('ERROR: flutter_inappwebview 不可用（请在 App 内打开）');
+        return Promise.reject('not in webview');
+      }
+      log('→ Flutter: action=' + action + ' payload=' + JSON.stringify(payload || {}));
+      return window.flutter_inappwebview.callHandler('AppBridge', {
+        action: action,
+        payload: payload || {}
+      }).then(function(result) {
+        log('← Flutter: ' + JSON.stringify(result));
+        return result;
+      }).catch(function(err) {
+        log('← ERROR: ' + err);
+        throw err;
+      });
+    }
+
+    window.addEventListener('flutterReady', function() {
+      renderParams();
+      log('收到 flutterReady 事件');
+    });
+
+    // 兜底：部分平台注入略慢
+    setTimeout(renderParams, 500);
+    setTimeout(renderParams, 1500);
+
+    function sendToast() {
+      callBridge('showToast', { text: 'Hello from H5 @ ' + new Date().toLocaleTimeString() });
+    }
+
+    function getUserInfo() {
+      callBridge('getUserInfo', {}).then(function(res) {
+        if (res && res.ok) {
+          alert(res.loggedIn
+            ? '已登录: ' + res.name + ' (id=' + res.userId + ')'
+            : '未登录');
+        }
+      });
+    }
+
+    function refreshDashboard() {
+      callBridge('refreshDashboard', {});
+    }
+
+    function getEnvironment() {
+      callBridge('getEnvironment', {}).then(function(res) {
+        if (res && res.ok) {
+          alert('当前环境: ' + res.label + '\nbaseUrl: ' + res.baseUrl);
+        }
+      });
+    }
+
+    function switchEnvironment() {
+      callBridge('switchEnvironment', { env: 'staging' }).then(function(res) {
+        if (res && res.ok) {
+          alert('已切换至: ' + res.label);
+        } else {
+          alert('切换失败: ' + (res && res.message || 'unknown'));
+        }
+      });
+    }
+
+    function closePage() {
+      callBridge('closeWithResult', {
+        from: 'test_bridge',
+        message: 'H5 主动关闭',
+        timestamp: Date.now()
+      });
+    }
+  </script>
+</body>
+</html>

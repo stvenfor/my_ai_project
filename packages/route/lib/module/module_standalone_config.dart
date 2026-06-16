@@ -13,6 +13,7 @@ class ModuleStandaloneConfig {
     this.onSetup,
     this.onEnvironmentChanged,
     this.innerAppBuilder,
+    this.extraRoutes,
   });
 
   final bool enableHttpLog;
@@ -34,4 +35,7 @@ class ModuleStandaloneConfig {
 
   /// 在 ScreenUtil 之内追加一层 App builder（如 EasyLoading.init）。
   final Widget Function(BuildContext context, Widget? child)? innerAppBuilder;
+
+  /// 独立运行时额外路由（如 Web 容器 [RoutePath.web]）。
+  final Map<String, WidgetBuilder>? extraRoutes;
 }
