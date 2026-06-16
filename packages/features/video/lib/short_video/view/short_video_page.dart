@@ -4,9 +4,12 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:get/get.dart';
 import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_core/core.dart';
+import 'package:module_route/route/route_path.dart';
 import 'package:module_utils/module_utils.dart';
+import 'package:module_video/short_video/mapper/short_video_player_mapper.dart';
 import 'package:module_video/short_video/mock/short_video_mock_data.dart';
 import 'package:module_video/short_video/model/short_video_models.dart';
+import 'package:module_video/short_video/model/short_video_play_args.dart';
 import 'package:module_video/short_video/widgets/short_video_empty_state.dart';
 import 'package:module_video/short_video/widgets/short_video_item_tile.dart';
 import 'package:module_video/short_video/widgets/short_video_profile_card.dart';
@@ -40,6 +43,26 @@ class _ShortVideoPageState extends State<ShortVideoPage> {
   }
 
   void _toast(String message) => UiKitInitializer.toast(message);
+
+  void _playVideo(ShortVideoItemModel item) {
+    if (item.status == ShortVideoStatus.reviewing) {
+      _toast('视频审核中，暂不可播放');
+      return;
+    }
+    if (item.status == ShortVideoStatus.uploading) {
+      _toast('视频上传中，请稍后再试');
+      return;
+    }
+
+    final index = ShortVideoPlayerMapper.indexForModelId(
+      ShortVideoMockData.listItems,
+      item.id ?? '',
+    );
+    Get.toNamed(
+      RoutePath.shortVideoPlay,
+      arguments: ShortVideoPlayArgs(initialIndex: index),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -108,7 +131,7 @@ class _ShortVideoPageState extends State<ShortVideoPage> {
                     }
                     return ShortVideoItemTile(
                       item: item,
-                      onTap: () => _toast('播放小视频（开发中）'),
+                      onTap: () => _playVideo(item),
                       onLongPress: () => _toast('长按删除（开发中）'),
                     );
                   },

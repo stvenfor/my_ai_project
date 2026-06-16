@@ -5,7 +5,7 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.0.3 <4.0.0'
+  sdk: '>=3.9.2 <4.0.0'
 
 dependencies:
   flutter:
@@ -68,3 +68,5 @@ flutter:
 
 dependency_overrides:
   rxdart: ^0.27.7
+  # Flutter 3.35.x iOS 嵌入层暂无 FlutterSceneLifeCycleDelegate，锁定 federated 实现版本。
+  screen_brightness_ios: 2.1.2

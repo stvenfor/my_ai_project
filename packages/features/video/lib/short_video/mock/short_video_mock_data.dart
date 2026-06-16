@@ -12,6 +12,15 @@ class ShortVideoMockData {
     'https://picsum.photos/seed/sv6/400/360',
   ];
 
+  static const _demoVideos = [
+    'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+    'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+    'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
+    'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4',
+    'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
+    'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4',
+  ];
+
   static final List<ShortVideoItemModel> listItems = [
     ShortVideoItemModel(type: ShortVideoCellType.publish, aspectRatio: 1.45),
     ShortVideoItemModel(
@@ -19,6 +28,7 @@ class ShortVideoMockData {
       id: '1',
       title: '吉利星越2021款全新到店吉越...',
       coverUrl: _covers[0],
+      videoUrl: _demoVideos[0],
       viewCount: 5467,
       duration: '12:30',
       aspectRatio: 1.3,
@@ -29,6 +39,7 @@ class ShortVideoMockData {
       id: '2',
       title: '吉利星越2021款全新到店吉越...',
       coverUrl: _covers[1],
+      videoUrl: _demoVideos[1],
       viewCount: 5467,
       duration: '12:30',
       aspectRatio: 0.75,
@@ -38,6 +49,7 @@ class ShortVideoMockData {
       id: '3',
       title: '吉利星越2021款全新到店吉越...',
       coverUrl: _covers[2],
+      videoUrl: _demoVideos[2],
       viewCount: 5467,
       duration: '12:30',
       aspectRatio: 1.15,
@@ -48,6 +60,7 @@ class ShortVideoMockData {
       id: '4',
       title: '吉利星越2021款全新到店吉越...',
       coverUrl: _covers[3],
+      videoUrl: _demoVideos[3],
       viewCount: 5467,
       duration: '12:30',
       aspectRatio: 0.85,
@@ -57,6 +70,7 @@ class ShortVideoMockData {
       id: '5',
       title: '吉利星越2021款全新到店吉越...',
       coverUrl: _covers[4],
+      videoUrl: _demoVideos[4],
       viewCount: 5467,
       duration: '12:30',
       aspectRatio: 1.25,
@@ -66,6 +80,7 @@ class ShortVideoMockData {
       id: '6',
       title: '吉利星越2021款全新到店吉越...',
       coverUrl: _covers[5],
+      videoUrl: _demoVideos[5],
       viewCount: 5467,
       duration: '12:30',
       aspectRatio: 0.9,

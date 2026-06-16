@@ -23,6 +23,7 @@ class RoutePath{
   static const String settings = '/settings';
   static const String video = '/video';
   static const String shortVideo = '/video/short';
+  static const String shortVideoPlay = '/video/short/play';
 
   /// 通用 Web 容器页（[AppWebViewPage]），通过 Get.arguments 传入 [WebPageConfig]。
   static const String web = '/web';
