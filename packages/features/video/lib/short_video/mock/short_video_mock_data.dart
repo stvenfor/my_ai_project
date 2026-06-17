@@ -1,5 +1,7 @@
+import 'package:module_utils/player/mock/video_mock_sources.dart';
 import 'package:module_video/short_video/model/short_video_models.dart';
 
+/// 小视频列表 Mock（映射 [kVideoMockSources]，业务接入后替换为 Repository）。
 class ShortVideoMockData {
   ShortVideoMockData._();
 
@@ -12,78 +14,46 @@ class ShortVideoMockData {
     'https://picsum.photos/seed/sv6/400/360',
   ];
 
-  static const _demoVideos = [
-    'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
-    'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
-    'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
-    'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4',
-    'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
-    'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4',
-  ];
-
   static final List<ShortVideoItemModel> listItems = [
     ShortVideoItemModel(type: ShortVideoCellType.publish, aspectRatio: 1.45),
-    ShortVideoItemModel(
-      type: ShortVideoCellType.video,
+    _videoItem(
       id: '1',
-      title: '吉利星越2021款全新到店吉越...',
-      coverUrl: _covers[0],
-      videoUrl: _demoVideos[0],
-      viewCount: 5467,
-      duration: '12:30',
+      sourceIndex: 0,
+      coverIndex: 0,
       aspectRatio: 1.3,
       status: ShortVideoStatus.reviewing,
     ),
-    ShortVideoItemModel(
-      type: ShortVideoCellType.video,
-      id: '2',
-      title: '吉利星越2021款全新到店吉越...',
-      coverUrl: _covers[1],
-      videoUrl: _demoVideos[1],
-      viewCount: 5467,
-      duration: '12:30',
-      aspectRatio: 0.75,
-    ),
-    ShortVideoItemModel(
-      type: ShortVideoCellType.video,
+    _videoItem(id: '2', sourceIndex: 0, coverIndex: 1, aspectRatio: 0.75),
+    _videoItem(
       id: '3',
-      title: '吉利星越2021款全新到店吉越...',
-      coverUrl: _covers[2],
-      videoUrl: _demoVideos[2],
-      viewCount: 5467,
-      duration: '12:30',
+      sourceIndex: 1,
+      coverIndex: 2,
       aspectRatio: 1.15,
       status: ShortVideoStatus.uploading,
     ),
-    ShortVideoItemModel(
-      type: ShortVideoCellType.video,
-      id: '4',
-      title: '吉利星越2021款全新到店吉越...',
-      coverUrl: _covers[3],
-      videoUrl: _demoVideos[3],
-      viewCount: 5467,
-      duration: '12:30',
-      aspectRatio: 0.85,
-    ),
-    ShortVideoItemModel(
-      type: ShortVideoCellType.video,
-      id: '5',
-      title: '吉利星越2021款全新到店吉越...',
-      coverUrl: _covers[4],
-      videoUrl: _demoVideos[4],
-      viewCount: 5467,
-      duration: '12:30',
-      aspectRatio: 1.25,
-    ),
-    ShortVideoItemModel(
-      type: ShortVideoCellType.video,
-      id: '6',
-      title: '吉利星越2021款全新到店吉越...',
-      coverUrl: _covers[5],
-      videoUrl: _demoVideos[5],
-      viewCount: 5467,
-      duration: '12:30',
-      aspectRatio: 0.9,
-    ),
+    _videoItem(id: '4', sourceIndex: 1, coverIndex: 3, aspectRatio: 0.85),
+    _videoItem(id: '5', sourceIndex: 2, coverIndex: 4, aspectRatio: 1.25),
+    _videoItem(id: '6', sourceIndex: 2, coverIndex: 5, aspectRatio: 0.9),
   ];
+
+  static ShortVideoItemModel _videoItem({
+    required String id,
+    required int sourceIndex,
+    required int coverIndex,
+    required double aspectRatio,
+    ShortVideoStatus status = ShortVideoStatus.normal,
+  }) {
+    final source = videoMockSourceAt(sourceIndex);
+    return ShortVideoItemModel(
+      type: ShortVideoCellType.video,
+      id: id,
+      title: source.title,
+      coverUrl: _covers[coverIndex],
+      videoUrl: source.url,
+      viewCount: 5467,
+      duration: '12:30',
+      aspectRatio: aspectRatio,
+      status: status,
+    );
+  }
 }

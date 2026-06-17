@@ -39,6 +39,7 @@ class _ShortVideoFeedViewState extends State<ShortVideoFeedView>
   late final VideoNetworkWatcher _networkWatcher;
 
   int _currentIndex = 0;
+  int? _landscapeIndex;
   Duration _lastPosition = Duration.zero;
   String? _lastUrl;
   bool _wasPlaying = false;
@@ -190,6 +191,48 @@ class _ShortVideoFeedViewState extends State<ShortVideoFeedView>
     if (mounted) setState(() {});
   }
 
+  Future<void> _openLandscape(
+    BuildContext context,
+    int index,
+    ShortVideoItem item,
+  ) async {
+    var controller = _pool.controllerAt(index);
+    if (controller == null || !_pool.isInitialized(index)) {
+      controller = await _pool.prepare(index, item.url);
+    }
+    if (controller == null || !controller.value.isInitialized) {
+      widget.onPlaybackEvent?.call(
+        PlaybackEvent(
+          type: PlaybackEventType.error,
+          index: index,
+          itemId: item.id,
+          message: '视频尚未就绪，请稍后再试',
+        ),
+      );
+      return;
+    }
+
+    setState(() => _landscapeIndex = index);
+    _notifyTick();
+
+    try {
+      await ShortVideoLandscapePage.open(
+        context,
+        item: item,
+        controller: controller,
+      );
+    } finally {
+      if (!mounted) return;
+      setState(() => _landscapeIndex = null);
+      _notifyTick();
+      if (index == _currentIndex &&
+          controller.value.isInitialized &&
+          !controller.value.isPlaying) {
+        await controller.play();
+      }
+    }
+  }
+
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
@@ -225,18 +268,15 @@ class _ShortVideoFeedViewState extends State<ShortVideoFeedView>
               isActive: index == _currentIndex,
               controller: controller,
               initialized: initialized,
+              hideVideoSurface: _landscapeIndex == index,
               danmakuItems: widget.danmakuItems,
               overlayBuilder: widget.overlayBuilder,
               onDoubleTapLike: () => widget.onDoubleTapLike?.call(index),
               onPlaybackEvent: widget.onPlaybackEvent,
               onTogglePlayPause: _togglePlayPause,
-              onRequestFullscreen: controller == null
-                  ? null
-                  : () => ShortVideoLandscapePage.open(
-                        context,
-                        item: item,
-                        controller: controller,
-                      ),
+              onRequestFullscreen: index == _currentIndex
+                  ? () => _openLandscape(context, index, item)
+                  : null,
             );
           },
         );

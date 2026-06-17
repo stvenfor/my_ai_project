@@ -8,7 +8,14 @@ class ShortVideoPlayerMapper {
   static List<ShortVideoItemModel> playableItems(
     List<ShortVideoItemModel> items,
   ) {
-    return items.where((item) => !item.isPublish).toList();
+    return items
+        .where(
+          (item) =>
+              !item.isPublish &&
+              item.status == ShortVideoStatus.normal &&
+              (item.videoUrl?.isNotEmpty ?? false),
+        )
+        .toList();
   }
 
   static List<ShortVideoItem> toPlayerItems(List<ShortVideoItemModel> items) {
@@ -16,13 +23,12 @@ class ShortVideoPlayerMapper {
         .map(
           (item) => ShortVideoItem(
             id: item.id ?? '',
-            url: item.videoUrl ?? '',
+            url: item.videoUrl!,
             coverUrl: item.coverUrl,
             title: item.title,
             aspectRatio: item.aspectRatio,
           ),
         )
-        .where((item) => item.url.isNotEmpty)
         .toList();
   }
 

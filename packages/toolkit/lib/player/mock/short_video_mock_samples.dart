@@ -1,3 +1,4 @@
+import 'package:module_utils/player/mock/video_mock_sources.dart';
 import 'package:module_utils/player/models/short_video_models.dart';
 
 /// P0 演示数据（业务可替换为接口数据）。
@@ -11,26 +12,12 @@ class ShortVideoMockSamples {
   ];
 
   static final List<ShortVideoItem> feedItems = [
-    ShortVideoItem(
-      id: 'demo_1',
-      url:
-          'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
-      coverUrl: _covers[0],
-      title: '吉利星越2021款全新到店',
-    ),
-    ShortVideoItem(
-      id: 'demo_2',
-      url:
-          'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
-      coverUrl: _covers[1],
-      title: '到店试驾体验',
-    ),
-    ShortVideoItem(
-      id: 'demo_3',
-      url:
-          'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
-      coverUrl: _covers[2],
-      title: '展厅实拍',
-    ),
+    for (var i = 0; i < kVideoMockSources.length; i++)
+      ShortVideoItem(
+        id: 'demo_${kVideoMockSources[i].id}',
+        url: kVideoMockSources[i].url,
+        coverUrl: _covers[i],
+        title: kVideoMockSources[i].title,
+      ),
   ];
 }

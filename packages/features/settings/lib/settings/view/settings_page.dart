@@ -1,7 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_core/core.dart';
+import 'package:module_route/route/route_path.dart';
 import 'package:module_settings/settings/viewmodel/settings_viewmodel.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -55,6 +57,26 @@ class _SettingsPageState extends State<SettingsPage> {
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => _showLanguagePicker(config.locale.languageCode),
                 ),
+                if (kDebugMode) ...[
+                  const Divider(height: 24),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                    child: Text(
+                      '开发调试',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  ListTile(
+                    title: const Text('弹框调度示例'),
+                    subtitle: const Text('样式、优先级队列、清空/取消待展示'),
+                    trailing: const Icon(Icons.chevron_right_rounded),
+                    onTap: () => Get.toNamed(RoutePath.dialogDemo),
+                  ),
+                ],
               ],
             ),
     );

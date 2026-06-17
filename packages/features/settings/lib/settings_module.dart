@@ -9,6 +9,7 @@ import 'package:module_settings/mine/api/mine_http_config.dart';
 import 'package:module_settings/mine/view/mine_http_test_page.dart';
 import 'package:module_settings/mine/view/mine_page.dart';
 import 'package:module_settings/settings/settings_binding.dart';
+import 'package:module_settings/settings/view/dialog_demo_page.dart';
 import 'package:module_settings/settings/view/settings_page.dart';
 
 class SettingsModule extends FeatureModule {
@@ -33,6 +34,7 @@ class SettingsModule extends FeatureModule {
         RoutePath.mine: (_) => const MinePage(),
         RoutePath.mineHttpTest: (_) => const MineHttpTestPage(),
         RoutePath.settings: (_) => const SettingsPage(),
+        RoutePath.dialogDemo: (_) => const DialogDemoPage(),
       };
 
   @override

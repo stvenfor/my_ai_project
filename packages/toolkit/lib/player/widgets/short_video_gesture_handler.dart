@@ -85,7 +85,7 @@ class _ShortVideoGestureHandlerState extends State<ShortVideoGestureHandler> {
     return Stack(
       children: [
         GestureDetector(
-          behavior: HitTestBehavior.opaque,
+          behavior: HitTestBehavior.translucent,
           onTapUp: widget.enabled ? (_) => _handleTapUp() : null,
           onLongPressStart: widget.enabled ? (_) => _onLongPressStart() : null,
           onLongPressEnd: widget.enabled ? (_) => _onLongPressEnd() : null,
@@ -96,6 +96,7 @@ class _ShortVideoGestureHandlerState extends State<ShortVideoGestureHandler> {
           onHorizontalDragStart: widget.enabled ? _onHorizontalDragStart : null,
           onHorizontalDragUpdate: widget.enabled ? _onHorizontalDragUpdate : null,
           onHorizontalDragEnd: widget.enabled ? _onHorizontalDragEnd : null,
+          child: const SizedBox.expand(),
         ),
         if (_showProgress) _ProgressOverlay(progress: _dragProgress),
         if (_brightness != null) _SideHud(icon: Icons.brightness_6, value: _brightness!),

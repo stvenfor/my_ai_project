@@ -2,6 +2,7 @@ library module_utils;
 
 export 'config/module_utils_config.dart';
 export 'player/mock/short_video_mock_samples.dart';
+export 'player/mock/video_mock_sources.dart';
 export 'player/models/short_video_models.dart';
 export 'player/short_video_player_kit.dart';
 export 'player/widgets/short_video_feed_view.dart';

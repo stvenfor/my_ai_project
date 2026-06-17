@@ -16,6 +16,7 @@ class ShortVideoPageCell extends StatefulWidget {
     required this.isActive,
     required this.controller,
     required this.initialized,
+    this.hideVideoSurface = false,
     this.danmakuItems,
     this.overlayBuilder,
     this.onDoubleTapLike,
@@ -29,6 +30,7 @@ class ShortVideoPageCell extends StatefulWidget {
   final bool isActive;
   final VideoPlayerController? controller;
   final bool initialized;
+  final bool hideVideoSurface;
   final List<DanmakuMockItem>? danmakuItems;
   final ShortVideoOverlayBuilder? overlayBuilder;
   final VoidCallback? onDoubleTapLike;
@@ -80,27 +82,29 @@ class _ShortVideoPageCellState extends State<ShortVideoPageCell> {
   @override
   Widget build(BuildContext context) {
     final controller = widget.controller;
-    final videoReady = widget.initialized && controller != null;
+    final showSurface =
+        widget.initialized && controller != null && !widget.hideVideoSurface;
+    final activeController = showSurface ? controller : null;
 
     return Container(
       color: Colors.black,
       child: Stack(
         fit: StackFit.expand,
         children: [
-          if (!videoReady)
+          if (activeController == null)
             _Cover(item: widget.item)
           else
             FittedBox(
               fit: BoxFit.cover,
               child: SizedBox(
-                width: controller.value.size.width,
-                height: controller.value.size.height,
-                child: AppVideoPlayer.view(controller, fit: BoxFit.cover),
+                width: activeController.value.size.width,
+                height: activeController.value.size.height,
+                child: AppVideoPlayer.view(activeController, fit: BoxFit.cover),
               ),
             ),
-          if (videoReady)
+          if (activeController != null)
             ShortVideoGestureHandler(
-              controller: controller,
+              controller: activeController,
               enabled: widget.isActive,
               onSingleTap: () async {
                 await widget.onTogglePlayPause?.call();
@@ -119,7 +123,9 @@ class _ShortVideoPageCellState extends State<ShortVideoPageCell> {
               },
             ),
           DanmakuMockLayer(items: widget.danmakuItems ?? const []),
-          if (_showPauseIcon && videoReady && !controller.value.isPlaying)
+          if (_showPauseIcon &&
+              activeController != null &&
+              !activeController.value.isPlaying)
             Center(
               child: Icon(
                 Icons.play_circle_fill,
@@ -133,16 +139,42 @@ class _ShortVideoPageCellState extends State<ShortVideoPageCell> {
             ),
           if (widget.overlayBuilder != null)
             widget.overlayBuilder!(context, widget.index, widget.item),
-          Positioned(
-            right: 12,
-            bottom: 100,
-            child: IconButton(
-              onPressed: widget.onRequestFullscreen,
-              icon: const Icon(Icons.screen_rotation, color: Colors.white70),
-              tooltip: '横屏全屏',
+          if (widget.isActive)
+            Positioned(
+              right: 8,
+              bottom: 96,
+              child: _FullscreenButton(
+                enabled: widget.onRequestFullscreen != null,
+                onPressed: widget.onRequestFullscreen,
+              ),
             ),
-          ),
         ],
+      ),
+    );
+  }
+}
+
+class _FullscreenButton extends StatelessWidget {
+  const _FullscreenButton({
+    required this.enabled,
+    required this.onPressed,
+  });
+
+  final bool enabled;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.black45,
+      borderRadius: BorderRadius.circular(24),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(24),
+        onTap: enabled ? onPressed : null,
+        child: const Padding(
+          padding: EdgeInsets.all(10),
+          child: Icon(Icons.screen_rotation, color: Colors.white, size: 26),
+        ),
       ),
     );
   }

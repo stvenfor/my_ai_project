@@ -21,6 +21,7 @@ class RoutePath{
   static const String mine = '/mine';
   static const String mineHttpTest = '/mine/http_test';
   static const String settings = '/settings';
+  static const String dialogDemo = '/settings/dialog_demo';
   static const String video = '/video';
   static const String shortVideo = '/video/short';
   static const String shortVideoPlay = '/video/short/play';

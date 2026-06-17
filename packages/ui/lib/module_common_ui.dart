@@ -2,6 +2,10 @@ library module_common_ui;
 
 export 'base/base_viewmodel.dart';
 export 'config/app_config_controller.dart';
+export 'dialog/app_dialog_manager.dart';
+export 'dialog/confirm_dialog.dart';
+export 'dialog/dialog_priority.dart';
+export 'dialog/general_dialog.dart';
 export 'kit/app_refresh_view.dart';
 export 'kit/ui_kit_config.dart';
 export 'kit/ui_kit_initializer.dart';
