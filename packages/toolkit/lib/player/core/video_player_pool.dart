@@ -16,6 +16,7 @@ class _PoolSlot {
   final int generation;
   bool initialized = false;
   bool disposed = false;
+  String? errorMessage;
 }
 
 /// 播放器池：保留当前页及相邻页，仅 initialize 预加载，不自动 play。
@@ -34,6 +35,13 @@ class VideoPlayerPool {
   bool isInitialized(int index) =>
       _slots[index]?.initialized == true && _slots[index]?.disposed == false;
 
+  String? errorAt(int index) => _slots[index]?.errorMessage;
+
+  void clearError(int index) {
+    final slot = _slots[index];
+    if (slot != null) slot.errorMessage = null;
+  }
+
   /// 预加载或获取指定 index 的控制器（不播放）。
   Future<VideoPlayerController?> prepare(int index, String url) async {
     final existing = _slots[index];
@@ -47,7 +55,10 @@ class VideoPlayerPool {
     await _disposeSlot(index);
 
     final gen = ++_generation;
-    final controller = VideoPlayerController.networkUrl(Uri.parse(url));
+    final controller = VideoPlayerController.networkUrl(
+      Uri.parse(url),
+      videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
+    );
     final slot = _PoolSlot(
       index: index,
       url: url,
@@ -65,13 +76,17 @@ class VideoPlayerPool {
 
   Future<void> _initializeSlot(_PoolSlot slot) async {
     if (slot.initialized || slot.disposed) return;
+    slot.errorMessage = null;
     try {
       await slot.controller.initialize();
       await slot.controller.setLooping(true);
-      await slot.controller.setVolume(0);
+      if (_activeIndex != slot.index) {
+        await slot.controller.setVolume(0);
+      }
       slot.initialized = true;
-    } catch (_) {
+    } catch (e) {
       slot.initialized = false;
+      slot.errorMessage = e.toString();
       rethrow;
     }
   }

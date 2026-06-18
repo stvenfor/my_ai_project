@@ -57,6 +57,12 @@ class _SettingsPageState extends State<SettingsPage> {
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => _showLanguagePicker(config.locale.languageCode),
                 ),
+                ListTile(
+                  title: const Text('蓝牙连接示例'),
+                  subtitle: const Text('BLE 扫描、连接、服务发现'),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () => Get.toNamed(RoutePath.bluetoothDemo),
+                ),
                 if (kDebugMode) ...[
                   const Divider(height: 24),
                   Padding(
@@ -75,6 +81,24 @@ class _SettingsPageState extends State<SettingsPage> {
                     subtitle: const Text('样式、优先级队列、清空/取消待展示'),
                     trailing: const Icon(Icons.chevron_right_rounded),
                     onTap: () => Get.toNamed(RoutePath.dialogDemo),
+                  ),
+                  ListTile(
+                    title: const Text('链接与推送调试'),
+                    subtitle: const Text('Mock Deeplink / 前台 Push Banner'),
+                    trailing: const Icon(Icons.chevron_right_rounded),
+                    onTap: () => Get.toNamed(RoutePath.linkingDebug),
+                  ),
+                  ListTile(
+                    title: const Text('Realtime / WebSocket 调试'),
+                    subtitle: const Text('连接状态、Mock 信令、离线队列'),
+                    trailing: const Icon(Icons.chevron_right_rounded),
+                    onTap: () => Get.toNamed(RoutePath.realtimeDebug),
+                  ),
+                  ListTile(
+                    title: const Text('融云 IM 调试'),
+                    subtitle: const Text('imUserId、连接态、备份队列'),
+                    trailing: const Icon(Icons.chevron_right_rounded),
+                    onTap: () => Get.toNamed(RoutePath.imDebug),
                   ),
                 ],
               ],

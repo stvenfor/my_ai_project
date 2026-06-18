@@ -1,0 +1,31 @@
+name: module_linking
+description: Deeplink + JPush linking infrastructure for flutter_module_sample.
+publish_to: 'none'
+version: 0.0.1
+
+environment:
+  sdk: '>=3.0.3 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  get: ^4.7.3
+  module_auth:
+    path: ../../features/auth
+  module_common_ui:
+    path: ../../ui
+  module_core:
+    path: ../../core
+  module_route:
+    path: ../../route
+  module_utils:
+    path: ../../toolkit
+  module_global_cache:
+    path: ../../storage
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:

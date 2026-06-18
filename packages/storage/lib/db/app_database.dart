@@ -8,7 +8,7 @@ class AppDatabase {
   static Database? _database;
 
   static const _dbName = 'module_sample.db';
-  static const _dbVersion = 1;
+  static const _dbVersion = 2;
 
   static Future<AppDatabase> init() async {
     _instance ??= AppDatabase._();
@@ -39,14 +39,13 @@ class AppDatabase {
       path,
       version: _dbVersion,
       onCreate: (db, version) async {
-        await db.execute('''
-          CREATE TABLE cache_entries (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            cache_key TEXT NOT NULL UNIQUE,
-            cache_value TEXT NOT NULL,
-            updated_at INTEGER NOT NULL
-          )
-        ''');
+        await _createV1(db);
+        await _createV2(db);
+      },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          await _createV2(db);
+        }
       },
     );
   }
@@ -72,5 +71,86 @@ class AppDatabase {
     );
     if (rows.isEmpty) return null;
     return rows.first['cache_value'] as String?;
+  }
+
+  static Future<void> _createV1(Database db) async {
+    await db.execute('''
+      CREATE TABLE cache_entries (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        cache_key TEXT NOT NULL UNIQUE,
+        cache_value TEXT NOT NULL,
+        updated_at INTEGER NOT NULL
+      )
+    ''');
+  }
+
+  static Future<void> _createV2(Database db) async {
+    await db.execute('''
+      CREATE TABLE ws_outbound_queue (
+        message_id TEXT PRIMARY KEY,
+        topic TEXT NOT NULL,
+        event_name TEXT NOT NULL,
+        payload_json TEXT NOT NULL,
+        status TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL
+      )
+    ''');
+  }
+
+  Future<void> upsertOutbound({
+    required String messageId,
+    required String topic,
+    required String eventName,
+    required String payloadJson,
+    required String status,
+  }) async {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    await database.insert(
+      'ws_outbound_queue',
+      {
+        'message_id': messageId,
+        'topic': topic,
+        'event_name': eventName,
+        'payload_json': payloadJson,
+        'status': status,
+        'created_at': now,
+        'updated_at': now,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<void> updateOutboundStatus(String messageId, String status) async {
+    await database.update(
+      'ws_outbound_queue',
+      {
+        'status': status,
+        'updated_at': DateTime.now().millisecondsSinceEpoch,
+      },
+      where: 'message_id = ?',
+      whereArgs: [messageId],
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> pendingOutbound() async {
+    return database.query(
+      'ws_outbound_queue',
+      where: 'status IN (?, ?)',
+      whereArgs: ['pending', 'sent'],
+      orderBy: 'created_at ASC',
+    );
+  }
+
+  Future<void> deleteOutbound(String messageId) async {
+    await database.delete(
+      'ws_outbound_queue',
+      where: 'message_id = ?',
+      whereArgs: [messageId],
+    );
+  }
+
+  Future<void> clearOutbound() async {
+    await database.delete('ws_outbound_queue');
   }
 }

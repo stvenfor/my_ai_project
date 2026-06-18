@@ -1,17 +1,18 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:module_chat/chat/models/chat_custom_message_types.dart';
 import 'package:module_chat/chat/models/conversation_model.dart';
 import 'package:module_chat/chat/models/message_model.dart';
 import 'package:module_chat/chat/models/message_read_status.dart';
 import 'package:module_chat/chat/models/message_send_status.dart';
 import 'package:module_chat/chat/models/message_type.dart';
 import 'package:module_chat/chat/repository/chat_repository.dart';
-import 'package:module_chat/chat/repository/mock_chat_repository.dart';
+import 'package:module_chat/chat/repository/im_chat_repository.dart';
 import 'package:module_common_ui/module_common_ui.dart';
+import 'package:module_core/model/im/conversation_ref.dart';
 import 'package:module_utils/module_utils.dart';
 
 enum InputPanelMode { text, voice, emoji, more }
@@ -20,10 +21,12 @@ class ChatDetailViewModel extends GetxController {
   ChatDetailViewModel({
     required this.conversation,
     ChatRepository? repository,
-  }) : _repository = repository ?? MockChatRepository.instance;
+  }) : _repository = repository ?? resolveChatRepository();
 
   final ConversationModel conversation;
   final ChatRepository _repository;
+
+  ConversationRef get _ref => conversation.ref;
 
   final messages = <MessageModel>[].obs;
   final inputText = ''.obs;
@@ -34,12 +37,11 @@ class ChatDetailViewModel extends GetxController {
   final recordDurationSeconds = 0.obs;
 
   final scrollController = ScrollController();
-  Timer? _mockReplyTimer;
+  StreamSubscription<List<MessageModel>>? _msgSub;
   Timer? _voicePlayTimer;
   Timer? _recordTimer;
   int _voiceAnimFrame = 0;
   final voiceAnimFrame = 0.obs;
-  int _messageSeq = 0;
 
   static const recallWindowMinutes = 3;
   static const emojiList = [
@@ -50,44 +52,26 @@ class ChatDetailViewModel extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _loadMessages();
-    _scheduleMockReply();
-  }
-
-  Future<void> _loadMessages() async {
-    isLoading.value = true;
-    try {
-      final list = await _repository.fetchMessages(conversation.id);
+    _msgSub = _repository.watchMessages(_ref).listen((list) {
       messages.assignAll(list);
-      await _markPeerMessagesRead();
-    } finally {
-      isLoading.value = false;
-    }
+      _scrollToLatest();
+    });
+    _markRead();
   }
 
-  Future<void> _markPeerMessagesRead() async {
-    final unreadIds = messages
-        .where((m) => !m.isSelf && m.readStatus == MessageReadStatus.unread)
-        .map((m) => m.id)
-        .toList();
-    if (unreadIds.isEmpty) return;
-    await _repository.markMessagesRead(conversation.id, unreadIds);
-    for (var i = 0; i < messages.length; i++) {
-      if (unreadIds.contains(messages[i].id)) {
-        messages[i] =
-            messages[i].copyWith(readStatus: MessageReadStatus.read);
-      }
+  Future<void> _markRead() async {
+    try {
+      await _repository.markConversationRead(_ref);
+    } catch (e) {
+      LogUtils.w('[ChatDetail] markRead failed: $e');
     }
   }
 
   void updateInput(String value) => inputText.value = value;
 
   void toggleVoiceInput() {
-    if (inputPanelMode.value == InputPanelMode.voice) {
-      inputPanelMode.value = InputPanelMode.text;
-    } else {
-      inputPanelMode.value = InputPanelMode.voice;
-    }
+    inputPanelMode.value =
+        inputPanelMode.value == InputPanelMode.voice ? InputPanelMode.text : InputPanelMode.voice;
   }
 
   void toggleEmojiPanel() {
@@ -106,11 +90,6 @@ class ChatDetailViewModel extends GetxController {
     inputText.value = '${inputText.value}$emoji';
   }
 
-  String _nextMessageId() {
-    _messageSeq++;
-    return 'local_${DateTime.now().millisecondsSinceEpoch}_$_messageSeq';
-  }
-
   bool _shouldInsertTimeDivider(DateTime createdAt) {
     if (messages.isEmpty) return true;
     final latest = messages.first;
@@ -120,15 +99,17 @@ class ChatDetailViewModel extends GetxController {
 
   void _insertTimeDividerIfNeeded(DateTime createdAt) {
     if (!_shouldInsertTimeDivider(createdAt)) return;
-    final divider = MessageModel(
-      id: _nextMessageId(),
-      conversationId: conversation.id,
-      type: MessageType.time,
-      content: _formatTimeLabel(createdAt),
-      isSelf: false,
-      createdAt: createdAt,
+    messages.insert(
+      0,
+      MessageModel(
+        id: 'time_${createdAt.millisecondsSinceEpoch}',
+        conversationId: conversation.id,
+        type: MessageType.time,
+        content: _formatTimeLabel(createdAt),
+        isSelf: false,
+        createdAt: createdAt,
+      ),
     );
-    messages.insert(0, divider);
   }
 
   String _formatTimeLabel(DateTime time) {
@@ -145,120 +126,48 @@ class ChatDetailViewModel extends GetxController {
   Future<void> sendTextMessage() async {
     final text = inputText.value.trim();
     if (text.isEmpty) return;
-
     inputText.value = '';
     inputPanelMode.value = InputPanelMode.text;
-    await _sendMessage(
-      type: MessageType.text,
-      content: text,
-    );
+    final now = DateTime.now();
+    _insertTimeDividerIfNeeded(now);
+    try {
+      await _repository.sendText(_ref, text);
+    } catch (e) {
+      UiKitInitializer.toastError('发送失败');
+    }
   }
 
   Future<void> sendImageMessage(String imagePath) async {
     inputPanelMode.value = InputPanelMode.text;
-    await _sendMessage(
-      type: MessageType.image,
-      content: imagePath,
-    );
-  }
-
-  Future<void> _sendMessage({
-    required MessageType type,
-    required String content,
-    int voiceDurationSeconds = 0,
-  }) async {
-    final now = DateTime.now();
-    _insertTimeDividerIfNeeded(now);
-
-    final pending = MessageModel(
-      id: _nextMessageId(),
-      conversationId: conversation.id,
-      type: type,
-      content: content,
-      isSelf: true,
-      createdAt: now,
-      sendStatus: MessageSendStatus.sending,
-      readStatus: MessageReadStatus.unread,
-      voiceDurationSeconds: voiceDurationSeconds,
-    );
-    messages.insert(0, pending);
-    _scrollToLatest();
-
+    _insertTimeDividerIfNeeded(DateTime.now());
     try {
-      final saved = await _repository.sendMessage(pending);
-      final index = messages.indexWhere((m) => m.id == pending.id);
-      if (index >= 0) {
-        messages[index] = saved.copyWith(readStatus: MessageReadStatus.read);
-      }
-      // 模拟对方已读
-      Future.delayed(const Duration(seconds: 2), () {
-        final idx = messages.indexWhere((m) => m.id == saved.id);
-        if (idx >= 0) {
-          messages[idx] = messages[idx].copyWith(
-            readStatus: MessageReadStatus.read,
-          );
-        }
-      });
-    } catch (error) {
-      LogUtils.e('[Chat] send failed: $error');
-      final index = messages.indexWhere((m) => m.id == pending.id);
-      if (index >= 0) {
-        messages[index] =
-            messages[index].copyWith(sendStatus: MessageSendStatus.failed);
-      }
-      UiKitInitializer.toastError('发送失败，请重试');
+      await _repository.sendImage(_ref, imagePath);
+    } catch (e) {
+      UiKitInitializer.toastError('图片发送失败');
     }
   }
 
-  Future<void> receiveMessage(MessageModel message) async {
-    _insertTimeDividerIfNeeded(message.createdAt);
-    messages.insert(0, message);
-    _scrollToLatest();
-    await _repository.sendMessage(message);
-  }
-
-  void mockReceiveMessage() {
-    final replies = [
-      '好的，没问题 👌',
-      '收到！',
-      '稍等一下',
-      '哈哈哈',
-      '[自动回复] 我在忙，稍后联系你',
-    ];
-    final text = replies[Random().nextInt(replies.length)];
-    final msg = MessageModel(
-      id: _nextMessageId(),
-      conversationId: conversation.id,
-      type: MessageType.text,
-      content: text,
-      isSelf: false,
-      createdAt: DateTime.now(),
-      readStatus: MessageReadStatus.unread,
-    );
-    receiveMessage(msg);
-  }
-
-  void _scheduleMockReply() {
-    _mockReplyTimer?.cancel();
-    _mockReplyTimer = Timer(const Duration(seconds: 8), () {
-      if (!Get.isRegistered<ChatDetailViewModel>()) return;
-      mockReceiveMessage();
-    });
+  Future<void> sendCustomDemoCard() async {
+    try {
+      await _repository.sendCustom(
+        _ref,
+        ChatCustomMessageTypes.card,
+        {
+          'title': 'Demo 名片',
+          'subtitle': '来自自定义消息',
+        },
+      );
+    } catch (e) {
+      UiKitInitializer.toastError('发送失败');
+    }
   }
 
   void retrySend(MessageModel message) {
     if (message.sendStatus != MessageSendStatus.failed) return;
-    final index = messages.indexWhere((m) => m.id == message.id);
-    if (index < 0) return;
-    messages[index] =
-        messages[index].copyWith(sendStatus: MessageSendStatus.sending);
-    _repository.sendMessage(message).then((saved) {
-      messages[index] = saved.copyWith(readStatus: MessageReadStatus.read);
-    }).catchError((_) {
-      messages[index] =
-          messages[index].copyWith(sendStatus: MessageSendStatus.failed);
-      UiKitInitializer.toastError('重试失败');
-    });
+    if (message.type == MessageType.text) {
+      inputText.value = message.content;
+      sendTextMessage();
+    }
   }
 
   void startRecordVoice() {
@@ -279,13 +188,12 @@ class ChatDetailViewModel extends GetxController {
     isRecordingVoice.value = false;
     recordDurationSeconds.value = 0;
     if (!send || duration < 1) return;
-
     inputPanelMode.value = InputPanelMode.text;
-    await _sendMessage(
-      type: MessageType.voice,
-      content: 'voice_mock',
-      voiceDurationSeconds: duration,
-    );
+    try {
+      await _repository.sendVoice(_ref, 'voice_mock_$duration', duration);
+    } catch (e) {
+      UiKitInitializer.toastError('语音发送失败');
+    }
   }
 
   void toggleVoicePlay(MessageModel message) {
@@ -320,21 +228,18 @@ class ChatDetailViewModel extends GetxController {
   }
 
   Future<void> deleteMessage(MessageModel message) async {
-    await _repository.deleteMessage(conversation.id, message.id);
+    await _repository.deleteMessage(_ref, message.id);
     messages.removeWhere((m) => m.id == message.id);
     UiKitInitializer.toast('已删除');
   }
 
   Future<void> recallMessage(MessageModel message) async {
     if (!message.canRecall) {
-      UiKitInitializer.toast('超过 ${recallWindowMinutes} 分钟，无法撤回');
+      UiKitInitializer.toast('超过 $recallWindowMinutes 分钟，无法撤回');
       return;
     }
     try {
-      final systemMsg =
-          await _repository.recallMessage(conversation.id, message.id);
-      final index = messages.indexWhere((m) => m.id == message.id);
-      if (index >= 0) messages[index] = systemMsg;
+      await _repository.recallMessage(_ref, message.id);
       UiKitInitializer.toast('已撤回');
     } catch (error) {
       UiKitInitializer.toastError('撤回失败');
@@ -369,7 +274,7 @@ class ChatDetailViewModel extends GetxController {
 
   @override
   void onClose() {
-    _mockReplyTimer?.cancel();
+    _msgSub?.cancel();
     _voicePlayTimer?.cancel();
     _recordTimer?.cancel();
     scrollController.dispose();

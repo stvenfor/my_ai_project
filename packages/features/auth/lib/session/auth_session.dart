@@ -8,6 +8,16 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class AuthSession {
   AuthSession._();
 
+  /// 登录成功后回调（Realtime 等基础设施注册）。
+  static Future<void> Function()? onAfterLogin;
+
+  /// 登出完成后回调。
+  static Future<void> Function()? onAfterLogout;
+
+  static Future<void> notifyAfterLogin() async {
+    await onAfterLogin?.call();
+  }
+
   /// 注册全局认证与会话服务（壳工程与独立运行均需调用，幂等）。
   ///
   /// [useMock] 为 true 时使用本地 Mock；为 null 时读取 [SupabaseConfig.useMockAuth]。
@@ -83,10 +93,10 @@ class AuthSession {
   static Future<void> logout() async {
     if (Get.isRegistered<AuthService>()) {
       await Get.find<AuthService>().signOut();
-      return;
+    } else if (Get.isRegistered<UserService>()) {
+      await Get.find<UserService>().clearUser();
     }
-    if (!Get.isRegistered<UserService>()) return;
-    await Get.find<UserService>().clearUser();
+    await onAfterLogout?.call();
   }
 
   static UserService? get maybeService =>

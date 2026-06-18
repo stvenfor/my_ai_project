@@ -1,17 +1,43 @@
 import 'package:module_chat/chat/models/conversation_model.dart';
 import 'package:module_chat/chat/models/message_model.dart';
+import 'package:module_core/model/im/conversation_ref.dart';
 
-/// 聊天数据抽象，后续可替换为 Supabase Realtime / WebSocket 实现。
+/// IM 聊天数据抽象（单聊 Phase0+1；群聊 Phase2 扩展）。
 abstract class ChatRepository {
-  Future<List<ConversationModel>> fetchConversations();
+  Stream<List<ConversationModel>> watchConversations();
 
-  Future<List<MessageModel>> fetchMessages(String conversationId);
+  Future<void> refreshConversations();
 
-  Future<MessageModel> sendMessage(MessageModel message);
+  Stream<List<MessageModel>> watchMessages(ConversationRef ref);
 
-  Future<void> deleteMessage(String conversationId, String messageId);
+  Future<List<MessageModel>> loadHistory(
+    ConversationRef ref, {
+    String? beforeMessageId,
+    int limit = 20,
+  });
 
-  Future<MessageModel> recallMessage(String conversationId, String messageId);
+  Future<MessageModel> sendText(ConversationRef ref, String text);
 
-  Future<void> markMessagesRead(String conversationId, List<String> messageIds);
+  Future<MessageModel> sendImage(ConversationRef ref, String localPath);
+
+  Future<MessageModel> sendVoice(
+    ConversationRef ref,
+    String localPath,
+    int durationSeconds,
+  );
+
+  Future<MessageModel> sendCustom(
+    ConversationRef ref,
+    String customType,
+    Map<String, dynamic> payload,
+  );
+
+  Future<void> recallMessage(ConversationRef ref, String messageId);
+
+  Future<void> deleteMessage(ConversationRef ref, String messageId);
+
+  Future<void> markConversationRead(ConversationRef ref);
+
+  /// 打开单聊（若不存在则创建会话项）。
+  Future<ConversationModel> ensurePrivateConversation(String peerImUserId);
 }

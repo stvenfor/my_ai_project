@@ -136,6 +136,25 @@ class MessageBubble extends StatelessWidget {
           message: message,
           isSelf: message.isSelf,
         ),
+      MessageType.custom => Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                message.customPayload['title']?.toString() ??
+                    message.customType ??
+                    '自定义消息',
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+              if (message.customPayload['subtitle'] != null)
+                Text(
+                  message.customPayload['subtitle'].toString(),
+                  style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
+                ),
+            ],
+          ),
+        ),
       MessageType.time || MessageType.system => const SizedBox.shrink(),
     };
   }

@@ -1,0 +1,23 @@
+[
+  {
+    "id": 1,
+    "title": "海洋 (Oceans)",
+    "desc": "经典测试视频，体积适中，加载速度快。",
+    "url": "http://vjs.zencdn.net/v/oceans.mp4",
+    "category": "自然"
+  },
+  {
+    "id": 2,
+    "title": "大兔子 (Big Buck Bunny)",
+    "desc": "W3School 官方示例，兼容性极佳。",
+    "url": "http://www.w3school.com.cn/example/html5/mov_bbb.mp4",
+    "category": "动画"
+  },
+  {
+    "id": 3,
+    "title": "钢铁之泪 (Tears of Steel)",
+    "desc": "高清演示视频（国内 CDN，非 Google 源）。",
+    "url": "https://sf1-cdn-tos.huoshanstatic.com/obj/media-fe/xgplayer_doc_video/mp4/xgplayer-demo-720p.mp4",
+    "category": "科幻"
+  }
+]

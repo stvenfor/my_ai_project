@@ -160,9 +160,13 @@ class AuthController extends GetxController {
 
     ModuleRegistry.ensureBindings();
     Get.offAllNamed(RoutePath.main);
-    if (redirect != null) {
-      Future.microtask(() => Get.toNamed(redirect));
-    }
+    Future.microtask(() async {
+      if (await LoginRedirect.notifyAfterAuthNavigation()) return;
+      if (redirect != null) {
+        Get.toNamed(redirect);
+      }
+      await AuthSession.notifyAfterLogin();
+    });
   }
 
   Future<void> goToPasswordPage() async {

@@ -16,7 +16,7 @@ class ChatPage extends GetView<ChatViewModel> {
       binding: ChatDetailBinding(conversation),
       transition: Transition.rightToLeft,
       duration: const Duration(milliseconds: 250),
-    )?.then((_) => controller.loadConversations());
+    )?.then((_) => controller.refreshConversations());
   }
 
   @override
@@ -47,7 +47,7 @@ class ChatPage extends GetView<ChatViewModel> {
                 Text(controller.errorMessage.value!),
                 const SizedBox(height: 12),
                 TextButton(
-                  onPressed: controller.loadConversations,
+                  onPressed: controller.refreshConversations,
                   child: const Text('重试'),
                 ),
               ],
@@ -56,7 +56,7 @@ class ChatPage extends GetView<ChatViewModel> {
         }
 
         return RefreshIndicator(
-          onRefresh: controller.loadConversations,
+          onRefresh: controller.refreshConversations,
           child: ListView.separated(
             physics: const AlwaysScrollableScrollPhysics(),
             itemCount: controller.conversations.length,

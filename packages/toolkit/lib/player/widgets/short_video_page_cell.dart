@@ -17,6 +17,8 @@ class ShortVideoPageCell extends StatefulWidget {
     required this.controller,
     required this.initialized,
     this.hideVideoSurface = false,
+    this.errorMessage,
+    this.onRetry,
     this.danmakuItems,
     this.overlayBuilder,
     this.onDoubleTapLike,
@@ -31,6 +33,8 @@ class ShortVideoPageCell extends StatefulWidget {
   final VideoPlayerController? controller;
   final bool initialized;
   final bool hideVideoSurface;
+  final String? errorMessage;
+  final VoidCallback? onRetry;
   final List<DanmakuMockItem>? danmakuItems;
   final ShortVideoOverlayBuilder? overlayBuilder;
   final VoidCallback? onDoubleTapLike;
@@ -47,8 +51,18 @@ class _ShortVideoPageCellState extends State<ShortVideoPageCell> {
   bool _showLikeBurst = false;
 
   @override
+  void initState() {
+    super.initState();
+    widget.controller?.addListener(_onControllerUpdate);
+  }
+
+  @override
   void didUpdateWidget(covariant ShortVideoPageCell oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller?.removeListener(_onControllerUpdate);
+      widget.controller?.addListener(_onControllerUpdate);
+    }
     if (widget.isActive && !oldWidget.isActive) {
       WakelockPlus.enable();
     } else if (!widget.isActive && oldWidget.isActive) {
@@ -56,8 +70,13 @@ class _ShortVideoPageCellState extends State<ShortVideoPageCell> {
     }
   }
 
+  void _onControllerUpdate() {
+    if (mounted) setState(() {});
+  }
+
   @override
   void dispose() {
+    widget.controller?.removeListener(_onControllerUpdate);
     if (widget.isActive) {
       WakelockPlus.disable();
     }
@@ -91,17 +110,12 @@ class _ShortVideoPageCellState extends State<ShortVideoPageCell> {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          if (activeController == null)
+          if (widget.errorMessage != null)
+            _ErrorPanel(message: widget.errorMessage!, onRetry: widget.onRetry)
+          else if (activeController == null)
             _Cover(item: widget.item)
           else
-            FittedBox(
-              fit: BoxFit.cover,
-              child: SizedBox(
-                width: activeController.value.size.width,
-                height: activeController.value.size.height,
-                child: AppVideoPlayer.view(activeController, fit: BoxFit.cover),
-              ),
-            ),
+            AppVideoPlayer.surface(activeController, fit: BoxFit.cover),
           if (activeController != null)
             ShortVideoGestureHandler(
               controller: activeController,
@@ -143,9 +157,12 @@ class _ShortVideoPageCellState extends State<ShortVideoPageCell> {
             Positioned(
               right: 8,
               bottom: 96,
-              child: _FullscreenButton(
-                enabled: widget.onRequestFullscreen != null,
-                onPressed: widget.onRequestFullscreen,
+              child: Material(
+                color: Colors.transparent,
+                child: _FullscreenButton(
+                  enabled: widget.onRequestFullscreen != null,
+                  onPressed: widget.onRequestFullscreen,
+                ),
               ),
             ),
         ],
@@ -194,5 +211,47 @@ class _Cover extends StatelessWidget {
       );
     }
     return CacheImageUtils.network(cover, fit: BoxFit.cover);
+  }
+}
+
+class _ErrorPanel extends StatelessWidget {
+  const _ErrorPanel({required this.message, this.onRetry});
+
+  final String message;
+  final VoidCallback? onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.error_outline, color: Colors.white70, size: 48),
+            const SizedBox(height: 12),
+            Text(
+              '视频加载失败',
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 16),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              message,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12),
+            ),
+            if (onRetry != null) ...[
+              const SizedBox(height: 16),
+              TextButton(
+                onPressed: onRetry,
+                child: const Text('重试'),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
   }
 }

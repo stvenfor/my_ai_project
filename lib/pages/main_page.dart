@@ -4,6 +4,7 @@ import 'package:module_auth/user/binding/auth_binding.dart';
 import 'package:module_auth/user/controller/auth_controller.dart';
 import 'package:module_auth/session/auth_session.dart';
 import 'package:module_common_ui/module_common_ui.dart';
+import 'package:module_linking/navigation/main_tab_controller.dart';
 import 'package:module_route/module/module_registry.dart';
 import 'package:module_route/route/route_path.dart';
 import 'package:module_sample/l10n/app_localizations.dart';
@@ -17,11 +18,32 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   int _currentIndex = 0;
+  Worker? _tabSyncWorker;
 
   @override
   void initState() {
     super.initState();
     ModuleRegistry.ensureBindings();
+    _syncTabFromController();
+  }
+
+  @override
+  void dispose() {
+    _tabSyncWorker?.dispose();
+    super.dispose();
+  }
+
+  void _syncTabFromController() {
+    if (!Get.isRegistered<MainTabController>()) return;
+    final tabController = Get.find<MainTabController>();
+    _currentIndex = tabController.selectedIndex.value;
+    _tabSyncWorker?.dispose();
+    _tabSyncWorker = ever(tabController.switchRevision, (_) {
+      if (!mounted) return;
+      setState(() {
+        _currentIndex = tabController.selectedIndex.value;
+      });
+    });
   }
 
   void _goLogin() {
@@ -37,7 +59,14 @@ class _MainPageState extends State<MainPage> {
       _goLogin();
       return;
     }
+    if (tab.moduleId == 'chat' && !AuthSession.isLoggedIn) {
+      _goLogin();
+      return;
+    }
     setState(() => _currentIndex = index);
+    if (Get.isRegistered<MainTabController>()) {
+      Get.find<MainTabController>().selectedIndex.value = index;
+    }
   }
 
   List<_TabConfig> get _tabs {

@@ -23,18 +23,8 @@ class ShortVideoLandscapePage extends StatefulWidget {
     required ShortVideoItem item,
     required VideoPlayerController controller,
   }) async {
-    if (controller.value.isInitialized && !controller.value.isPlaying) {
-      await controller.play();
-    }
-
-    await SystemChrome.setPreferredOrientations([
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
-    ]);
-    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-
     if (!context.mounted) return;
-    await Navigator.of(context, rootNavigator: true).push(
+    await Navigator.of(context, rootNavigator: true).push<void>(
       MaterialPageRoute<void>(
         fullscreenDialog: true,
         builder: (_) => ShortVideoLandscapePage(
@@ -43,36 +33,53 @@ class ShortVideoLandscapePage extends StatefulWidget {
         ),
       ),
     );
-
-    await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   }
 }
 
 class _ShortVideoLandscapePageState extends State<ShortVideoLandscapePage> {
+  bool _orientationApplied = false;
+
   @override
   void initState() {
     super.initState();
     widget.controller.addListener(_onControllerUpdate);
-    _ensurePlaying();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _enterLandscape());
   }
 
   @override
   void dispose() {
     widget.controller.removeListener(_onControllerUpdate);
+    _exitLandscape();
     super.dispose();
+  }
+
+  Future<void> _enterLandscape() async {
+    if (_orientationApplied) return;
+    _orientationApplied = true;
+
+    if (widget.controller.value.isInitialized && !widget.controller.value.isPlaying) {
+      await widget.controller.play();
+    }
+
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _exitLandscape() async {
+    await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    await SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.manual,
+      overlays: SystemUiOverlay.values,
+    );
   }
 
   void _onControllerUpdate() {
     if (mounted) setState(() {});
-  }
-
-  Future<void> _ensurePlaying() async {
-    final controller = widget.controller;
-    if (!controller.value.isInitialized) return;
-    if (!controller.value.isPlaying) {
-      await controller.play();
-    }
   }
 
   @override
@@ -90,7 +97,9 @@ class _ShortVideoLandscapePageState extends State<ShortVideoLandscapePage> {
               child: CircularProgressIndicator(color: Colors.white54),
             )
           else
-            Center(child: AppVideoPlayer.view(controller, fit: BoxFit.contain)),
+            Center(
+              child: AppVideoPlayer.surface(controller, fit: BoxFit.contain),
+            ),
           SafeArea(
             child: Align(
               alignment: Alignment.topLeft,

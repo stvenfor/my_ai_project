@@ -12,6 +12,10 @@ abstract class EnvironmentService extends GetxService {
 
   String get baseUrl => config.baseUrl;
 
+  String get wsBaseUrl => config.wsBaseUrl;
+
+  String get rongAppKey => config.rongAppKey;
+
   /// 壳工程注册：环境切换后重建 Http 等基础设施。
   EnvChangedHandler? onEnvChanged;
 

@@ -32,10 +32,21 @@ class ShortVideoItemTile extends StatelessWidget {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    CacheImageUtils.network(
-                      item.coverUrl ?? '',
-                      fit: BoxFit.cover,
-                    ),
+                    if (item.coverUrl != null && item.coverUrl!.isNotEmpty)
+                      CacheImageUtils.network(
+                        item.coverUrl!,
+                        fit: BoxFit.cover,
+                      )
+                    else
+                      Container(
+                        color: const Color(0xFF2A2A2A),
+                        alignment: Alignment.center,
+                        child: Icon(
+                          Icons.play_circle_outline,
+                          size: 48.sp,
+                          color: Colors.white54,
+                        ),
+                      ),
                     if (item.status == ShortVideoStatus.uploading)
                       Container(
                         color: Colors.white.withValues(alpha: 0.55),

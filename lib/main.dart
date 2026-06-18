@@ -12,6 +12,10 @@ import 'package:module_route/module/module_registry.dart';
 import 'package:module_sample/app/app.dart';
 import 'package:module_sample/app/app_binding.dart';
 import 'package:module_sample/app/app_controller.dart';
+import 'package:module_linking/linking_binding.dart';
+import 'package:module_linking/linking_initializer.dart';
+import 'package:module_realtime/realtime_initializer.dart';
+import 'package:module_rongcloud_im/im_initializer.dart';
 import 'package:module_sample/config/module_manifest.dart';
 import 'package:module_settings/env/environment_session.dart';
 import 'package:module_utils/module_utils.dart';
@@ -24,6 +28,8 @@ class AppInitializer {
         logTag: 'module_sample',
       ),
     );
+
+    await VideoMockSourceLoader.load();
 
     await SpManager.init();
     await AppDatabase.init();
@@ -67,10 +73,15 @@ class AppInitializer {
     }
 
     AppBinding().dependencies();
+    LinkingBinding().dependencies();
+    await ImInitializer.initDeferred();
     for (final binding in ModuleRegistry.collectBindings()) {
       binding.dependencies();
     }
     await Get.find<AppController>().loadSettings();
+
+    await LinkingInitializer.initDeferred();
+    await RealtimeInitializer.initDeferred();
 
     LogUtils.i(
       '[App] 应用初始化完成 env=${Get.find<EnvironmentService>().config.label}',

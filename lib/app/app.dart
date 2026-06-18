@@ -4,6 +4,8 @@ import 'package:module_sample/l10n/app_localizations.dart';
 import 'package:get/get.dart';
 import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_route/route/route_path.dart';
+import 'package:module_linking/ui/in_app_push_banner_host.dart';
+import 'package:module_realtime/ui/realtime_notify_banner_host.dart';
 import 'package:module_sample/app/app_controller.dart';
 import 'package:module_sample/app/app_pages.dart';
 import 'package:module_utils/module_utils.dart';
@@ -42,7 +44,11 @@ class App extends StatelessWidget {
             getPages: AppPages.routes(),
             builder: UiKitInitializer.appBuilder(
               inner: (context, child) => ModuleUtilsInitializer.wrapApp(
-                builder: (_, __) => child ?? const SizedBox.shrink(),
+                builder: (_, __) => RealtimeNotifyBannerHost(
+                  child: InAppPushBannerHost(
+                    child: child ?? const SizedBox.shrink(),
+                  ),
+                ),
               ),
             ),
           ),

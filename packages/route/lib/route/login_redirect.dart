@@ -4,6 +4,9 @@ class LoginRedirect {
 
   static String? _pendingRoute;
 
+  /// 登录成功后优先执行的导航（如 PendingNavigation flush）。
+  static Future<bool> Function()? onAfterAuthNavigation;
+
   static void setPending(String route) {
     _pendingRoute = route;
   }
@@ -17,4 +20,10 @@ class LoginRedirect {
   }
 
   static void clear() => _pendingRoute = null;
+
+  static Future<bool> notifyAfterAuthNavigation() async {
+    final hook = onAfterAuthNavigation;
+    if (hook == null) return false;
+    return hook();
+  }
 }

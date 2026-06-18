@@ -126,6 +126,7 @@ class _ShortVideoFeedViewState extends State<ShortVideoFeedView>
     if (index < 0 || index >= widget.items.length) return;
     setState(() => _currentIndex = index);
     final item = widget.items[index];
+    _pool.clearError(index);
 
     try {
       await _pool.activate(index, item.url);
@@ -148,6 +149,7 @@ class _ShortVideoFeedViewState extends State<ShortVideoFeedView>
         ),
       );
     } catch (e) {
+      if (mounted) setState(() {});
       widget.onPlaybackEvent?.call(
         PlaybackEvent(
           type: PlaybackEventType.error,
@@ -198,7 +200,11 @@ class _ShortVideoFeedViewState extends State<ShortVideoFeedView>
   ) async {
     var controller = _pool.controllerAt(index);
     if (controller == null || !_pool.isInitialized(index)) {
-      controller = await _pool.prepare(index, item.url);
+      try {
+        controller = await _pool.prepare(index, item.url);
+      } catch (_) {
+        controller = null;
+      }
     }
     if (controller == null || !controller.value.isInitialized) {
       widget.onPlaybackEvent?.call(
@@ -212,8 +218,11 @@ class _ShortVideoFeedViewState extends State<ShortVideoFeedView>
       return;
     }
 
+    if (!mounted) return;
+
+    // 先隐藏竖屏纹理并等一帧，再进横屏，避免 iOS 同 controller 双挂载黑屏。
     setState(() => _landscapeIndex = index);
-    _notifyTick();
+    await WidgetsBinding.instance.endOfFrame;
 
     try {
       await ShortVideoLandscapePage.open(
@@ -225,12 +234,20 @@ class _ShortVideoFeedViewState extends State<ShortVideoFeedView>
       if (!mounted) return;
       setState(() => _landscapeIndex = null);
       _notifyTick();
+      final current = _pool.controllerAt(index);
       if (index == _currentIndex &&
-          controller.value.isInitialized &&
-          !controller.value.isPlaying) {
-        await controller.play();
+          current != null &&
+          current.value.isInitialized &&
+          !current.value.isPlaying) {
+        await current.play();
       }
     }
+  }
+
+  Future<void> _retryIndex(int index) async {
+    if (index < 0 || index >= widget.items.length) return;
+    _pool.clearError(index);
+    await _onPageSettled(index);
   }
 
   @override
@@ -262,6 +279,7 @@ class _ShortVideoFeedViewState extends State<ShortVideoFeedView>
             final item = widget.items[index];
             final controller = _pool.controllerAt(index);
             final initialized = _pool.isInitialized(index);
+            final errorMessage = _pool.errorAt(index);
             return ShortVideoPageCell(
               index: index,
               item: item,
@@ -269,6 +287,8 @@ class _ShortVideoFeedViewState extends State<ShortVideoFeedView>
               controller: controller,
               initialized: initialized,
               hideVideoSurface: _landscapeIndex == index,
+              errorMessage: errorMessage,
+              onRetry: errorMessage != null ? () => _retryIndex(index) : null,
               danmakuItems: widget.danmakuItems,
               overlayBuilder: widget.overlayBuilder,
               onDoubleTapLike: () => widget.onDoubleTapLike?.call(index),

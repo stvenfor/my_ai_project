@@ -9,6 +9,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  get: ^4.7.3
+  module_core:
+    path: ../../core
+  module_realtime:
+    path: ../../infrastructure/realtime
   module_common_ui:
     path: ../../ui
   module_route:

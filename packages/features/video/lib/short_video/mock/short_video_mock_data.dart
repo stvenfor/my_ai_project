@@ -1,59 +1,29 @@
 import 'package:module_utils/player/mock/video_mock_sources.dart';
 import 'package:module_video/short_video/model/short_video_models.dart';
 
-/// 小视频列表 Mock（映射 [kVideoMockSources]，业务接入后替换为 Repository）。
+/// 小视频列表 Mock（严格映射 [video_mock_sources.json]，业务接入后替换为 Repository）。
 class ShortVideoMockData {
   ShortVideoMockData._();
 
-  static const _covers = [
-    'https://picsum.photos/seed/sv1/400/520',
-    'https://picsum.photos/seed/sv2/400/300',
-    'https://picsum.photos/seed/sv3/400/460',
-    'https://picsum.photos/seed/sv4/400/340',
-    'https://picsum.photos/seed/sv5/400/500',
-    'https://picsum.photos/seed/sv6/400/360',
-  ];
+  static const _aspectRatios = [1.3, 0.85, 1.15];
 
-  static final List<ShortVideoItemModel> listItems = [
-    ShortVideoItemModel(type: ShortVideoCellType.publish, aspectRatio: 1.45),
-    _videoItem(
-      id: '1',
-      sourceIndex: 0,
-      coverIndex: 0,
-      aspectRatio: 1.3,
-      status: ShortVideoStatus.reviewing,
-    ),
-    _videoItem(id: '2', sourceIndex: 0, coverIndex: 1, aspectRatio: 0.75),
-    _videoItem(
-      id: '3',
-      sourceIndex: 1,
-      coverIndex: 2,
-      aspectRatio: 1.15,
-      status: ShortVideoStatus.uploading,
-    ),
-    _videoItem(id: '4', sourceIndex: 1, coverIndex: 3, aspectRatio: 0.85),
-    _videoItem(id: '5', sourceIndex: 2, coverIndex: 4, aspectRatio: 1.25),
-    _videoItem(id: '6', sourceIndex: 2, coverIndex: 5, aspectRatio: 0.9),
-  ];
-
-  static ShortVideoItemModel _videoItem({
-    required String id,
-    required int sourceIndex,
-    required int coverIndex,
-    required double aspectRatio,
-    ShortVideoStatus status = ShortVideoStatus.normal,
-  }) {
-    final source = videoMockSourceAt(sourceIndex);
-    return ShortVideoItemModel(
-      type: ShortVideoCellType.video,
-      id: id,
-      title: source.title,
-      coverUrl: _covers[coverIndex],
-      videoUrl: source.url,
-      viewCount: 5467,
-      duration: '12:30',
-      aspectRatio: aspectRatio,
-      status: status,
-    );
+  /// 列表项：发布入口 + JSON 中每条视频各一条（均可播放）。
+  static List<ShortVideoItemModel> get listItems {
+    final sources = kVideoMockSources;
+    return [
+      const ShortVideoItemModel(type: ShortVideoCellType.publish, aspectRatio: 1.45),
+      for (var i = 0; i < sources.length; i++)
+        ShortVideoItemModel(
+          type: ShortVideoCellType.video,
+          id: '${sources[i].id}',
+          title: sources[i].title,
+          coverUrl: null,
+          videoUrl: sources[i].url,
+          viewCount: 1200 + i * 337,
+          duration: '${1 + i}:${10 + i * 5}',
+          aspectRatio: _aspectRatios[i % _aspectRatios.length],
+          status: ShortVideoStatus.normal,
+        ),
+    ];
   }
 }

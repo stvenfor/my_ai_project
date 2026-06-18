@@ -50,6 +50,12 @@ dependencies:
     path: ./packages/infrastructure/supabase
   module_video:
     path: ./packages/features/video
+  module_linking:
+    path: ./packages/infrastructure/linking
+  module_realtime:
+    path: ./packages/infrastructure/realtime
+  module_rongcloud_im:
+    path: ./packages/infrastructure/rongcloud_im
 
 dev_dependencies:
   flutter_test:
@@ -65,6 +71,7 @@ flutter:
     - assets/images/
     - assets/lotties/
     - assets/web/
+    - packages/toolkit/assets/data/video_mock_sources.json
 
 dependency_overrides:
   rxdart: ^0.27.7

@@ -20,6 +20,14 @@ dependencies:
     path: ../../route
   module_utils:
     path: ../../toolkit
+  module_linking:
+    path: ../../infrastructure/linking
+  module_realtime:
+    path: ../../infrastructure/realtime
+  module_rongcloud_im:
+    path: ../../infrastructure/rongcloud_im
+  module_bluetooth:
+    path: ../../infrastructure/bluetooth
 
 dev_dependencies:
   flutter_test:

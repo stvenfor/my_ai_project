@@ -11,13 +11,16 @@ class ShortVideoMockSamples {
     'https://picsum.photos/seed/sv_play_3/400/700',
   ];
 
-  static final List<ShortVideoItem> feedItems = [
-    for (var i = 0; i < kVideoMockSources.length; i++)
-      ShortVideoItem(
-        id: 'demo_${kVideoMockSources[i].id}',
-        url: kVideoMockSources[i].url,
-        coverUrl: _covers[i],
-        title: kVideoMockSources[i].title,
-      ),
-  ];
+  static List<ShortVideoItem> get feedItems {
+    final sources = kVideoMockSources;
+    return [
+      for (var i = 0; i < sources.length; i++)
+        ShortVideoItem(
+          id: 'demo_${sources[i].id}',
+          url: sources[i].url,
+          coverUrl: _covers[i % _covers.length],
+          title: sources[i].title,
+        ),
+    ];
+  }
 }

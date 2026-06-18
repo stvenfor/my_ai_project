@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:module_sample/l10n/app_localizations.dart';
 import 'package:get/get.dart';
 import 'package:module_common_ui/module_common_ui.dart';
+import 'package:module_linking/linking_initializer.dart';
+import 'package:module_linking/privacy/privacy_consent_dialog.dart';
 import 'package:module_route/module/module_registry.dart';
 import 'package:module_route/route/route_path.dart';
 
@@ -19,10 +21,16 @@ class _SplashPageState extends State<SplashPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) => _routeByAuth());
   }
 
-  void _routeByAuth() {
-    // 游客模式：无论是否登录均进入主页，社区 Tab 单独拦截登录。
+  Future<void> _routeByAuth() async {
     ModuleRegistry.ensureBindings();
+
+    final granted = await PrivacyConsentDialog.showIfNeeded(context);
+    if (!mounted) return;
+    if (!granted) return;
+
     Get.offNamed(RoutePath.main);
+    await Future<void>.delayed(const Duration(milliseconds: 150));
+    await LinkingInitializer.flushPendingNavigation();
   }
 
   @override
