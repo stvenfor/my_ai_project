@@ -63,6 +63,12 @@ class _SettingsPageState extends State<SettingsPage> {
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => Get.toNamed(RoutePath.bluetoothDemo),
                 ),
+                ListTile(
+                  title: const Text('新车成交示例'),
+                  subtitle: const Text('悬浮 Tab、下拉刷新、上拉加载更多'),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () => Get.toNamed(RoutePath.dealInvoiceDemo),
+                ),
                 if (kDebugMode) ...[
                   const Divider(height: 24),
                   Padding(

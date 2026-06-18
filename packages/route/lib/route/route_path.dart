@@ -27,6 +27,8 @@ class RoutePath{
   static const String realtimeDebug = '/settings/realtime_debug';
   static const String imDebug = '/settings/im_debug';
   static const String bluetoothDemo = '/settings/bluetooth_demo';
+  static const String dealInvoiceDemo = '/settings/deal_invoice_demo';
+  static const String dealInvoiceUpload = '/settings/deal_invoice/upload';
   static const String video = '/video';
   static const String shortVideo = '/video/short';
   static const String shortVideoPlay = '/video/short/play';
