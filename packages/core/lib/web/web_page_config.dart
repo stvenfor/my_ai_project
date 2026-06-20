@@ -15,6 +15,7 @@ class WebPageConfig {
     this.url,
     this.title,
     this.params = const {},
+    this.bridgeScriptAssetPath,
     this.enableJavaScript = true,
     this.showAppBar = true,
     this.showBackButton = true,
@@ -25,6 +26,7 @@ class WebPageConfig {
     required String assetPath,
     String? title,
     Map<String, dynamic>? params,
+    String? bridgeScriptAssetPath = WebBridgeAssets.icsAppInjection,
     bool enableJavaScript = true,
     bool showAppBar = true,
     bool showBackButton = true,
@@ -34,6 +36,7 @@ class WebPageConfig {
       assetPath: assetPath,
       title: title,
       params: params ?? const {},
+      bridgeScriptAssetPath: bridgeScriptAssetPath,
       enableJavaScript: enableJavaScript,
       showAppBar: showAppBar,
       showBackButton: showBackButton,
@@ -45,6 +48,7 @@ class WebPageConfig {
     required String url,
     String? title,
     Map<String, dynamic>? params,
+    String? bridgeScriptAssetPath = WebBridgeAssets.icsAppInjection,
     bool enableJavaScript = true,
     bool showAppBar = true,
     bool showBackButton = true,
@@ -54,6 +58,7 @@ class WebPageConfig {
       url: url,
       title: title,
       params: params ?? const {},
+      bridgeScriptAssetPath: bridgeScriptAssetPath,
       enableJavaScript: enableJavaScript,
       showAppBar: showAppBar,
       showBackButton: showBackButton,
@@ -65,6 +70,10 @@ class WebPageConfig {
   final String? url;
   final String? title;
   final Map<String, dynamic> params;
+
+  /// 页面加载完成后注入的 JS bridge asset；传 null 可关闭默认注入。
+  final String? bridgeScriptAssetPath;
+
   final bool enableJavaScript;
 
   /// 是否显示 Flutter 导航栏；false 时 H5 全屏（H5 可自带顶栏）。
@@ -81,4 +90,5 @@ class WebBridgeAssets {
   WebBridgeAssets._();
 
   static const testBridge = 'assets/web/test_bridge.html';
+  static const icsAppInjection = 'assets/web/ICSAPPInjection.js';
 }

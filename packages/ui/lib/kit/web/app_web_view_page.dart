@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart' hide WebMessage;
 import 'package:get/get.dart';
 import 'package:module_common_ui/module_common_ui.dart';
@@ -99,7 +100,17 @@ class _AppWebViewPageState extends State<AppWebViewPage> {
   }
 
   Future<void> _onLoadStop(InAppWebViewController controller, WebUri? url) async {
+    await _injectBridgeScript(controller);
     await _injectFlutterParams(controller);
+  }
+
+  Future<void> _injectBridgeScript(InAppWebViewController controller) async {
+    final bridgeScriptAssetPath = widget.config.bridgeScriptAssetPath;
+    if (bridgeScriptAssetPath == null || bridgeScriptAssetPath.isEmpty) {
+      return;
+    }
+    final source = await rootBundle.loadString(bridgeScriptAssetPath);
+    await controller.evaluateJavascript(source: source);
   }
 
   Future<void> _injectFlutterParams(InAppWebViewController controller) async {

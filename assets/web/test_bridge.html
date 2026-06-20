@@ -52,7 +52,7 @@
 </head>
 <body>
   <h1>Flutter ↔ H5 桥接测试</h1>
-  <p class="subtitle">Core 统一注册 + Module 扩展（action 见 WebBridgeActions 常量表）</p>
+  <p class="subtitle">通过 ICSAPPInjection.js 统一调用 Core 与 Module action</p>
 
   <section>
     <h2>Flutter 注入参数 (__FLUTTER_PARAMS__)</h2>
@@ -90,15 +90,12 @@
     }
 
     function callBridge(action, payload) {
-      if (!window.flutter_inappwebview) {
-        log('ERROR: flutter_inappwebview 不可用（请在 App 内打开）');
+      if (!window.ICSJavascriptBridge) {
+        log('ERROR: ICSJavascriptBridge 不可用（请在 App 内打开）');
         return Promise.reject('not in webview');
       }
       log('→ Flutter: action=' + action + ' payload=' + JSON.stringify(payload || {}));
-      return window.flutter_inappwebview.callHandler('AppBridge', {
-        action: action,
-        payload: payload || {}
-      }).then(function(result) {
+      return window.ICSJavascriptBridge.invoke(action, payload || {}).then(function(result) {
         log('← Flutter: ' + JSON.stringify(result));
         return result;
       }).catch(function(err) {

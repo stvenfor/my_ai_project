@@ -500,6 +500,8 @@ Get.toNamed(
     title: 'Web 桥接测试',
     showAppBar: true,
     params: {'storeName': 'xxx'},
+    // 默认注入 WebBridgeAssets.icsAppInjection，通常无需手动配置。
+    // bridgeScriptAssetPath: null, // H5 自带 bridge 时可关闭默认注入。
   ),
 );
 
@@ -532,15 +534,13 @@ registry.registerModule(WebBridgeActions.refreshDashboard, (message) async {
 ### H5 调用约定
 
 ```javascript
-window.flutter_inappwebview.callHandler('AppBridge', {
-  action: 'showToast',  // 对应 WebBridgeActions 常量
-  payload: { text: 'Hello' }
-});
+window.ICSJavascriptBridge.invoke('showToast', { text: 'Hello' });
 ```
 
 Flutter 注入参数：`window.__FLUTTER_PARAMS__`，事件：`flutterReady`。
 
 测试入口：首页 **销售顾问** → `assets/web/test_bridge.html`。
+默认注入脚本：`assets/web/ICSAPPInjection.js`。
 
 ### 替换 flutter_inappwebview
 
