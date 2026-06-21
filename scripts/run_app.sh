@@ -10,6 +10,7 @@ BUILD=false
 BUILD_TARGET=""
 MODE_ARGS=()
 EXTRA_ARGS=()
+ENV_FILE="$ROOT/.env"
 
 usage() {
   cat <<'EOF'
@@ -40,8 +41,48 @@ Release / Profile 模式:
   ./scripts/run_app.sh --build appbundle -r
 
 说明:
-  始终注入 --dart-define-from-file=.env（若文件存在）。
+  始终注入 --dart-define-from-file=.env。
+  首次运行请先执行: cp .env.example .env
 EOF
+}
+
+find_flutter() {
+  if [[ -n "${FLUTTER_BIN:-}" ]]; then
+    echo "$FLUTTER_BIN"
+  elif [[ -x "$ROOT/.fvm/flutter_sdk/bin/flutter" ]]; then
+    echo "$ROOT/.fvm/flutter_sdk/bin/flutter"
+  elif [[ -x "/Users/stvenfor/fvm/default/bin/flutter" ]]; then
+    echo "/Users/stvenfor/fvm/default/bin/flutter"
+  else
+    command -v flutter
+  fi
+}
+
+prepare_android_env() {
+  if [[ -d "/Users/stvenfor/Library/Android/sdk" ]]; then
+    export ANDROID_HOME="${ANDROID_HOME:-/Users/stvenfor/Library/Android/sdk}"
+    export ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT:-/Users/stvenfor/Library/Android/sdk}"
+  fi
+  if [[ "${JAVA_HOME:-}" == "/usr/local/opt/openjdk@17" &&
+        ! -d "$JAVA_HOME" ]]; then
+    unset JAVA_HOME
+  fi
+}
+
+ensure_env_file() {
+  if [[ -f "$ENV_FILE" ]]; then
+    return
+  fi
+  cat >&2 <<EOF
+错误: 未找到 $ENV_FILE
+
+请先创建本地配置:
+  cp .env.example .env
+
+如果只是本地跑 Mock 登录，可将 .env 中 USE_MOCK_AUTH 改为 true。
+如果要连接 Supabase，请填入真实 SUPABASE_URL / SUPABASE_ANON_KEY。
+EOF
+  exit 1
 }
 
 while [[ $# -gt 0 ]]; do
@@ -83,18 +124,16 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-ENV_ARGS=()
-if [[ -f "$ROOT/.env" ]]; then
-  ENV_ARGS+=(--dart-define-from-file=.env)
-else
-  echo "提示: 未找到 .env，跳过 --dart-define-from-file" >&2
-fi
+ensure_env_file
+prepare_android_env
+FLUTTER="$(find_flutter)"
+ENV_ARGS=(--dart-define-from-file="$ENV_FILE")
 
-flutter pub get
+"$FLUTTER" pub get
 
 # bash 3.2 + set -u 下空数组 "${arr[@]}" 会报 unbound variable，需先判长度。
 run_flutter() {
-  local -a cmd=(flutter "$@")
+  local -a cmd=("$FLUTTER" "$@")
   if ((${#ENV_ARGS[@]} > 0)); then cmd+=("${ENV_ARGS[@]}"); fi
   if ((${#MODE_ARGS[@]} > 0)); then cmd+=("${MODE_ARGS[@]}"); fi
   if ((${#EXTRA_ARGS[@]} > 0)); then cmd+=("${EXTRA_ARGS[@]}"); fi

@@ -1,9 +1,49 @@
 #!/usr/bin/env bash
-# 在业务模块目录独立运行：./scripts/run_module.sh auth [device]
+# 在业务模块目录独立运行：./scripts/run_module.sh auth [flutter run 额外参数...]
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 MODULE="${1:-}"
+ENV_FILE="$ROOT/.env"
+
+find_flutter() {
+  if [[ -n "${FLUTTER_BIN:-}" ]]; then
+    echo "$FLUTTER_BIN"
+  elif [[ -x "$ROOT/.fvm/flutter_sdk/bin/flutter" ]]; then
+    echo "$ROOT/.fvm/flutter_sdk/bin/flutter"
+  elif [[ -x "/Users/stvenfor/fvm/default/bin/flutter" ]]; then
+    echo "/Users/stvenfor/fvm/default/bin/flutter"
+  else
+    command -v flutter
+  fi
+}
+
+prepare_android_env() {
+  if [[ -d "/Users/stvenfor/Library/Android/sdk" ]]; then
+    export ANDROID_HOME="${ANDROID_HOME:-/Users/stvenfor/Library/Android/sdk}"
+    export ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT:-/Users/stvenfor/Library/Android/sdk}"
+  fi
+  if [[ "${JAVA_HOME:-}" == "/usr/local/opt/openjdk@17" &&
+        ! -d "$JAVA_HOME" ]]; then
+    unset JAVA_HOME
+  fi
+}
+
+ensure_env_file() {
+  if [[ -f "$ENV_FILE" ]]; then
+    return
+  fi
+  cat >&2 <<EOF
+错误: 未找到 $ENV_FILE
+
+请先创建本地配置:
+  cp .env.example .env
+
+如果只是本地跑 Mock 登录，可将 .env 中 USE_MOCK_AUTH 改为 true。
+如果要连接 Supabase，请填入真实 SUPABASE_URL / SUPABASE_ANON_KEY。
+EOF
+  exit 1
+}
 
 if [[ -z "$MODULE" ]]; then
   echo "用法: $0 <模块名> [flutter run 额外参数...]"
@@ -28,5 +68,8 @@ case "$MODULE" in
 esac
 
 cd "$ROOT/$DIR"
-flutter pub get
-exec flutter run -t lib/main_dev.dart "$@"
+ensure_env_file
+prepare_android_env
+FLUTTER="$(find_flutter)"
+"$FLUTTER" pub get
+exec "$FLUTTER" run -t lib/main_dev.dart --dart-define-from-file="$ENV_FILE" "$@"
