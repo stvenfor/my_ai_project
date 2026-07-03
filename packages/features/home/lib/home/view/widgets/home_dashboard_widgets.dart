@@ -136,6 +136,10 @@ class HomeFeatureGrid extends StatelessWidget {
   final List<HomeFeatureItem> items;
 
   void _onFeatureTap(HomeFeatureItem item) {
+    if (item.label == '更多') {
+      Get.toNamed(RoutePath.homeAllServices);
+      return;
+    }
     if (item.label == '生活服务') {
       Get.toNamed(RoutePath.homeCheckInMall);
       return;

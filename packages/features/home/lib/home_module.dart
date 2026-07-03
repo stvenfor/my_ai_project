@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:module_home/home/api/home_http_config.dart';
+import 'package:module_home/home/view/all_services_page.dart';
 import 'package:module_home/home/view/check_in_mall_page.dart';
 import 'package:module_home/home/view/home_learning_report_page.dart';
 import 'package:module_home/home/view/home_page.dart';
@@ -33,6 +34,7 @@ class HomeModule extends FeatureModule {
         RoutePath.home: (_) => const HomePage(),
         RoutePath.homeLearningReport: (_) => const HomeLearningReportPage(),
         RoutePath.homeCheckInMall: (_) => const CheckInMallPage(),
+        RoutePath.homeAllServices: (_) => const AllServicesPage(),
       };
 
   @override
