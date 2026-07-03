@@ -1,7 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:module_auth/session/user_service_impl.dart';
 import 'package:module_core/core.dart';
 import 'package:module_supabase/module_supabase.dart';
+import 'package:module_utils/module_utils.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// 登录模块会话入口：注册 AuthService + UserService（Mock 或 Supabase）。
@@ -25,7 +27,15 @@ class AuthSession {
     bool? useMock,
     bool permanent = true,
   }) async {
-    final mock = useMock ?? SupabaseConfig.useMockAuth;
+    var mock = useMock ?? SupabaseConfig.useMockAuth;
+
+    if (!mock && kDebugMode && !SupabaseConfig.isConfigured) {
+      LogUtils.w(
+        '[AuthSession] Supabase 未配置，Debug 模式自动使用 Mock 认证；'
+        '连接真实 Supabase 请 cp .env.example .env 并用 flutter run --dart-define-from-file=.env 启动',
+      );
+      mock = true;
+    }
 
     if (mock) {
       await _registerMock(permanent: permanent);
