@@ -1,0 +1,12 @@
+---
+description: Git 提交规范，禁止 Cursor Co-authored-by 尾注
+alwaysApply: true
+---
+
+# Git 提交规范
+
+创建 git commit 时：
+
+- **禁止**在提交信息中添加 `Co-authored-by: Cursor <cursoragent@cursor.com>` 或任何 Cursor 相关 Co-authored-by 行
+- 只写与变更相关的标题和正文，不要添加 AI/Agent 共同作者尾注
+- 使用 HEREDOC 传递 commit message，确保内容干净
