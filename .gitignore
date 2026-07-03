@@ -46,7 +46,6 @@ app.*.map.json
 /android/app/release
 /.codegraph
 .worktrees/
-.env
 
 # FVM Version Cache
 .fvm/
