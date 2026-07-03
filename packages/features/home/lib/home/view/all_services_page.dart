@@ -62,6 +62,7 @@ class AllServicesPage extends GetView<AllServicesController> {
                     canRemoveFavorite: controller.canRemoveFavorite,
                     onEditTap: controller.toggleEdit,
                     onRemoveFavorite: (item) => controller.removeFavorite(item.id),
+                    onItemTap: controller.onServiceTap,
                   ),
                   for (final section in AllServicesData.catalogSections)
                     AllServicesSectionWidget(
@@ -70,6 +71,7 @@ class AllServicesPage extends GetView<AllServicesController> {
                       favoriteIds: controller.favoriteIds,
                       canAddFavorite: controller.canAddFavorite,
                       onAddFavorite: (item) => controller.addFavorite(item.id),
+                      onItemTap: controller.onServiceTap,
                     ),
                 ],
               );

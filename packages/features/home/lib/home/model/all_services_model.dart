@@ -3,21 +3,25 @@ class AllServiceItem {
   const AllServiceItem({
     required this.label,
     required this.assetName,
+    required this.routePath,
     String? id,
   }) : id = id ?? assetName;
 
   final String id;
   final String label;
   final String assetName;
+  final String routePath;
 
   AllServiceItem copyWith({
     String? label,
     String? assetName,
+    String? routePath,
   }) {
     final nextAsset = assetName ?? this.assetName;
     return AllServiceItem(
       label: label ?? this.label,
       assetName: nextAsset,
+      routePath: routePath ?? this.routePath,
       id: nextAsset,
     );
   }

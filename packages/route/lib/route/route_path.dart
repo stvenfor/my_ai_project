@@ -36,4 +36,23 @@ class RoutePath{
 
   /// 通用 Web 容器页（[AppWebViewPage]），通过 Get.arguments 传入 [WebPageConfig]。
   static const String web = '/web';
+
+  // BFUI 模板示例
+  static const String bfuiIntroductionAnimation = '/bfui/introduction_animation';
+  static const String bfuiHotelBooking = '/bfui/hotel_booking';
+  static const String bfuiHotelFilters = '/bfui/hotel_filters';
+  static const String bfuiFitnessApp = '/bfui/fitness_app';
+  static const String bfuiMyDiary = '/bfui/my_diary';
+  static const String bfuiTraining = '/bfui/training';
+  static const String bfuiDesignCourse = '/bfui/design_course';
+  static const String bfuiCourseInfo = '/bfui/course_info';
+  static const String bfuiHelp = '/bfui/help';
+  static const String bfuiFeedback = '/bfui/feedback';
+  static const String bfuiInviteFriend = '/bfui/invite_friend';
+  static const String bfuiNavigationDrawer = '/bfui/navigation_drawer';
+  static const String bfuiGlassView = '/bfui/glass_view';
+  static const String bfuiWaveView = '/bfui/wave_view';
+  static const String bfuiRunningView = '/bfui/running_view';
+  static const String bfuiWorkoutView = '/bfui/workout_view';
+  static const String bfuiMediterraneanDiet = '/bfui/mediterranean_diet';
 }

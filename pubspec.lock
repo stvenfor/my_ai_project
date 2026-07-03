@@ -17,6 +17,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "10.0.1"
+  animations:
+    dependency: transitive
+    description:
+      name: animations
+      sha256: "9cb469212ea51be27097f23b519d594c01171721347b55df9334fff653659e7f"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "2.2.0"
   app_links:
     dependency: transitive
     description:
@@ -547,6 +555,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.0.34"
+  flutter_rating_bar:
+    dependency: transitive
+    description:
+      name: flutter_rating_bar
+      sha256: d2af03469eac832c591a1eba47c91ecc871fe5708e69967073c043b2d775ed93
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "4.0.1"
   flutter_screenutil:
     dependency: transitive
     description:
@@ -589,6 +605,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  font_awesome_flutter:
+    dependency: transitive
+    description:
+      name: font_awesome_flutter
+      sha256: b9011df3a1fa02993630b8fb83526368cf2206a711259830325bab2f1d2a4eb0
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "10.12.0"
   functions_client:
     dependency: transitive
     description:
@@ -891,6 +915,13 @@ packages:
     dependency: "direct main"
     description:
       path: "packages/features/auth"
+      relative: true
+    source: path
+    version: "0.0.1"
+  module_bfui:
+    dependency: "direct main"
+    description:
+      path: "packages/features/bfui"
       relative: true
     source: path
     version: "0.0.1"

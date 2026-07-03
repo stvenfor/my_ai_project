@@ -56,6 +56,11 @@ class AllServicesController extends GetxController {
     favoriteItems.add(item);
     await AllServicesRepository.saveFavoriteItems(favoriteItems);
   }
+
+  void onServiceTap(AllServiceItem item) {
+    if (isEditing.value) return;
+    Get.toNamed<void>(item.routePath);
+  }
 }
 
 class AllServicesBinding extends Bindings {

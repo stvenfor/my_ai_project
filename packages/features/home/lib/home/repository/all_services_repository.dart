@@ -5,7 +5,7 @@ import 'package:module_utils/module_utils.dart';
 class AllServicesRepository {
   AllServicesRepository._();
 
-  static const _favoriteIdsKey = 'home_favorite_service_ids';
+  static const _favoriteIdsKey = 'home_favorite_service_ids_v2';
 
   static Future<List<String>> loadFavoriteIds() async {
     final stored = SpUtils.getStringList(_favoriteIdsKey);

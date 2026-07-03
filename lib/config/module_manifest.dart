@@ -1,6 +1,7 @@
 /// 模块启用清单：注释掉 import 与列表项即可移除模块，主工程仍可编译运行。
 library module_manifest;
 
+import 'package:module_bfui/bfui_module.dart';
 import 'package:module_auth/auth_module.dart';
 import 'package:module_chat/chat_module.dart';
 import 'package:module_community/community_module.dart';
@@ -24,5 +25,6 @@ List<FeatureModule> buildEnabledModules() {
     LiveModule(),
     PayModule(),
     VideoModule(),
+    BfuiModule(),
   ];
 }

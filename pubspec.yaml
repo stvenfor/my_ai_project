@@ -50,6 +50,8 @@ dependencies:
     path: ./packages/infrastructure/supabase
   module_video:
     path: ./packages/features/video
+  module_bfui:
+    path: ./packages/features/bfui
   module_linking:
     path: ./packages/infrastructure/linking
   module_realtime:
