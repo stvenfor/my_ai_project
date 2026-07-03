@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:module_core/core.dart';
@@ -197,7 +199,10 @@ class _HeaderBody extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 12),
-                        _Avatar(url: data.avatarUrl),
+                        GestureDetector(
+                          onTap: controller.onAvatarTap,
+                          child: _Avatar(url: data.avatarUrl),
+                        ),
                       ],
                     ),
                   ],
@@ -287,13 +292,36 @@ class _Avatar extends StatelessWidget {
         ],
       ),
       child: ClipOval(
-        child: url != null && url!.isNotEmpty
-            ? CacheImageUtils.network(url!, width: 72, height: 72, fit: BoxFit.cover)
-            : Container(
-                color: const Color(0xFFE0E0E0),
-                child: const Icon(Icons.person, size: 36, color: Colors.white),
-              ),
+        child: _buildAvatarImage(url),
       ),
+    );
+  }
+
+  Widget _buildAvatarImage(String? url) {
+    if (url == null || url.isEmpty) {
+      return _placeholder();
+    }
+
+    if (_isLocalPath(url)) {
+      return Image.file(
+        File(url.replaceFirst('file:', '')),
+        width: 72,
+        height: 72,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _placeholder(),
+      );
+    }
+
+    return CacheImageUtils.network(url, width: 72, height: 72, fit: BoxFit.cover);
+  }
+
+  bool _isLocalPath(String url) =>
+      url.startsWith('/') || url.startsWith('file:');
+
+  Widget _placeholder() {
+    return Container(
+      color: const Color(0xFFE0E0E0),
+      child: const Icon(Icons.person, size: 36, color: Colors.white),
     );
   }
 }

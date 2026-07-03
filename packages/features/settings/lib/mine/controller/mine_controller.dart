@@ -12,6 +12,7 @@ import 'package:module_settings/mine/model/mine_store_data.dart';
 import 'package:module_settings/mine/repository/mine_function_repository.dart';
 import 'package:module_settings/mine/repository/mine_store_repository.dart';
 import 'package:module_settings/mine/widgets/switch_store_dialog.dart';
+import 'package:module_utils/module_utils.dart';
 
 class MineController extends GetxController {
   final UserService _userService = Get.find<UserService>();
@@ -136,6 +137,39 @@ class MineController extends GetxController {
   }
 
   void onElectronicCardTap() => UiKitInitializer.toast('电子名片');
+
+  Future<void> onAvatarTap() async {
+    if (!isLoggedIn) {
+      UiKitInitializer.toast('请先登录');
+      return;
+    }
+
+    final source = await MediaSourceBottomSheet.show();
+    if (source == null) return;
+
+    try {
+      if (source == MediaPickSource.camera) {
+        final granted = await ImagePickerUtils.ensureCameraPermission();
+        if (!granted) {
+          UiKitInitializer.toastError('需要相机权限才能拍摄');
+          return;
+        }
+      }
+
+      final path = await ImagePickerUtils.pickImage(source, maxWidth: 800);
+      if (path == null) return;
+      await _updateAvatar(path);
+    } catch (_) {
+      UiKitInitializer.toastError('选择图片失败');
+    }
+  }
+
+  Future<void> _updateAvatar(String path) async {
+    final user = _userService.currentUser.value;
+    if (user == null) return;
+    await _userService.setUser(user.copyWith(avatar: path));
+    UiKitInitializer.toast('头像已更新');
+  }
 
   void onFunctionTap(MineFunctionItem item) {
     if (item.id == 'qa') {

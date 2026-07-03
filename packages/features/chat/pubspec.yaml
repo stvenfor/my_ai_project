@@ -10,7 +10,6 @@ dependencies:
   flutter:
     sdk: flutter
   get: ^4.7.3
-  image_picker: ^1.1.2
   module_common_ui:
     path: ../../commons/ui
   module_core:

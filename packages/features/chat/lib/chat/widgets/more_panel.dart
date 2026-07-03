@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:module_chat/chat/viewmodel/chat_detail_viewmodel.dart';
 import 'package:module_common_ui/module_common_ui.dart';
+import 'package:module_utils/module_utils.dart';
 
 class MorePanel extends StatelessWidget {
   const MorePanel({super.key});
-
-  static final _picker = ImagePicker();
 
   @override
   Widget build(BuildContext context) {
@@ -23,12 +21,12 @@ class MorePanel extends StatelessWidget {
           _MoreAction(
             icon: Icons.photo_library_outlined,
             label: '相册',
-            onTap: () => _pickImage(controller, ImageSource.gallery),
+            onTap: () => _pickImage(controller, MediaPickSource.gallery),
           ),
           _MoreAction(
             icon: Icons.camera_alt_outlined,
             label: '拍摄',
-            onTap: () => _pickImage(controller, ImageSource.camera),
+            onTap: () => _pickImage(controller, MediaPickSource.camera),
           ),
         ],
       ),
@@ -37,17 +35,21 @@ class MorePanel extends StatelessWidget {
 
   Future<void> _pickImage(
     ChatDetailViewModel controller,
-    ImageSource source,
+    MediaPickSource source,
   ) async {
     try {
-      final file = await _picker.pickImage(
-        source: source,
-        maxWidth: 1200,
-        imageQuality: 85,
-      );
-      if (file == null) return;
+      if (source == MediaPickSource.camera) {
+        final granted = await ImagePickerUtils.ensureCameraPermission();
+        if (!granted) {
+          UiKitInitializer.toastError('需要相机权限才能拍摄');
+          return;
+        }
+      }
+
+      final path = await ImagePickerUtils.pickImage(source);
+      if (path == null) return;
       controller.inputPanelMode.value = InputPanelMode.text;
-      await controller.sendImageMessage(file.path);
+      await controller.sendImageMessage(path);
     } catch (error) {
       UiKitInitializer.toastError('选择图片失败');
     }

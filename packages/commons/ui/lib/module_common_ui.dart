@@ -6,6 +6,7 @@ export 'dialog/app_dialog_manager.dart';
 export 'dialog/confirm_dialog.dart';
 export 'dialog/dialog_priority.dart';
 export 'dialog/general_dialog.dart';
+export 'dialog/media_source_bottom_sheet.dart';
 export 'kit/app_refresh_view.dart';
 export 'kit/ui_kit_config.dart';
 export 'kit/ui_kit_initializer.dart';

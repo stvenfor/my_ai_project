@@ -56,6 +56,11 @@ dependencies:
     path: ./packages/infrastructure/realtime
   module_rongcloud_im:
     path: ./packages/infrastructure/rongcloud_im
+  permission_handler_ohos:
+    git:
+      url: https://gitcode.com/openharmony-sig/flutter_permission_handler.git
+      path: permission_handler_ohos
+      ref: br_v12.0.1_ohos
 
 dev_dependencies:
   flutter_test:
@@ -77,3 +82,14 @@ dependency_overrides:
   rxdart: ^0.27.7
   # Flutter 3.35.x iOS 嵌入层暂无 FlutterSceneLifeCycleDelegate，锁定 federated 实现版本。
   screen_brightness_ios: 2.1.2
+  # OpenHarmony 适配：CPF-Flutter/flutter_packages
+  image_picker:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_packages.git
+      ref: br_image_picker-v1.1.2_ohos
+      path: packages/image_picker/image_picker
+  image_picker_ohos:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_packages.git
+      ref: br_image_picker-v1.1.2_ohos
+      path: packages/image_picker/image_picker_ohos

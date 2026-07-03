@@ -88,3 +88,35 @@ Cannot hit test a render box with no size
 ### 参考实现
 
 - `packages/features/settings/lib/mine/widgets/mine_reorderable_function_grid.dart`
+
+## 三方库鸿蒙（OpenHarmony）适配
+
+### 原则
+
+带原生能力的第三方库**必须**具备鸿蒙适配后再引入或升级，不能仅依赖 pub.dev 官方版本。
+
+### 官方适配源
+
+- 主仓库：[CPF-Flutter/flutter_packages](https://gitcode.com/CPF-Flutter/flutter_packages)（原 openharmony-tpc 已迁移）
+- 适配清单见仓库 README「OpenHarmony平台已适配packages三方库」
+- 不在 packages 内的库（如 `permission_handler`）查 CPF-Flutter 组织下对应鸿蒙仓库
+- 示例 Demo：[flutter_samples](https://gitcode.com/openharmony-tpc/flutter_samples)（ohos 子目录）
+
+### 依赖写法
+
+1. 各 feature 模块 `pubspec.yaml` 保持 pub.dev 语义化版本（如 `image_picker: ^1.1.2`）。
+2. 根 [`pubspec.yaml`](pubspec.yaml) `dependency_overrides` 统一指向鸿蒙 git 源（优先 `ref` 标签，其次 `br_<库名>-v<版本>_ohos` 分支）。
+3. **federated 插件**需同时 override 主包与 `*_ohos` 实现包（如 `image_picker` + `image_picker_ohos`）。
+4. 部分插件还需在根 `dependencies` 显式添加 `permission_handler_ohos` 等实现包。
+5. `flutter pub get` 后检查 `ohos/entry/oh-package.json5` 是否自动注入 har 依赖。
+
+### 权限
+
+在 `ohos/entry/src/main/module.json5` 声明权限（如 `ohos.permission.CAMERA`），并在 Dart 层拍照等敏感操作前动态申请（`permission_handler` + `permission_handler_ohos`）。
+
+### 本项目已接入
+
+- `ImagePickerUtils` / `MediaPickSource` — 相册选图、相机拍照（[`image_picker_utils.dart`](packages/commons/toolkit/lib/utils/image_picker_utils.dart)）
+- `MediaSourceBottomSheet` — 相册/相机来源选择弹框（[`media_source_bottom_sheet.dart`](packages/commons/ui/lib/dialog/media_source_bottom_sheet.dart)）
+- `image_picker` / `image_picker_ohos` — 三方库声明在 `module_utils`，鸿蒙 override 在根 [`pubspec.yaml`](pubspec.yaml)
+- `permission_handler_ohos` — 权限动态申请
