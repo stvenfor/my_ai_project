@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:module_settings/mine/controller/mine_controller.dart';
-import 'package:module_settings/mine/widgets/mine_function_card_widget.dart';
+import 'package:module_settings/mine/widgets/mine_reorderable_function_grid.dart';
 
 class MineFunctionSectionWidget extends StatelessWidget {
   const MineFunctionSectionWidget({super.key});
@@ -34,26 +34,12 @@ class MineFunctionSectionWidget extends StatelessWidget {
           ),
         ),
         Obx(() {
-          final items = controller.functions;
-          return GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              childAspectRatio: 1.05,
-            ),
-            itemCount: items.length,
-            itemBuilder: (context, index) {
-              final item = items[index];
-              return MineFunctionCardWidget(
-                item: item,
-                onTap: () => controller.onFunctionTap(item),
-                onLongPress: () => controller.onFunctionLongPress(item),
-              );
-            },
+          final items = controller.functions.toList();
+          return MineReorderableFunctionGrid(
+            key: ValueKey(items.map((e) => e.id).join(',')),
+            items: items,
+            onReorder: controller.reorderFunction,
+            onItemTap: controller.onFunctionTap,
           );
         }),
       ],

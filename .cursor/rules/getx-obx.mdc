@@ -1,0 +1,15 @@
+---
+description: GetX Obx 正确用法，避免 improper use 运行时错误
+alwaysApply: true
+---
+
+# GetX Obx 规范
+
+使用 `Obx` / `GetX` 时：
+
+1. builder **内部**必须读取 `.obs`（如 `.value`、`.toList()`、`.length`），再传给子 widget
+2. **禁止** `Obx(() => Widget(items: controller.rxList))` 这种未在 builder 内订阅的写法
+3. 列表重排后给 StatefulWidget 加 `ValueKey`（如 id 拼接）
+4. 无 obs 依赖的 UI 不要包 Obx
+
+详见项目根目录 [AGENTS.md](../../AGENTS.md) 中「GetX / Obx 响应式 UI」章节。

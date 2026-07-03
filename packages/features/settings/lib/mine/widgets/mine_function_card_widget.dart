@@ -6,12 +6,10 @@ class MineFunctionCardWidget extends StatelessWidget {
     super.key,
     required this.item,
     required this.onTap,
-    required this.onLongPress,
   });
 
   final MineFunctionItem item;
   final VoidCallback onTap;
-  final VoidCallback onLongPress;
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +19,6 @@ class MineFunctionCardWidget extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
-        onLongPress: onLongPress,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

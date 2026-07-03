@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:module_auth/session/auth_session.dart';
 import 'package:module_auth/user/binding/auth_binding.dart';
@@ -9,12 +8,17 @@ import 'package:module_route/route/login_redirect.dart';
 import 'package:module_route/route/route_path.dart';
 import 'package:module_settings/mine/model/mine_function_item.dart';
 import 'package:module_settings/mine/model/mine_profile_model.dart';
+import 'package:module_settings/mine/model/mine_store_data.dart';
+import 'package:module_settings/mine/repository/mine_function_repository.dart';
+import 'package:module_settings/mine/repository/mine_store_repository.dart';
+import 'package:module_settings/mine/widgets/switch_store_dialog.dart';
 
 class MineController extends GetxController {
   final UserService _userService = Get.find<UserService>();
 
   final profile = Rxn<MineProfileModel>();
   final functions = <MineFunctionItem>[].obs;
+  final selectedStoreId = RxString(MineStoreData.defaultStoreId);
 
   static const _defaultAvatar =
       'https://picsum.photos/seed/mine_profile/200/200';
@@ -22,78 +26,21 @@ class MineController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _initFunctions();
+    selectedStoreId.value = MineStoreRepository.loadSelectedStoreId();
+    _loadFunctions();
     _syncUser(_userService.currentUser.value);
     ever(_userService.currentUser, _syncUser);
   }
 
-  void _initFunctions() {
-    functions.assignAll(const [
-      MineFunctionItem(
-        id: 'sms',
-        title: '短信模板',
-        subtitle: '一键发送 轻松快捷',
-        accentColor: Color(0xFFE8F8EF),
-        iconColor: Color(0xFF52C41A),
-        icon: Icons.sms_outlined,
-      ),
-      MineFunctionItem(
-        id: 'calculator',
-        title: '购车计算器',
-        subtitle: '全款/贷款/保险全能算',
-        accentColor: Color(0xFFE8F0FF),
-        iconColor: Color(0xFF1890FF),
-        icon: Icons.calculate_outlined,
-      ),
-      MineFunctionItem(
-        id: 'used_car',
-        title: '二手车',
-        subtitle: '置换/专卖/估价',
-        accentColor: Color(0xFFE8F0FF),
-        iconColor: Color(0xFF1890FF),
-        icon: Icons.directions_car_outlined,
-      ),
-      MineFunctionItem(
-        id: 'short_video',
-        title: '小视频',
-        subtitle: '用小视频秀车秀店',
-        accentColor: Color(0xFFF0E8FF),
-        iconColor: Color(0xFF9254DE),
-        icon: Icons.play_circle_outline,
-      ),
-      MineFunctionItem(
-        id: 'after_sales',
-        title: '售后专区',
-        subtitle: '售后维修保养记录',
-        accentColor: Color(0xFFFFF8E8),
-        iconColor: Color(0xFFFAAD14),
-        icon: Icons.build_outlined,
-      ),
-      MineFunctionItem(
-        id: 'qr_pay',
-        title: '店铺收款码',
-        subtitle: '常见问题 功能介绍',
-        accentColor: Color(0xFFE8F8EF),
-        iconColor: Color(0xFF52C41A),
-        icon: Icons.qr_code_2_outlined,
-      ),
-      MineFunctionItem(
-        id: 'qa',
-        title: '选买问答',
-        subtitle: '在线解答客户问题',
-        accentColor: Color(0xFFE8F0FF),
-        iconColor: Color(0xFF1890FF),
-        icon: Icons.support_agent_outlined,
-      ),
-      MineFunctionItem(
-        id: 'poster',
-        title: '商家海报',
-        subtitle: '置换/专卖/估价',
-        accentColor: Color(0xFFFFF8E8),
-        iconColor: Color(0xFFFAAD14),
-        icon: Icons.bar_chart_outlined,
-      ),
-    ]);
+  Future<void> _loadFunctions() async {
+    functions.assignAll(await MineFunctionRepository.loadFunctions());
+  }
+
+  Future<void> reorderFunction(int fromIndex, int toIndex) async {
+    if (fromIndex == toIndex) return;
+    final item = functions.removeAt(fromIndex);
+    functions.insert(toIndex, item);
+    await MineFunctionRepository.saveFunctions(functions);
   }
 
   void _syncUser(User? user) {
@@ -113,9 +60,22 @@ class MineController extends GetxController {
       displayName: user.name.isNotEmpty ? user.name : '东东枪',
       avatarUrl: user.avatar.isNotEmpty ? user.avatar : _defaultAvatar,
       roleBadge: '销售经理',
-      storeName: '[4S] 北京沃德龙鼎吉利',
+      storeName: MineStoreRepository.resolveStoreName(selectedStoreId.value),
       maskedPhone: _maskPhone(user.id),
       stats: MineProfileModel.demoStats,
+    );
+  }
+
+  void _applyStoreToProfile() {
+    final current = profile.value;
+    if (current == null || !isLoggedIn) return;
+    profile.value = MineProfileModel(
+      displayName: current.displayName,
+      avatarUrl: current.avatarUrl,
+      roleBadge: current.roleBadge,
+      storeName: MineStoreRepository.resolveStoreName(selectedStoreId.value),
+      maskedPhone: current.maskedPhone,
+      stats: current.stats,
     );
   }
 
@@ -161,7 +121,19 @@ class MineController extends GetxController {
 
   void onCalendarTap() => UiKitInitializer.toast('签到日历');
 
-  void onStoreTap() => UiKitInitializer.toast('切换门店');
+  Future<void> onStoreTap() async {
+    if (!isLoggedIn) {
+      UiKitInitializer.toast('请先登录');
+      return;
+    }
+    final picked = await SwitchStoreDialog.show(
+      selectedId: selectedStoreId.value,
+    );
+    if (picked == null || picked == selectedStoreId.value) return;
+    selectedStoreId.value = picked;
+    await MineStoreRepository.saveSelectedStoreId(picked);
+    _applyStoreToProfile();
+  }
 
   void onElectronicCardTap() => UiKitInitializer.toast('电子名片');
 
@@ -175,9 +147,5 @@ class MineController extends GetxController {
       return;
     }
     UiKitInitializer.toast('${item.title} 开发中');
-  }
-
-  void onFunctionLongPress(MineFunctionItem item) {
-    UiKitInitializer.toast('长按拖动排序（开发中）');
   }
 }
