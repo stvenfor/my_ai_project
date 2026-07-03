@@ -256,8 +256,8 @@ dart run build_runner build
 
 | 模块 | 用途 |
 |------|------|
-| `module_utils`（packages/toolkit） | **工具统一入口**：Log/SP/CacheImage/Svg/Lottie/Html/ScreenUtil |
-| `module_common_ui`（packages/ui） | 主题、UiKit、BaseViewModel |
+| `module_utils`（packages/commons/toolkit） | **工具统一入口**：Log/SP/CacheImage/Svg/Lottie/Html/ScreenUtil |
+| `module_common_ui`（packages/commons/ui） | 主题、UiKit、BaseViewModel |
 | `module_route` | `RoutePath`、`FeatureModule`、`ModuleRegistry` |
 | `module_http` | 统一 Dio 客户端 |
 
@@ -323,7 +323,7 @@ module_utils:
 | pay | module_pay | — | `/pay` | 占位 | — |
 | video | module_video | — | `/video` | 占位 | — |
 
-基础设施模块（不参与 manifest）：`packages/network`、`packages/route`、`packages/ui`、`packages/storage`、`packages/toolkit`
+基础设施模块（不参与 manifest）：`packages/commons/network`、`packages/route`、`packages/commons/ui`、`packages/commons/storage`、`packages/commons/toolkit`
 
 ---
 

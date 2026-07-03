@@ -10,11 +10,11 @@ dependencies:
   flutter:
     sdk: flutter
   module_common_ui:
-    path: ../../ui
+    path: ../../commons/ui
   module_route:
     path: ../../route
   module_utils:
-    path: ../../toolkit
+    path: ../../commons/toolkit
 
 dev_dependencies:
   flutter_test:

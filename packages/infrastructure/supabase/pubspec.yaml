@@ -13,7 +13,7 @@ dependencies:
   http: ^1.2.2
   supabase_flutter: ^2.9.1
   module_core:
-    path: ../../core
+    path: ../../commons/core
 
 dev_dependencies:
   flutter_test:

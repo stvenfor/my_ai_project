@@ -17,31 +17,21 @@
 
 ```text
 .
-├── lib/                         # 主 App Dart 代码
-│   ├── main.dart                 # Flutter 入口
-│   ├── pages/                    # 主 App 自有页面
-│   └── route/                    # 主 App 路由聚合
-├── android/                      # Android 宿主工程
-├── ios/                          # iOS 宿主工程
-├── module_auth/                  # 登录/注册模块
-├── module_chat/                  # 聊天模块
-├── module_community/             # 社区模块
-├── module_friend/                # 好友模块
-├── module_live/                  # 直播模块
-├── module_pay/                   # 支付模块
-├── module_settings/              # 我的/设置模块
-├── module_video/                 # 视频模块
-├── module_route/                 # 路由基础设施
-├── module_repository/            # 数据模型/API 仓储预留
-├── module_http/                  # HTTP 封装预留
-├── module_utils/                 # 工具能力
-├── module_common_ui/             # 通用 UI 预留
-├── module_res/                   # 资源预留
-├── module_log/                   # 日志预留
-├── module_global_cache/          # 全局缓存预留
-├── module_sdk/                   # SDK 封装预留
+├── lib/                              # 主 App Dart 代码（启动、壳页面、模块清单）
+├── packages/
+│   ├── commons/                      # 公共基础能力
+│   │   ├── core/                     # module_core — 模型与服务契约
+│   │   ├── ui/                       # module_common_ui — 共享 UI
+│   │   ├── toolkit/                  # module_utils — 工具与播放器
+│   │   ├── network/                  # module_http — HTTP 封装
+│   │   └── storage/                  # module_global_cache — 缓存
+│   ├── route/                        # module_route — 路由与模块注册
+│   ├── features/                     # 业务模块（auth/chat/community/...）
+│   └── infrastructure/               # 平台适配（supabase/linking/realtime/...）
+├── android/                          # Android 宿主工程
+├── ios/                              # iOS 宿主工程
 └── docs/
-    └── architecture.md           # 本文档
+    └── architecture.md               # 本文档
 ```
 
 ## 3. 模块关系总览

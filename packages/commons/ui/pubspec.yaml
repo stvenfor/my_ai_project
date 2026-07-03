@@ -19,7 +19,7 @@ dependencies:
   module_utils:
     path: ../toolkit
   module_route:
-    path: ../route
+    path: ../../route
 
 dev_dependencies:
   flutter_test:

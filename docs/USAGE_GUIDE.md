@@ -443,7 +443,7 @@ ModuleStandaloneConfig(
 
 业务模块代码无需改动。
 
-业务模块 **不要** 直接 `import cached_network_image` 等第三方库，统一使用 `packages/toolkit` 封装：
+业务模块 **不要** 直接 `import cached_network_image` 等第三方库，统一使用 `packages/commons/toolkit` 封装：
 
 ```dart
 import 'package:module_utils/module_utils.dart';
@@ -462,7 +462,7 @@ CacheImageUtils.circle(avatarUrl, size: 56);
 |------|------|
 | **Core action** | `WebBridgeActions.coreActions`，壳工程 `WebKitCoreHandlers` **统一注册** |
 | **Module action** | `WebBridgeActions.moduleActions`，各模块 `onRegister` 用 `registerModule` **扩展** |
-| **常量表** | `packages/core/lib/web/web_bridge_actions.dart`，新增 action 先在此声明 |
+| **常量表** | `packages/commons/core/lib/web/web_bridge_actions.dart`，新增 action 先在此声明 |
 
 ### Action 常量表
 
@@ -544,7 +544,7 @@ Flutter 注入参数：`window.__FLUTTER_PARAMS__`，事件：`flutterReady`。
 
 ### 替换 flutter_inappwebview
 
-只需修改 `packages/ui/lib/kit/web/` 内实现；Core/Module action 常量表与 H5 协议不变。
+只需修改 `packages/commons/ui/lib/kit/web/` 内实现；Core/Module action 常量表与 H5 协议不变。
 
 ---
 
@@ -648,8 +648,8 @@ git worktree list
 | 模块清单 | `lib/config/module_manifest.dart` |
 | 环境配置 | `module_core/lib/env/env_config.dart` |
 | 环境服务实现 | `packages/features/settings/lib/env/environment_service_impl.dart` |
-| HTTP 统一初始化 | `packages/network/lib/http/app_http_bootstrap.dart` |
-| 工具模块 | `packages/toolkit/lib/utils/cache_image_utils.dart` |
+| HTTP 统一初始化 | `packages/commons/network/lib/http/app_http_bootstrap.dart` |
+| 工具模块 | `packages/commons/toolkit/lib/utils/cache_image_utils.dart` |
 | WanAndroid 遗留演示 | `packages/features/home/lib/legacy/wanandroid/` |
 | 环境切换 UI | `module_settings/lib/settings/view/settings_page.dart` |
 | 独立运行 Runner | `module_route/lib/module/module_standalone_runner.dart` |

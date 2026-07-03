@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 
 /// 跨模块共享的视频测试源（仅 Mock / 演示，业务层勿直接依赖）。
 ///
-/// 数据源：`packages/toolkit/assets/data/video_mock_sources.json`
+/// 数据源：`packages/commons/toolkit/assets/data/video_mock_sources.json`
 /// 启动时由 [VideoMockSourceLoader.load] 加载；JSON 不可用时使用 [kVideoMockSourcesFallback]。
 class VideoMockSource {
   const VideoMockSource({

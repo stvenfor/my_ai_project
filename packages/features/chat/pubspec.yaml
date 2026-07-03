@@ -12,15 +12,15 @@ dependencies:
   get: ^4.7.3
   image_picker: ^1.1.2
   module_common_ui:
-    path: ../../ui
+    path: ../../commons/ui
   module_core:
-    path: ../../core
+    path: ../../commons/core
   module_rongcloud_im:
     path: ../../infrastructure/rongcloud_im
   module_route:
     path: ../../route
   module_utils:
-    path: ../../toolkit
+    path: ../../commons/toolkit
 
 dev_dependencies:
   flutter_test:

@@ -19,23 +19,23 @@ dependencies:
   intl: any
 
   module_core:
-    path: ./packages/core
+    path: ./packages/commons/core
   module_auth:
     path: ./packages/features/auth
   module_chat:
     path: ./packages/features/chat
   module_common_ui:
-    path: ./packages/ui
+    path: ./packages/commons/ui
   module_community:
     path: ./packages/features/community
   module_friend:
     path: ./packages/features/friend
   module_global_cache:
-    path: ./packages/storage
+    path: ./packages/commons/storage
   module_home:
     path: ./packages/features/home
   module_http:
-    path: ./packages/network
+    path: ./packages/commons/network
   module_live:
     path: ./packages/features/live
   module_pay:
@@ -45,7 +45,7 @@ dependencies:
   module_settings:
     path: ./packages/features/settings
   module_utils:
-    path: ./packages/toolkit
+    path: ./packages/commons/toolkit
   module_supabase:
     path: ./packages/infrastructure/supabase
   module_video:
@@ -71,7 +71,7 @@ flutter:
     - assets/images/
     - assets/lotties/
     - assets/web/
-    - packages/toolkit/assets/data/video_mock_sources.json
+    - packages/commons/toolkit/assets/data/video_mock_sources.json
 
 dependency_overrides:
   rxdart: ^0.27.7

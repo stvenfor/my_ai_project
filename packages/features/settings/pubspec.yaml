@@ -11,15 +11,15 @@ dependencies:
     sdk: flutter
   get: ^4.7.3
   module_common_ui:
-    path: ../../ui
+    path: ../../commons/ui
   module_core:
-    path: ../../core
+    path: ../../commons/core
   module_http:
-    path: ../../network
+    path: ../../commons/network
   module_route:
     path: ../../route
   module_utils:
-    path: ../../toolkit
+    path: ../../commons/toolkit
   module_linking:
     path: ../../infrastructure/linking
   module_realtime:

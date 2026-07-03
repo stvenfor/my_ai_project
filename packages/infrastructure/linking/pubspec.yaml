@@ -13,15 +13,15 @@ dependencies:
   module_auth:
     path: ../../features/auth
   module_common_ui:
-    path: ../../ui
+    path: ../../commons/ui
   module_core:
-    path: ../../core
+    path: ../../commons/core
   module_route:
     path: ../../route
   module_utils:
-    path: ../../toolkit
+    path: ../../commons/toolkit
   module_global_cache:
-    path: ../../storage
+    path: ../../commons/storage
 
 dev_dependencies:
   flutter_test:
