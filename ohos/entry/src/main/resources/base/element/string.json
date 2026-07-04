@@ -15,6 +15,10 @@
     {
       "name": "camera_permission_reason",
       "value": "Used to take photos for chat messages"
+    },
+    {
+      "name": "background_audio_permission_reason",
+      "value": "Allows audio playback to continue when the app is in the background"
     }
   ]
 }

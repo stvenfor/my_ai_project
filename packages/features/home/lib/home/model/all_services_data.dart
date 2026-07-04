@@ -56,10 +56,10 @@ abstract final class AllServicesData {
     assetName: 'calculator.png',
     routePath: RoutePath.bfuiFeedback,
   );
-  static const _inviteFriend = AllServiceItem(
-    label: '邀请好友',
+  static const _musicPlayer = AllServiceItem(
+    label: '音频列表',
     assetName: 'used_car.png',
-    routePath: RoutePath.bfuiInviteFriend,
+    routePath: RoutePath.musicList,
   );
   static const _navigationDrawer = AllServiceItem(
     label: '侧滑导航',
@@ -138,7 +138,7 @@ abstract final class AllServicesData {
         _help,
         _feedback,
         _navigationDrawer,
-        _inviteFriend,
+        _musicPlayer,
       ],
     ),
   ];

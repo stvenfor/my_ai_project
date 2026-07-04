@@ -52,6 +52,8 @@ dependencies:
     path: ./packages/features/video
   module_bfui:
     path: ./packages/features/bfui
+  module_music:
+    path: ./packages/features/music
   module_linking:
     path: ./packages/infrastructure/linking
   module_realtime:
@@ -95,3 +97,4 @@ dependency_overrides:
       url: https://gitcode.com/CPF-Flutter/flutter_packages.git
       ref: br_image_picker-v1.1.2_ohos
       path: packages/image_picker/image_picker_ohos
+  # audioplayers OHOS override 仅用于鸿蒙 Flutter SDK 构建，见 docs/flutter-example-apps-music-migration.md

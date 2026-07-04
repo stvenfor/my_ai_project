@@ -55,4 +55,8 @@ class RoutePath{
   static const String bfuiRunningView = '/bfui/running_view';
   static const String bfuiWorkoutView = '/bfui/workout_view';
   static const String bfuiMediterraneanDiet = '/bfui/mediterranean_diet';
+
+  // 音乐播放器（Flutter Music Player P1）
+  static const String musicList = '/music/list';
+  static const String musicNowPlaying = '/music/now_playing';
 }

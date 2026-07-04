@@ -15,6 +15,10 @@
     {
       "name": "camera_permission_reason",
       "value": "用于拍摄并发送聊天图片"
+    },
+    {
+      "name": "background_audio_permission_reason",
+      "value": "允许应用在后台继续播放音频"
     }
   ]
 }

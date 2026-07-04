@@ -1,5 +1,5 @@
-name: module_home
-description: Home module for flutter_module_sample.
+name: module_music
+description: Local music player module (P1 UI POC with mock data).
 publish_to: 'none'
 version: 0.0.1
 
@@ -10,16 +10,13 @@ dependencies:
   flutter:
     sdk: flutter
   get: ^4.7.3
+  audioplayers: ^6.5.1
   module_common_ui:
     path: ../../commons/ui
   module_core:
     path: ../../commons/core
-  module_http:
-    path: ../../commons/network
   module_route:
     path: ../../route
-  module_music:
-    path: ../music
   module_utils:
     path: ../../commons/toolkit
 
@@ -31,4 +28,4 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/all_services/
+    - assets/defaults/

@@ -9,7 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  font_awesome_flutter: ^10.12.0
+  font_awesome_flutter: ^11.0.0
   flutter_rating_bar: ^4.0.1
   intl: any
   animations: ^2.1.1

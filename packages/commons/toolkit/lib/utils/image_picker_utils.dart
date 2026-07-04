@@ -10,8 +10,12 @@ class ImagePickerUtils {
 
   static final ImagePicker _picker = ImagePicker();
 
+  /// 鸿蒙在标准 Flutter SDK 无 [Platform.isOhos]，用 operatingSystem 判断。
+  static bool get _isOhosPlatform =>
+      Platform.operatingSystem.toLowerCase() == 'ohos';
+
   static Future<bool> ensureCameraPermission() async {
-    if (!Platform.isAndroid && !Platform.isIOS && !Platform.isOhos) {
+    if (!Platform.isAndroid && !Platform.isIOS && !_isOhosPlatform) {
       return true;
     }
 

@@ -4,6 +4,7 @@ import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_home/home/controller/home_controller.dart';
 import 'package:module_home/home/theme/home_dashboard_theme.dart';
 import 'package:module_home/home/view/widgets/home_dashboard_widgets.dart';
+import 'package:module_music/widgets/music_mini_player_bar.dart';
 import 'package:module_route/route/route_path.dart';
 
 class HomeBinding extends Bindings {
@@ -42,73 +43,84 @@ class HomePage extends GetView<HomeController> {
           return const SizedBox.shrink();
         }
 
-        return AppRefreshView(
-          onRefresh: controller.refreshDashboard,
-          child: CustomScrollView(
-            slivers: [
-            SliverToBoxAdapter(
-                child: ColoredBox(
-                color: HomeDashboardTheme.bannerDark,
-                child: Padding(
-                  padding: EdgeInsets.only(top: AppSafeInsets.top(context)),
-                  child: Column(
-                    children: [
-                      const HomeSearchBar(),
-                      const HomeBannerSection(),
-                      HomeFeatureGrid(items: data.features),
-                     SizedBox(height: 16.h),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: Container(
-                height: 20.h,
-                decoration: BoxDecoration(
-                  color: HomeDashboardTheme.bannerDark,
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(24.r),
-                    bottomRight: Radius.circular(24.r),
-                  ),
-                ),
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: ColoredBox(
-                color: HomeDashboardTheme.background,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Obx(
-                      () => HomeGreetingSection(
-                        greeting: controller.userGreeting.value,
+        return Obx(() {
+          final miniBarInset =
+              MusicMiniPlayerBar.bottomInsetForHomeSession(context);
+
+          return Padding(
+            padding: EdgeInsets.only(bottom: miniBarInset),
+            child: AppRefreshView(
+              onRefresh: controller.refreshDashboard,
+              child: CustomScrollView(
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: ColoredBox(
+                      color: HomeDashboardTheme.bannerDark,
+                      child: Padding(
+                        padding:
+                            EdgeInsets.only(top: AppSafeInsets.top(context)),
+                        child: Column(
+                          children: [
+                            const HomeSearchBar(),
+                            const HomeBannerSection(),
+                            HomeFeatureGrid(items: data.features),
+                            SizedBox(height: 16.h),
+                          ],
+                        ),
                       ),
                     ),
-                    HomeQuickActionGrid(actions: data.quickActions),
-                    Obx(
-                      () => HomeStoreMetricsCard(
-                        storeName: data.storeName,
-                        selectedTab: controller.selectedMetricTab.value,
-                        tabs: HomeController.metricTabs,
-                        metrics: controller.currentMetrics,
-                        details: data.metricDetails,
-                        onTabSelected: controller.selectMetricTab,
+                  ),
+                  SliverToBoxAdapter(
+                    child: Container(
+                      height: 20.h,
+                      decoration: BoxDecoration(
+                        color: HomeDashboardTheme.bannerDark,
+                        borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(24.r),
+                          bottomRight: Radius.circular(24.r),
+                        ),
                       ),
                     ),
-                    HomeServiceGrid(items: data.services),
-                    HomeContactList(items: data.contacts),
-                    HomeNewsList(items: data.news),
-                    _LearningReportEntry(
-                      onTap: () => Get.toNamed(RoutePath.homeLearningReport),
+                  ),
+                  SliverToBoxAdapter(
+                    child: ColoredBox(
+                      color: HomeDashboardTheme.background,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Obx(
+                            () => HomeGreetingSection(
+                              greeting: controller.userGreeting.value,
+                            ),
+                          ),
+                          HomeQuickActionGrid(actions: data.quickActions),
+                          Obx(
+                            () => HomeStoreMetricsCard(
+                              storeName: data.storeName,
+                              selectedTab:
+                                  controller.selectedMetricTab.value,
+                              tabs: HomeController.metricTabs,
+                              metrics: controller.currentMetrics,
+                              details: data.metricDetails,
+                              onTabSelected: controller.selectMetricTab,
+                            ),
+                          ),
+                          HomeServiceGrid(items: data.services),
+                          HomeContactList(items: data.contacts),
+                          HomeNewsList(items: data.news),
+                          _LearningReportEntry(
+                            onTap: () =>
+                                Get.toNamed(RoutePath.homeLearningReport),
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-            ],
-          ),
-        );
+          );
+        });
       }),
     );
   }

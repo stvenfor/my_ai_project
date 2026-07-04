@@ -5,6 +5,8 @@ import 'package:module_auth/user/controller/auth_controller.dart';
 import 'package:module_auth/session/auth_session.dart';
 import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_linking/navigation/main_tab_controller.dart';
+import 'package:module_music/controller/music_playback_controller.dart';
+import 'package:module_music/widgets/music_mini_player_bar.dart';
 import 'package:module_route/module/module_registry.dart';
 import 'package:module_route/route/route_path.dart';
 import 'package:module_sample/l10n/app_localizations.dart';
@@ -104,6 +106,7 @@ class _MainPageState extends State<MainPage> {
 
     final safeIndex = _currentIndex.clamp(0, tabs.length - 1);
     final pages = tabs.map((tab) => tab.page).toList();
+    final isHomeTab = tabs[safeIndex].moduleId == 'home';
 
     return ImmersiveAnnotated(
       child: AdaptiveScaffold(
@@ -113,17 +116,11 @@ class _MainPageState extends State<MainPage> {
             index: safeIndex,
             children: pages,
           ),
-          bottomNavigationBar: NavigationBar(
+          bottomNavigationBar: _PhoneBottomNavigationBar(
             selectedIndex: safeIndex,
+            tabs: tabs,
+            showMiniPlayer: isHomeTab,
             onDestinationSelected: (index) => _onTabSelected(index, tabs),
-            destinations: [
-              for (final tab in tabs)
-                NavigationDestination(
-                  icon: Icon(tab.icon),
-                  selectedIcon: Icon(tab.selectedIcon),
-                  label: tab.label,
-                ),
-            ],
           ),
         ),
         tablet: Scaffold(
@@ -145,9 +142,15 @@ class _MainPageState extends State<MainPage> {
               ),
               const VerticalDivider(width: 1),
               Expanded(
-                child: IndexedStack(
-                  index: safeIndex,
-                  children: pages,
+                child: Stack(
+                  alignment: Alignment.bottomCenter,
+                  children: [
+                    IndexedStack(
+                      index: safeIndex,
+                      children: pages,
+                    ),
+                    if (isHomeTab) const MusicMiniPlayerBar(),
+                  ],
                 ),
               ),
             ],
@@ -155,6 +158,62 @@ class _MainPageState extends State<MainPage> {
         ),
       ),
     );
+  }
+}
+
+/// 手机底部：迷你播放条（仅首页 Tab）叠在 [NavigationBar] 上方，避免被 Tab 遮挡。
+class _PhoneBottomNavigationBar extends StatelessWidget {
+  const _PhoneBottomNavigationBar({
+    required this.selectedIndex,
+    required this.tabs,
+    required this.showMiniPlayer,
+    required this.onDestinationSelected,
+  });
+
+  final int selectedIndex;
+  final List<_TabConfig> tabs;
+  final bool showMiniPlayer;
+  final ValueChanged<int> onDestinationSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final miniVisible = showMiniPlayer && _hasActiveMusicSession();
+
+      return Material(
+        color: Theme.of(context).colorScheme.surface,
+        elevation: miniVisible ? 8 : 0,
+        child: SafeArea(
+          top: false,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (miniVisible) const MusicMiniPlayerBar(),
+              NavigationBar(
+                selectedIndex: selectedIndex,
+                onDestinationSelected: onDestinationSelected,
+                destinations: [
+                  for (final tab in tabs)
+                    NavigationDestination(
+                      icon: Icon(tab.icon),
+                      selectedIcon: Icon(tab.selectedIcon),
+                      label: tab.label,
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    });
+  }
+
+  bool _hasActiveMusicSession() {
+    if (!Get.isRegistered<MusicPlaybackController>()) return false;
+    final playback = Get.find<MusicPlaybackController>();
+    playback.playerState.value;
+    playback.currentIndex.value;
+    return playback.hasActiveSession;
   }
 }
 
