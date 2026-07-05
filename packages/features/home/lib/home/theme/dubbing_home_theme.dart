@@ -14,6 +14,16 @@ abstract final class DubbingHomeTheme {
   static const sectionTitleSize = 18.0;
   static const cardRadius = 12.0;
   static const thumbRadius = 8.0;
+
+  // 热搜榜详情页
+  static const hotRankHeaderPink = Color(0xFFFFF0F5);
+  static const hotRankSidebarBg = Color(0xFFF7F8FA);
+  static const hotRankSidebarActive = Colors.white;
+  static const hotRankRankGold = Color(0xFFFFC107);
+  static const hotRankRankSilver = Color(0xFFCFD8DC);
+  static const hotRankRankBronze = Color(0xFFFFCCBC);
+  static const hotRankRankDefault = Color(0xFFBDBDBD);
+  static const hotRankDropdownShadow = Color(0x1A000000);
 }
 
 enum HotRankCardTheme {

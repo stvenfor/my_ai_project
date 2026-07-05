@@ -1,183 +1,191 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:module_common_ui/module_common_ui.dart';
-import 'package:module_home/home/model/dubbing_home_model.dart';
+import 'package:module_home/home/controller/hot_rank_detail_controller.dart';
+import 'package:module_home/home/model/hot_rank_detail_model.dart';
 import 'package:module_home/home/theme/dubbing_home_theme.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:module_home/home/view/widgets/hot_rank/hot_rank_age_filter.dart';
+import 'package:module_home/home/view/widgets/hot_rank/hot_rank_list_item.dart';
+import 'package:module_home/home/view/widgets/hot_rank/hot_rank_sidebar.dart';
 
-class HotRankDetailPage extends StatelessWidget {
+class HotRankDetailPage extends GetView<HotRankDetailController> {
   const HotRankDetailPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final board = Get.arguments as DubbingHomeHotRankBoard?;
-
-    if (board == null) {
-      return AppPageScaffold(
-        layout: AppPageLayout.edgeToEdge,
-        backgroundColor: DubbingHomeTheme.background,
-        body: const Center(child: Text('榜单数据不存在')),
-      );
+    if (!Get.isRegistered<HotRankDetailController>()) {
+      HotRankDetailBinding().dependencies();
     }
 
     return AppPageScaffold(
       layout: AppPageLayout.edgeToEdge,
       backgroundColor: DubbingHomeTheme.background,
-      body: Column(
-        children: [
-          AppNavBar(
-            title: '${board.title} TOP 10',
-            showBackButton: true,
-            onBack: () => Get.back<void>(),
-            backgroundColor: board.theme.top,
-            foregroundColor: DubbingHomeTheme.titleBlack,
+      body: Obx(() {
+        final pageState = controller.state.value;
+        if (pageState == null) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final items = pageState.currentItems.toList();
+
+        return GestureDetector(
+          onTap: controller.closeAgeFilterMenu,
+          behavior: HitTestBehavior.translucent,
+          child: Column(
+            children: [
+              _HotRankHeader(pageState: pageState),
+              Expanded(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const HotRankSidebar(),
+                    Expanded(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: DubbingHomeTheme.background,
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(12.r),
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.fromLTRB(12.w, 10.h, 12.w, 4.h),
+                              child: Align(
+                                alignment: Alignment.centerRight,
+                                child: const HotRankAgeFilterBar(),
+                              ),
+                            ),
+                            Expanded(
+                              child: ListView.separated(
+                                padding: EdgeInsets.only(bottom: 24.h),
+                                itemCount: items.length,
+                                separatorBuilder: (_, __) => Divider(
+                                  height: 1,
+                                  indent: 12.w,
+                                  endIndent: 12.w,
+                                  color: DubbingHomeTheme.divider,
+                                ),
+                                itemBuilder: (context, index) {
+                                  final item = items[index];
+                                  return HotRankListItem(
+                                    item: item,
+                                    onTap: () => controller.onItemTap(item),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          Expanded(
-            child: ListView.separated(
-              padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 24.h),
-              itemCount: board.items.length,
-              separatorBuilder: (_, __) => SizedBox(height: 12.h),
-              itemBuilder: (context, index) {
-                final item = board.items[index];
-                return _HotRankDetailRow(
-                  item: item,
-                  theme: board.theme,
-                  onTap: () {
-                    Get.toNamed<void>(
-                      RoutePath.dubbingVideoDetail,
-                      arguments: {'id': item.id},
-                    );
-                  },
-                );
-              },
-            ),
-          ),
-        ],
-      ),
+        );
+      }),
     );
   }
 }
 
-class _HotRankDetailRow extends StatelessWidget {
-  const _HotRankDetailRow({
-    required this.item,
-    required this.theme,
-    required this.onTap,
-  });
+class _HotRankHeader extends StatelessWidget {
+  const _HotRankHeader({required this.pageState});
 
-  final DubbingHomeHotRankItem item;
-  final HotRankCardTheme theme;
-  final VoidCallback onTap;
+  final HotRankDetailState pageState;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        padding: EdgeInsets.all(12.w),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12.r),
-          boxShadow: [
-            BoxShadow(
-              color: DubbingHomeTheme.cardShadow,
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
+    final top = AppSafeInsets.top(context);
+
+    return Container(
+      padding: EdgeInsets.fromLTRB(8.w, top + 4.h, 8.w, 16.h),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            DubbingHomeTheme.hotRankHeaderPink,
+            Colors.white,
           ],
+          stops: [0.0, 1.0],
         ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Stack(
-              clipBehavior: Clip.none,
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8.r),
-                  child: Image.asset(
-                    DubbingHomeAssets.path(item.coverAsset),
-                    package: DubbingHomeAssets.package,
-                    width: 72.w,
-                    height: 72.w,
-                    fit: BoxFit.cover,
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              GestureDetector(
+                onTap: () => Get.back<void>(),
+                behavior: HitTestBehavior.opaque,
+                child: SizedBox(
+                  width: 44.w,
+                  height: 44.w,
+                  child: Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    size: 20.sp,
+                    color: DubbingHomeTheme.titleBlack,
                   ),
                 ),
-                if (item.rank <= 3)
-                  Positioned(
-                    left: -4.w,
-                    top: -4.h,
-                    child: Image.asset(
-                      DubbingHomeAssets.rankBadgeAsset(item.rank),
-                      package: DubbingHomeAssets.package,
-                      width: 22.w,
-                      height: 24.h,
-                      fit: BoxFit.contain,
-                    ),
-                  )
-                else
-                  Positioned(
-                    left: -4.w,
-                    top: -4.h,
-                    child: Container(
-                      width: 20.w,
-                      height: 20.w,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: theme.bottom,
-                        borderRadius: BorderRadius.circular(4.r),
-                      ),
-                      child: Text(
-                        '${item.rank}',
-                        style: TextStyle(
-                          fontSize: 11.sp,
-                          fontWeight: FontWeight.w600,
-                          color: DubbingHomeTheme.titleBlack,
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 15.sp,
-                      fontWeight: FontWeight.w600,
-                      color: DubbingHomeTheme.titleBlack,
-                    ),
-                  ),
-                  SizedBox(height: 6.h),
-                  Text(
-                    item.subtitle,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 13.sp,
-                      color: DubbingHomeTheme.subtitleGray,
-                      height: 1.4,
-                    ),
-                  ),
-                  SizedBox(height: 6.h),
-                  Text(
-                    '热度 ${item.heat}',
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      color: DubbingHomeTheme.subtitleGray,
-                    ),
-                  ),
-                ],
               ),
+              const Spacer(),
+              GestureDetector(
+                onTap: () {},
+                behavior: HitTestBehavior.opaque,
+                child: SizedBox(
+                  width: 44.w,
+                  height: 44.w,
+                  child: Image.asset(
+                    HotRankDetailAssets.path('icon_share.png'),
+                    package: HotRankDetailAssets.package,
+                    width: 22.w,
+                    height: 22.w,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 4.h),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset(
+                HotRankDetailAssets.path('wheat_large_left.png'),
+                package: HotRankDetailAssets.package,
+                width: 28.w,
+                height: 36.h,
+                fit: BoxFit.contain,
+              ),
+              SizedBox(width: 8.w),
+              Text(
+                pageState.title,
+                style: TextStyle(
+                  fontSize: 22.sp,
+                  fontWeight: FontWeight.w700,
+                  color: DubbingHomeTheme.titleBlack,
+                ),
+              ),
+              SizedBox(width: 8.w),
+              Image.asset(
+                HotRankDetailAssets.path('wheat_large_right.png'),
+                package: HotRankDetailAssets.package,
+                width: 28.w,
+                height: 36.h,
+                fit: BoxFit.contain,
+              ),
+            ],
+          ),
+          SizedBox(height: 6.h),
+          Text(
+            pageState.subtitle,
+            style: TextStyle(
+              fontSize: 12.sp,
+              color: DubbingHomeTheme.subtitleGray,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
