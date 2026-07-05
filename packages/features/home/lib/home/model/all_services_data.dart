@@ -106,6 +106,11 @@ abstract final class AllServicesData {
     assetName: 'exhibition_hall_shooting.png',
     routePath: RoutePath.dubbingWorkList,
   );
+  static const _membershipRenew = AllServiceItem(
+    label: '会员续费',
+    assetName: 'marketing.png',
+    routePath: RoutePath.payMembership,
+  );
 
   static const defaultFavoriteItems = <AllServiceItem>[
     _introductionAnimation,
@@ -158,6 +163,7 @@ abstract final class AllServicesData {
     AllServiceSection(
       title: '其他服务',
       items: [
+        _membershipRenew,
         _help,
         _feedback,
         _navigationDrawer,

@@ -118,7 +118,7 @@ class MineController extends GetxController {
 
   bool get isLoggedIn => AuthSession.isLoggedIn;
 
-  void onInfoTap() => UiKitInitializer.toast('关于我们');
+  void onInfoTap() => Get.toNamed(RoutePath.personalizedSettings);
 
   void onCalendarTap() => UiKitInitializer.toast('签到日历');
 
