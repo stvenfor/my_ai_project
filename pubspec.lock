@@ -1394,6 +1394,15 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "0.27.7"
+  scan:
+    dependency: "direct overridden"
+    description:
+      path: "."
+      ref: master
+      resolved-ref: "8081f1816cfe4b42c6e19f5b37b753a8383e8be0"
+      url: "https://gitcode.com/CPF-Flutter/fluttertpc_scan.git"
+    source: git
+    version: "1.6.0"
   screen_brightness:
     dependency: transitive
     description:

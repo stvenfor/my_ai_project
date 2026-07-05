@@ -8,10 +8,13 @@ PODS:
     - Flutter
     - OrderedSet (~> 6.0.3)
   - OrderedSet (6.0.3)
+  - scan (0.0.1):
+    - Flutter
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
   - flutter_inappwebview_ios (from `.symlinks/plugins/flutter_inappwebview_ios/ios`)
+  - scan (from `.symlinks/plugins/scan/ios`)
 
 SPEC REPOS:
   trunk:
@@ -22,11 +25,14 @@ EXTERNAL SOURCES:
     :path: Flutter
   flutter_inappwebview_ios:
     :path: ".symlinks/plugins/flutter_inappwebview_ios/ios"
+  scan:
+    :path: ".symlinks/plugins/scan/ios"
 
 SPEC CHECKSUMS:
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   flutter_inappwebview_ios: b89ba3482b96fb25e00c967aae065701b66e9b99
   OrderedSet: e539b66b644ff081c73a262d24ad552a69be3a94
+  scan: 28e4f67b9b0d63ccd5c649acc3d6aaf94c0a7a81
 
 PODFILE CHECKSUM: 3c63482e143d1b91d2d2560aee9fb04ecc74ac7e
 

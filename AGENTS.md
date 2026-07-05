@@ -91,6 +91,10 @@ Cannot hit test a render box with no size
 
 ## 三方库鸿蒙（OpenHarmony）适配
 
+### Flutter SDK
+
+本项目使用 [CPF-Flutter/flutter_flutter](https://gitcode.com/CPF-Flutter/flutter_flutter/tree/3.35.8-ohos-1.0.1) **3.35.8-ohos-1.0.1**（含 `TargetPlatform.ohos`）。IDE 与构建请指向 `.fvm/versions/custom_3.35-ohos`（见 [`.vscode/settings.json`](.vscode/settings.json)），**不要**用标准 pub.dev Flutter 编此项目，否则 CPF 插件会因缺少 `ohos` 平台报错。
+
 ### 原则
 
 带原生能力的第三方库**必须**具备鸿蒙适配后再引入或升级，不能仅依赖 pub.dev 官方版本。
@@ -120,3 +124,5 @@ Cannot hit test a render box with no size
 - `MediaSourceBottomSheet` — 相册/相机来源选择弹框（[`media_source_bottom_sheet.dart`](packages/commons/ui/lib/dialog/media_source_bottom_sheet.dart)）
 - `image_picker` / `image_picker_ohos` — 三方库声明在 `module_utils`，鸿蒙 override 在根 [`pubspec.yaml`](pubspec.yaml)
 - `permission_handler_ohos` — 权限动态申请
+- `ScanUtils` / `ScanPage` — 相机实时扫码、相册图片解析（[`scan_utils.dart`](packages/commons/toolkit/lib/utils/scan_utils.dart)）
+- `scan` — 声明在 `module_utils`（`^1.6.0`），根 [`pubspec.yaml`](pubspec.yaml) `dependency_overrides` 指向 [CPF-Flutter/fluttertpc_scan](https://gitcode.com/CPF-Flutter/fluttertpc_scan)（iOS / Android / Harmony 统一 git 源，需在上述鸿蒙 Flutter SDK 下编译）

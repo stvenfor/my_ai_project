@@ -33,6 +33,10 @@
 	</dict>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>用于扫描并连接附近的蓝牙设备</string>
+	<key>NSCameraUsageDescription</key>
+	<string>用于扫描二维码、条形码及拍摄聊天图片</string>
+	<key>io.flutter.embedded_views_preview</key>
+	<true/>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

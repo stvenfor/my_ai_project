@@ -97,4 +97,8 @@ dependency_overrides:
       url: https://gitcode.com/CPF-Flutter/flutter_packages.git
       ref: br_image_picker-v1.1.2_ohos
       path: packages/image_picker/image_picker_ohos
+  scan:
+    git:
+      url: https://gitcode.com/CPF-Flutter/fluttertpc_scan.git
+      ref: master
   # audioplayers OHOS override 仅用于鸿蒙 Flutter SDK 构建，见 docs/flutter-example-apps-music-migration.md
