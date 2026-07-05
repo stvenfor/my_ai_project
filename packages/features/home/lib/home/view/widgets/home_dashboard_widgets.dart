@@ -17,22 +17,26 @@ class HomeSearchBar extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: Container(
-              height: 40.h,
-              padding: EdgeInsets.symmetric(horizontal: 14.w),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(20.r),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.search, size: 20.sp, color: Colors.white70),
-                  SizedBox(width: 8.w),
-                  Text(
-                    '搜索客户、订单、资讯',
-                    style: TextStyle(fontSize: 14.sp, color: Colors.white60),
-                  ),
-                ],
+            child: GestureDetector(
+              onTap: () => Get.toNamed<void>(RoutePath.homeSearch),
+              behavior: HitTestBehavior.opaque,
+              child: Container(
+                height: 40.h,
+                padding: EdgeInsets.symmetric(horizontal: 14.w),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(20.r),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.search, size: 20.sp, color: Colors.white70),
+                    SizedBox(width: 8.w),
+                    Text(
+                      '搜索客户、订单、资讯',
+                      style: TextStyle(fontSize: 14.sp, color: Colors.white60),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

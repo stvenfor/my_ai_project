@@ -5,6 +5,7 @@ import 'package:module_home/home/view/all_services_page.dart';
 import 'package:module_home/home/view/check_in_mall_page.dart';
 import 'package:module_home/home/view/home_learning_report_page.dart';
 import 'package:module_home/home/view/home_page.dart';
+import 'package:module_home/home/view/search_page.dart';
 import 'package:module_home/home/web/home_web_handlers.dart';
 import 'package:module_core/core.dart';
 import 'package:module_route/module/feature_module.dart';
@@ -35,6 +36,7 @@ class HomeModule extends FeatureModule {
         RoutePath.homeLearningReport: (_) => const HomeLearningReportPage(),
         RoutePath.homeCheckInMall: (_) => const CheckInMallPage(),
         RoutePath.homeAllServices: (_) => const AllServicesPage(),
+        RoutePath.homeSearch: (_) => const SearchPage(),
       };
 
   @override
