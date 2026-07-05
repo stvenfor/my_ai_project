@@ -106,6 +106,11 @@ abstract final class AllServicesData {
     assetName: 'exhibition_hall_shooting.png',
     routePath: RoutePath.dubbingWorkList,
   );
+  static const _dubbingHome = AllServiceItem(
+    label: '配音首页',
+    assetName: 'dubbing_home.png',
+    routePath: RoutePath.homeDubbingFeed,
+  );
   static const _membershipRenew = AllServiceItem(
     label: '会员续费',
     assetName: 'marketing.png',
@@ -156,6 +161,7 @@ abstract final class AllServicesData {
       title: '教学服务',
       items: [
         _classroom,
+        _dubbingHome,
         _dubbingVideoList,
         _dubbingWorkList,
       ],

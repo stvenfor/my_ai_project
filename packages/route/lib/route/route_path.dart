@@ -7,6 +7,8 @@ class RoutePath{
   static const String homeCheckInMall = '/home/check_in_mall';
   static const String homeAllServices = '/home/all_services';
   static const String homeSearch = '/home/search';
+  static const String homeDubbingFeed = '/home/dubbing_feed';
+  static const String homeHotRankDetail = '/home/hot_rank_detail';
   static const String login = '/login';
   static const String loginPassword = '/login/password';
   static const String loginOtp = '/login/otp';

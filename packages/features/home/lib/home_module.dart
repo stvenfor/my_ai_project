@@ -3,8 +3,10 @@ import 'package:get/get.dart';
 import 'package:module_home/home/api/home_http_config.dart';
 import 'package:module_home/home/view/all_services_page.dart';
 import 'package:module_home/home/view/check_in_mall_page.dart';
+import 'package:module_home/home/view/dubbing_home_page.dart';
 import 'package:module_home/home/view/home_learning_report_page.dart';
 import 'package:module_home/home/view/home_page.dart';
+import 'package:module_home/home/view/hot_rank_detail_page.dart';
 import 'package:module_home/home/view/search_page.dart';
 import 'package:module_home/home/web/home_web_handlers.dart';
 import 'package:module_core/core.dart';
@@ -37,6 +39,8 @@ class HomeModule extends FeatureModule {
         RoutePath.homeCheckInMall: (_) => const CheckInMallPage(),
         RoutePath.homeAllServices: (_) => const AllServicesPage(),
         RoutePath.homeSearch: (_) => const SearchPage(),
+        RoutePath.homeDubbingFeed: (_) => const DubbingHomePage(),
+        RoutePath.homeHotRankDetail: (_) => const HotRankDetailPage(),
       };
 
   @override
