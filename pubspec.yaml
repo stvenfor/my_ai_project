@@ -34,6 +34,8 @@ dependencies:
     path: ./packages/commons/storage
   module_home:
     path: ./packages/features/home
+  module_classroom:
+    path: ./packages/features/classroom
   module_http:
     path: ./packages/commons/network
   module_live:

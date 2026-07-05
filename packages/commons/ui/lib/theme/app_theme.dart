@@ -102,4 +102,24 @@ class ImmersiveHelper {
       overlayStyle(brightness: brightness, immersive: immersive),
     );
   }
+
+  /// 视频播放页：隐藏状态栏时间与系统图标（immersiveSticky）。
+  static Future<void> applyPlayback() async {
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
+        systemNavigationBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        systemNavigationBarIconBrightness: Brightness.light,
+      ),
+    );
+  }
+
+  /// 离开播放页后恢复为应用默认 edgeToEdge 沉浸式。
+  static Future<void> restoreFromPlayback({
+    required Brightness brightness,
+  }) async {
+    await apply(brightness: brightness, immersive: true);
+  }
 }

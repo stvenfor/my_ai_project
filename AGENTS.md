@@ -126,3 +126,82 @@ Cannot hit test a render box with no size
 - `permission_handler_ohos` — 权限动态申请
 - `ScanUtils` / `ScanPage` — 相机实时扫码、相册图片解析（[`scan_utils.dart`](packages/commons/toolkit/lib/utils/scan_utils.dart)）
 - `scan` — 声明在 `module_utils`（`^1.6.0`），根 [`pubspec.yaml`](pubspec.yaml) `dependency_overrides` 指向 [CPF-Flutter/fluttertpc_scan](https://gitcode.com/CPF-Flutter/fluttertpc_scan)（iOS / Android / Harmony 统一 git 源，需在上述鸿蒙 Flutter SDK 下编译）
+
+## 视频播放页沉浸式
+
+### 要求
+
+凡**以视频播放为主**的页面（全屏播放、短视频 Feed、详情页顶部播放区等），须：
+
+1. **隐藏状态栏内容**（时间、电量、信号等），使用 `SystemUiMode.immersiveSticky`，不要用仅 `edgeToEdge`（透明但仍显示状态栏文字）。
+2. **画面铺满顶部**，视频区域延伸至屏幕顶边，不在状态栏下方留出灰/黑空白条。
+3. **离开播放页时恢复**应用默认 `ImmersiveHelper.apply(immersive: true)`（edgeToEdge），避免影响其他页面。
+
+### 正确写法
+
+用 [`VideoPlaybackImmersiveScope`](packages/commons/ui/lib/layout/video_playback_immersive_scope.dart) 包裹播放页根节点：
+
+```dart
+return VideoPlaybackImmersiveScope(
+  child: AppPageScaffold(
+    layout: AppPageLayout.edgeToEdge, // 或 fullBleed（纯播放页）
+    backgroundColor: Colors.black,
+    body: ...,
+  ),
+);
+```
+
+顶部内嵌播放区（如详情页 `PlayableVideoHeader`）：
+
+- `SizedBox` 高度为播放区高度即可，**不要**再加 `MediaQuery.padding.top` 把视频整体下移。
+- 返回按钮用 `AppSafeInsets.top(context)` 定位，避开刘海/挖孔。
+- 底部须使用 [`AppVideoControlsBar`](packages/commons/toolkit/lib/utils/app_video_controls_bar.dart)：播放/暂停、进度条、当前时间/总时长。
+
+```dart
+Positioned(
+  left: 0,
+  right: 0,
+  bottom: 0,
+  child: AppVideoControlsBar(controller: controller),
+),
+```
+
+```dart
+// ✅ 正确：视频铺满播放区，按钮按安全区偏移
+SizedBox(
+  height: 220,
+  child: Stack(
+    fit: StackFit.expand,
+    children: [
+      AppVideoPlayer.view(controller, fit: BoxFit.cover),
+      Positioned(
+        top: AppSafeInsets.top(context) + 4,
+        left: 4,
+        child: BackButton(),
+      ),
+    ],
+  ),
+);
+
+// ❌ 错误：为状态栏单独留白，沉浸式下会出现顶部黑条
+Positioned.fill(top: MediaQuery.paddingOf(context).top, child: video),
+```
+
+### API 说明
+
+| API | 用途 |
+|-----|------|
+| `ImmersiveHelper.applyPlayback()` | 进入播放页：immersiveSticky + 浅色状态栏图标 |
+| `ImmersiveHelper.restoreFromPlayback()` | 离开播放页：恢复 edgeToEdge |
+| `VideoPlaybackImmersiveScope` | 自动在 `initState` / `dispose` 调用上述两者 |
+
+**底部固定操作条**：白底须延伸至 Home Indicator 区域，用 `padding: EdgeInsets.only(bottom: 10 + AppSafeInsets.bottom(context))`，**不要**仅用 `SafeArea` 包裹（会在底部露出页面背景色）。
+
+### 参考实现
+
+- `packages/commons/ui/lib/layout/video_playback_immersive_scope.dart`
+- `packages/commons/toolkit/lib/utils/app_video_controls_bar.dart` — 底部播放控制条
+- `packages/features/video/lib/dubbing/widgets/playable_video_header.dart` — 详情顶部播放区
+- `packages/features/video/lib/dubbing/view/dubbing_video_detail_page.dart` — 配音视频详情
+- `packages/features/video/lib/short_video/view/short_video_play_page.dart` — 短视频播放
+- `packages/features/community/lib/community/view/video_play_page.dart` — 社区单视频播放

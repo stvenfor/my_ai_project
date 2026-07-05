@@ -59,4 +59,22 @@ class RoutePath{
   // 音乐播放器（Flutter Music Player P1）
   static const String musicList = '/music/list';
   static const String musicNowPlaying = '/music/now_playing';
+
+  // 班级教学
+  static const String classroomMyClass = '/classroom/my_class';
+  static const String classroomHomeworkStats = '/classroom/homework_stats';
+  static const String classroomHomeworkDetailTeacher =
+      '/classroom/homework/detail_teacher';
+  static const String classroomHomeworkDetailStudent =
+      '/classroom/homework/detail_student';
+  static const String classroomDubbingHomework = '/classroom/homework/dubbing';
+  static const String classroomHomeworkReview = '/classroom/homework/review';
+  static const String classroomClaimGift = '/classroom/gift/claim';
+  static const String classroomVideoDetail = '/classroom/video/detail';
+
+  // 配音视频/作品（全部服务入口）
+  static const String dubbingVideoList = '/video/dubbing/videos';
+  static const String dubbingVideoDetail = '/video/dubbing/videos/detail';
+  static const String dubbingWorkList = '/video/dubbing/works';
+  static const String dubbingWorkDetail = '/video/dubbing/works/detail';
 }

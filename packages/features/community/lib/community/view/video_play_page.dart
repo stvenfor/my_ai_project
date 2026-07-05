@@ -51,37 +51,42 @@ class _VideoPlayPageState extends State<VideoPlayPage> {
   void _togglePlay() {
     final c = _controller;
     if (c == null) return;
-    setState(() {
-      if (c.value.isPlaying) {
-        c.pause();
-      } else {
-        c.play();
-      }
-    });
+    if (c.value.isPlaying) {
+      c.pause();
+    } else {
+      c.play();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return AppPageScaffold(
-      layout: AppPageLayout.fullBleed,
-      backgroundColor: Colors.black,
-      navBar: const AppNavBar(
-        showBackButton: true,
-        style: AppNavBarStyle.dark,
-      ),
-      body: Center(
-        child: _failed
-            ? const Text('视频加载失败', style: TextStyle(color: Colors.white))
+    return VideoPlaybackImmersiveScope(
+      child: AppPageScaffold(
+        layout: AppPageLayout.fullBleed,
+        backgroundColor: Colors.black,
+        navBar: const AppNavBar(
+          showBackButton: true,
+          style: AppNavBarStyle.dark,
+        ),
+        body: _failed
+            ? const Center(
+                child: Text('视频加载失败', style: TextStyle(color: Colors.white)),
+              )
             : !_initialized || _controller == null
-                ? const CircularProgressIndicator(color: Colors.white)
+                ? const Center(child: CircularProgressIndicator(color: Colors.white))
                 : Stack(
-                    alignment: Alignment.center,
+                    fit: StackFit.expand,
                     children: [
-                      AppVideoPlayer.view(_controller!),
-                      AppVideoPlayer.playPauseOverlay(
-                        controller: _controller!,
-                        isPlaying: _controller!.value.isPlaying,
-                        onToggle: _togglePlay,
+                      GestureDetector(
+                        onTap: _togglePlay,
+                        behavior: HitTestBehavior.opaque,
+                        child: Center(child: AppVideoPlayer.view(_controller!)),
+                      ),
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        child: AppVideoControlsBar(controller: _controller!),
                       ),
                     ],
                   ),

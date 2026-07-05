@@ -20,6 +20,7 @@ export 'layout/app_nav_bar_style.dart';
 export 'layout/app_page_layout.dart';
 export 'layout/app_page_scaffold.dart';
 export 'layout/app_safe_insets.dart';
+export 'layout/video_playback_immersive_scope.dart';
 export 'layout/responsive_layout.dart';
 export 'screen/app_screen_util.dart';
 export 'package:module_core/service/app_loading.dart';

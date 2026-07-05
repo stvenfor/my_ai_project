@@ -91,6 +91,21 @@ abstract final class AllServicesData {
     assetName: 'small_video.png',
     routePath: RoutePath.bfuiMediterraneanDiet,
   );
+  static const _classroom = AllServiceItem(
+    label: '班级教学',
+    assetName: 'intelligence_task.png',
+    routePath: RoutePath.classroomMyClass,
+  );
+  static const _dubbingVideoList = AllServiceItem(
+    label: '视频列表',
+    assetName: 'small_video.png',
+    routePath: RoutePath.dubbingVideoList,
+  );
+  static const _dubbingWorkList = AllServiceItem(
+    label: '作品列表',
+    assetName: 'exhibition_hall_shooting.png',
+    routePath: RoutePath.dubbingWorkList,
+  );
 
   static const defaultFavoriteItems = <AllServiceItem>[
     _introductionAnimation,
@@ -130,6 +145,14 @@ abstract final class AllServicesData {
         _workoutView,
         _mediterraneanDiet,
         _courseInfo,
+      ],
+    ),
+    AllServiceSection(
+      title: '教学服务',
+      items: [
+        _classroom,
+        _dubbingVideoList,
+        _dubbingWorkList,
       ],
     ),
     AllServiceSection(

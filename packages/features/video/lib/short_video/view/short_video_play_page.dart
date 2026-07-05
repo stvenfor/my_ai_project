@@ -44,28 +44,30 @@ class ShortVideoPlayPage extends StatelessWidget {
 
     final index = initialIndex.clamp(0, items.length - 1);
 
-    return AppPageScaffold(
-      layout: AppPageLayout.edgeToEdge,
-      backgroundColor: Colors.black,
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          ShortVideoPlayerKit.single(
-            items: items,
-            initialIndex: index,
-            overlayBuilder: _buildOverlay,
-            onDoubleTapLike: (i) => UiKitInitializer.toast('点赞（开发中）'),
-            onPlaybackEvent: kDebugMode ? _logPlaybackEvent : null,
-          ),
-          Positioned(
-            left: 4.w,
-            top: AppSafeInsets.top(context) + 4.h,
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
-              onPressed: Get.back,
+    return VideoPlaybackImmersiveScope(
+      child: AppPageScaffold(
+        layout: AppPageLayout.edgeToEdge,
+        backgroundColor: Colors.black,
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            ShortVideoPlayerKit.single(
+              items: items,
+              initialIndex: index,
+              overlayBuilder: _buildOverlay,
+              onDoubleTapLike: (i) => UiKitInitializer.toast('点赞（开发中）'),
+              onPlaybackEvent: kDebugMode ? _logPlaybackEvent : null,
             ),
-          ),
-        ],
+            Positioned(
+              left: 4.w,
+              top: AppSafeInsets.top(context) + 4.h,
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+                onPressed: Get.back,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

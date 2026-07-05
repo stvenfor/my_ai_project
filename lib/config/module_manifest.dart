@@ -2,6 +2,7 @@
 library module_manifest;
 
 import 'package:module_bfui/bfui_module.dart';
+import 'package:module_classroom/classroom_module.dart';
 import 'package:module_auth/auth_module.dart';
 import 'package:module_chat/chat_module.dart';
 import 'package:module_community/community_module.dart';
@@ -18,6 +19,7 @@ import 'package:module_video/video_module.dart';
 List<FeatureModule> buildEnabledModules() {
   return [
     HomeModule(),
+    ClassroomModule(),
     ChatModule(),
     CommunityModule(),
     SettingsModule(),
