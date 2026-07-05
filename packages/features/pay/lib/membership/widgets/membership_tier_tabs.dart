@@ -11,14 +11,18 @@ class MembershipTierTabs extends GetView<MembershipRenewController> {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    final tabHeight = MembershipDimens.tabBarHeightForWidth(width);
+
     return Obx(() {
       final selected = controller.selectedTier.value;
 
       return SizedBox(
-        height: MembershipDimens.tabBarHeight,
+        height: tabHeight,
         width: double.infinity,
         child: Stack(
           fit: StackFit.expand,
+          clipBehavior: Clip.hardEdge,
           children: [
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 220),
@@ -196,14 +200,15 @@ class _TabBackgroundRow extends StatelessWidget {
           ];
 
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         for (final asset in slices)
           Expanded(
             child: Image.asset(
               asset,
               package: MembershipAssets.package,
-              height: MembershipDimens.tabBarHeight,
-              fit: BoxFit.fill,
+              fit: BoxFit.cover,
+              alignment: Alignment.topCenter,
             ),
           ),
       ],

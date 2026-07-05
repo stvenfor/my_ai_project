@@ -1,18 +1,58 @@
 import 'package:flutter/material.dart';
+import 'package:module_common_ui/layout/app_safe_insets.dart';
 import 'package:module_pay/membership/model/membership_models.dart';
 
 /// 会员页尺寸 token（设计稿 375×812 @1x pt）。
 abstract final class MembershipDimens {
-  /// Tab 背景切图 188×84px，显示高度为切图逻辑高度的一半（42pt）。
-  static const double tabBarDesignWidth = 188;
+  /// Tab 背景切图 188×84px（左/中/右各 1/3，总宽 564px @3x）。
+  static const double tabBarDesignSliceWidth = 188;
   static const double tabBarDesignSliceHeight = 84;
+  static const double tabBarDesignTotalWidth = tabBarDesignSliceWidth * 3;
+  /// 历史固定高度；请优先使用 [tabBarHeightForWidth]。
   static const double tabBarHeight = 42;
+
+  static double tabBarHeightForWidth(double width) =>
+      width * tabBarDesignSliceHeight / tabBarDesignTotalWidth;
+
+  static double headerTotalHeight(BuildContext context, double width) =>
+      headerExpandedHeight(context) + tabBarHeightForWidth(width);
 
   /// 图标与字号随 Tab 高度同比缩放。
   static const double tabIconWidth = 18;
   static const double tabIconHeight = 14;
   static const double tabTitleSize = 13;
   static const double tabSubtitleSize = 8;
+
+  /// Header 内容区（不含状态栏）：顶距 + 操作行 + 间距 + 头像行 + 底距。
+  static const double headerTopPadding = 8;
+  static const double headerActionRowHeight = 38;
+  static const double headerProfileGap = 12;
+  static const double headerAvatarSize = 48;
+  static const double headerBottomPadding = 10;
+  static const double headerBodyHeight = headerTopPadding +
+      headerActionRowHeight +
+      headerProfileGap +
+      headerAvatarSize +
+      headerBottomPadding;
+
+  /// Header 背景切图 563×344 @3x。
+  static const double headerBgAspectRatio = 563 / 344;
+
+  /// 折叠导航条高度（状态栏 + 工具栏）。
+  static double collapsedNavHeight(BuildContext context) =>
+      AppSafeInsets.navBarHeight(context);
+
+  /// Header 展开总高度。
+  static double headerExpandedHeight(BuildContext context) =>
+      AppSafeInsets.top(context) + headerBodyHeight;
+
+  /// 用户信息区滚出顶部时的 scroll 阈值。
+  static double navCollapseThreshold(BuildContext context) =>
+      AppSafeInsets.top(context) +
+      headerTopPadding +
+      headerActionRowHeight +
+      headerProfileGap +
+      headerAvatarSize;
 
   /// 套餐横滑卡片（设计稿 118×148 @1x pt）。
   static const double planCardWidth = 118;

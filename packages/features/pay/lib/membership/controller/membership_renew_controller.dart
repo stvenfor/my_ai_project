@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_pay/membership/mock/membership_mock_data.dart';
@@ -12,9 +13,13 @@ class MembershipRenewController extends GetxController {
   final paymentMethod = PaymentMethodType.wechat.obs;
   final agreedToTerms = false.obs;
   final redPacketCountdown = MembershipMockData.redPacketCountdown.obs;
+  final showCollapsedNav = false.obs;
+
+  final scrollController = ScrollController();
 
   Timer? _countdownTimer;
   int _redPacketSeconds = 2 * 3600 + 32 * 60 + 59;
+  double _navCollapseThreshold = 106;
 
   MembershipUserProfile get profile => MembershipMockData.userProfile;
 
@@ -46,13 +51,30 @@ class MembershipRenewController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    scrollController.addListener(_onScroll);
     _startCountdown();
   }
 
   @override
   void onClose() {
+    scrollController.removeListener(_onScroll);
+    scrollController.dispose();
     _countdownTimer?.cancel();
     super.onClose();
+  }
+
+  void bindNavCollapseThreshold(double threshold) {
+    if (_navCollapseThreshold == threshold) return;
+    _navCollapseThreshold = threshold;
+    _onScroll();
+  }
+
+  void _onScroll() {
+    if (!scrollController.hasClients) return;
+    final show = scrollController.offset >= _navCollapseThreshold;
+    if (showCollapsedNav.value != show) {
+      showCollapsedNav.value = show;
+    }
   }
 
   void _startCountdown() {
