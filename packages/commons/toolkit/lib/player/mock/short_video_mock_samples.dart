@@ -11,6 +11,8 @@ class ShortVideoMockSamples {
     'https://picsum.photos/seed/sv_play_3/400/700',
   ];
 
+  static String coverAt(int index) => _covers[index % _covers.length];
+
   static List<ShortVideoItem> get feedItems {
     final sources = kVideoMockSources;
     return [

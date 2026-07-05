@@ -1,3 +1,4 @@
+import 'package:module_utils/player/mock/short_video_mock_samples.dart';
 import 'package:module_utils/player/mock/video_mock_sources.dart';
 import 'package:module_video/short_video/model/short_video_models.dart';
 
@@ -17,7 +18,7 @@ class ShortVideoMockData {
           type: ShortVideoCellType.video,
           id: '${sources[i].id}',
           title: sources[i].title,
-          coverUrl: null,
+          coverUrl: ShortVideoMockSamples.coverAt(i),
           videoUrl: sources[i].url,
           viewCount: 1200 + i * 337,
           duration: '${1 + i}:${10 + i * 5}',
