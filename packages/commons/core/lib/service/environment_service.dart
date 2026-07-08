@@ -12,6 +12,8 @@ abstract class EnvironmentService extends GetxService {
 
   String get baseUrl => config.baseUrl;
 
+  String get backendBaseUrl => config.backendBaseUrl;
+
   String get wsBaseUrl => config.wsBaseUrl;
 
   String get rongAppKey => config.rongAppKey;

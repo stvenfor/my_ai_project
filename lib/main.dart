@@ -66,6 +66,7 @@ class AppInitializer {
 
     if (!HttpManager.instance.isInitialized) {
       AppHttpBootstrap.initialize(
+        headerProvider: const AuthHeaderProvider(),
         enableLog: hostContext.enableHttpLog,
         maxRetries: hostContext.httpMaxRetries,
         responseParser: const WanAndroidResponseParser(),
@@ -91,6 +92,7 @@ class AppInitializer {
   static void _wireEnvironmentHttpRefresh() {
     Get.find<EnvironmentService>().onEnvChanged = (_) async {
       AppHttpBootstrap.reinitialize(
+        headerProvider: const AuthHeaderProvider(),
         enableLog: kDebugMode,
         maxRetries: 3,
         responseParser: const WanAndroidResponseParser(),
