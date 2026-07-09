@@ -1,0 +1,16 @@
+name: module_dokit_bootstrap
+description: Debug-only DoKit bootstrap for the shell app.
+publish_to: 'none'
+version: 0.0.1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  dokit:
+    path: ../dokit
+  get: ^4.7.3
+  module_route:
+    path: ../../route

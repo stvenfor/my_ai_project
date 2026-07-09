@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:module_auth/session/session_guard.dart';
 import 'package:module_auth/session/auth_session.dart';
@@ -9,9 +8,10 @@ import 'package:module_global_cache/module_global_cache.dart';
 import 'package:module_http/module_http.dart';
 import 'package:module_route/module/module_host_context.dart';
 import 'package:module_route/module/module_registry.dart';
-import 'package:module_sample/app/app.dart';
 import 'package:module_sample/app/app_binding.dart';
 import 'package:module_sample/app/app_controller.dart';
+import 'package:module_sample/bootstrap/app_runner_debug.dart'
+    if (dart.vm.product) 'package:module_sample/bootstrap/app_runner_release.dart';
 import 'package:module_linking/linking_binding.dart';
 import 'package:module_linking/linking_initializer.dart';
 import 'package:module_realtime/realtime_initializer.dart';
@@ -86,7 +86,4 @@ class AppInitializer {
   }
 }
 
-Future<void> main() async {
-  await AppInitializer.init();
-  runApp(const App());
-}
+Future<void> main() => AppRunner.launch();

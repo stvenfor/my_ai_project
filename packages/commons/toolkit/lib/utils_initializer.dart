@@ -22,7 +22,7 @@ class ModuleUtilsInitializer {
   }) async {
     if (_initialized) return;
 
-    WidgetsFlutterBinding.ensureInitialized();
+    _ensureWidgetsBinding();
     _config = config;
 
     await SpUtils.init();
@@ -61,6 +61,14 @@ class ModuleUtilsInitializer {
       throw StateError(
         'ModuleUtilsInitializer 未初始化，请在 main() 中先调用 initialize()',
       );
+    }
+  }
+
+  static void _ensureWidgetsBinding() {
+    try {
+      WidgetsBinding.instance;
+    } catch (_) {
+      WidgetsFlutterBinding.ensureInitialized();
     }
   }
 }

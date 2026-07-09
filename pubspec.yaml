@@ -60,6 +60,8 @@ dependencies:
     path: ./packages/infrastructure/realtime
   module_rongcloud_im:
     path: ./packages/infrastructure/rongcloud_im
+  module_dokit_bootstrap:
+    path: ./packages/infrastructure/dokit_bootstrap
   permission_handler_ohos:
     git:
       url: https://gitcode.com/openharmony-sig/flutter_permission_handler.git

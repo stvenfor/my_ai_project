@@ -68,8 +68,11 @@ main()
   → ModuleRegistry.bootstrap（各模块 HTTP 等）
   → AppHttpBootstrap.initialize（全局 Dio）
   → AppBinding + 各模块 Binding
-  → runApp(App) → GetMaterialApp.builder 内 UiKitInitializer.appBuilder
+  → Debug：DoKit.runApp(DoKitApp(App))；Profile/Release：runApp(App)
+  → GetMaterialApp.builder 内 UiKitInitializer.appBuilder
 ```
+
+**DoKit（仅 Debug）**：`flutter run --debug` 启动后可见悬浮调试球；鸿蒙端若原生插件不兼容会自动降级为普通 `runApp`（设置页调试入口仍可用）。
 
 ### 2.3 页面分流
 

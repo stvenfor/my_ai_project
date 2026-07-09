@@ -8,6 +8,8 @@ import 'package:module_linking/ui/in_app_push_banner_host.dart';
 import 'package:module_realtime/ui/realtime_notify_banner_host.dart';
 import 'package:module_sample/app/app_controller.dart';
 import 'package:module_sample/app/app_pages.dart';
+import 'package:module_sample/bootstrap/dokit_navigator_observers_debug.dart'
+    if (dart.vm.product) 'package:module_sample/bootstrap/dokit_navigator_observers_stub.dart';
 import 'package:module_utils/module_utils.dart';
 
 class App extends StatelessWidget {
@@ -42,7 +44,10 @@ class App extends StatelessWidget {
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             initialRoute: RoutePath.splash,
             getPages: AppPages.routes(),
-            navigatorObservers: UiKitInitializer.navigatorObservers,
+            navigatorObservers: [
+              ...UiKitInitializer.navigatorObservers,
+              ...dokitNavigatorObservers(),
+            ],
             builder: UiKitInitializer.appBuilder(
               inner: (context, child) => ModuleUtilsInitializer.wrapApp(
                 builder: (_, __) => RealtimeNotifyBannerHost(

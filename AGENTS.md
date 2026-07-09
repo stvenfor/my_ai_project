@@ -272,14 +272,17 @@ await client.sendEvent(topic: RealtimeTopics.presenceBulk, eventName: 'presence.
 
 ### 调试
 
-Debug 模式：设置 → **Realtime / WebSocket 调试**（`/settings/realtime_debug`）。
+**DoKit（DoraemonKit）**：仅 **Debug 构建**启用（`lib/bootstrap/app_runner_debug.dart`）；Profile/Release 不加载。启动后屏幕边缘有悬浮球，可查看日志、网络、路由等；「业务专区」含链接/Realtime/IM/弹框调度入口。
 
-Go 端推送测试：`POST /api/v1/realtime/push`（需 Bearer token）。
+设置页仍保留 **开发调试** 列表（`/settings/*_debug`）。Go 端推送测试：`POST /api/v1/realtime/push`（需 Bearer token）。
 
 **完整协议、JSON 示例、curl/Python 联调**：Go 仓库 [docs/realtime-websocket.md](../../my_code_study/my_go_study/docs/realtime-websocket.md)
 
 ### 参考文件
 
+- `packages/infrastructure/dokit/` — vendored DoKit（Dart 3 适配）
+- `packages/infrastructure/dokit_bootstrap/` — BizKit 注册
+- `lib/bootstrap/app_runner_debug.dart`
 - `packages/infrastructure/realtime/lib/client/app_realtime_client_impl.dart`
 - `packages/infrastructure/realtime/lib/connection/heartbeat_scheduler.dart`
 - `packages/infrastructure/realtime/lib/config/realtime_config.dart`
