@@ -1,15 +1,56 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_core/model/realtime/realtime_connection_state.dart';
+import 'package:module_core/model/realtime/realtime_envelope.dart';
 import 'package:module_realtime/config/realtime_config.dart';
 import 'package:module_realtime/realtime_initializer.dart';
 import 'package:module_route/route/route_path.dart';
 
 /// Realtime 调试页。
-class RealtimeDebugPage extends StatelessWidget {
+class RealtimeDebugPage extends StatefulWidget {
   const RealtimeDebugPage({super.key});
+
+  @override
+  State<RealtimeDebugPage> createState() => _RealtimeDebugPageState();
+}
+
+class _RealtimeDebugPageState extends State<RealtimeDebugPage> {
+  StreamSubscription<RealtimeEnvelope>? _presenceSub;
+  String _lastPresenceUpdate = '（等待 presence.update）';
+
+  @override
+  void initState() {
+    super.initState();
+    final client = RealtimeInitializer.client;
+    if (client != null) {
+      _presenceSub = client
+          .watchEvents(eventName: 'presence.update')
+          .listen(_onPresenceUpdate);
+    }
+  }
+
+  void _onPresenceUpdate(RealtimeEnvelope envelope) {
+    final p = envelope.payload;
+    final userId = p['userId']?.toString() ?? '?';
+    final online = p['online'] == true;
+    final count = p['onlineCount']?.toString() ?? '?';
+    final device = p['device']?.toString();
+    setState(() {
+      _lastPresenceUpdate =
+          'user=$userId online=$online count=$count${device != null ? ' device=$device' : ''}';
+    });
+  }
+
+  @override
+  void dispose() {
+    unawaited(_presenceSub?.cancel());
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,6 +79,8 @@ class RealtimeDebugPage extends StatelessWidget {
               Text('reconnectCount=${client.reconnectCount}'),
               Text('queueDepth=${client.outboundQueueDepth}'),
               Text('keepAliveBg=${client.keepAliveInBackground}'),
+              const SizedBox(height: 12),
+              Text('presence.update: $_lastPresenceUpdate'),
               const SizedBox(height: 16),
               FilledButton(
                 onPressed: () => RealtimeInitializer.tryConnectIfReady(),
@@ -49,15 +92,33 @@ class RealtimeDebugPage extends StatelessWidget {
               ),
               const Divider(height: 32),
               ListTile(
-                title: const Text('订阅 sys.notify'),
-                onTap: () => client.subscribeTopics([RealtimeTopics.sysNotify]),
+                title: const Text('订阅 sys.notify + presence.bulk'),
+                onTap: () => client.subscribeTopics([
+                  RealtimeTopics.sysNotify,
+                  RealtimeTopics.presenceBulk,
+                ]),
               ),
               ListTile(
-                title: const Text('模拟发送 presence 事件'),
+                title: const Text('上报 presence.report（广播给其他在线用户）'),
+                subtitle: const Text('Go 处理后向 presence.bulk 推送 presence.update'),
                 onTap: () => client.sendEvent(
                   topic: RealtimeTopics.presenceBulk,
                   eventName: 'presence.report',
-                  payload: {'online': true},
+                  payload: {
+                    'online': true,
+                    'device': Platform.operatingSystem,
+                  },
+                ),
+              ),
+              ListTile(
+                title: const Text('上报 presence.report（离线）'),
+                onTap: () => client.sendEvent(
+                  topic: RealtimeTopics.presenceBulk,
+                  eventName: 'presence.report',
+                  payload: {
+                    'online': false,
+                    'device': Platform.operatingSystem,
+                  },
                 ),
               ),
               if (kDebugMode)
