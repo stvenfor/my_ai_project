@@ -57,3 +57,4 @@ app.*.map.json
 
 # 禁止本地 CocoaPods vendor，OrderedSet 等依赖走远程 trunk
 ios/vendor/
+/packages/infrastructure/dokit/example/local.properties
