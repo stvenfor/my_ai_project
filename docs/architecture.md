@@ -27,7 +27,7 @@
 │   │   └── storage/                  # module_global_cache — 缓存
 │   ├── route/                        # module_route — 路由与模块注册
 │   ├── features/                     # 业务模块（auth/chat/community/...）
-│   └── infrastructure/               # 平台适配（supabase/linking/realtime/...）
+│   └── infrastructure/               # 平台适配（linking/realtime/...）
 ├── android/                          # Android 宿主工程
 ├── ios/                              # iOS 宿主工程
 └── docs/

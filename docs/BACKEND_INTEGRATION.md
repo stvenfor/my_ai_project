@@ -96,7 +96,9 @@ Go 后端仓库（独立）：`my_go_study`（默认 `http://127.0.0.1:8080`）�
 cp .env.example .env   # .env 须入库，团队共用
 ```
 
-`.env` 主要用于 Flutter 侧 `--dart-define-from-file`（如 `USE_MOCK_AUTH`）。**Go 后端 Supabase 密钥**在 `my_go_study/.env` 或 `configs/config.dev.yaml`、`SUPABASE_*` 环境变量中配置。
+Flutter `.env` **仅含** `USE_MOCK_AUTH`（经 `--dart-define-from-file` 注入）。**不包含** Supabase URL/密钥；所有认证与业务请求经 Go BFF。
+
+**Supabase 密钥仅配置在 Go 后端** `my_go_study/.env` 或 `configs/config.dev.yaml`、`SUPABASE_*` 环境变量。
 
 ---
 

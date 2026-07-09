@@ -8,7 +8,7 @@ import 'package:module_core/model/user.dart';
 import 'package:module_core/service/auth_service.dart';
 import 'package:module_core/service/user_service.dart';
 
-/// 模块独立运行 / USE_MOCK_AUTH 时的认证实现。
+/// 模块独立运行 / USE_MOCK_AUTH 时的认证实现（不请求 Go 后端）。
 class MockAuthService extends AuthService {
   MockAuthService(this._userService);
 

@@ -107,8 +107,13 @@ class UserAuthApi {
     if (text.contains('参数错误') || text.contains('password')) {
       return const WeakPasswordFailure();
     }
-    if (text.contains('无法连接 Supabase') || text.contains('Supabase 未配置')) {
-      return const SupabaseConfigFailure();
+    if (text.contains('无法连接 Supabase') ||
+        text.contains('Supabase 未配置') ||
+        text.contains('认证服务暂时不可用')) {
+      final baseUrl = BackendHttpConfig.resolveBackendBaseUrl();
+      return BackendServiceFailure(
+        '认证服务暂时不可用，请确认后端已启动（$baseUrl）或稍后重试',
+      );
     }
     if (code == 50000 || text.contains('服务器内部错误')) {
       return UnknownAuthFailure(

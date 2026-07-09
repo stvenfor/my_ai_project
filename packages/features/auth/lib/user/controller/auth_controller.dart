@@ -35,17 +35,53 @@ class AuthController extends GetxController {
   final agreedPrivacy = true.obs;
   final credentialMode = AuthCredentialMode.email.obs;
 
-  final email = '454655062@qq.com'.obs;
-  final phone = '13477525645'.obs;
-  final password = '123456'.obs;
-  final confirmPassword = '123456'.obs;
+  final email = ''.obs;
+  final phone = ''.obs;
+  final password = ''.obs;
+  final confirmPassword = ''.obs;
   final displayName = ''.obs;
   final otpCode = ''.obs;
   final otpCooldownSeconds = 0.obs;
 
+  static const _lastLoginEmailKey = 'auth_last_login_email';
+  static const _lastLoginPasswordKey = 'auth_last_login_password';
+
   String _pendingEmail = '';
   String _pendingPhone = '';
+  String _lastSavedLoginEmail = '';
   Timer? _otpTimer;
+
+  @override
+  void onInit() {
+    super.onInit();
+    _restoreLastLoginCredentials();
+  }
+
+  void _restoreLastLoginCredentials() {
+    final savedEmail = SpUtils.getString(_lastLoginEmailKey);
+    final savedPassword = SpUtils.getString(_lastLoginPasswordKey);
+    if (savedEmail != null && savedEmail.isNotEmpty) {
+      email.value = savedEmail;
+      _pendingEmail = savedEmail;
+      _lastSavedLoginEmail = savedEmail;
+    }
+    if (savedPassword != null && savedPassword.isNotEmpty) {
+      password.value = savedPassword;
+    }
+  }
+
+  Future<void> _persistLastLoginCredentials(String loginEmail) async {
+    _lastSavedLoginEmail = loginEmail;
+    await SpUtils.setString(_lastLoginEmailKey, loginEmail);
+    await SpUtils.setString(_lastLoginPasswordKey, password.value);
+  }
+
+  /// 邮箱未改动且已有上次登录密码时，可在登录页直接点「登录」。
+  bool get canLoginDirectlyFromLoginPage =>
+      credentialMode.value == AuthCredentialMode.email &&
+      validateEmail(email.value) &&
+      isLoginPasswordValid &&
+      email.value.trim() == _lastSavedLoginEmail;
 
   String get greeting {
     final hour = DateTime.now().hour;
@@ -71,7 +107,11 @@ class AuthController extends GetxController {
     credentialMode.value = mode;
   }
 
-  void updateEmail(String value) => email.value = value.trim();
+  void updateEmail(String value) {
+    final trimmed = value.trim();
+    email.value = trimmed;
+    _pendingEmail = trimmed;
+  }
 
   void updatePhone(String value) => phone.value = value;
 
@@ -298,8 +338,7 @@ class AuthController extends GetxController {
     }
 
     isLoading.value = true;
-    final loginEmail =
-        _pendingEmail.isNotEmpty ? _pendingEmail : email.value.trim();
+    final loginEmail = email.value.trim();
     _logAuth('AuthLogin', 'start: email=$loginEmail');
     try {
       await _authService.signInWithEmail(
@@ -307,6 +346,7 @@ class AuthController extends GetxController {
         password: password.value,
       );
       _logAuth('AuthLogin', 'success: email=$loginEmail', level: 'success');
+      await _persistLastLoginCredentials(loginEmail);
       await _navigateAfterAuth();
     } catch (error) {
       _showLoginAuthFailure(error);
@@ -344,6 +384,8 @@ class AuthController extends GetxController {
         displayName: displayName.value.isEmpty ? null : displayName.value,
       );
       await _refreshUserSession();
+      final registeredEmail = email.value.trim();
+      await _persistLastLoginCredentials(registeredEmail);
       _showRegisterSuccess('注册成功');
       await _navigateAfterAuth();
     } catch (error) {

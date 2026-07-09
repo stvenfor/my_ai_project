@@ -5,8 +5,29 @@ import 'package:module_auth/user/controller/auth_controller.dart';
 import 'package:module_auth/user/theme/auth_theme.dart';
 import 'package:module_auth/user/view/login_footer_links.dart';
 
-class LoginPasswordPage extends GetView<AuthController> {
+class LoginPasswordPage extends StatefulWidget {
   const LoginPasswordPage({super.key});
+
+  @override
+  State<LoginPasswordPage> createState() => _LoginPasswordPageState();
+}
+
+class _LoginPasswordPageState extends State<LoginPasswordPage> {
+  late final TextEditingController _passwordController;
+  late final AuthController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = Get.find<AuthController>();
+    _passwordController = TextEditingController(text: _controller.password.value);
+  }
+
+  @override
+  void dispose() {
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,10 +58,11 @@ class LoginPasswordPage extends GetView<AuthController> {
               ),
               const SizedBox(height: 40),
               TextField(
-                autofocus: true,
+                controller: _passwordController,
+                autofocus: _controller.password.value.isEmpty,
                 obscureText: true,
                 keyboardType: TextInputType.visiblePassword,
-                onChanged: controller.updatePassword,
+                onChanged: _controller.updatePassword,
                 style: const TextStyle(fontSize: 18),
                 decoration: const InputDecoration(
                   hintText: '至少6位密码',
@@ -63,9 +85,9 @@ class LoginPasswordPage extends GetView<AuthController> {
                   width: double.infinity,
                   height: 48,
                   child: FilledButton(
-                    onPressed: controller.isLoginPasswordValid &&
-                            !controller.isLoading.value
-                        ? controller.loginWithPassword
+                    onPressed: _controller.isLoginPasswordValid &&
+                            !_controller.isLoading.value
+                        ? _controller.loginWithPassword
                         : null,
                     style: FilledButton.styleFrom(
                       backgroundColor: AuthTheme.primaryBlue,
@@ -74,7 +96,7 @@ class LoginPasswordPage extends GetView<AuthController> {
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
-                    child: controller.isLoading.value
+                    child: _controller.isLoading.value
                         ? const SizedBox(
                             width: 22,
                             height: 22,

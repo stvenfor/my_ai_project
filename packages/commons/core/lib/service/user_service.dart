@@ -12,7 +12,7 @@ abstract class UserService extends GetxService {
   Future<void> clearUser();
 }
 
-/// 可主动从底层 SDK 刷新登录态的实现（Supabase [UserServiceBridge]）。
+/// 可主动从底层刷新登录态的实现（如需要时由 auth 模块提供）。
 abstract class SessionRefreshable {
   Future<void> refreshSession();
 }

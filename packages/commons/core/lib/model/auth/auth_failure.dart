@@ -59,9 +59,12 @@ class NetworkAuthFailure extends AuthFailure {
   const NetworkAuthFailure([super.message = '网络异常，请稍后重试']);
 }
 
-class SupabaseConfigFailure extends AuthFailure {
-  const SupabaseConfigFailure([super.message = 'Supabase 未正确配置']);
+class BackendServiceFailure extends AuthFailure {
+  const BackendServiceFailure([super.message = '认证服务暂时不可用，请稍后重试']);
 }
+
+@Deprecated('Use BackendServiceFailure')
+typedef SupabaseConfigFailure = BackendServiceFailure;
 
 class UnknownAuthFailure extends AuthFailure {
   const UnknownAuthFailure([super.message = '登录失败，请稍后重试']);

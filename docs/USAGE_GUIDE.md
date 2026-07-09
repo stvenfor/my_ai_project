@@ -46,16 +46,14 @@ module_sample/                 # 壳工程（完整 App）
 
 ```bash
 cd /path/to/flutter_module_sample
-cp .env.example .env   # 填入 Supabase URL 与 anon key
+cp .env.example .env   # 仅需 USE_MOCK_AUTH 开关
 flutter pub get
-flutter run --dart-define-from-file=.env
+./scripts/run_app.sh   # 或 flutter run --dart-define-from-file=.env
 ```
 
-> Supabase Dashboard → Authentication → Providers → Email：关闭 **Confirm email**（注册后不强制验证）。
+> 真实登录联调：`USE_MOCK_AUTH=false`，并启动 Go 后端 `my_go_study`（默认 `http://127.0.0.1:8080`）。Supabase 密钥配置在 Go 后端，不在 Flutter。
 
-> SQL：依次执行 [`001_profiles_rls.sql`](../supabase/migrations/001_profiles_rls.sql)、[`002_phone_otp_profiles.sql`](../supabase/migrations/002_phone_otp_profiles.sql)。
-
-> Supabase Dashboard → Authentication → Providers：开启 **Email**（关闭 Confirm email）与 **Phone**（配置 SMS）。
+> 数据库迁移 SQL 见 [`supabase/migrations/`](../supabase/migrations/)（由 Go 后端连接 Supabase 使用）。
 
 ### 2.2 启动流程
 
@@ -63,7 +61,7 @@ flutter run --dart-define-from-file=.env
 main()
   → ModuleUtilsInitializer（日志、SP、ScreenUtil）
   → SpManager / AppDatabase
-  → AuthSession.register（AuthService + UserService；Supabase 或 Mock）
+  → AuthSession.register（AuthService + UserService；Go 后端或 Mock）
   → UiKitInitializer.initialize（AppLoading + EasyLoading 配置）
   → WebKitInitializer.initialize（WebBridgeRegistry + 内置 handler）
   → EnvironmentSession.register（settings 模块，恢复环境）
@@ -283,17 +281,17 @@ await AuthSession.register(); // 读取 .env 中 USE_MOCK_AUTH
 await Get.putAsync<EnvironmentService>(EnvironmentServiceImpl.create, permanent: true);
 ```
 
-### 5.1.1 Supabase 配置（`.env`）
+### 5.1.1 认证开关（`.env`）
 
 | 变量 | 说明 |
 |------|------|
-| `SUPABASE_URL` | Supabase Project URL |
-| `SUPABASE_ANON_KEY` | anon public key（可进客户端，安全靠 RLS） |
-| `USE_MOCK_AUTH` | `true` Mock；`false` 连接 Supabase |
+| `USE_MOCK_AUTH` | `true` Mock 本地登录；`false` 经 Go 后端真实登录 |
 
 ```bash
 flutter run --dart-define-from-file=.env
 ```
+
+> Flutter **不配置、不直连** Supabase；`SUPABASE_*` 密钥仅在 Go 后端 `my_go_study` 中配置。
 
 ### 5.2 业务模块只依赖接口
 
@@ -318,12 +316,12 @@ class HomeBinding extends Bindings {
 [`module_core/lib/core.dart`](../module_core/lib/core.dart) **只导出**：
 
 - `User` / `UserService` / `AuthService` / `AuthFailure`
-- `SupabaseConfig`
+- `AppAuthConfig`
 - `AppLoading`
 - `AppEnv` / `EnvConfig` / `EnvironmentService`
 - `MockUserService` / `MockAuthService` / `DefaultEnvironmentService`（dev 用）
 
-**不导出** `UserServiceImpl`、`SupabaseAuthService`（分别在 auth / infrastructure 模块）。
+**不导出** `UserServiceImpl`（在 auth 模块）。
 
 ---
 

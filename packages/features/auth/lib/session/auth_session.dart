@@ -19,13 +19,13 @@ class AuthSession {
 
   /// 注册全局认证与会话服务（壳工程与独立运行均需调用，幂等）。
   ///
-  /// [useMock] 为 true 时使用本地 Mock；为 null 时读取 [SupabaseConfig.useMockAuth]。
-  /// 默认使用 my_go_study `/api/v1/user/*`（邮箱密码），由 Go 后端与 Supabase Auth 交互。
+  /// [useMock] 为 true 时使用本地 Mock；为 null 时读取 [AppAuthConfig.useMockAuth]。
+  /// 默认使用 my_go_study `/api/v1/user/*`（邮箱密码），由 Go 后端代理 Supabase Auth。
   static Future<void> register({
     bool? useMock,
     bool permanent = true,
   }) async {
-    final mock = useMock ?? SupabaseConfig.useMockAuth;
+    final mock = useMock ?? AppAuthConfig.useMockAuth;
 
     if (mock) {
       await _registerMock(permanent: permanent);

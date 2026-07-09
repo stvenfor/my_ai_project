@@ -20,8 +20,6 @@ dependencies:
     path: ../../commons/network
   module_route:
     path: ../../route
-  module_supabase:
-    path: ../../infrastructure/supabase
   module_music:
     path: ../music
   module_utils:

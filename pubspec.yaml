@@ -48,8 +48,6 @@ dependencies:
     path: ./packages/features/settings
   module_utils:
     path: ./packages/commons/toolkit
-  module_supabase:
-    path: ./packages/infrastructure/supabase
   module_video:
     path: ./packages/features/video
   module_bfui:

@@ -40,7 +40,7 @@ ensure_env_file() {
   cp .env.example .env
 
 如果只是本地跑 Mock 登录，可将 .env 中 USE_MOCK_AUTH 改为 true。
-如果要连接 Supabase，请填入真实 SUPABASE_URL / SUPABASE_ANON_KEY。
+如果要联调真实登录，请保持 USE_MOCK_AUTH=false 并启动 my_go_study 后端。
 EOF
   exit 1
 }

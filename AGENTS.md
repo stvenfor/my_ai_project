@@ -53,7 +53,7 @@ AuthSession.register()   // BackendAuthService，非 Mock 时
 | `FormatException: Invalid HTTP header` | `X-App-Env` 用了中文 | 使用 `AppEnv.name`（`test`/`staging`/`production`） |
 | 登录显示 `Internal Server Error` | Dio 未解析 4xx body | 已用 `validateStatus < 600` + `BackendResponseParser` |
 | 模拟器连不上 `127.0.0.1:8080` | 网络隔离 | Android/鸿蒙自动映射 `10.0.2.2`；真机用局域网 IP |
-| 二手车 401 | token 为 Go JWT 或过期 | 必须走 Supabase 登录拿 token |
+| 二手车 401 | token 过期或未登录 | 须经 Go 后端登录获取 access_token |
 | `.env` 修改不生效 | 热重载不读 define | **Hot Restart** 或重新 `flutter run` |
 
 ### 参考文件
@@ -95,9 +95,9 @@ if (AuthSession.isLoggedIn) {
 
 ### 密钥与 Git
 
-- **`.env` 须入库**，与团队共用 Supabase / 后端配置；新成员可复制 `.env.example` 再按需调整。
+- **`.env` 须入库**，仅含 `USE_MOCK_AUTH` 开关；新成员可复制 `.env.example`。
 - 仅 **`.env.local`** 等本地覆盖文件不入库（已在 `.gitignore`）。
-- Go 后端 Supabase 配置在 `my_go_study` 的 `.env` 或 `configs/`、`SUPABASE_*` 环境变量。
+- **Supabase 密钥仅配置在 Go 后端** `my_go_study` 的 `.env` 或 `configs/`、`SUPABASE_*` 环境变量；Flutter 不持有、不直连。
 
 ---
 

@@ -23,10 +23,8 @@ class _LoginPageState extends State<LoginPage> {
   void initState() {
     super.initState();
     _controller = Get.find<AuthController>();
-    _emailController = TextEditingController();
-    _phoneController = TextEditingController();
-    _controller.updateEmail(_emailController.text);
-    _controller.updatePhone(_phoneController.text);
+    _emailController = TextEditingController(text: _controller.email.value);
+    _phoneController = TextEditingController(text: _controller.phone.value);
   }
 
   @override
@@ -134,6 +132,8 @@ class _LoginPageState extends State<LoginPage> {
                 () {
                   final isEmail =
                       _controller.credentialMode.value == AuthCredentialMode.email;
+                  final canDirectLogin =
+                      isEmail && _controller.canLoginDirectlyFromLoginPage;
                   return SizedBox(
                     width: double.infinity,
                     height: 48,
@@ -141,7 +141,9 @@ class _LoginPageState extends State<LoginPage> {
                       onPressed: _controller.isLoading.value
                           ? null
                           : isEmail
-                              ? _controller.goToPasswordPage
+                              ? (canDirectLogin
+                                  ? _controller.loginWithPassword
+                                  : _controller.goToPasswordPage)
                               : _controller.sendPhoneOtpAndGo,
                       style: FilledButton.styleFrom(
                         backgroundColor: AuthTheme.primaryBlue,
@@ -160,7 +162,9 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                             )
                           : Text(
-                              isEmail ? '下一步' : '获取验证码',
+                              isEmail
+                                  ? (canDirectLogin ? '登录' : '下一步')
+                                  : '获取验证码',
                               style: const TextStyle(
                                 fontSize: 17,
                                 fontWeight: FontWeight.w600,
