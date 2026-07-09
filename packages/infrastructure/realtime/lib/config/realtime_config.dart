@@ -2,11 +2,11 @@
 class RealtimeConfig {
   RealtimeConfig._();
 
-  /// 无真实 WS 网关时使用 Mock Transport + Mock Ticket/Sync API。
-  static const useMockGateway = true;
+  /// false=连接 Go BFF WebSocket 网关；true=进程内 Mock。
+  static const useMockGateway = false;
 
-  static const ticketPath = '/realtime/ws-ticket';
-  static const syncPath = '/realtime/sync';
+  static const ticketPath = '/api/v1/realtime/ws-ticket';
+  static const syncPath = '/api/v1/realtime/sync';
 
   static const heartbeatInterval = Duration(seconds: 25);
   static const heartbeatTimeout = Duration(seconds: 10);

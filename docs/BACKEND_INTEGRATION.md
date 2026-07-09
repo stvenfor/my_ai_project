@@ -291,7 +291,124 @@ UsedCarNavigation.open()
 
 ---
 
-## 6. 启动 Go 后端（my_go_study）
+## 6. Realtime WebSocket
+
+Flutter 通过 `module_realtime` 连接 Go BFF WebSocket 网关（**不**使用 Supabase Realtime SDK）。
+
+### 6.1 与 HTTP 的差异
+
+| 项 | HTTP 业务 API | Realtime |
+|----|---------------|----------|
+| 响应格式 | `ResultModel { code, message, data }` | 直出 JSON 或 WS `RealtimeEnvelope` |
+| 鉴权 | 每个请求带 Bearer token | 先 HTTP 换 ticket，WS 首帧 `auth` 消费 ticket |
+| BaseUrl | `BackendHttpConfig` | ticket 返回 `wsUrl` + `BackendWsConfig` 平台映射 |
+
+### 6.2 连接流程
+
+```
+1. POST /api/v1/realtime/ws-ticket   Authorization: Bearer <token>
+2. WebSocket.connect(wsUrl)
+3. 发送 { type: "auth", payload: { ticket } }
+4. 收到 { type: "auth_ok" } → 已连接
+5. 发送 { type: "sub", payload: { topics: ["sys.notify"] } }
+6. auth_ok 后 HTTP POST /api/v1/realtime/sync 补拉断线期间事件
+7. 每 25s 应用层 ping，10s 内须 pong（连续 2 次超时则重连）
+```
+
+登录成功后 `RealtimeInitializer` 会自动连接；默认订阅 `sys.notify`、`presence.bulk`。
+
+### 6.3 HTTP 接口（Go BFF）
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| POST | `/api/v1/realtime/ws-ticket` | 换票，`{ platform, connId? }` → `{ ticket, wsUrl, expiresInSeconds, connId }` |
+| POST | `/api/v1/realtime/sync` | `{ sinceSeq, topics? }` → `{ events[], latestSeq }` |
+| POST | `/api/v1/realtime/push` | 开发推送 `{ title, body, topic?, name? }` → `{ envelope, delivered }` |
+| GET | `/realtime/v1/connect` | WebSocket 升级 |
+
+### 6.4 WS 消息类型（RealtimeEnvelope）
+
+| type | 方向 | 说明 |
+|------|------|------|
+| `auth` / `auth_ok` | 双向 | 换票鉴权 |
+| `sub` / `unsub` / `ack` | 客户端发起 | 主题订阅 |
+| `ping` / `pong` | 客户端发起 | 应用层心跳（pong 回显 ping 的 `id`） |
+| `event` | 服务端 → 客户端 | 业务事件，如 `sys.notify.show` |
+| `error` | 服务端 → 客户端 | 鉴权失败等，随后关闭 WS |
+
+**sys.notify 事件 payload 示例：**
+
+```json
+{
+  "name": "sys.notify.show",
+  "notifyId": "uuid",
+  "title": "标题",
+  "body": "正文"
+}
+```
+
+App 内由 `GlobalNotifyHandler` 展示顶部 Banner；`notifyId` 去重。
+
+### 6.5 Flutter 配置与代码
+
+| 配置 | 文件 | 说明 |
+|------|------|------|
+| `useMockGateway = false` | `realtime_config.dart` | 连真实 Go WS |
+| `wsBaseUrl` | `env_config.dart` | 参考地址；实际用 ticket.wsUrl |
+| 模拟器 | `backend_ws_config.dart` | `127.0.0.1` → `10.0.2.2` |
+
+```dart
+final client = Get.find<AppRealtimeClient>();
+
+// 监听连接状态
+client.connectionState.listen((s) => debugPrint(s.label));
+
+// 订阅 + 监听
+await client.subscribeTopics([RealtimeTopics.sysNotify]);
+client.watchEvents(eventName: 'sys.notify.show').listen((e) {
+  debugPrint('${e.payload['title']}: ${e.payload['body']}');
+});
+
+// 发送客户端事件
+await client.sendEvent(
+  topic: RealtimeTopics.presenceBulk,
+  eventName: 'presence.report',
+  payload: {'status': 'online'},
+);
+```
+
+**调试页**：Debug 模式 → 设置 → **Realtime / WebSocket 调试**（`/settings/realtime_debug`）。
+
+### 6.6 联调命令
+
+```bash
+# Go 仓库
+cd my_go_study && make run          # 终端 1
+make test-realtime                  # 终端 2
+
+# 手动推送（需 TOKEN）
+curl -X POST http://127.0.0.1:8080/api/v1/realtime/push \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"title":"测试","body":"Hello"}'
+```
+
+**完整协议文档**（含 curl / Python 示例、心跳时序、关闭码）：Go 仓库 [docs/realtime-websocket.md](../../my_code_study/my_go_study/docs/realtime-websocket.md)
+
+### 6.7 关键文件
+
+| 文件 | 职责 |
+|------|------|
+| `packages/infrastructure/realtime/lib/client/app_realtime_client_impl.dart` | 连接、auth、sync、重连 |
+| `packages/infrastructure/realtime/lib/api/ws_ticket_api.dart` | 换票 HTTP |
+| `packages/infrastructure/realtime/lib/api/ws_sync_api.dart` | 同步 HTTP |
+| `packages/infrastructure/realtime/lib/connection/heartbeat_scheduler.dart` | ping/pong |
+| `packages/infrastructure/realtime/lib/handlers/global_notify_handler.dart` | 通知 Banner |
+| `packages/commons/network/lib/http/backend_ws_config.dart` | WS URL 平台映射 |
+
+---
+
+## 7. 启动 Go 后端（my_go_study）
 
 ```bash
 cd /path/to/my_go_study
@@ -319,7 +436,7 @@ curl -X POST http://127.0.0.1:8080/api/v1/user/login \
 
 ---
 
-## 7. 新增业务 API 检查清单
+## 8. 新增业务 API 检查清单
 
 1. **Go**：在 `my_go_study` 增加 handler，需登录接口挂 `SupabaseAuth` 中间件。
 2. **Flutter 模型**：`packages/features/<module>/lib/.../model/` 定义 `fromJson`。
@@ -331,7 +448,7 @@ curl -X POST http://127.0.0.1:8080/api/v1/user/login \
 
 ---
 
-## 8. 调试技巧
+## 9. 调试技巧
 
 1. **开启 HTTP 日志**：壳工程 `AppHttpBootstrap.initialize(enableLog: kDebugMode)` 已启用 Dio 日志。
 2. **看请求头**：确认 `X-App-Env: test`、`Authorization: Bearer eyJ...`。
@@ -341,8 +458,9 @@ curl -X POST http://127.0.0.1:8080/api/v1/user/login \
 
 ---
 
-## 9. 相关文档
+## 10. 相关文档
 
 - [USAGE_GUIDE.md](./USAGE_GUIDE.md) — 运行、环境、登录 UI 流程
 - [MODULE_ARCHITECTURE.md](./MODULE_ARCHITECTURE.md) — 模块边界与 DI
 - [AGENTS.md](../AGENTS.md) — Agent 陷阱（Obx、HTTP、鸿蒙、视频沉浸式）
+- Go [Realtime WebSocket 协议与联调指南](../../my_code_study/my_go_study/docs/realtime-websocket.md) — 收发消息、心跳、订阅、重连 sync

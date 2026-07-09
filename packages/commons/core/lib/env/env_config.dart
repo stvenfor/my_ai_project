@@ -21,14 +21,14 @@ class EnvConfig {
     AppEnv.test: EnvConfig(
       env: AppEnv.test,
       backendBaseUrl: 'http://127.0.0.1:8080',
-      wsBaseUrl: 'wss://mock-ws.test.xiaomaomain.com/realtime/v1/connect',
+      wsBaseUrl: 'ws://127.0.0.1:8080/realtime/v1/connect',
       rongAppKey: 'DEV_RONG_APP_KEY_PLACEHOLDER',
       label: '测试',
     ),
     AppEnv.staging: EnvConfig(
       env: AppEnv.staging,
       backendBaseUrl: 'http://127.0.0.1:8080',
-      wsBaseUrl: 'wss://mock-ws.staging.xiaomaomain.com/realtime/v1/connect',
+      wsBaseUrl: 'ws://127.0.0.1:8080/realtime/v1/connect',
       rongAppKey: 'DEV_RONG_APP_KEY_PLACEHOLDER',
       label: '预发',
     ),

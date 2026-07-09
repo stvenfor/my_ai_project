@@ -2,10 +2,13 @@ import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/widgets.dart';
+import 'package:get/get.dart';
 import 'package:module_auth/session/auth_session.dart';
+import 'package:module_core/core.dart';
 import 'package:module_core/model/realtime/realtime_connection_state.dart';
 import 'package:module_core/model/realtime/realtime_envelope.dart';
 import 'package:module_core/service/app_realtime_client.dart';
+import 'package:module_http/module_http.dart';
 import 'package:module_realtime/api/ws_sync_api.dart';
 import 'package:module_realtime/api/ws_ticket_api.dart';
 import 'package:module_realtime/config/realtime_config.dart';
@@ -122,8 +125,9 @@ class AppRealtimeClientImpl implements AppRealtimeClient {
 
     final sw = Stopwatch()..start();
     try {
-      final ticket = await _ticketApi.fetchTicket(accessToken: 'mock_access_token');
-      final uri = Uri.parse(ticket.wsUrl);
+      final token = _resolveAccessToken();
+      final ticket = await _ticketApi.fetchTicket(accessToken: token);
+      final uri = Uri.parse(BackendWsConfig.resolveWsUrl(ticket.wsUrl));
 
       await _transport.connect(uri);
       _listenInbound();
@@ -434,6 +438,17 @@ class AppRealtimeClientImpl implements AppRealtimeClient {
     _state = state;
     _stateController.add(state);
     _telemetry.metric('ws_state', params: {'state': state.name});
+  }
+
+  String _resolveAccessToken() {
+    if (!Get.isRegistered<UserService>()) {
+      throw StateError('UserService 未注册，无法连接 Realtime');
+    }
+    final token = Get.find<UserService>().currentUser.value?.token;
+    if (token == null || token.isEmpty) {
+      throw StateError('未登录或 token 为空，无法连接 Realtime');
+    }
+    return token;
   }
 
   Future<void> dispose() async {

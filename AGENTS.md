@@ -10,7 +10,8 @@
 
 1. [HTTP / 后端交互](#http--后端交互)
 2. [认证与会话](#认证与会话)
-3. [GetX / Obx 响应式 UI](#getx--obx-响应式-ui)
+3. [Realtime WebSocket](#realtime-websocket)
+4. [GetX / Obx 响应式 UI](#getx--obx-响应式-ui)
 4. [Flutter 拖动排序](#flutter-拖动排序longpressdraggable)
 5. [鸿蒙（OpenHarmony）三方库](#鸿蒙-openharmony-三方库)
 6. [视频播放页沉浸式](#视频播放页沉浸式)
@@ -231,6 +232,56 @@ Positioned.fill(top: MediaQuery.paddingOf(context).top, child: video),
 - `packages/commons/toolkit/lib/utils/app_video_controls_bar.dart`
 - `packages/features/video/lib/dubbing/widgets/playable_video_header.dart`
 - `packages/features/video/lib/short_video/view/short_video_play_page.dart`
+
+---
+
+## Realtime WebSocket
+
+### 架构
+
+Flutter `module_realtime` → Go BFF（非直连 Supabase Realtime）：
+
+```text
+登录 token → POST /api/v1/realtime/ws-ticket → WebSocket /realtime/v1/connect
+           → auth → sub → 收 event / ping-pong
+重连       → POST /api/v1/realtime/sync（补拉 sinceSeq 之后事件）
+```
+
+### 配置
+
+| 项 | 位置 | 说明 |
+|----|------|------|
+| `useMockGateway` | `realtime_config.dart` | `false` = 连 Go；`true` = 进程内 Mock |
+| `wsBaseUrl` | `env_config.dart` | 参考地址；实际用 ticket 返回的 `wsUrl` |
+| 模拟器 WS | `backend_ws_config.dart` | `127.0.0.1` → `10.0.2.2` |
+
+### 心跳（应用层）
+
+- 间隔 25s 发 `{type:"ping"}`，10s 内须收到同 id 的 `pong`
+- 连续 2 次超时 → 触发重连（指数退避 1s～60s）
+
+### 常用 API
+
+```dart
+final client = Get.find<AppRealtimeClient>();
+await client.subscribeTopics([RealtimeTopics.sysNotify]);
+client.watchEvents(eventName: 'sys.notify.show').listen((e) { /* Banner */ });
+await client.sendEvent(topic: RealtimeTopics.presenceBulk, eventName: 'presence.report', payload: {});
+```
+
+### 调试
+
+Debug 模式：设置 → **Realtime / WebSocket 调试**（`/settings/realtime_debug`）。
+
+Go 端推送测试：`POST /api/v1/realtime/push`（需 Bearer token）。
+
+**完整协议、JSON 示例、curl/Python 联调**：Go 仓库 [docs/realtime-websocket.md](../../my_code_study/my_go_study/docs/realtime-websocket.md)
+
+### 参考文件
+
+- `packages/infrastructure/realtime/lib/client/app_realtime_client_impl.dart`
+- `packages/infrastructure/realtime/lib/connection/heartbeat_scheduler.dart`
+- `packages/infrastructure/realtime/lib/config/realtime_config.dart`
 
 ---
 

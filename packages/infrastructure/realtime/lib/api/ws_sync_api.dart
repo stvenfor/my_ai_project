@@ -1,43 +1,40 @@
+import 'package:module_auth/api/auth_http_config.dart';
 import 'package:module_core/model/realtime/realtime_envelope.dart';
+import 'package:module_http/module_http.dart';
+import 'package:module_realtime/config/realtime_config.dart';
 import 'package:module_utils/module_utils.dart';
 
-/// 重连后增量同步（Mock 实现）。
+/// 重连后增量同步（Go BFF）。
 class WsSyncApi {
   Future<WsSyncResult> sync({
     required int sinceSeq,
     required List<String> topics,
   }) async {
-    await Future<void>.delayed(const Duration(milliseconds: 180));
-    final events = <RealtimeEnvelope>[];
+    AuthHttpConfig.ensureInitialized();
 
-    var seq = sinceSeq;
-    if (topics.contains('sys.notify') && sinceSeq < 1) {
-      seq++;
-      events.add(
-        RealtimeEnvelope(
-          id: 'sync_notify_1',
-          type: 'event',
-          topic: 'sys.notify',
-          seq: seq,
-          ts: DateTime.now().millisecondsSinceEpoch,
-          payload: {
-            'name': 'sys.notify.show',
-            'notifyId': 'mock_notify_sync_001',
-            'title': '同步通知',
-            'body': '重连后 mock 补发的全局通知',
-          },
-        ),
+    final result = await HttpManager.instance.post<WsSyncResult>(
+      RealtimeConfig.syncPath,
+      data: {
+        'sinceSeq': sinceSeq,
+        'topics': topics,
+      },
+      converter: (json) => WsSyncResult.fromJson(
+        Map<String, dynamic>.from(json as Map),
+      ),
+    );
+
+    final sync = result.data;
+    if (!result.success || sync == null) {
+      throw HttpRequestException(
+        message: result.message ?? 'Realtime sync 失败',
+        code: result.code?.toString(),
       );
     }
 
     LogUtils.i(
-      '[WsSyncApi] mock sync sinceSeq=$sinceSeq topics=$topics events=${events.length}',
+      '[WsSyncApi] sync sinceSeq=$sinceSeq topics=$topics events=${sync.events.length}',
     );
-
-    return WsSyncResult(
-      events: events,
-      latestSeq: seq > sinceSeq ? seq : sinceSeq,
-    );
+    return sync;
   }
 }
 
@@ -49,4 +46,28 @@ class WsSyncResult {
 
   final List<RealtimeEnvelope> events;
   final int latestSeq;
+
+  factory WsSyncResult.fromJson(Map<String, dynamic> json) {
+    final rawEvents = json['events'];
+    final events = <RealtimeEnvelope>[];
+    if (rawEvents is List) {
+      for (final item in rawEvents) {
+        if (item is Map) {
+          events.add(
+            RealtimeEnvelope.fromJson(Map<String, dynamic>.from(item)),
+          );
+        }
+      }
+    }
+    return WsSyncResult(
+      events: events,
+      latestSeq: _asInt(json['latestSeq']) ?? 0,
+    );
+  }
+
+  static int? _asInt(Object? value) {
+    if (value is int) return value;
+    if (value is String) return int.tryParse(value);
+    return null;
+  }
 }

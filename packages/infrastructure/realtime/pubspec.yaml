@@ -13,6 +13,8 @@ dependencies:
   get: ^4.7.3
   uuid: ^4.5.1
   web_socket_channel: ^3.0.3
+  module_http:
+    path: ../../commons/network
   module_auth:
     path: ../../features/auth
   module_common_ui:
