@@ -12,7 +12,8 @@ import 'package:module_core/service/user_service.dart';
 class MockAuthService extends AuthService {
   MockAuthService(this._userService);
 
-  /// Mock 环境下固定验证码。
+  /// Mock 环境下固定测试手机号与验证码。
+  static const mockTestPhone = '13400000000';
   static const mockOtpCode = '123456';
 
   final UserService _userService;
@@ -65,6 +66,10 @@ class MockAuthService extends AuthService {
 
   @override
   Future<void> sendPhoneOtp({required String phone}) async {
+    final digits = PhoneAuthUtils.normalizeDigits(phone);
+    if (digits != mockTestPhone) {
+      throw UnknownAuthFailure('测试环境请使用 $mockTestPhone');
+    }
     await Future<void>.delayed(const Duration(milliseconds: 400));
   }
 
@@ -74,6 +79,9 @@ class MockAuthService extends AuthService {
     required String otp,
   }) async {
     final digits = PhoneAuthUtils.normalizeDigits(phone);
+    if (digits != mockTestPhone) {
+      throw UnknownAuthFailure('测试环境请使用 $mockTestPhone');
+    }
     if (otp.trim() != mockOtpCode) {
       throw const InvalidOtpFailure();
     }

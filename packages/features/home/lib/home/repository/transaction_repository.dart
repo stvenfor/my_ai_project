@@ -48,8 +48,12 @@ String formatTransactionLoadError(Object error) {
   if (error is HttpRequestException) {
     if (error.statusCode == 401 ||
         error.message.contains('未授权') ||
-        error.message.contains('Unauthorized')) {
-      return '登录已过期，请重新登录';
+        error.message.contains('Unauthorized') ||
+        error.message.contains('其他设备登录') ||
+        error.message.contains('会话无效')) {
+      return error.message.contains('其他设备登录')
+          ? '账号已在其他设备登录，请重新登录'
+          : '登录已过期，请重新登录';
     }
     return error.message;
   }

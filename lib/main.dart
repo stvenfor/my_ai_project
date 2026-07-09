@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:module_auth/session/session_guard.dart';
 import 'package:module_auth/session/auth_session.dart';
 import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_core/core.dart';
@@ -37,6 +38,7 @@ class AppInitializer {
     _wireEnvironmentHttpRefresh();
     AppHttpBootstrap.initialize(
       headerProvider: const AuthHeaderProvider(),
+      responseHook: SessionGuardHook(),
       enableLog: kDebugMode,
       maxRetries: 3,
     );
@@ -76,6 +78,7 @@ class AppInitializer {
     Get.find<EnvironmentService>().onEnvChanged = (_) async {
       AppHttpBootstrap.reinitialize(
         headerProvider: const AuthHeaderProvider(),
+        responseHook: SessionGuardHook(),
         enableLog: kDebugMode,
         maxRetries: 3,
       );

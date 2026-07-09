@@ -42,11 +42,10 @@ class LoginOtpPage extends GetView<AuthController> {
                   style: const TextStyle(color: AuthTheme.textGray, fontSize: 14),
                 ),
               ),
-              if (Get.isRegistered<AuthService>() &&
-                  Get.find<AuthService>() is MockAuthService) ...[
+              if (_showTestPhoneHint()) ...[
                 const SizedBox(height: 8),
                 Text(
-                  'Mock 模式验证码：${MockAuthService.mockOtpCode}',
+                  '测试号 ${MockAuthService.mockTestPhone}，验证码 ${MockAuthService.mockOtpCode}',
                   style: const TextStyle(
                     color: AuthTheme.primaryBlue,
                     fontSize: 13,
@@ -132,5 +131,18 @@ class LoginOtpPage extends GetView<AuthController> {
           ),
         ),
     );
+  }
+
+  bool _showTestPhoneHint() {
+    if (Get.isRegistered<AuthService>() &&
+        Get.find<AuthService>() is MockAuthService) {
+      return true;
+    }
+    if (!AppAuthConfig.useMockAuth &&
+        Get.isRegistered<EnvironmentService>() &&
+        Get.find<EnvironmentService>().currentEnv.value == AppEnv.test) {
+      return true;
+    }
+    return false;
   }
 }

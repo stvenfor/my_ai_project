@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:get/get.dart';
 import 'package:module_auth/api/user_auth_api.dart';
+import 'package:module_auth/session/device_auth_context.dart';
 import 'package:module_core/core.dart';
 
 /// =============================================================================
@@ -43,15 +44,23 @@ class BackendAuthService extends AuthService {
       email: normalizedEmail,
       displayName: displayName,
     );
+    final device = await DeviceAuthContext.resolve();
     final result = await _api.register(
       username: username,
       password: password,
       email: normalizedEmail,
+      deviceId: device.deviceId,
+      platform: device.platform,
     );
     // Supabase 若开启邮箱验证，register 无 token，需再 login
     if (result.hasSession) {
       await _persistLogin(
-        LoginResult(token: result.token!, user: result.user),
+        LoginResult(
+          token: result.token!,
+          sessionId: result.sessionId ?? '',
+          user: result.user,
+        ),
+        deviceId: device.deviceId,
       );
       return;
     }
@@ -64,11 +73,14 @@ class BackendAuthService extends AuthService {
     required String password,
   }) async {
     final normalizedEmail = email.trim();
+    final device = await DeviceAuthContext.resolve();
     final result = await _api.login(
       username: normalizedEmail, // Go 侧 username 即邮箱
       password: password,
+      deviceId: device.deviceId,
+      platform: device.platform,
     );
-    await _persistLogin(result);
+    await _persistLogin(result, deviceId: device.deviceId);
   }
 
   @override
@@ -79,7 +91,8 @@ class BackendAuthService extends AuthService {
 
   @override
   Future<void> sendPhoneOtp({required String phone}) async {
-    throw const UnknownAuthFailure('短信登录暂未开放，请使用邮箱登录');
+    final e164 = PhoneAuthUtils.toE164China(phone);
+    await _api.sendPhoneOtp(phone: e164);
   }
 
   @override
@@ -87,11 +100,22 @@ class BackendAuthService extends AuthService {
     required String phone,
     required String otp,
   }) async {
-    throw const UnknownAuthFailure('短信登录暂未开放，请使用邮箱登录');
+    final e164 = PhoneAuthUtils.toE164China(phone);
+    final device = await DeviceAuthContext.resolve();
+    final result = await _api.verifyPhoneOtp(
+      phone: e164,
+      otp: otp.trim(),
+      deviceId: device.deviceId,
+      platform: device.platform,
+    );
+    await _persistLogin(result, deviceId: device.deviceId);
   }
 
   /// 把 Go 返回的 token + user 映射为本地 User 模型并持久化。
-  Future<void> _persistLogin(LoginResult result) async {
+  Future<void> _persistLogin(
+    LoginResult result, {
+    required String deviceId,
+  }) async {
     final backendUser = result.user;
     final displayName = backendUser.username.isNotEmpty
         ? backendUser.username
@@ -102,6 +126,8 @@ class BackendAuthService extends AuthService {
         name: displayName,
         avatar: '',
         token: result.token, // Realtime / transactions 都读这个 token
+        sessionId: result.sessionId,
+        deviceId: deviceId,
       ),
     );
     _emit(AuthSessionState.signedIn);

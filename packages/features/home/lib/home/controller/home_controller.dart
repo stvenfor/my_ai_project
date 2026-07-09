@@ -55,7 +55,7 @@ class HomeController extends BaseViewModel {
   /// 错误页重试（走首次加载流程，含全局 Loading）。
   Future<void> retryInitialLoad() => _loadInitial();
 
-  /// 首次进入：全局 Loading（EasyLoading 遮罩）。
+  /// 首次进入：全局 Loading（BotToast 遮罩）。
   Future<void> _loadInitial() async {
     await _loading.run(
       () async {

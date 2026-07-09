@@ -11,5 +11,6 @@ Future<void> main() => ModuleStandaloneRunner.run(
           await UiKitInitializer.initialize();
         },
         innerAppBuilder: UiKitInitializer.wrapChild,
+        navigatorObservers: UiKitInitializer.navigatorObservers,
       ),
     );

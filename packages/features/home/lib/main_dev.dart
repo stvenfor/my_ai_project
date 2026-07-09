@@ -14,6 +14,7 @@ Future<void> main() => ModuleStandaloneRunner.run(
           WebKitCoreHandlers.register(registry);
         },
         innerAppBuilder: UiKitInitializer.wrapChild,
+        navigatorObservers: UiKitInitializer.navigatorObservers,
         extraRoutes: WebKitRoutes.routes(),
       ),
     );

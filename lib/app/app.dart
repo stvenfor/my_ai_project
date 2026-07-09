@@ -42,6 +42,7 @@ class App extends StatelessWidget {
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             initialRoute: RoutePath.splash,
             getPages: AppPages.routes(),
+            navigatorObservers: UiKitInitializer.navigatorObservers,
             builder: UiKitInitializer.appBuilder(
               inner: (context, child) => ModuleUtilsInitializer.wrapApp(
                 builder: (_, __) => RealtimeNotifyBannerHost(

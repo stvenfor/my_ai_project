@@ -73,6 +73,7 @@ class ModuleStandaloneRunner {
               ),
             )
             .toList(),
+        navigatorObservers: config.navigatorObservers ?? const [],
         builder: (context, child) {
           return ModuleUtilsInitializer.wrapApp(
             builder: (_, innerChild) {

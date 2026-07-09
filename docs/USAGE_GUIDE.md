@@ -95,7 +95,10 @@ main()
 - **邮箱注册**：`/register` → 邮箱 Tab → 邮箱 + 密码
 - **手机注册**：`/register` → 手机 Tab → 短信验证码（首次验证自动建号）
 
-> Supabase 控制台需开启 **Phone** Provider 并配置 SMS（Twilio 等）；Mock 模式验证码固定为 `123456`。
+> **测试环境固定账号**：手机号 `13400000000`，验证码 `123456`。
+> - `USE_MOCK_AUTH=true`：本地 Mock，不请求 Go
+> - `USE_MOCK_AUTH=false`：走 Go dev bypass，返回真实 Supabase token（需 `make run` + `service_role`）
+> 生产环境真实 SMS 尚未开放。
 
 **登出 / 登录**
 

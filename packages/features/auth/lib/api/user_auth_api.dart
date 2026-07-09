@@ -11,10 +11,14 @@ import 'package:module_http/module_http.dart';
 class UserAuthApi {
   static const loginPath = '/api/v1/user/login';
   static const registerPath = '/api/v1/user/register';
+  static const sendPhoneOtpPath = '/api/v1/user/phone/otp/send';
+  static const verifyPhoneOtpPath = '/api/v1/user/phone/otp/verify';
 
   Future<LoginResult> login({
     required String username,
     required String password,
+    required String deviceId,
+    required String platform,
   }) async {
     AuthHttpConfig.ensureInitialized();
     try {
@@ -23,6 +27,67 @@ class UserAuthApi {
         data: {
           'username': username,
           'password': password,
+          'device_id': deviceId,
+          'platform': platform,
+        },
+        converter: _parseLoginResult,
+      );
+      final model = result.data;
+      if (model == null || !model.isSuccess || model.data == null) {
+        throw _mapFailure(model?.code, model?.message);
+      }
+      return model.data!;
+    } on AuthFailure {
+      rethrow;
+    } on HttpRequestException catch (error) {
+      throw _mapFailure(
+        int.tryParse(error.code ?? ''),
+        error.message,
+      );
+    } catch (error) {
+      throw _mapFailure(null, error.toString());
+    }
+  }
+
+  Future<void> sendPhoneOtp({required String phone}) async {
+    AuthHttpConfig.ensureInitialized();
+    try {
+      final result = await HttpManager.instance.post<ResultModel<Object?>>(
+        sendPhoneOtpPath,
+        data: {'phone': phone},
+        converter: _parseOkResult,
+      );
+      final model = result.data;
+      if (model == null || !model.isSuccess) {
+        throw _mapFailure(model?.code, model?.message);
+      }
+    } on AuthFailure {
+      rethrow;
+    } on HttpRequestException catch (error) {
+      throw _mapFailure(
+        int.tryParse(error.code ?? ''),
+        error.message,
+      );
+    } catch (error) {
+      throw _mapFailure(null, error.toString());
+    }
+  }
+
+  Future<LoginResult> verifyPhoneOtp({
+    required String phone,
+    required String otp,
+    required String deviceId,
+    required String platform,
+  }) async {
+    AuthHttpConfig.ensureInitialized();
+    try {
+      final result = await HttpManager.instance.post<ResultModel<LoginResult>>(
+        verifyPhoneOtpPath,
+        data: {
+          'phone': phone,
+          'otp': otp,
+          'device_id': deviceId,
+          'platform': platform,
         },
         converter: _parseLoginResult,
       );
@@ -47,6 +112,8 @@ class UserAuthApi {
     required String username,
     required String password,
     required String email,
+    required String deviceId,
+    required String platform,
   }) async {
     AuthHttpConfig.ensureInitialized();
     try {
@@ -57,6 +124,8 @@ class UserAuthApi {
           'username': username,
           'password': password,
           'email': email,
+          'device_id': deviceId,
+          'platform': platform,
         },
         converter: _parseRegisterResult,
       );
@@ -91,6 +160,13 @@ class UserAuthApi {
     );
   }
 
+  static ResultModel<Object?> _parseOkResult(dynamic json) {
+    return ResultModel.fromJson(
+      json as Map<String, dynamic>,
+      (_) => null,
+    );
+  }
+
   AuthFailure _mapFailure(int? code, String? message) {
     final text = message?.trim() ?? '';
     if (code == 10003 ||
@@ -106,6 +182,12 @@ class UserAuthApi {
     }
     if (text.contains('验证邮件')) {
       return const EmailConfirmationRequiredFailure();
+    }
+    if (text.contains('验证码错误') || text.contains('验证码已失效')) {
+      return const InvalidOtpFailure();
+    }
+    if (text.contains('短信登录暂未开放')) {
+      return UnknownAuthFailure(text);
     }
     if (text.contains('用户已存在')) {
       return const EmailAlreadyRegisteredFailure();
@@ -162,11 +244,13 @@ class LoginResult {
   const LoginResult({
     required this.token,
     required this.user,
+    this.sessionId = '',
   });
 
   factory LoginResult.fromJson(Map<String, dynamic> json) {
     return LoginResult(
       token: json['token']?.toString() ?? '',
+      sessionId: json['session_id']?.toString() ?? '',
       user: BackendUser.fromJson(
         json['user'] is Map<String, dynamic>
             ? json['user'] as Map<String, dynamic>
@@ -176,6 +260,7 @@ class LoginResult {
   }
 
   final String token;
+  final String sessionId;
   final BackendUser user;
 }
 
@@ -183,6 +268,7 @@ class RegisterResult {
   const RegisterResult({
     required this.user,
     this.token,
+    this.sessionId,
   });
 
   factory RegisterResult.fromJson(dynamic json) {
@@ -190,19 +276,23 @@ class RegisterResult {
       return const RegisterResult(user: BackendUser(id: '', username: '', email: ''));
     }
     final token = json['token']?.toString() ?? '';
+    final sessionId = json['session_id']?.toString() ?? '';
     if (json.containsKey('user') && json['user'] is Map<String, dynamic>) {
       return RegisterResult(
         token: token.isNotEmpty ? token : null,
+        sessionId: sessionId.isNotEmpty ? sessionId : null,
         user: BackendUser.fromJson(json['user'] as Map<String, dynamic>),
       );
     }
     return RegisterResult(
       token: token.isNotEmpty ? token : null,
+      sessionId: sessionId.isNotEmpty ? sessionId : null,
       user: BackendUser.fromJson(json),
     );
   }
 
   final String? token;
+  final String? sessionId;
   final BackendUser user;
 
   bool get hasSession => token != null && token!.isNotEmpty;

@@ -1,11 +1,11 @@
+import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
-import 'package:module_common_ui/kit/easy_loading_service.dart';
+import 'package:module_common_ui/kit/bot_toast_loading_service.dart';
 import 'package:module_common_ui/kit/ui_kit_config.dart';
 import 'package:module_core/core.dart';
 
-/// UI 公共能力入口：Loading 注册 + EasyLoading.init 包裹。
+/// UI 公共能力入口：Loading 注册 + BotToast.init 包裹。
 class UiKitInitializer {
   UiKitInitializer._();
 
@@ -13,6 +13,11 @@ class UiKitInitializer {
   static AppLoading _loading = _NoopAppLoading();
 
   static bool get isInitialized => _initialized;
+
+  /// BotToast 路由观察者，须在 GetMaterialApp.navigatorObservers 中注册。
+  static List<NavigatorObserver> get navigatorObservers => [
+        BotToastNavigatorObserver(),
+      ];
 
   /// 当前 Loading 能力（优先 GetX 注册实例）。
   static AppLoading get loading =>
@@ -30,7 +35,7 @@ class UiKitInitializer {
   /// 信息提示。
   static void toastInfo(String message) => loading.showInfo(message);
 
-  /// 注册 [AppLoading] 并配置 EasyLoading 样式（幂等）。
+  /// 注册 [AppLoading] 并配置 BotToast 样式（幂等）。
   static Future<AppLoading> initialize({
     UiKitConfig config = const UiKitConfig(),
     bool permanent = true,
@@ -40,27 +45,31 @@ class UiKitInitializer {
       return Get.find<AppLoading>();
     }
 
-    applyEasyLoadingConfig(config);
-    final service = EasyLoadingAppLoading();
+    applyBotToastConfig(config);
+    final service = BotToastAppLoading(config);
     _loading = service;
     Get.put<AppLoading>(service, permanent: permanent);
     _initialized = true;
     return service;
   }
 
-  /// 供 GetMaterialApp.builder 使用，EasyLoading 置于最外层。
+  /// 供 GetMaterialApp.builder 使用，BotToast 置于最外层。
   static TransitionBuilder appBuilder({
     required TransitionBuilder inner,
   }) {
     _ensureInitialized();
-    return EasyLoading.init(builder: inner);
+    final botInit = BotToastInit();
+    return (context, child) => botInit(
+          context,
+          inner(context, child),
+        );
   }
 
   /// 独立运行时在 [ModuleStandaloneConfig.innerAppBuilder] 中包裹子树。
   static Widget wrapChild(BuildContext context, Widget? child) {
     _ensureInitialized();
-    final builder = EasyLoading.init();
-    return builder(context, child) ?? const SizedBox.shrink();
+    final botInit = BotToastInit();
+    return botInit(context, child);
   }
 
   static void _ensureInitialized() {

@@ -13,6 +13,7 @@ class ModuleStandaloneConfig {
     this.onSetup,
     this.onEnvironmentChanged,
     this.innerAppBuilder,
+    this.navigatorObservers,
     this.extraRoutes,
   });
 
@@ -33,8 +34,11 @@ class ModuleStandaloneConfig {
   /// 环境切换后重建 HTTP（独立运行时在 main_dev 中传入 AppHttpBootstrap.reinitialize）。
   final Future<void> Function(AppEnv env)? onEnvironmentChanged;
 
-  /// 在 ScreenUtil 之内追加一层 App builder（如 EasyLoading.init）。
+  /// 在 ScreenUtil 之内追加一层 App builder（如 BotToast.init）。
   final Widget Function(BuildContext context, Widget? child)? innerAppBuilder;
+
+  /// 路由观察者（如 BotToastNavigatorObserver）。
+  final List<NavigatorObserver>? navigatorObservers;
 
   /// 独立运行时额外路由（如 Web 容器 [RoutePath.web]）。
   final Map<String, WidgetBuilder>? extraRoutes;

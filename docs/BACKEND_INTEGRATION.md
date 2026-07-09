@@ -87,6 +87,8 @@ Go 后端仓库（独立）：`my_go_study`（默认 `http://127.0.0.1:8080`）�
 | Header | 来源 | 说明 |
 |--------|------|------|
 | `Authorization` | `AuthHeaderProvider` | 已登录时 `Bearer <Supabase access_token>` |
+| `X-Session-ID` | `AuthHeaderProvider` | 登录返回的 `session_id`（单设备校验） |
+| `X-Device-ID` | `AuthHeaderProvider` | 本机 `device_id`（android id / iOS idfv） |
 | `Content-Type` | Dio 默认 / Provider | `application/json` |
 | `X-App-Env` | `EnvHeaderInterceptor` | **必须为 ASCII**：`test` / `staging` / `production`（不可用中文） |
 
@@ -167,12 +169,15 @@ sequenceDiagram
   Api->>Go: username=完整邮箱
   Go->>SB: SignInWithEmailPassword
   SB-->>Go: access_token + user
-  Go-->>Api: LoginData
+  Go->>Redis: 覆盖 auth:session:{userId}
+  Go-->>Api: LoginData(token + session_id)
   Api-->>Svc: LoginResult
-  Svc->>Store: setUser(id, token, name)
+  Svc->>Store: setUser(id, token, sessionId, deviceId)
 ```
 
 注册同理：`POST /api/v1/user/register` → Supabase Signup；若返回 `token` 则自动登录，否则需邮箱验证后再登录。
+
+**单设备登录**：同一账号全局仅 1 个 mobile 会话。新设备登录后旧设备下次 API 返回 401「账号已在其他设备登录」；[`SessionGuardHook`](../packages/features/auth/lib/session/session_guard.dart) 自动登出并跳转登录页。
 
 ### 4.2 API 约定
 
@@ -184,17 +189,20 @@ Content-Type: application/json
 
 {
   "username": "user@example.com",
-  "password": "******"
+  "password": "******",
+  "device_id": "<android_id_or_idfv>",
+  "platform": "ios"
 }
 ```
 
-> **username 必须为完整邮箱**（Supabase 邮箱登录）。Flutter 不要传邮箱 localPart。
+> **username 必须为完整邮箱**；**platform** 仅 `android` / `ios`。
 
 成功 `data`：
 
 ```json
 {
   "token": "<supabase_access_token>",
+  "session_id": "<uuid>",
   "user": {
     "id": "<uuid>",
     "username": "display_or_local_part",
@@ -211,12 +219,14 @@ POST /api/v1/user/register
 {
   "username": "昵称或邮箱前缀",
   "password": "******",
-  "email": "user@example.com"
+  "email": "user@example.com",
+  "device_id": "<android_id_or_idfv>",
+  "platform": "android"
 }
 ```
 
 - 密码最少 **6 位**（Flutter UI 与 Go/Supabase 一致）。
-- 成功且 Supabase 返回 session 时，响应结构与登录相同（含 `token`）。
+- 成功且 Supabase 返回 session 时，响应结构与登录相同（含 `token` + `session_id`）。
 - 若项目开启邮箱验证，返回提示「请查收验证邮件后再登录」。
 
 ### 4.3 本地会话
@@ -224,10 +234,19 @@ POST /api/v1/user/register
 登录成功后 [`BackendAuthService`](../packages/features/auth/lib/session/backend_auth_service.dart) 写入：
 
 ```dart
-User(id: uuid, name: displayName, avatar: '', token: accessToken)
+User(
+  id: uuid,
+  name: displayName,
+  avatar: '',
+  token: accessToken,
+  sessionId: sessionId,
+  deviceId: deviceId,
+)
 ```
 
 持久化键：`auth_user_session`（SharedPreferences，见 `UserServiceImpl`）。
+
+业务请求由 `AuthHeaderProvider` 附加 `Authorization`、`X-Session-ID`、`X-Device-ID`。
 
 登出：`AuthSession.logout()` → 清除 SP + `AuthService.signOut()`。
 
