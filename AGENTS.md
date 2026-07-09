@@ -2,7 +2,8 @@
 
 本文档供 AI Agent 与协作者查阅：常见陷阱、正确写法，以及与本项目 **Flutter ↔ Go BFF ↔ Supabase** 架构相关的约束。
 
-> **后端交互完整说明**见 [docs/BACKEND_INTEGRATION.md](docs/BACKEND_INTEGRATION.md)（认证、ResultModel、transactions、环境、调试）。
+> **工作区总览**（Flutter + Go 双仓库）：[my_go_study/AGENTS.md](../my_code_study/my_go_study/AGENTS.md) §一  
+> **后端交互完整说明**：[docs/BACKEND_INTEGRATION.md](docs/BACKEND_INTEGRATION.md)
 
 ---
 
@@ -12,9 +13,9 @@
 2. [认证与会话](#认证与会话)
 3. [Realtime WebSocket](#realtime-websocket)
 4. [GetX / Obx 响应式 UI](#getx--obx-响应式-ui)
-4. [Flutter 拖动排序](#flutter-拖动排序longpressdraggable)
-5. [鸿蒙（OpenHarmony）三方库](#鸿蒙-openharmony-三方库)
-6. [视频播放页沉浸式](#视频播放页沉浸式)
+5. [Flutter 拖动排序](#flutter-拖动排序longpressdraggable)
+6. [鸿蒙（OpenHarmony）三方库](#鸿蒙-openharmony-三方库)
+7. [视频播放页沉浸式](#视频播放页沉浸式)
 
 ---
 
