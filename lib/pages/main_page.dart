@@ -177,8 +177,44 @@ class _PhoneBottomNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final navigationBar = NavigationBar(
+      selectedIndex: selectedIndex,
+      onDestinationSelected: onDestinationSelected,
+      destinations: [
+        for (final tab in tabs)
+          NavigationDestination(
+            icon: Icon(tab.icon),
+            selectedIcon: Icon(tab.selectedIcon),
+            label: tab.label,
+          ),
+      ],
+    );
+
+    if (!showMiniPlayer) {
+      return Material(
+        color: Theme.of(context).colorScheme.surface,
+        child: SafeArea(
+          top: false,
+          child: navigationBar,
+        ),
+      );
+    }
+
+    if (!Get.isRegistered<MusicPlaybackController>()) {
+      return Material(
+        color: Theme.of(context).colorScheme.surface,
+        child: SafeArea(
+          top: false,
+          child: navigationBar,
+        ),
+      );
+    }
+
     return Obx(() {
-      final miniVisible = showMiniPlayer && _hasActiveMusicSession();
+      final playback = Get.find<MusicPlaybackController>();
+      playback.playerState.value;
+      playback.currentIndex.value;
+      final miniVisible = playback.hasActiveSession;
 
       return Material(
         color: Theme.of(context).colorScheme.surface,
@@ -189,31 +225,12 @@ class _PhoneBottomNavigationBar extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (miniVisible) const MusicMiniPlayerBar(),
-              NavigationBar(
-                selectedIndex: selectedIndex,
-                onDestinationSelected: onDestinationSelected,
-                destinations: [
-                  for (final tab in tabs)
-                    NavigationDestination(
-                      icon: Icon(tab.icon),
-                      selectedIcon: Icon(tab.selectedIcon),
-                      label: tab.label,
-                    ),
-                ],
-              ),
+              navigationBar,
             ],
           ),
         ),
       );
     });
-  }
-
-  bool _hasActiveMusicSession() {
-    if (!Get.isRegistered<MusicPlaybackController>()) return false;
-    final playback = Get.find<MusicPlaybackController>();
-    playback.playerState.value;
-    playback.currentIndex.value;
-    return playback.hasActiveSession;
   }
 }
 

@@ -1,6 +1,105 @@
 # Agent 开发指南
 
-本文档供 AI Agent 与协作者查阅，约定本项目常见陷阱与正确写法。
+本文档供 AI Agent 与协作者查阅：常见陷阱、正确写法，以及与本项目 **Flutter ↔ Go BFF ↔ Supabase** 架构相关的约束。
+
+> **后端交互完整说明**见 [docs/BACKEND_INTEGRATION.md](docs/BACKEND_INTEGRATION.md)（认证、ResultModel、transactions、环境、调试）。
+
+---
+
+## 目录
+
+1. [HTTP / 后端交互](#http--后端交互)
+2. [认证与会话](#认证与会话)
+3. [GetX / Obx 响应式 UI](#getx--obx-响应式-ui)
+4. [Flutter 拖动排序](#flutter-拖动排序longpressdraggable)
+5. [鸿蒙（OpenHarmony）三方库](#鸿蒙-openharmony-三方库)
+6. [视频播放页沉浸式](#视频播放页沉浸式)
+
+---
+
+## HTTP / 后端交互
+
+### 架构（当前）
+
+- Flutter **仅通过 HTTP** 访问 **my_go_study**（Go BFF），**不**在业务层直连 Supabase SDK。
+- 登录/注册：`POST /api/v1/user/*` → Go 代理 **Supabase Auth** → 返回 `access_token`。
+- 业务接口（如二手车）：`GET /api/v1/transactions` → Go 校验 **Supabase JWT** → Supabase PostgREST + RLS。
+- 分层：`ViewModel → Repository → Api → HttpManager → ResultModel<T>`。
+
+### 初始化顺序（壳工程）
+
+```
+EnvironmentSession.register()
+AppHttpBootstrap.initialize(headerProvider: AuthHeaderProvider())
+AuthSession.register()   // BackendAuthService，非 Mock 时
+```
+
+环境切换时必须 `AppHttpBootstrap.reinitialize()`（见 `lib/main.dart`）。
+
+### ResultModel 信封
+
+```json
+{ "code": 0, "message": "success", "data": { ... }, "timestamp": 1704067200 }
+```
+
+- 列表 `data`：`{ "list": [...], "pagination": { ... } }` 或 Flutter 兼容 `{ "items": [...] }`。
+- Api converter：`ResultModel.listPage` / `ResultModel.object`（见 `module_http`）。
+- **禁止**在 UI 层直接依赖 `ResultModel`；Repository 解包为 `PageResult` 或实体。
+
+### 常见陷阱
+
+| 问题 | 原因 | 修复 |
+|------|------|------|
+| `FormatException: Invalid HTTP header` | `X-App-Env` 用了中文 | 使用 `AppEnv.name`（`test`/`staging`/`production`） |
+| 登录显示 `Internal Server Error` | Dio 未解析 4xx body | 已用 `validateStatus < 600` + `BackendResponseParser` |
+| 模拟器连不上 `127.0.0.1:8080` | 网络隔离 | Android/鸿蒙自动映射 `10.0.2.2`；真机用局域网 IP |
+| 二手车 401 | token 为 Go JWT 或过期 | 必须走 Supabase 登录拿 token |
+| `.env` 修改不生效 | 热重载不读 define | **Hot Restart** 或重新 `flutter run` |
+
+### 参考文件
+
+- `packages/commons/network/lib/http/app_http_bootstrap.dart`
+- `packages/commons/network/lib/http/backend_response_parser.dart`
+- `packages/commons/network/lib/api/result_model.dart`
+- `packages/features/home/lib/home/api/transaction_api.dart`
+- `docs/BACKEND_INTEGRATION.md`
+
+---
+
+## 认证与会话
+
+### 默认实现
+
+| 开关 | 实现 | 说明 |
+|------|------|------|
+| `USE_MOCK_AUTH=true` | `MockAuthService` | 本地调试，不请求 Go |
+| `USE_MOCK_AUTH=false` | `BackendAuthService` | Flutter → Go → Supabase |
+
+### 登录约定
+
+- 请求体 `username` = **完整邮箱**；密码 ≥ **6 位**。
+- 成功：`UserService.setUser`，token 为 Supabase `access_token`。
+- 错误映射见 `UserAuthApi._mapFailure`：`AccountNotRegisteredFailure`(10003)、`InvalidCredentialsFailure`(10002) 等。
+
+### 需登录功能入口
+
+```dart
+if (AuthSession.isLoggedIn) {
+  await Get.toNamed(targetRoute);
+} else {
+  await AuthNavigation.openLogin(redirectRoute: targetRoute);
+}
+```
+
+参考：`packages/features/home/lib/home/navigation/used_car_navigation.dart`。
+
+### 密钥与 Git
+
+- **`.env` 须入库**，与团队共用 Supabase / 后端配置；新成员可复制 `.env.example` 再按需调整。
+- 仅 **`.env.local`** 等本地覆盖文件不入库（已在 `.gitignore`）。
+- Go 后端 Supabase 配置在 `my_go_study` 的 `.env` 或 `configs/`、`SUPABASE_*` 环境变量。
+
+---
 
 ## GetX / Obx 响应式 UI
 
@@ -11,14 +110,12 @@
 You should only use GetX or Obx for the specific widget that will be updated.
 ```
 
-通常表示 `Obx` / `GetX` 的 builder **在 build 期间没有读取任何 `.obs` 变量**，GetX 无法建立依赖，会在 debug 模式下抛错。
+通常表示 `Obx` / `GetX` 的 builder **在 build 期间没有读取任何 `.obs` 变量**。
 
 ### 正确写法
 
-在 `Obx` builder **内部**显式读取响应式数据，再传给子组件：
-
 ```dart
-// ✅ 正确：在 Obx 内读取 .value / .toList() / .length
+// ✅ 在 Obx 内读取 .value / .toList() / .length
 Obx(() {
   final items = controller.functions.toList();
   return MineReorderableFunctionGrid(
@@ -29,7 +126,7 @@ Obx(() {
   );
 });
 
-// ✅ 正确：读取 Rxn / Rx 的 .value
+// ✅ 读取 Rxn / Rx 的 .value
 Obx(() {
   final profile = controller.profile.value;
   if (profile == null) return const SizedBox.shrink();
@@ -38,39 +135,33 @@ Obx(() {
 ```
 
 ```dart
-// ❌ 错误：直接把 RxList 传给子组件，builder 内未触发订阅
+// ❌ builder 内未订阅 obs
 Obx(() => MyGrid(items: controller.functions));
 
-// ❌ 错误：在 Obx 外读取 obs，builder 内只用普通变量
+// ❌ 在 Obx 外读取 obs
 final list = controller.functions;
 Obx(() => MyGrid(items: list));
-
-// ❌ 错误：obs 只在回调里读，build 期间未读
-Obx(() => ElevatedButton(
-  onPressed: () => controller.count.value++,
-  child: const Text('Add'), // 未读 count
-));
 ```
 
 ### 规则清单
 
-1. **`Obx` builder 必须是块级函数**，在 return 之前读取 obs（`.value`、`.toList()`、`.length` 等）。
-2. **不要把 `RxList` / `Rx` 原样当普通类型传给 StatelessWidget**，先在 Obx 内快照为普通值（如 `List.from(...)`、`toList()`）。
-3. **StatefulWidget 依赖列表顺序时**，列表重排后加 `ValueKey`（如 id 拼接），避免 drag 等内部状态与数据错位。
-4. **父、子都要响应不同 obs 时**，各自包一层 `Obx`，不要指望外层 Obx 更新深层子树。
-5. **纯静态 UI 不要用 Obx**；没有 obs 就不包。
+1. **`Obx` builder 必须是块级函数**，在 return 之前读取 obs。
+2. **先把 `RxList` 快照为普通 `List`** 再传给子组件。
+3. **列表重排**后给 StatefulWidget 加 `ValueKey`（id 拼接）。
+4. **父子响应不同 obs** 时各包一层 `Obx`。
+5. **无 obs 依赖不要包 Obx**。
 
 ### 参考实现
 
-- `packages/features/settings/lib/mine/widgets/mine_function_section_widget.dart` — 个人功能拖动排序
-- `packages/features/settings/lib/mine/widgets/mine_header_widget.dart` — `profile.value` 读取
-- `packages/features/home/lib/home/view/all_services_page.dart` — `favoriteItems.toList()` 读取
+- `packages/features/settings/lib/mine/widgets/mine_function_section_widget.dart`
+- `packages/features/settings/lib/mine/widgets/mine_header_widget.dart`
+- `packages/features/home/lib/home/view/all_services_page.dart`
+
+---
 
 ## Flutter 拖动排序（LongPressDraggable）
 
 ### 问题现象
-
-长按时出现：
 
 ```
 '!_debugDoingThisLayout': is not true
@@ -78,130 +169,71 @@ Obx(() => ElevatedButton(
 Cannot hit test a render box with no size
 ```
 
-### 原因与修复
+### 修复要点
 
-1. **`feedback` 必须有明确的宽高**。若 feedback 内子组件含 `Expanded`/`Flexible`，只设 width 不设 height 会导致 overlay 无尺寸。
-2. **不要在 `DragTarget.onMove` 里 `setState`**，会在 layout 阶段触发重绘。改用 `builder` 的 `candidateData.isNotEmpty` 做高亮。
-3. **拖动状态变更**（`onDragStarted` / `onDragEnd`）用 `SchedulerBinding.instance.addPostFrameCallback` 延迟到下一帧再 `setState`。
-4. **宫格 reorder 优先 `childDragAnchorStrategy`**，避免 `pointerDragAnchorStrategy` 在边缘长按时 feedback 起手大跳；`feedback` 用 `Transform.scale(0.94)` 略缩小视觉占位，仍保留 `SizedBox` 明确宽高。
+1. **`feedback` 必须有明确宽高**；避免 `Expanded`/`Flexible` 导致无尺寸。
+2. **不要在 `DragTarget.onMove` 里 `setState`**；用 `candidateData.isNotEmpty` 高亮。
+3. **拖动状态变更**用 `SchedulerBinding.instance.addPostFrameCallback` 延迟 `setState`。
+4. **宫格 reorder** 优先 `childDragAnchorStrategy`；`feedback` 用 `Transform.scale(0.94)` + 明确 `SizedBox`。
 
-### 参考实现
+参考：`packages/features/settings/lib/mine/widgets/mine_reorderable_function_grid.dart`
 
-- `packages/features/settings/lib/mine/widgets/mine_reorderable_function_grid.dart`
+---
 
-## 三方库鸿蒙（OpenHarmony）适配
+## 鸿蒙（OpenHarmony）三方库
 
 ### Flutter SDK
 
-本项目使用 [CPF-Flutter/flutter_flutter](https://gitcode.com/CPF-Flutter/flutter_flutter/tree/3.35.8-ohos-1.0.1) **3.35.8-ohos-1.0.1**（含 `TargetPlatform.ohos`）。IDE 与构建请指向 `.fvm/versions/custom_3.35-ohos`（见 [`.vscode/settings.json`](.vscode/settings.json)），**不要**用标准 pub.dev Flutter 编此项目，否则 CPF 插件会因缺少 `ohos` 平台报错。
+使用 [CPF-Flutter/flutter_flutter](https://gitcode.com/CPF-Flutter/flutter_flutter/tree/3.35.8-ohos-1.0.1) **3.35.8-ohos-1.0.1**。IDE 指向 `.fvm/versions/custom_3.35-ohos`，**不要**用标准 pub.dev Flutter 编此项目。
 
 ### 原则
 
-带原生能力的第三方库**必须**具备鸿蒙适配后再引入或升级，不能仅依赖 pub.dev 官方版本。
-
-### 官方适配源
-
-- 主仓库：[CPF-Flutter/flutter_packages](https://gitcode.com/CPF-Flutter/flutter_packages)（原 openharmony-tpc 已迁移）
-- 适配清单见仓库 README「OpenHarmony平台已适配packages三方库」
-- 不在 packages 内的库（如 `permission_handler`）查 CPF-Flutter 组织下对应鸿蒙仓库
-- 示例 Demo：[flutter_samples](https://gitcode.com/openharmony-tpc/flutter_samples)（ohos 子目录）
+带原生能力的库**必须**有鸿蒙适配后再引入；根 `pubspec.yaml` `dependency_overrides` 指向 CPF git 源。
 
 ### 依赖写法
 
-1. 各 feature 模块 `pubspec.yaml` 保持 pub.dev 语义化版本（如 `image_picker: ^1.1.2`）。
-2. 根 [`pubspec.yaml`](pubspec.yaml) `dependency_overrides` 统一指向鸿蒙 git 源（优先 `ref` 标签，其次 `br_<库名>-v<版本>_ohos` 分支）。
-3. **federated 插件**需同时 override 主包与 `*_ohos` 实现包（如 `image_picker` + `image_picker_ohos`）。
-4. 部分插件还需在根 `dependencies` 显式添加 `permission_handler_ohos` 等实现包。
-5. `flutter pub get` 后检查 `ohos/entry/oh-package.json5` 是否自动注入 har 依赖。
-
-### 权限
-
-在 `ohos/entry/src/main/module.json5` 声明权限（如 `ohos.permission.CAMERA`），并在 Dart 层拍照等敏感操作前动态申请（`permission_handler` + `permission_handler_ohos`）。
+1. Feature 模块 `pubspec.yaml` 保持 pub.dev 语义化版本。
+2. 根 `dependency_overrides` 统一鸿蒙 git 源（federated 插件需同时 override 主包与 `*_ohos`）。
+3. `flutter pub get` 后检查 `ohos/entry/oh-package.json5` har 依赖。
 
 ### 本项目已接入
 
-- `ImagePickerUtils` / `MediaPickSource` — 相册选图、相机拍照（[`image_picker_utils.dart`](packages/commons/toolkit/lib/utils/image_picker_utils.dart)）
-- `MediaSourceBottomSheet` — 相册/相机来源选择弹框（[`media_source_bottom_sheet.dart`](packages/commons/ui/lib/dialog/media_source_bottom_sheet.dart)）
-- `image_picker` / `image_picker_ohos` — 三方库声明在 `module_utils`，鸿蒙 override 在根 [`pubspec.yaml`](pubspec.yaml)
-- `permission_handler_ohos` — 权限动态申请
-- `ScanUtils` / `ScanPage` — 相机实时扫码、相册图片解析（[`scan_utils.dart`](packages/commons/toolkit/lib/utils/scan_utils.dart)）
-- `scan` — 声明在 `module_utils`（`^1.6.0`），根 [`pubspec.yaml`](pubspec.yaml) `dependency_overrides` 指向 [CPF-Flutter/fluttertpc_scan](https://gitcode.com/CPF-Flutter/fluttertpc_scan)（iOS / Android / Harmony 统一 git 源，需在上述鸿蒙 Flutter SDK 下编译）
+- `ImagePickerUtils` / `MediaSourceBottomSheet` / `image_picker_ohos`
+- `permission_handler_ohos`
+- `ScanUtils` / `scan`（git override）
+
+详见根 [`pubspec.yaml`](pubspec.yaml) 与各 feature 模块 `pubspec.yaml`。
+
+---
 
 ## 视频播放页沉浸式
 
 ### 要求
 
-凡**以视频播放为主**的页面（全屏播放、短视频 Feed、详情页顶部播放区等），须：
+以**视频播放为主**的页面须：
 
-1. **隐藏状态栏内容**（时间、电量、信号等），使用 `SystemUiMode.immersiveSticky`，不要用仅 `edgeToEdge`（透明但仍显示状态栏文字）。
-2. **画面铺满顶部**，视频区域延伸至屏幕顶边，不在状态栏下方留出灰/黑空白条。
-3. **离开播放页时恢复**应用默认 `ImmersiveHelper.apply(immersive: true)`（edgeToEdge），避免影响其他页面。
+1. **隐藏状态栏内容**：`SystemUiMode.immersiveSticky`。
+2. **画面铺满顶部**，不为状态栏单独留白。
+3. **离开播放页**恢复 `ImmersiveHelper.apply(immersive: true)`。
 
 ### 正确写法
 
-用 [`VideoPlaybackImmersiveScope`](packages/commons/ui/lib/layout/video_playback_immersive_scope.dart) 包裹播放页根节点：
+用 `VideoPlaybackImmersiveScope` 包裹播放页根节点；顶部内嵌播放区用 `AppSafeInsets.top(context)` 定位返回按钮；底部用 `AppVideoControlsBar`。
 
 ```dart
-return VideoPlaybackImmersiveScope(
-  child: AppPageScaffold(
-    layout: AppPageLayout.edgeToEdge, // 或 fullBleed（纯播放页）
-    backgroundColor: Colors.black,
-    body: ...,
-  ),
-);
-```
-
-顶部内嵌播放区（如详情页 `PlayableVideoHeader`）：
-
-- `SizedBox` 高度为播放区高度即可，**不要**再加 `MediaQuery.padding.top` 把视频整体下移。
-- 返回按钮用 `AppSafeInsets.top(context)` 定位，避开刘海/挖孔。
-- 底部须使用 [`AppVideoControlsBar`](packages/commons/toolkit/lib/utils/app_video_controls_bar.dart)：播放/暂停、进度条、当前时间/总时长。
-
-```dart
-Positioned(
-  left: 0,
-  right: 0,
-  bottom: 0,
-  child: AppVideoControlsBar(controller: controller),
-),
-```
-
-```dart
-// ✅ 正确：视频铺满播放区，按钮按安全区偏移
-SizedBox(
-  height: 220,
-  child: Stack(
-    fit: StackFit.expand,
-    children: [
-      AppVideoPlayer.view(controller, fit: BoxFit.cover),
-      Positioned(
-        top: AppSafeInsets.top(context) + 4,
-        left: 4,
-        child: BackButton(),
-      ),
-    ],
-  ),
-);
-
-// ❌ 错误：为状态栏单独留白，沉浸式下会出现顶部黑条
+// ❌ 错误：沉浸式下为状态栏留白会出现顶部黑条
 Positioned.fill(top: MediaQuery.paddingOf(context).top, child: video),
 ```
-
-### API 说明
-
-| API | 用途 |
-|-----|------|
-| `ImmersiveHelper.applyPlayback()` | 进入播放页：immersiveSticky + 浅色状态栏图标 |
-| `ImmersiveHelper.restoreFromPlayback()` | 离开播放页：恢复 edgeToEdge |
-| `VideoPlaybackImmersiveScope` | 自动在 `initState` / `dispose` 调用上述两者 |
-
-**底部固定操作条**：白底须延伸至 Home Indicator 区域，用 `padding: EdgeInsets.only(bottom: 10 + AppSafeInsets.bottom(context))`，**不要**仅用 `SafeArea` 包裹（会在底部露出页面背景色）。
 
 ### 参考实现
 
 - `packages/commons/ui/lib/layout/video_playback_immersive_scope.dart`
-- `packages/commons/toolkit/lib/utils/app_video_controls_bar.dart` — 底部播放控制条
-- `packages/features/video/lib/dubbing/widgets/playable_video_header.dart` — 详情顶部播放区
-- `packages/features/video/lib/dubbing/view/dubbing_video_detail_page.dart` — 配音视频详情
-- `packages/features/video/lib/short_video/view/short_video_play_page.dart` — 短视频播放
-- `packages/features/community/lib/community/view/video_play_page.dart` — 社区单视频播放
+- `packages/commons/toolkit/lib/utils/app_video_controls_bar.dart`
+- `packages/features/video/lib/dubbing/widgets/playable_video_header.dart`
+- `packages/features/video/lib/short_video/view/short_video_play_page.dart`
+
+---
+
+## Git 提交
+
+创建 commit 时**不要**添加 `Co-authored-by: Cursor` 等 Agent 尾注；只写与变更相关的标题和正文。

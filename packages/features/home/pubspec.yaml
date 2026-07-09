@@ -12,12 +12,16 @@ dependencies:
   get: ^4.7.3
   module_common_ui:
     path: ../../commons/ui
+  module_auth:
+    path: ../auth
   module_core:
     path: ../../commons/core
   module_http:
     path: ../../commons/network
   module_route:
     path: ../../route
+  module_supabase:
+    path: ../../infrastructure/supabase
   module_music:
     path: ../music
   module_utils:

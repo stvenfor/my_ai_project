@@ -1,3 +1,5 @@
+import 'package:module_http/api/result_model.dart';
+
 class HarmonyIndexModel {
   HarmonyIndexModel({
     this.links,
@@ -16,6 +18,42 @@ class HarmonyIndexModel {
       tools: json['tools'] != null
           ? HarmonySectionModel.fromJson(json['tools'])
           : null,
+    );
+  }
+
+  /// 将 my_go_study transactions 列表映射为 HTTP 调试页展示结构。
+  factory HarmonyIndexModel.fromListData(
+    ListData<Map<String, dynamic>> data,
+  ) {
+    final articles = <HarmonyArticleModel>[];
+    for (final item in data.list) {
+      final category = item['category']?.toString() ?? '未分类';
+      final amount = item['amount'];
+      final date = item['date']?.toString() ?? '';
+      final note = item['note']?.toString();
+      articles.add(
+        HarmonyArticleModel(
+          id: item['id'],
+          title: '$category · ${amount ?? '-'}',
+          desc: note,
+          niceDate: date,
+          author: item['type']?.toString(),
+        ),
+      );
+    }
+    return HarmonyIndexModel(
+      links: HarmonySectionModel(
+        name: 'transactions',
+        desc: 'my_go_study /api/v1/transactions',
+        articleList: articles,
+      ),
+    );
+  }
+
+  /// @deprecated 使用 [fromListData]。
+  factory HarmonyIndexModel.fromTransactions(Map<String, dynamic> json) {
+    return HarmonyIndexModel.fromListData(
+      ListData.fromJson(json, (item) => item),
     );
   }
 

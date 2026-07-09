@@ -2,5 +2,6 @@
 library module_auth;
 
 export 'auth_module.dart';
+export 'navigation/auth_navigation.dart';
 export 'session/auth_session.dart';
 export 'user/controller/auth_controller.dart';

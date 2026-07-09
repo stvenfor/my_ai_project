@@ -1,29 +1,29 @@
 import 'package:get/get.dart';
 import 'package:module_core/core.dart';
-import 'package:module_http/module_http.dart';
+import 'package:module_http/http/backend_http_config.dart';
+import 'package:module_http/http/backend_response_parser.dart';
+import 'package:module_http/http/env_header_interceptor.dart';
+import 'package:module_http/http/http.dart';
+import 'package:module_http/http/rsp_interceptor.dart';
 
-/// 统一 HTTP 初始化，读取 [EnvironmentService] 当前环境 baseUrl。
+/// my_go_study HTTP 初始化，读取当前环境 [backendBaseUrl]。
 class AppHttpBootstrap {
   AppHttpBootstrap._();
 
-  static String resolveBaseUrl() {
-    if (Get.isRegistered<EnvironmentService>()) {
-      return Get.find<EnvironmentService>().baseUrl;
-    }
-    return EnvConfig.of(AppEnv.test).baseUrl;
-  }
+  static String resolveBaseUrl() => BackendHttpConfig.resolveBackendBaseUrl();
 
+  /// HTTP 请求头 `X-App-Env` 须为 ASCII，使用 [AppEnv.name]（test/staging/production）。
   static String resolveEnvLabel() {
     if (Get.isRegistered<EnvironmentService>()) {
-      return Get.find<EnvironmentService>().config.label;
+      return Get.find<EnvironmentService>().currentEnv.value.name;
     }
-    return EnvConfig.of(AppEnv.test).label;
+    return AppEnv.test.name;
   }
 
   static void initialize({
     HttpHeaderProvider? headerProvider,
     HttpResponseHook? responseHook,
-    HttpResponseParser responseParser = const DefaultHttpResponseParser(),
+    HttpResponseParser responseParser = const BackendResponseParser(),
     bool enableLog = false,
     int maxRetries = 0,
   }) {
@@ -39,7 +39,7 @@ class AppHttpBootstrap {
   static void reinitialize({
     HttpHeaderProvider? headerProvider,
     HttpResponseHook? responseHook,
-    HttpResponseParser responseParser = const DefaultHttpResponseParser(),
+    HttpResponseParser responseParser = const BackendResponseParser(),
     bool enableLog = false,
     int maxRetries = 0,
   }) {
@@ -69,6 +69,8 @@ class AppHttpBootstrap {
       interceptors: [
         EnvHeaderInterceptor(resolveEnvLabel),
       ],
+      // 4xx/5xx 仍交给 BackendResponseParser 解析 { code, message } 信封。
+      validateStatus: (status) => status != null && status >= 200 && status < 600,
     );
 
     if (HttpManager.instance.isInitialized) {

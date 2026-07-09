@@ -18,8 +18,8 @@ dependencies:
     path: ../../commons/toolkit
   module_common_ui:
     path: ../../commons/ui
-  module_supabase:
-    path: ../../infrastructure/supabase
+  module_http:
+    path: ../../commons/network
 
 dev_dependencies:
   flutter_test:

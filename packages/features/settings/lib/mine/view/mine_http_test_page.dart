@@ -32,7 +32,7 @@ class MineHttpTestPage extends GetView<MineHttpTestViewModel> {
           children: [
                     _RequestInfoCard(
                       baseUrl: MineHttpConfig.baseUrl,
-                      path: MineHttpConfig.harmonyIndexPath,
+                      path: MineHttpConfig.transactionsPath,
                       loadState: controller.loadState.value,
                       level: controller.args.level,
                       loadedAt: controller.loadedAt.value,

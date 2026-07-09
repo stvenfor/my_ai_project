@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:module_auth/navigation/auth_navigation.dart';
 import 'package:module_auth/session/auth_session.dart';
 import 'package:module_auth/user/binding/auth_binding.dart';
 import 'package:module_auth/user/controller/auth_controller.dart';
@@ -178,6 +179,14 @@ class MineController extends GetxController {
     }
     if (item.id == 'short_video') {
       openShortVideo();
+      return;
+    }
+    if (item.id == 'used_car') {
+      if (isLoggedIn) {
+        Get.toNamed(RoutePath.homeUsedCarList);
+      } else {
+        AuthNavigation.openLogin(redirectRoute: RoutePath.homeUsedCarList);
+      }
       return;
     }
     UiKitInitializer.toast('${item.title} 开发中');

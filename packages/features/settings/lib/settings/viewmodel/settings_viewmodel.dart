@@ -25,7 +25,7 @@ class SettingsViewModel extends GetxController {
     if (service == null) return;
     await service.setEnv(env);
     UiKitInitializer.toastInfo(
-      '环境已切换：${service.config.label} · ${service.baseUrl}',
+      '环境已切换：${service.config.label} · ${service.backendBaseUrl}',
     );
   }
 }

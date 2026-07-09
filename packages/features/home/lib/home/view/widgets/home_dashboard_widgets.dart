@@ -4,6 +4,7 @@ import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_home/home/controller/home_controller.dart';
 import 'package:module_home/home/model/home_dashboard_model.dart';
 import 'package:module_home/home/theme/home_dashboard_theme.dart';
+import 'package:module_home/home/navigation/used_car_navigation.dart';
 import 'package:module_route/route/route_path.dart';
 import 'package:module_utils/module_utils.dart';
 
@@ -146,6 +147,10 @@ class HomeFeatureGrid extends StatelessWidget {
     }
     if (item.label == '生活服务') {
       Get.toNamed(RoutePath.homeCheckInMall);
+      return;
+    }
+    if (item.label == '二手车') {
+      UsedCarNavigation.open();
       return;
     }
     if (item.label == '销售顾问') {

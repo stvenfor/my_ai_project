@@ -4,7 +4,6 @@ import 'package:module_core/env/app_env.dart';
 class EnvConfig {
   const EnvConfig({
     required this.env,
-    required this.baseUrl,
     required this.backendBaseUrl,
     required this.wsBaseUrl,
     required this.rongAppKey,
@@ -12,7 +11,6 @@ class EnvConfig {
   });
 
   final AppEnv env;
-  final String baseUrl;
   /// Go 后端 my_go_study 地址；Android 模拟器请改为 http://10.0.2.2:8080
   final String backendBaseUrl;
   final String wsBaseUrl;
@@ -22,7 +20,6 @@ class EnvConfig {
   static const configs = {
     AppEnv.test: EnvConfig(
       env: AppEnv.test,
-      baseUrl: 'https://www.wanandroid.com/',
       backendBaseUrl: 'http://127.0.0.1:8080',
       wsBaseUrl: 'wss://mock-ws.test.xiaomaomain.com/realtime/v1/connect',
       rongAppKey: 'DEV_RONG_APP_KEY_PLACEHOLDER',
@@ -30,7 +27,6 @@ class EnvConfig {
     ),
     AppEnv.staging: EnvConfig(
       env: AppEnv.staging,
-      baseUrl: 'https://www.wanandroid.com/',
       backendBaseUrl: 'http://127.0.0.1:8080',
       wsBaseUrl: 'wss://mock-ws.staging.xiaomaomain.com/realtime/v1/connect',
       rongAppKey: 'DEV_RONG_APP_KEY_PLACEHOLDER',
@@ -38,7 +34,6 @@ class EnvConfig {
     ),
     AppEnv.production: EnvConfig(
       env: AppEnv.production,
-      baseUrl: 'https://www.wanandroid.com/',
       backendBaseUrl: 'https://api.xiaomaomain.com',
       wsBaseUrl: 'wss://ws.xiaomaomain.com/realtime/v1/connect',
       rongAppKey: 'PROD_RONG_APP_KEY_PLACEHOLDER',

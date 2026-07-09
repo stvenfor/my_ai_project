@@ -8,6 +8,9 @@ import 'package:module_home/home/view/home_learning_report_page.dart';
 import 'package:module_home/home/view/home_page.dart';
 import 'package:module_home/home/view/hot_rank_detail_page.dart';
 import 'package:module_home/home/view/search_page.dart';
+import 'package:module_home/home/binding/used_car_binding.dart';
+import 'package:module_home/home/view/used_car_detail_page.dart';
+import 'package:module_home/home/view/used_car_list_page.dart';
 import 'package:module_home/home/web/home_web_handlers.dart';
 import 'package:module_core/core.dart';
 import 'package:module_route/module/feature_module.dart';
@@ -41,6 +44,14 @@ class HomeModule extends FeatureModule {
         RoutePath.homeSearch: (_) => const SearchPage(),
         RoutePath.homeDubbingFeed: (_) => const DubbingHomePage(),
         RoutePath.homeHotRankDetail: (_) => const HotRankDetailPage(),
+        RoutePath.homeUsedCarList: (_) {
+          UsedCarListBinding().dependencies();
+          return const UsedCarListPage();
+        },
+        RoutePath.homeUsedCarDetail: (_) {
+          UsedCarDetailBinding().dependencies();
+          return const UsedCarDetailPage();
+        },
       };
 
   @override

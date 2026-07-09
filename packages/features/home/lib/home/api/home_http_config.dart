@@ -1,6 +1,6 @@
 import 'package:module_http/module_http.dart';
-import 'package:module_home/legacy/wanandroid/wanandroid_api.dart';
 
+/// module_home 内 HTTP 初始化（my_go_study）。
 class HomeHttpConfig {
   static String get baseUrl => AppHttpBootstrap.resolveBaseUrl();
 
@@ -26,9 +26,8 @@ class HomeHttpConfig {
     int maxRetries = 0,
   }) {
     AppHttpBootstrap.initialize(
-      headerProvider: headerProvider,
+      headerProvider: headerProvider ?? const AuthHeaderProvider(),
       responseHook: responseHook,
-      responseParser: const WanAndroidResponseParser(),
       enableLog: enableLog,
       maxRetries: maxRetries,
     );

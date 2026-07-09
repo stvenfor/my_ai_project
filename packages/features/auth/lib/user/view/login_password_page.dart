@@ -43,7 +43,7 @@ class LoginPasswordPage extends GetView<AuthController> {
                 onChanged: controller.updatePassword,
                 style: const TextStyle(fontSize: 18),
                 decoration: const InputDecoration(
-                  hintText: '8-16位密码',
+                  hintText: '至少6位密码',
                   hintStyle: TextStyle(color: AuthTheme.inputHint),
                   border: UnderlineInputBorder(
                     borderSide: BorderSide(color: AuthTheme.dividerGray),
@@ -63,7 +63,7 @@ class LoginPasswordPage extends GetView<AuthController> {
                   width: double.infinity,
                   height: 48,
                   child: FilledButton(
-                    onPressed: controller.isPasswordValid &&
+                    onPressed: controller.isLoginPasswordValid &&
                             !controller.isLoading.value
                         ? controller.loginWithPassword
                         : null,

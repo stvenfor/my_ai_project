@@ -5,7 +5,6 @@ import 'package:module_auth/session/auth_session.dart';
 import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_core/core.dart';
 import 'package:module_global_cache/module_global_cache.dart';
-import 'package:module_home/legacy/wanandroid/wanandroid_api.dart';
 import 'package:module_http/module_http.dart';
 import 'package:module_route/module/module_host_context.dart';
 import 'package:module_route/module/module_registry.dart';
@@ -34,17 +33,13 @@ class AppInitializer {
     await SpManager.init();
     await AppDatabase.init();
 
-    if (!SupabaseConfig.useMockAuth) {
-      LogUtils.i(
-        '[Supabase] host=${SupabaseConfig.urlHost} '
-        'configured=${SupabaseConfig.isConfigured} '
-        'placeholder=${SupabaseConfig.usesPlaceholder}',
-      );
-      final issue = SupabaseConfig.configurationIssue;
-      if (issue != null) {
-        LogUtils.w('[Supabase] $issue');
-      }
-    }
+    await EnvironmentSession.register();
+    _wireEnvironmentHttpRefresh();
+    AppHttpBootstrap.initialize(
+      headerProvider: const AuthHeaderProvider(),
+      enableLog: kDebugMode,
+      maxRetries: 3,
+    );
 
     await AuthSession.register();
 
@@ -53,9 +48,6 @@ class AppInitializer {
     final webRegistry = await WebKitInitializer.initialize();
     WebKitCoreHandlers.register(webRegistry);
 
-    await EnvironmentSession.register();
-    _wireEnvironmentHttpRefresh();
-
     ModuleRegistry.registerAll(buildEnabledModules());
 
     final hostContext = ModuleHostContext.integrated(
@@ -63,15 +55,6 @@ class AppInitializer {
       httpMaxRetries: 3,
     );
     await ModuleRegistry.bootstrap(hostContext);
-
-    if (!HttpManager.instance.isInitialized) {
-      AppHttpBootstrap.initialize(
-        headerProvider: const AuthHeaderProvider(),
-        enableLog: hostContext.enableHttpLog,
-        maxRetries: hostContext.httpMaxRetries,
-        responseParser: const WanAndroidResponseParser(),
-      );
-    }
 
     AppBinding().dependencies();
     LinkingBinding().dependencies();
@@ -95,7 +78,6 @@ class AppInitializer {
         headerProvider: const AuthHeaderProvider(),
         enableLog: kDebugMode,
         maxRetries: 3,
-        responseParser: const WanAndroidResponseParser(),
       );
     };
   }

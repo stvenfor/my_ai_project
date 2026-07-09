@@ -4,13 +4,11 @@ import 'package:module_core/env/env_config.dart';
 
 typedef EnvChangedHandler = Future<void> Function(AppEnv env);
 
-/// 环境配置抽象服务，业务模块通过 [config.baseUrl] 读取当前 API 地址。
+/// 环境配置抽象服务，业务模块通过 [config.backendBaseUrl] 读取 my_go_study API 地址。
 abstract class EnvironmentService extends GetxService {
   Rx<AppEnv> get currentEnv;
 
   EnvConfig get config => EnvConfig.of(currentEnv.value);
-
-  String get baseUrl => config.baseUrl;
 
   String get backendBaseUrl => config.backendBaseUrl;
 

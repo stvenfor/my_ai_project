@@ -1,0 +1,60 @@
+import 'package:module_core/core.dart';
+import 'package:module_home/home/api/transaction_api.dart';
+import 'package:module_home/home/model/transaction_model.dart';
+import 'package:module_http/module_http.dart';
+
+class TransactionRepository {
+  TransactionRepository({TransactionApi? api}) : _api = api ?? TransactionApi();
+
+  final TransactionApi _api;
+
+  static const pageSize = 20;
+
+  Future<PageResult<TransactionModel>> fetchPage({
+    required int page,
+    String? type,
+  }) async {
+    final result = await _api.fetchPage(
+      page: page,
+      size: pageSize,
+      type: type,
+    );
+    final listData = result.data;
+    if (listData == null) {
+      return const PageResult(list: [], hasMore: false);
+    }
+    return PageResult.fromListData(listData, pageSize: pageSize);
+  }
+
+  Future<TransactionModel> fetchById(int id) async {
+    final result = await _api.getTransaction(id);
+    final item = result.data;
+    if (item == null) {
+      throw StateError('交易记录不存在');
+    }
+    return item;
+  }
+
+  String get sourceLabel => 'my_go_study HTTP API';
+}
+
+String formatTransactionLoadError(Object error) {
+  if (error is HttpRequestException) {
+    if (error.statusCode == 401 ||
+        error.message.contains('未授权') ||
+        error.message.contains('Unauthorized')) {
+      return '登录已过期，请重新登录';
+    }
+    return error.message;
+  }
+  if (error is AuthFailure) {
+    return error.message;
+  }
+  final text = error.toString();
+  if (text.contains('Connection refused') ||
+      text.contains('connection error') ||
+      text.contains('网络连接异常')) {
+    return '无法连接后端，请确认 my_go_study 已启动（默认 http://127.0.0.1:8080）';
+  }
+  return text;
+}

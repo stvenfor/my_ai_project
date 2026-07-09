@@ -177,9 +177,11 @@ class HttpRequestException implements Exception {
     StackTrace stackTrace,
   ) {
     final response = error.response;
+    final bodyMessage = _messageFromResponse(response);
+    final bodyCode = _codeFromResponse(response);
     return HttpRequestException(
-      message: _messageFromDio(error),
-      code: error.type.name,
+      message: bodyMessage ?? _messageFromDio(error),
+      code: bodyCode ?? error.type.name,
       statusCode: response?.statusCode,
       data: response?.data,
       origin: error,
@@ -205,14 +207,47 @@ class HttpRequestException implements Exception {
       case DioExceptionType.badCertificate:
         return '证书校验失败';
       case DioExceptionType.badResponse:
-        return error.response?.statusMessage ?? '服务器响应异常';
+        return _messageFromResponse(error.response) ??
+            error.response?.statusMessage ??
+            '服务器响应异常';
       case DioExceptionType.cancel:
         return '请求已取消';
       case DioExceptionType.connectionError:
-        return '网络连接异常';
+        return _unwrapDioError(error) ?? '网络连接异常';
       case DioExceptionType.unknown:
-        return error.message ?? '未知网络异常';
+        return _unwrapDioError(error) ?? error.message ?? '未知网络异常';
     }
+  }
+
+  static String? _messageFromResponse(Response<dynamic>? response) {
+    final data = response?.data;
+    if (data is Map<String, dynamic>) {
+      final message = data['message']?.toString().trim();
+      if (message != null && message.isNotEmpty) return message;
+      final error = data['error']?.toString().trim();
+      if (error != null && error.isNotEmpty) return error;
+    }
+    return null;
+  }
+
+  static String? _codeFromResponse(Response<dynamic>? response) {
+    final data = response?.data;
+    if (data is Map<String, dynamic>) {
+      final code = data['code'];
+      if (code != null) return code.toString();
+    }
+    return null;
+  }
+
+  static String? _unwrapDioError(DioException error) {
+    final inner = error.error;
+    if (inner != null) {
+      final text = inner.toString().trim();
+      if (text.isNotEmpty) return text;
+    }
+    final message = error.message?.trim();
+    if (message != null && message.isNotEmpty) return message;
+    return null;
   }
 
   @override

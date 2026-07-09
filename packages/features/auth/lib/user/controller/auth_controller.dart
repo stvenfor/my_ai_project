@@ -54,12 +54,11 @@ class AuthController extends GetxController {
     return '晚上好，欢迎使用i车商';
   }
 
-  static const minPasswordLength = 8;
-  static const maxPasswordLength = 16;
+  static const minPasswordLength = 6;
 
-  bool get isPasswordValid =>
-      password.value.length >= minPasswordLength &&
-      password.value.length <= maxPasswordLength;
+  bool get isPasswordValid => password.value.length >= minPasswordLength;
+
+  bool get isLoginPasswordValid => isPasswordValid;
 
   bool get isRegisterPasswordMatch =>
       password.value == confirmPassword.value && isPasswordValid;
@@ -97,6 +96,48 @@ class AuthController extends GetxController {
 
   void _showToast(String message) => _loading.showToast(message);
 
+  void _logAuth(String tag, String message, {Object? error, String level = 'info'}) {
+    final line = error == null
+        ? '[$tag] $message'
+        : '[$tag] $message | $error';
+    switch (level) {
+      case 'error':
+        LogUtils.e(line);
+      case 'success':
+        LogUtils.i(line);
+      default:
+        LogUtils.i(line);
+    }
+  }
+
+  void _showLoginToast(String message) {
+    _logAuth('AuthLogin', 'toast: $message');
+    _showToast(message);
+  }
+
+  void _showLoginAuthFailure(Object error) {
+    final message =
+        error is AuthFailure ? error.message : '操作失败，请稍后重试';
+    _logAuth('AuthLogin', 'toast: $message', error: error, level: 'error');
+    if (error is AccountNotRegisteredFailure) {
+      _loading.showError(message);
+      Future.microtask(() {
+        Get.defaultDialog<void>(
+          title: '提示',
+          middleText: message,
+          textCancel: '取消',
+          textConfirm: '去注册',
+          onConfirm: () {
+            Get.back<void>();
+            Get.toNamed(RoutePath.register);
+          },
+        );
+      });
+      return;
+    }
+    _showAuthFailure(error is AuthFailure ? error : UnknownAuthFailure(message));
+  }
+
   void _showAuthFailure(Object error) {
     final message =
         error is AuthFailure ? error.message : '操作失败：$error';
@@ -108,17 +149,7 @@ class AuthController extends GetxController {
   }
 
   void _logRegister(String message, {Object? error, String level = 'info'}) {
-    final line = error == null
-        ? '[AuthRegister] $message'
-        : '[AuthRegister] $message | $error';
-    switch (level) {
-      case 'error':
-        LogUtils.e(line);
-      case 'success':
-        LogUtils.i(line);
-      default:
-        LogUtils.i(line);
-    }
+    _logAuth('AuthRegister', message, error: error, level: level);
   }
 
   void _showRegisterToast(String message) {
@@ -171,14 +202,15 @@ class AuthController extends GetxController {
 
   Future<void> goToPasswordPage() async {
     if (!agreedPrivacy.value) {
-      _showToast('请先阅读并同意隐私条款');
+      _showLoginToast('请先阅读并同意隐私条款');
       return;
     }
     if (!validateEmail(email.value)) {
-      _showToast('请输入有效的邮箱');
+      _showLoginToast('请输入有效的邮箱');
       return;
     }
     _pendingEmail = email.value.trim();
+    _logAuth('AuthLogin', 'navigate: password page, email=$_pendingEmail');
     await Get.toNamed(RoutePath.loginPassword);
   }
 
@@ -260,20 +292,24 @@ class AuthController extends GetxController {
   }
 
   Future<void> loginWithPassword() async {
-    if (!isPasswordValid) {
-      _showToast('请输入8-16位密码');
+    if (!isLoginPasswordValid) {
+      _showLoginToast('请输入至少6位密码');
       return;
     }
 
     isLoading.value = true;
+    final loginEmail =
+        _pendingEmail.isNotEmpty ? _pendingEmail : email.value.trim();
+    _logAuth('AuthLogin', 'start: email=$loginEmail');
     try {
       await _authService.signInWithEmail(
-        email: _pendingEmail.isNotEmpty ? _pendingEmail : email.value.trim(),
+        email: loginEmail,
         password: password.value,
       );
+      _logAuth('AuthLogin', 'success: email=$loginEmail', level: 'success');
       await _navigateAfterAuth();
     } catch (error) {
-      _showAuthFailure(error);
+      _showLoginAuthFailure(error);
     } finally {
       isLoading.value = false;
     }
@@ -289,7 +325,11 @@ class AuthController extends GetxController {
       return;
     }
     if (!isRegisterPasswordMatch) {
-      _showRegisterToast('两次密码不一致或长度不符合要求');
+      if (password.value.length < minPasswordLength) {
+        _showRegisterToast('请输入至少6位密码');
+      } else {
+        _showRegisterToast('两次密码不一致');
+      }
       return;
     }
 

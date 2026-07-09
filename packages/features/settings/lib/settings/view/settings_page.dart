@@ -37,7 +37,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     () => ListTile(
                       title: const Text('运行环境'),
                       subtitle: Text(
-                        '${envService.config.label} · ${envService.baseUrl}',
+                        '${envService.config.label} · ${envService.backendBaseUrl}',
                       ),
                       trailing: const Icon(Icons.chevron_right_rounded),
                       onTap: () => _showEnvironmentPicker(
@@ -130,7 +130,7 @@ class _SettingsPageState extends State<SettingsPage> {
               for (final env in AppEnv.values)
                 ListTile(
                   title: Text(env.label),
-                  subtitle: Text(EnvConfig.of(env).baseUrl),
+                  subtitle: Text(EnvConfig.of(env).backendBaseUrl),
                   trailing: current == env
                       ? const Icon(Icons.check_rounded, color: Colors.blue)
                       : null,

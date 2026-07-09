@@ -18,6 +18,8 @@ dependencies:
     path: ../../commons/network
   module_route:
     path: ../../route
+  module_auth:
+    path: ../auth
   module_utils:
     path: ../../commons/toolkit
   module_linking:

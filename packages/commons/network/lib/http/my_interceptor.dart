@@ -22,6 +22,7 @@ class HeaderInterceptor extends Interceptor {
           requestOptions: options,
           error: error,
           stackTrace: stackTrace,
+          message: error.toString(),
           type: DioExceptionType.unknown,
         ),
       );

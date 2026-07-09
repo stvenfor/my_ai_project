@@ -3,25 +3,13 @@ import 'package:module_http/module_http.dart';
 class MineHttpConfig {
   static String get baseUrl => AppHttpBootstrap.resolveBaseUrl();
 
-  static const String harmonyIndexPath = '/harmony/index/json';
+  static const String transactionsPath = '/api/v1/transactions';
 
   static void init({bool enableLog = false, int maxRetries = 0}) {
     AppHttpBootstrap.initialize(
-      headerProvider: const MineHeaderProvider(),
+      headerProvider: const AuthHeaderProvider(),
       enableLog: enableLog,
       maxRetries: maxRetries,
     );
-  }
-}
-
-class MineHeaderProvider implements HttpHeaderProvider {
-  const MineHeaderProvider();
-
-  @override
-  Map<String, dynamic> getHeaders(RequestOptions options) {
-    return const {
-      Headers.acceptHeader: Headers.jsonContentType,
-      Headers.contentTypeHeader: Headers.jsonContentType,
-    };
   }
 }

@@ -2,7 +2,8 @@
 
 本文档基于当前工程实践，涵盖：**壳工程运行**、**业务模块独立运行**、**三套环境切换**、**登录与用户状态**、**Git Worktree 并行开发** 等日常开发场景。
 
-> 架构设计详见 [MODULE_ARCHITECTURE.md](./MODULE_ARCHITECTURE.md)。
+> 架构设计详见 [MODULE_ARCHITECTURE.md](./MODULE_ARCHITECTURE.md)。  
+> **Flutter ↔ Go 后端 ↔ Supabase 交互**（API、认证、ResultModel、调试）详见 [BACKEND_INTEGRATION.md](./BACKEND_INTEGRATION.md)。
 
 ---
 
@@ -14,9 +15,8 @@ module_sample/                 # 壳工程（完整 App）
 ├── lib/config/module_manifest.dart
 ├── packages/
 │   ├── core/                  # 契约：User、AuthService、AppLoading、EnvironmentService
-│   ├── infrastructure/supabase/  # Supabase 实现（Auth + Profile）
+│   ├── network/               # Dio + AppHttpBootstrap + ResultModel
 │   ├── route/                 # FeatureModule、Registry、独立运行 Runner
-│   ├── network/               # Dio + AppHttpBootstrap
 │   ├── storage/               # sqflite、AppSettings
 │   ├── toolkit/               # 工具封装（Log/SP/CacheImage/Svg/Lottie…）
 │   ├── ui/                    # 主题、UiKit、BaseViewModel
@@ -29,7 +29,7 @@ module_sample/                 # 壳工程（完整 App）
 
 | 服务 | 注册位置 | 说明 |
 |------|----------|------|
-| `AuthService` | `AuthSession.register()` | 登录/注册/登出；Mock 或 Supabase 实现 |
+| `AuthService` | `AuthSession.register()` | 登录/注册/登出；Mock 或 BackendAuthService（Go → Supabase） |
 | `UserService` | `AuthSession.register()` | 登录态快照；业务模块只读 |
 | `EnvironmentService` | `EnvironmentSession.register()` | 测试/预发/线上；实现在 settings 模块 |
 | `AppLoading` | 壳工程 `main.dart`（`UiKitInitializer.initialize()`） | 全局 Loading / Toast；业务通过接口调用 |

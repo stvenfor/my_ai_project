@@ -127,7 +127,7 @@ class _EmailRegisterForm extends StatelessWidget {
             onChanged: controller.updatePassword,
             decoration: const InputDecoration(
               labelText: '密码',
-                  hintText: '8-16 位',
+                  hintText: '至少6位',
               border: OutlineInputBorder(),
             ),
           ),

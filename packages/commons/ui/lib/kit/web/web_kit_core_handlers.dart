@@ -30,7 +30,7 @@ class WebKitCoreHandlers {
         'ok': true,
         'env': env.currentEnv.value.name,
         'label': env.config.label,
-        'baseUrl': env.baseUrl,
+        'baseUrl': env.backendBaseUrl,
       };
     });
 

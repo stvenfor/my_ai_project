@@ -9,7 +9,11 @@ sealed class AuthFailure implements Exception {
 }
 
 class InvalidCredentialsFailure extends AuthFailure {
-  const InvalidCredentialsFailure() : super('邮箱或密码错误');
+  const InvalidCredentialsFailure() : super('密码错误');
+}
+
+class AccountNotRegisteredFailure extends AuthFailure {
+  const AccountNotRegisteredFailure() : super('账号未注册，请先注册');
 }
 
 class EmailAlreadyRegisteredFailure extends AuthFailure {
@@ -17,7 +21,7 @@ class EmailAlreadyRegisteredFailure extends AuthFailure {
 }
 
 class WeakPasswordFailure extends AuthFailure {
-  const WeakPasswordFailure() : super('密码至少 8 位，建议包含字母与数字');
+  const WeakPasswordFailure() : super('密码至少 6 位');
 }
 
 class SignUpDisabledFailure extends AuthFailure {
