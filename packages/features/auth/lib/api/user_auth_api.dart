@@ -2,6 +2,12 @@ import 'package:module_auth/api/auth_http_config.dart';
 import 'package:module_core/core.dart';
 import 'package:module_http/module_http.dart';
 
+/// =============================================================================
+/// UserAuthApi — 登录/注册 HTTP 封装
+///
+/// 响应格式：ResultModel { code, message, data: { token, user } }
+/// _mapFailure：把 Go 中文 message 映射为 typed AuthFailure，UI 好展示
+/// =============================================================================
 class UserAuthApi {
   static const loginPath = '/api/v1/user/login';
   static const registerPath = '/api/v1/user/register';

@@ -2,10 +2,18 @@ import 'package:module_home/home/api/home_http_config.dart';
 import 'package:module_home/home/model/transaction_model.dart';
 import 'package:module_http/module_http.dart';
 
+/// =============================================================================
+/// TransactionApi — 二手车/收支列表 HTTP 层
+///
+/// GET /api/v1/transactions?limit=&offset=
+/// 需已登录：HttpManager 自动带 Authorization: Bearer <Supabase token>
+///
+/// 初学者导读：my_go_study/docs/transactions-beginner-walkthrough.md
+/// =============================================================================
 class TransactionApi {
   static const transactionsPath = '/api/v1/transactions';
 
-  /// [page] 为 0-based 页码，请求时转换为后端 `offset`。
+  /// [page] 为 0-based；后端用 offset = page * size（与 Go listLegacy 对齐）。
   Future<TransactionListResult> fetchPage({
     required int page,
     int size = 20,
@@ -42,6 +50,7 @@ class TransactionApi {
     return data;
   }
 
+  /// 兼容两种后端 JSON：ResultModel 信封 或 直出 { items: [] }。
   static TransactionListResult _parseListResult(dynamic json) {
     final map = json as Map<String, dynamic>;
     if (map.containsKey('code')) {

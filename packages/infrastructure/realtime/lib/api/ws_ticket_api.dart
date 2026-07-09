@@ -5,10 +5,15 @@ import 'package:module_http/module_http.dart';
 import 'package:module_realtime/config/realtime_config.dart';
 import 'package:module_utils/module_utils.dart';
 
-/// WS Ticket（HTTP 换票，Go BFF）。
+/// =============================================================================
+/// HTTP 换票 API
+///
+/// 【为什么换票走 HTTP 而不是 WebSocket 第一条消息带 JWT？】
+///   HttpManager 已统一注入 Authorization 头；JWT 校验走成熟中间件；
+///   WS 只处理短期 ticket，职责更清晰。
+/// =============================================================================
 class WsTicketApi {
-  WsTicketApi({EnvironmentService? envService})
-      : _envService = envService;
+  WsTicketApi({EnvironmentService? envService}) : _envService = envService;
 
   final EnvironmentService? _envService;
 
@@ -37,13 +42,12 @@ class WsTicketApi {
     }
 
     final env = _envService?.currentEnv.value ?? AppEnv.test;
-    LogUtils.i(
-      '[WsTicketApi] ticket env=${env.name} wsUrl=${ticket.wsUrl}',
-    );
+    LogUtils.i('[WsTicketApi] ticket env=${env.name} wsUrl=${ticket.wsUrl}');
     return ticket;
   }
 }
 
+/// 换票响应，字段名与 Go RealtimeTicketData JSON 一致（camelCase）。
 class WsTicketResult {
   const WsTicketResult({
     required this.ticket,

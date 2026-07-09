@@ -463,4 +463,6 @@ curl -X POST http://127.0.0.1:8080/api/v1/user/login \
 - [USAGE_GUIDE.md](./USAGE_GUIDE.md) — 运行、环境、登录 UI 流程
 - [MODULE_ARCHITECTURE.md](./MODULE_ARCHITECTURE.md) — 模块边界与 DI
 - [AGENTS.md](../AGENTS.md) — Agent 陷阱（Obx、HTTP、鸿蒙、视频沉浸式）
-- Go [Realtime WebSocket 协议与联调指南](../../my_code_study/my_go_study/docs/realtime-websocket.md) — 收发消息、心跳、订阅、重连 sync
+- Go [认证初学者导读](../../my_code_study/my_go_study/docs/auth-beginner-walkthrough.md)
+- Go [Transactions 初学者导读](../../my_code_study/my_go_study/docs/transactions-beginner-walkthrough.md)
+- Go [Realtime 初学者导读](../../my_code_study/my_go_study/docs/realtime-beginner-walkthrough.md)

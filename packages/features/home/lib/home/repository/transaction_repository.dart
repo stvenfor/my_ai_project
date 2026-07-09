@@ -3,6 +3,11 @@ import 'package:module_home/home/api/transaction_api.dart';
 import 'package:module_home/home/model/transaction_model.dart';
 import 'package:module_http/module_http.dart';
 
+/// =============================================================================
+/// TransactionRepository — UI 与 Api 之间的薄层
+///
+/// 职责：解包 ResultModel → PageResult/实体，UI 不直接接触 HTTP 信封。
+/// =============================================================================
 class TransactionRepository {
   TransactionRepository({TransactionApi? api}) : _api = api ?? TransactionApi();
 
@@ -38,6 +43,7 @@ class TransactionRepository {
   String get sourceLabel => 'my_go_study HTTP API';
 }
 
+/// 把底层异常翻译成用户可读中文（401 → 重新登录）。
 String formatTransactionLoadError(Object error) {
   if (error is HttpRequestException) {
     if (error.statusCode == 401 ||

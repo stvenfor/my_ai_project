@@ -25,7 +25,17 @@ import 'package:module_realtime/transport/ws_transport.dart';
 import 'package:module_utils/module_utils.dart';
 import 'package:uuid/uuid.dart';
 
-/// 全局单连接 Realtime 客户端实现。
+/// =============================================================================
+/// AppRealtimeClientImpl — Realtime 核心客户端
+///
+/// 【连接全流程】
+///   connect → HTTP 换票 → WS connect → auth → auth_ok → sync → sub → 心跳
+///
+/// 【收消息】_onEnvelope 按 type 分发
+/// 【发消息】sendEvent → WS type:event；服务端 push → type:event 下行
+///
+/// 初学者请配合阅读：docs/realtime-beginner-walkthrough.md（Go 仓库）
+/// =============================================================================
 class AppRealtimeClientImpl implements AppRealtimeClient {
   AppRealtimeClientImpl({
     required WsTicketApi ticketApi,
@@ -105,6 +115,7 @@ class AppRealtimeClientImpl implements AppRealtimeClient {
       LogUtils.i('[Realtime] skip connect: not logged in');
       return;
     }
+    // 防止重复 connect 造成多条 WS
     if (_state == RealtimeConnectionState.connected ||
         _state == RealtimeConnectionState.connecting ||
         _state == RealtimeConnectionState.authenticating) {
@@ -115,6 +126,7 @@ class AppRealtimeClientImpl implements AppRealtimeClient {
     await _connectInternal(isReconnect: false);
   }
 
+  /// 内部连接：换票 → 建连 → 发 auth 帧。
   Future<void> _connectInternal({required bool isReconnect}) async {
     _reconnectTimer?.cancel();
     _setState(
@@ -174,6 +186,7 @@ class AppRealtimeClientImpl implements AppRealtimeClient {
   Future<void> _onEnvelope(RealtimeEnvelope envelope) async {
     switch (envelope.type) {
       case 'auth_ok':
+        // 鉴权成功：重置重连计数，启动心跳，sync 补消息，重新 sub
         _reconnectPolicy.reset();
         _reconnectCount = 0;
         _setState(RealtimeConnectionState.connected);
@@ -182,6 +195,7 @@ class AppRealtimeClientImpl implements AppRealtimeClient {
       case 'pong':
         _heartbeat?.onPong(envelope.id ?? '');
       case 'ack':
+        // 服务端确认收到客户端 event（如 presence.report）
         final refId = envelope.payload['refId']?.toString();
         if (refId != null) _completeAck(refId);
       case 'error':
@@ -189,6 +203,7 @@ class AppRealtimeClientImpl implements AppRealtimeClient {
         LogUtils.w('[Realtime] server error $code ${envelope.payload}');
         _telemetry.error('ws_server_error', Exception('$code'));
       case 'event':
+        // seq 去重后路由到 watchTopic / GlobalNotifyHandler
         if (!_seqStore.acceptSeq(envelope.seq)) return;
         _router.dispatch(envelope);
         if (envelope.topic == RealtimeTopics.sysNotify) {
@@ -199,6 +214,7 @@ class AppRealtimeClientImpl implements AppRealtimeClient {
     }
   }
 
+  /// auth_ok 之后：HTTP sync 补离线消息 → 重发出站队列 → 重新订阅 topic。
   Future<void> _afterConnected() async {
     final syncSw = Stopwatch()..start();
     try {
@@ -352,6 +368,7 @@ class AppRealtimeClientImpl implements AppRealtimeClient {
     Map<String, dynamic>? payload,
     bool requireAck = true,
   }) async {
+    // 先入 SQLite 队列：断线期间消息不丢，连上后 _replayOutboundQueue 重发
     final messageId = await _outboundQueue.enqueue(
       topic: topic,
       eventName: eventName,
@@ -370,6 +387,7 @@ class AppRealtimeClientImpl implements AppRealtimeClient {
     );
   }
 
+  /// 构造 type=event 的 RealtimeEnvelope 并通过 WS 发送。
   Future<void> _sendOutbound({
     required String messageId,
     required String topic,
