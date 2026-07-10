@@ -25,4 +25,19 @@ class MockUserService extends UserService {
   Future<void> clearUser() async {
     currentUser.value = null;
   }
+
+  @override
+  Future<void> updateAuthTokens({
+    required String token,
+    required String refreshToken,
+    String? sessionId,
+  }) async {
+    final user = currentUser.value;
+    if (user == null) return;
+    currentUser.value = user.copyWith(
+      token: token,
+      refreshToken: refreshToken,
+      sessionId: sessionId?.isNotEmpty == true ? sessionId : user.sessionId,
+    );
+  }
 }

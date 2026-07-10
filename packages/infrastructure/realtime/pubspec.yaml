@@ -25,6 +25,8 @@ dependencies:
     path: ../../commons/storage
   module_route:
     path: ../../route
+  module_linking:
+    path: ../linking
   module_utils:
     path: ../../commons/toolkit
 

@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:module_auth/session/backend_auth_service.dart';
 import 'package:module_auth/session/user_service_impl.dart';
+import 'package:module_auth/session/session_recovery.dart';
 import 'package:module_core/core.dart';
 
 /// 登录模块会话入口：注册 AuthService + UserService（Mock 或 my_go_study HTTP）。
@@ -62,6 +63,16 @@ class AuthSession {
         MockAuthService(Get.find<UserService>()),
         permanent: permanent,
       );
+    }
+  }
+
+  /// 启动时静默 refresh（本地已有 refresh_token 时）。
+  static Future<void> refreshIfNeeded() async {
+    if (!isLoggedIn || !Get.isRegistered<AuthService>()) return;
+    await SessionRecovery.syncStoredDeviceId();
+    final auth = Get.find<AuthService>();
+    if (auth is SessionRefreshable) {
+      await (auth as SessionRefreshable).refreshSession();
     }
   }
 

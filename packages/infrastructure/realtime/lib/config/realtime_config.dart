@@ -37,6 +37,12 @@ class RealtimeConfig {
   /// 通知 notifyId 去重队列最大长度。
   static const notifyDedupMax = 200;
 
+  /// 顶部通知 Banner 自动消失时长。
+  static const notifyBannerAutoDismiss = Duration(seconds: 4);
+
+  /// 顶部通知 Banner 滑入/滑出动画时长。
+  static const notifyBannerAnimation = Duration(milliseconds: 300);
+
   /// 与 Go entity.WSClose* 一致，用于判断是否需要重新换票。
   static const wsCloseAuthFailed = 4001;
   static const wsCloseKicked = 4002;

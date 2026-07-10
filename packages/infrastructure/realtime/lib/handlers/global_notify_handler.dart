@@ -1,4 +1,6 @@
+import 'package:flutter/scheduler.dart';
 import 'package:module_core/model/realtime/realtime_envelope.dart';
+import 'package:module_realtime/handlers/notify_action_resolver.dart';
 import 'package:module_realtime/store/realtime_seq_store.dart';
 import 'package:module_realtime/telemetry/realtime_telemetry.dart';
 import 'package:module_realtime/ui/realtime_notify_banner_controller.dart';
@@ -16,6 +18,8 @@ class GlobalNotifyPayload {
   final String title;
   final String body;
   final Map<String, dynamic> extras;
+
+  bool get silent => extras['silent'] == true;
 
   factory GlobalNotifyPayload.fromEnvelope(RealtimeEnvelope envelope) {
     final p = envelope.payload;
@@ -58,7 +62,30 @@ class GlobalNotifyHandler {
     }
 
     _telemetry.metric('notify_arrive', params: {'notifyId': payload.notifyId});
-    _bannerController.show(payload);
+    if (payload.silent) {
+      LogUtils.d('[GlobalNotify] silent skip notifyId=${payload.notifyId}');
+      _telemetry.metric('notify_silent_skip', params: {'notifyId': payload.notifyId});
+      return;
+    }
+
+    final onTap = resolveNotifyTap(
+      extras: payload.extras,
+      notifyId: payload.notifyId,
+    );
+    _scheduleBannerShow(payload, onTap);
     _telemetry.metric('notify_banner_show', params: {'notifyId': payload.notifyId});
+  }
+
+  /// WebSocket 回调可能在 layout 阶段触发，统一投递到 UI 帧再展示。
+  void _scheduleBannerShow(GlobalNotifyPayload payload, VoidCallback? onTap) {
+    final phase = SchedulerBinding.instance.schedulerPhase;
+    if (phase == SchedulerPhase.idle ||
+        phase == SchedulerPhase.postFrameCallbacks) {
+      _bannerController.show(payload, onTap: onTap);
+      return;
+    }
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _bannerController.show(payload, onTap: onTap);
+    });
   }
 }

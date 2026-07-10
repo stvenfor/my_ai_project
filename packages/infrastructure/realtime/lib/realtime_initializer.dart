@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:module_auth/session/auth_session.dart';
+import 'package:module_core/model/realtime/realtime_connection_state.dart';
 import 'package:module_core/service/app_realtime_client.dart';
 import 'package:module_core/service/environment_service.dart';
 import 'package:module_global_cache/prefs/sp_keys.dart';
@@ -50,7 +53,7 @@ class RealtimeInitializer {
       };
     }
 
-    await tryConnectIfReady();
+    await tryConnectIfReady(trigger: 'app_startup');
   }
 
   static Future<void> Function()? _chainPrivacyGranted(
@@ -58,7 +61,7 @@ class RealtimeInitializer {
   ) {
     return () async {
       await previous?.call();
-      await tryConnectIfReady();
+      await tryConnectIfReady(trigger: 'privacy_granted');
     };
   }
 
@@ -67,7 +70,7 @@ class RealtimeInitializer {
   ) {
     return () async {
       await previous?.call();
-      await tryConnectIfReady();
+      await tryConnectIfReady(trigger: 'after_login');
     };
   }
 
@@ -83,20 +86,75 @@ class RealtimeInitializer {
   static bool _privacyGranted() =>
       SpManager.instance.getBool(SpKeys.privacyConsentGranted) ?? false;
 
-  static Future<void> tryConnectIfReady() async {
-    if (!_privacyGranted()) {
-      LogUtils.i('[Realtime] skip connect: privacy not granted');
+  static Future<void> tryConnectIfReady({String trigger = 'manual'}) async {
+    final privacyGranted = _privacyGranted();
+    final loggedIn = AuthSession.isLoggedIn;
+    final user = AuthSession.maybeService?.currentUser.value;
+    final currentState = _clientImpl?.currentState;
+    LogUtils.i(
+      '[Realtime] tryConnect trigger=$trigger '
+      'privacy=$privacyGranted loggedIn=$loggedIn '
+      'user=${user?.name.isNotEmpty == true ? user!.name : user?.id ?? 'none'} '
+      'state=${currentState?.label ?? 'n/a'}',
+    );
+
+    if (!privacyGranted) {
+      LogUtils.i('[Realtime] skip connect: privacy not granted (trigger=$trigger)');
       return;
     }
-    if (!AuthSession.isLoggedIn) {
-      LogUtils.i('[Realtime] skip connect: not logged in');
+    if (!loggedIn) {
+      LogUtils.i('[Realtime] skip connect: not logged in (trigger=$trigger)');
       return;
     }
     final c = _clientImpl;
-    if (c == null) return;
+    if (c == null) {
+      LogUtils.w('[Realtime] skip connect: client not ready (trigger=$trigger)');
+      return;
+    }
 
+    if (c.currentState.isActive) {
+      LogUtils.i(
+        '[Realtime] skip connect: already ${c.currentState.label} (trigger=$trigger)',
+      );
+      return;
+    }
+
+    LogUtils.i('[Realtime] connecting... trigger=$trigger mock=${RealtimeConfig.useMockGateway}');
     await c.connect();
     await c.subscribeTopics([RealtimeTopics.sysNotify, RealtimeTopics.presenceBulk]);
+
+    final connected = await _waitUntilConnected(
+      timeout: const Duration(seconds: 8),
+    );
+    LogUtils.i(
+      '[Realtime] connect result trigger=$trigger success=$connected '
+      'state=${c.currentState.label} lastSeq=${c.lastSeq} '
+      'topics=${RealtimeTopics.sysNotify},${RealtimeTopics.presenceBulk}',
+    );
+    if (!connected) {
+      LogUtils.w(
+        '[Realtime] connect not ready within timeout trigger=$trigger '
+        'state=${c.currentState.label} — check backend / token / network',
+      );
+    }
+  }
+
+  static Future<bool> _waitUntilConnected({required Duration timeout}) async {
+    final c = _clientImpl;
+    if (c == null) return false;
+    if (c.currentState.isActive) return true;
+
+    try {
+      await c.connectionState
+          .firstWhere(
+            (state) =>
+                state.isActive || state == RealtimeConnectionState.failed,
+          )
+          .timeout(timeout);
+      return c.currentState.isActive;
+    } on TimeoutException {
+      return c.currentState.isActive;
+    }
   }
 
   static Future<void> onLogout() async {
@@ -105,7 +163,7 @@ class RealtimeInitializer {
 
   static Future<void> _onEnvChanged() async {
     await _clientImpl?.disconnect(reason: 'env_changed');
-    await tryConnectIfReady();
+    await tryConnectIfReady(trigger: 'env_changed');
   }
 
   static Future<void> dispose() async {

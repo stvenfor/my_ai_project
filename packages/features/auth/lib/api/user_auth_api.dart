@@ -11,6 +11,8 @@ import 'package:module_http/module_http.dart';
 class UserAuthApi {
   static const loginPath = '/api/v1/user/login';
   static const registerPath = '/api/v1/user/register';
+  static const refreshPath = '/api/v1/user/refresh';
+  static const logoutPath = '/api/v1/user/logout';
   static const sendPhoneOtpPath = '/api/v1/user/phone/otp/send';
   static const verifyPhoneOtpPath = '/api/v1/user/phone/otp/verify';
 
@@ -108,6 +110,78 @@ class UserAuthApi {
     }
   }
 
+  Future<RefreshTokenResult> refresh({
+    required String refreshToken,
+    String? deviceId,
+    String? sessionId,
+    String? platform,
+  }) async {
+    AuthHttpConfig.ensureInitialized();
+    try {
+      final result =
+          await HttpManager.instance.post<ResultModel<RefreshTokenResult>>(
+        refreshPath,
+        data: {
+          'refresh_token': refreshToken,
+          if (deviceId != null && deviceId.isNotEmpty) 'device_id': deviceId,
+          if (sessionId != null && sessionId.isNotEmpty) 'session_id': sessionId,
+          if (platform != null && platform.isNotEmpty) 'platform': platform,
+        },
+        options: Options(extra: const {'skipAuthRefresh': true}),
+        converter: _parseRefreshResult,
+      );
+      final model = result.data;
+      if (model == null || !model.isSuccess || model.data == null) {
+        throw _mapFailure(model?.code, model?.message);
+      }
+      return model.data!;
+    } on AuthFailure {
+      rethrow;
+    } on HttpRequestException catch (error) {
+      throw _mapFailure(
+        int.tryParse(error.code ?? ''),
+        error.message,
+      );
+    } catch (error) {
+      throw _mapFailure(null, error.toString());
+    }
+  }
+
+  Future<void> logout({
+    required String token,
+    required String sessionId,
+    required String deviceId,
+  }) async {
+    AuthHttpConfig.ensureInitialized();
+    try {
+      final result = await HttpManager.instance.post<ResultModel<Object?>>(
+        logoutPath,
+        options: Options(
+          extra: const {'skipAuthRefresh': true},
+          headers: {
+            'Authorization': 'Bearer $token',
+            'X-Session-ID': sessionId,
+            'X-Device-ID': deviceId,
+          },
+        ),
+        converter: _parseOkResult,
+      );
+      final model = result.data;
+      if (model == null || !model.isSuccess) {
+        throw _mapFailure(model?.code, model?.message);
+      }
+    } on AuthFailure {
+      rethrow;
+    } on HttpRequestException catch (error) {
+      throw _mapFailure(
+        int.tryParse(error.code ?? ''),
+        error.message,
+      );
+    } catch (error) {
+      throw _mapFailure(null, error.toString());
+    }
+  }
+
   Future<RegisterResult> register({
     required String username,
     required String password,
@@ -144,6 +218,13 @@ class UserAuthApi {
     } catch (error) {
       throw _mapFailure(null, error.toString());
     }
+  }
+
+  static ResultModel<RefreshTokenResult> _parseRefreshResult(dynamic json) {
+    return ResultModel.object(
+      json as Map<String, dynamic>,
+      RefreshTokenResult.fromJson,
+    );
   }
 
   static ResultModel<LoginResult> _parseLoginResult(dynamic json) {
@@ -198,9 +279,12 @@ class UserAuthApi {
     if (text.contains('无法连接 Supabase') ||
         text.contains('Supabase 未配置') ||
         text.contains('认证服务暂时不可用')) {
+      if (text.isNotEmpty) {
+        return BackendServiceFailure(text);
+      }
       final baseUrl = BackendHttpConfig.resolveBackendBaseUrl();
       return BackendServiceFailure(
-        '认证服务暂时不可用，请确认后端已启动（$baseUrl）或稍后重试',
+        '认证服务暂时不可用，请检查 Go 后端 Supabase 配置（$baseUrl）',
       );
     }
     if (code == 50000 || text.contains('服务器内部错误')) {
@@ -244,12 +328,14 @@ class LoginResult {
   const LoginResult({
     required this.token,
     required this.user,
+    this.refreshToken = '',
     this.sessionId = '',
   });
 
   factory LoginResult.fromJson(Map<String, dynamic> json) {
     return LoginResult(
       token: json['token']?.toString() ?? '',
+      refreshToken: json['refresh_token']?.toString() ?? '',
       sessionId: json['session_id']?.toString() ?? '',
       user: BackendUser.fromJson(
         json['user'] is Map<String, dynamic>
@@ -260,14 +346,36 @@ class LoginResult {
   }
 
   final String token;
+  final String refreshToken;
   final String sessionId;
   final BackendUser user;
+}
+
+class RefreshTokenResult {
+  const RefreshTokenResult({
+    required this.token,
+    required this.refreshToken,
+    this.sessionId = '',
+  });
+
+  factory RefreshTokenResult.fromJson(Map<String, dynamic> json) {
+    return RefreshTokenResult(
+      token: json['token']?.toString() ?? '',
+      refreshToken: json['refresh_token']?.toString() ?? '',
+      sessionId: json['session_id']?.toString() ?? '',
+    );
+  }
+
+  final String token;
+  final String refreshToken;
+  final String sessionId;
 }
 
 class RegisterResult {
   const RegisterResult({
     required this.user,
     this.token,
+    this.refreshToken,
     this.sessionId,
   });
 
@@ -276,22 +384,26 @@ class RegisterResult {
       return const RegisterResult(user: BackendUser(id: '', username: '', email: ''));
     }
     final token = json['token']?.toString() ?? '';
+    final refreshToken = json['refresh_token']?.toString() ?? '';
     final sessionId = json['session_id']?.toString() ?? '';
     if (json.containsKey('user') && json['user'] is Map<String, dynamic>) {
       return RegisterResult(
         token: token.isNotEmpty ? token : null,
+        refreshToken: refreshToken.isNotEmpty ? refreshToken : null,
         sessionId: sessionId.isNotEmpty ? sessionId : null,
         user: BackendUser.fromJson(json['user'] as Map<String, dynamic>),
       );
     }
     return RegisterResult(
       token: token.isNotEmpty ? token : null,
+      refreshToken: refreshToken.isNotEmpty ? refreshToken : null,
       sessionId: sessionId.isNotEmpty ? sessionId : null,
       user: BackendUser.fromJson(json),
     );
   }
 
   final String? token;
+  final String? refreshToken;
   final String? sessionId;
   final BackendUser user;
 

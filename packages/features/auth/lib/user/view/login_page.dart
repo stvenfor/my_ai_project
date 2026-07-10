@@ -16,6 +16,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   late final TextEditingController _emailController;
+  late final TextEditingController _passwordController;
   late final TextEditingController _phoneController;
   late final AuthController _controller;
 
@@ -24,12 +25,14 @@ class _LoginPageState extends State<LoginPage> {
     super.initState();
     _controller = Get.find<AuthController>();
     _emailController = TextEditingController(text: _controller.email.value);
+    _passwordController = TextEditingController(text: _controller.password.value);
     _phoneController = TextEditingController(text: _controller.phone.value);
   }
 
   @override
   void dispose() {
     _emailController.dispose();
+    _passwordController.dispose();
     _phoneController.dispose();
     super.dispose();
   }
@@ -132,8 +135,9 @@ class _LoginPageState extends State<LoginPage> {
                 () {
                   final isEmail =
                       _controller.credentialMode.value == AuthCredentialMode.email;
-                  final canDirectLogin =
-                      isEmail && _controller.canLoginDirectlyFromLoginPage;
+                  final canEmailLogin = isEmail &&
+                      _controller.validateEmail(_controller.email.value) &&
+                      _controller.isLoginPasswordValid;
                   return SizedBox(
                     width: double.infinity,
                     height: 48,
@@ -141,9 +145,9 @@ class _LoginPageState extends State<LoginPage> {
                       onPressed: _controller.isLoading.value
                           ? null
                           : isEmail
-                              ? (canDirectLogin
+                              ? (canEmailLogin
                                   ? _controller.loginWithPassword
-                                  : _controller.goToPasswordPage)
+                                  : null)
                               : _controller.sendPhoneOtpAndGo,
                       style: FilledButton.styleFrom(
                         backgroundColor: AuthTheme.primaryBlue,
@@ -162,9 +166,7 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                             )
                           : Text(
-                              isEmail
-                                  ? (canDirectLogin ? '登录' : '下一步')
-                                  : '获取验证码',
+                              isEmail ? '登录' : '获取验证码',
                               style: const TextStyle(
                                 fontSize: 17,
                                 fontWeight: FontWeight.w600,
@@ -183,27 +185,54 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _buildEmailForm() {
-    return TextField(
-      controller: _emailController,
-      keyboardType: TextInputType.emailAddress,
-      autocorrect: false,
-      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-      decoration: const InputDecoration(
-        hintText: '请输入邮箱',
-        hintStyle: TextStyle(color: AuthTheme.inputHint),
-        prefixIcon: Icon(Icons.mail_outline, color: AuthTheme.textGray),
-        border: UnderlineInputBorder(
-          borderSide: BorderSide(color: AuthTheme.dividerGray),
+    return Column(
+      children: [
+        TextField(
+          controller: _emailController,
+          keyboardType: TextInputType.emailAddress,
+          autocorrect: false,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+          decoration: const InputDecoration(
+            hintText: '请输入邮箱',
+            hintStyle: TextStyle(color: AuthTheme.inputHint),
+            prefixIcon: Icon(Icons.mail_outline, color: AuthTheme.textGray),
+            border: UnderlineInputBorder(
+              borderSide: BorderSide(color: AuthTheme.dividerGray),
+            ),
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: AuthTheme.dividerGray),
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: AuthTheme.primaryBlue),
+            ),
+            contentPadding: EdgeInsets.only(bottom: 8),
+          ),
+          onChanged: _controller.updateEmail,
         ),
-        enabledBorder: UnderlineInputBorder(
-          borderSide: BorderSide(color: AuthTheme.dividerGray),
+        const SizedBox(height: 24),
+        TextField(
+          controller: _passwordController,
+          obscureText: true,
+          keyboardType: TextInputType.visiblePassword,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+          decoration: const InputDecoration(
+            hintText: '请输入密码',
+            hintStyle: TextStyle(color: AuthTheme.inputHint),
+            prefixIcon: Icon(Icons.lock_outline, color: AuthTheme.textGray),
+            border: UnderlineInputBorder(
+              borderSide: BorderSide(color: AuthTheme.dividerGray),
+            ),
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: AuthTheme.dividerGray),
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: AuthTheme.primaryBlue),
+            ),
+            contentPadding: EdgeInsets.only(bottom: 8),
+          ),
+          onChanged: _controller.updatePassword,
         ),
-        focusedBorder: UnderlineInputBorder(
-          borderSide: BorderSide(color: AuthTheme.primaryBlue),
-        ),
-        contentPadding: EdgeInsets.only(bottom: 8),
-      ),
-      onChanged: _controller.updateEmail,
+      ],
     );
   }
 

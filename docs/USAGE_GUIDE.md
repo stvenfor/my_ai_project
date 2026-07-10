@@ -3,7 +3,8 @@
 本文档基于当前工程实践，涵盖：**壳工程运行**、**业务模块独立运行**、**三套环境切换**、**登录与用户状态**、**Git Worktree 并行开发** 等日常开发场景。
 
 > 架构设计详见 [MODULE_ARCHITECTURE.md](./MODULE_ARCHITECTURE.md)。  
-> **Flutter ↔ Go 后端 ↔ Supabase 交互**（API、认证、ResultModel、调试）详见 [BACKEND_INTEGRATION.md](./BACKEND_INTEGRATION.md)。
+> **Flutter ↔ Go 后端 ↔ Supabase 交互**（API、认证、ResultModel、调试）详见 [BACKEND_INTEGRATION.md](./BACKEND_INTEGRATION.md)。  
+> **Git Markdown → 飞书 Wiki 同步**详见 [FEISHU_SYNC.md](./FEISHU_SYNC.md)。
 
 ---
 

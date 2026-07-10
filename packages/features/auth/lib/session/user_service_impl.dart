@@ -42,4 +42,21 @@ class UserServiceImpl extends UserService {
     currentUser.value = null;
     await SpUtils.remove(storageKey);
   }
+
+  @override
+  Future<void> updateAuthTokens({
+    required String token,
+    required String refreshToken,
+    String? sessionId,
+  }) async {
+    final user = currentUser.value;
+    if (user == null) return;
+    await setUser(
+      user.copyWith(
+        token: token,
+        refreshToken: refreshToken,
+        sessionId: sessionId?.isNotEmpty == true ? sessionId : user.sessionId,
+      ),
+    );
+  }
 }

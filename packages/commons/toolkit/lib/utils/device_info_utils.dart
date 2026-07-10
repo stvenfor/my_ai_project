@@ -1,11 +1,16 @@
+import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
+import 'sp_utils.dart';
 
 /// 设备信息工具。
 class DeviceInfoUtils {
   DeviceInfoUtils._();
+
+  static const _stableDeviceIdKey = 'auth_stable_device_id';
 
   static final DeviceInfoPlugin _plugin = DeviceInfoPlugin();
 
@@ -36,6 +41,34 @@ class DeviceInfoUtils {
       return info.data;
     }
     return {'platform': 'unknown'};
+  }
+
+  /// 本 App 安装周期内稳定的设备标识（优先读 SP，避免 iOS 模拟器 idfv 为空时反复变化）。
+  static Future<String> getStableDeviceId() async {
+    final cached = SpUtils.getString(_stableDeviceIdKey);
+    if (cached != null &&
+        cached.isNotEmpty &&
+        !isPlaceholderDeviceId(cached)) {
+      return cached;
+    }
+
+    var resolved = await getDeviceId();
+    if (isPlaceholderDeviceId(resolved)) {
+      resolved = _generateInstallId();
+    }
+    await SpUtils.setString(_stableDeviceIdKey, resolved);
+    return resolved;
+  }
+
+  static bool isPlaceholderDeviceId(String id) {
+    if (id.isEmpty) return true;
+    const placeholders = {
+      'ios',
+      'web',
+      'unknown',
+      'unknown-device',
+    };
+    return placeholders.contains(id);
   }
 
   /// 设备唯一标识（Android ID / iOS identifierForVendor 等）。
@@ -102,6 +135,12 @@ class DeviceInfoUtils {
       'systemVersion': info.systemVersion,
       'isPhysicalDevice': info.isPhysicalDevice,
     };
+  }
+
+  static String _generateInstallId() {
+    final random = Random.secure();
+    final bytes = List<int>.generate(16, (_) => random.nextInt(256));
+    return base64Url.encode(bytes).replaceAll('=', '');
   }
 
   static Map<String, dynamic> _webInfoToMap(WebBrowserInfo info) {

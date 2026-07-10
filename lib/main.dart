@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
+import 'package:module_auth/session/auth_token_refresh_interceptor.dart';
 import 'package:module_auth/session/session_guard.dart';
 import 'package:module_auth/session/auth_session.dart';
 import 'package:module_common_ui/module_common_ui.dart';
@@ -39,11 +40,13 @@ class AppInitializer {
     AppHttpBootstrap.initialize(
       headerProvider: const AuthHeaderProvider(),
       responseHook: SessionGuardHook(),
+      interceptors: [AuthTokenRefreshInterceptor()],
       enableLog: kDebugMode,
       maxRetries: 3,
     );
 
     await AuthSession.register();
+    await AuthSession.refreshIfNeeded();
 
     await UiKitInitializer.initialize();
 
@@ -69,8 +72,11 @@ class AppInitializer {
     await LinkingInitializer.initDeferred();
     await RealtimeInitializer.initDeferred();
 
+    final wsClient = RealtimeInitializer.client;
     LogUtils.i(
-      '[App] 应用初始化完成 env=${Get.find<EnvironmentService>().config.label}',
+      '[App] 应用初始化完成 env=${Get.find<EnvironmentService>().config.label} '
+      'loggedIn=${AuthSession.isLoggedIn} '
+      'ws=${wsClient?.currentState.label ?? '未初始化'}',
     );
   }
 
@@ -79,6 +85,7 @@ class AppInitializer {
       AppHttpBootstrap.reinitialize(
         headerProvider: const AuthHeaderProvider(),
         responseHook: SessionGuardHook(),
+        interceptors: [AuthTokenRefreshInterceptor()],
         enableLog: kDebugMode,
         maxRetries: 3,
       );

@@ -229,6 +229,33 @@ POST /api/v1/user/register
 - 成功且 Supabase 返回 session 时，响应结构与登录相同（含 `token` + `session_id`）。
 - 若项目开启邮箱验证，返回提示「请查收验证邮件后再登录」。
 
+#### 刷新 Token（同设备续期 session）
+
+```
+POST /api/v1/user/refresh
+
+{
+  "refresh_token": "<supabase_refresh_token>",
+  "device_id": "<stable_device_id>",
+  "session_id": "<current_session_id>",
+  "platform": "ios"
+}
+```
+
+- `device_id` / `session_id` / `platform` 可选但 **推荐携带**；携带后服务端会在同设备上续期 Redis session 并返回最新 `session_id`。
+- 同设备仅 `session_id` 过期时返回「会话无效」，客户端应走 refresh 恢复，**不应**视为其他设备互踢。
+- 仅当 Redis 中活跃 `device_id` 与请求不一致时，返回 401「账号已在其他设备登录」。
+
+成功 `data`：
+
+```json
+{
+  "token": "<new_access_token>",
+  "refresh_token": "<new_refresh_token>",
+  "session_id": "<renewed_session_id>"
+}
+```
+
 ### 4.3 本地会话
 
 登录成功后 [`BackendAuthService`](../packages/features/auth/lib/session/backend_auth_service.dart) 写入：

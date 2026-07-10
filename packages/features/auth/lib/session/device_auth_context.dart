@@ -7,7 +7,7 @@ class DeviceAuthContext {
   static Future<DeviceAuthPayload> resolve() async {
     final rawPlatform = (await DeviceInfoUtils.getPlatformName()).toLowerCase();
     final platform = rawPlatform == 'ios' ? 'ios' : 'android';
-    final deviceId = await DeviceInfoUtils.getDeviceId();
+    final deviceId = await DeviceInfoUtils.getStableDeviceId();
     return DeviceAuthPayload(
       deviceId: deviceId.isNotEmpty ? deviceId : 'unknown-device',
       platform: platform,

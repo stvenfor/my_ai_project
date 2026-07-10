@@ -4,18 +4,23 @@ import 'package:get/get.dart';
 import 'package:module_auth/api/user_auth_api.dart';
 import 'package:module_auth/session/device_auth_context.dart';
 import 'package:module_core/core.dart';
+import 'package:module_utils/module_utils.dart';
 
 /// =============================================================================
 /// BackendAuthService — 真实登录实现（USE_MOCK_AUTH=false 时启用）
 ///
 /// 流程：UI → AuthController → 本类 → UserAuthApi → Go /api/v1/user/login
-/// 成功：token 写入 UserService（SharedPreferences），供 AuthHeaderProvider 读取
+/// 成功：token + refresh_token 写入 UserService，供 AuthHeaderProvider 读取
 ///
 /// 初学者导读：my_go_study/docs/auth-beginner-walkthrough.md
 /// =============================================================================
-class BackendAuthService extends AuthService {
+class BackendAuthService extends AuthService implements SessionRefreshable {
   BackendAuthService(this._userService, {UserAuthApi? api})
-      : _api = api ?? UserAuthApi();
+      : _api = api ?? UserAuthApi() {
+    if (_userService.isLoggedIn) {
+      _emit(AuthSessionState.signedIn);
+    }
+  }
 
   final UserService _userService;
   final UserAuthApi _api;
@@ -52,11 +57,11 @@ class BackendAuthService extends AuthService {
       deviceId: device.deviceId,
       platform: device.platform,
     );
-    // Supabase 若开启邮箱验证，register 无 token，需再 login
     if (result.hasSession) {
       await _persistLogin(
         LoginResult(
           token: result.token!,
+          refreshToken: result.refreshToken ?? '',
           sessionId: result.sessionId ?? '',
           user: result.user,
         ),
@@ -75,7 +80,7 @@ class BackendAuthService extends AuthService {
     final normalizedEmail = email.trim();
     final device = await DeviceAuthContext.resolve();
     final result = await _api.login(
-      username: normalizedEmail, // Go 侧 username 即邮箱
+      username: normalizedEmail,
       password: password,
       deviceId: device.deviceId,
       platform: device.platform,
@@ -85,8 +90,59 @@ class BackendAuthService extends AuthService {
 
   @override
   Future<void> signOut() async {
+    final user = _userService.currentUser.value;
+    if (user != null &&
+        user.token.isNotEmpty &&
+        user.sessionId.isNotEmpty &&
+        user.deviceId.isNotEmpty) {
+      try {
+        await _api.logout(
+          token: user.token,
+          sessionId: user.sessionId,
+          deviceId: user.deviceId,
+        );
+      } catch (_) {
+        // 退出以清本地凭证为准；服务端失败不阻塞 UI。
+      }
+    }
     await _userService.clearUser();
     _emit(AuthSessionState.signedOut);
+  }
+
+  @override
+  Future<void> refreshSession() async {
+    final user = _userService.currentUser.value;
+    if (user == null || user.refreshToken.isEmpty) return;
+
+    final device = await DeviceAuthContext.resolve();
+    final deviceId = user.deviceId.isNotEmpty &&
+            !DeviceInfoUtils.isPlaceholderDeviceId(user.deviceId)
+        ? user.deviceId
+        : device.deviceId;
+
+    try {
+      final result = await _api.refresh(
+        refreshToken: user.refreshToken,
+        deviceId: deviceId,
+        sessionId: user.sessionId,
+        platform: device.platform,
+      );
+      await _userService.updateAuthTokens(
+        token: result.token,
+        refreshToken: result.refreshToken,
+        sessionId: result.sessionId,
+      );
+      if (user.deviceId != deviceId) {
+        final current = _userService.currentUser.value;
+        if (current != null) {
+          await _userService.setUser(current.copyWith(deviceId: deviceId));
+        }
+      }
+      _emit(AuthSessionState.signedIn);
+    } catch (_) {
+      await _userService.clearUser();
+      _emit(AuthSessionState.signedOut);
+    }
   }
 
   @override
@@ -111,7 +167,6 @@ class BackendAuthService extends AuthService {
     await _persistLogin(result, deviceId: device.deviceId);
   }
 
-  /// 把 Go 返回的 token + user 映射为本地 User 模型并持久化。
   Future<void> _persistLogin(
     LoginResult result, {
     required String deviceId,
@@ -125,7 +180,8 @@ class BackendAuthService extends AuthService {
         id: backendUser.id,
         name: displayName,
         avatar: '',
-        token: result.token, // Realtime / transactions 都读这个 token
+        token: result.token,
+        refreshToken: result.refreshToken,
         sessionId: result.sessionId,
         deviceId: deviceId,
       ),

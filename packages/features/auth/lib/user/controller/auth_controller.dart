@@ -76,13 +76,6 @@ class AuthController extends GetxController {
     await SpUtils.setString(_lastLoginPasswordKey, password.value);
   }
 
-  /// 邮箱未改动且已有上次登录密码时，可在登录页直接点「登录」。
-  bool get canLoginDirectlyFromLoginPage =>
-      credentialMode.value == AuthCredentialMode.email &&
-      validateEmail(email.value) &&
-      isLoginPasswordValid &&
-      email.value.trim() == _lastSavedLoginEmail;
-
   String get greeting {
     final hour = DateTime.now().hour;
     if (hour < 12) return '早上好，欢迎使用i车商';
@@ -137,9 +130,11 @@ class AuthController extends GetxController {
   void _showToast(String message) => _loading.showToast(message);
 
   void _logAuth(String tag, String message, {Object? error, String level = 'info'}) {
-    final line = error == null
-        ? '[$tag] $message'
-        : '[$tag] $message | $error';
+    final line = switch (error) {
+      null => '[$tag] $message',
+      AuthFailure() => '[$tag] $message',
+      _ => '[$tag] $message | $error',
+    };
     switch (level) {
       case 'error':
         LogUtils.e(line);
@@ -240,20 +235,6 @@ class AuthController extends GetxController {
     });
   }
 
-  Future<void> goToPasswordPage() async {
-    if (!agreedPrivacy.value) {
-      _showLoginToast('请先阅读并同意隐私条款');
-      return;
-    }
-    if (!validateEmail(email.value)) {
-      _showLoginToast('请输入有效的邮箱');
-      return;
-    }
-    _pendingEmail = email.value.trim();
-    _logAuth('AuthLogin', 'navigate: password page, email=$_pendingEmail');
-    await Get.toNamed(RoutePath.loginPassword);
-  }
-
   Future<void> sendPhoneOtpAndGo({bool fromRegister = false}) async {
     void toast(String message) =>
         fromRegister ? _showRegisterToast(message) : _showToast(message);
@@ -332,6 +313,14 @@ class AuthController extends GetxController {
   }
 
   Future<void> loginWithPassword() async {
+    if (!agreedPrivacy.value) {
+      _showLoginToast('请先阅读并同意隐私条款');
+      return;
+    }
+    if (!validateEmail(email.value)) {
+      _showLoginToast('请输入有效的邮箱');
+      return;
+    }
     if (!isLoginPasswordValid) {
       _showLoginToast('请输入至少6位密码');
       return;
@@ -339,6 +328,7 @@ class AuthController extends GetxController {
 
     isLoading.value = true;
     final loginEmail = email.value.trim();
+    _pendingEmail = loginEmail;
     _logAuth('AuthLogin', 'start: email=$loginEmail');
     try {
       await _authService.signInWithEmail(

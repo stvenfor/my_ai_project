@@ -9,6 +9,7 @@ import 'package:module_core/model/realtime/realtime_connection_state.dart';
 import 'package:module_core/model/realtime/realtime_envelope.dart';
 import 'package:module_realtime/config/realtime_config.dart';
 import 'package:module_realtime/realtime_initializer.dart';
+import 'package:module_realtime/ui/realtime_notify_banner_controller.dart';
 import 'package:module_route/route/route_path.dart';
 
 /// Realtime 调试页。
@@ -43,6 +44,29 @@ class _RealtimeDebugPageState extends State<RealtimeDebugPage> {
     setState(() {
       _lastPresenceUpdate =
           'user=$userId online=$online count=$count${device != null ? ' device=$device' : ''}';
+    });
+  }
+
+  void _simulateNotifyBanner() {
+    if (!Get.isRegistered<RealtimeNotifyBannerController>()) return;
+    final controller = Get.find<RealtimeNotifyBannerController>();
+    final stamp = DateTime.now().millisecondsSinceEpoch % 100000;
+    controller.showBanner(
+      RealtimeNotifyBannerData(
+        notifyId: 'debug_$stamp',
+        title: 'Realtime 测试通知 $stamp',
+        body: '这是一条模拟 WebSocket sys.notify 顶部横幅消息',
+      ),
+    );
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (!Get.isRegistered<RealtimeNotifyBannerController>()) return;
+      Get.find<RealtimeNotifyBannerController>().showBanner(
+        RealtimeNotifyBannerData(
+          notifyId: 'debug_${stamp + 1}',
+          title: '排队测试通知',
+          body: '上一条消失后应自动展示本条',
+        ),
+      );
     });
   }
 
@@ -121,12 +145,19 @@ class _RealtimeDebugPageState extends State<RealtimeDebugPage> {
                   },
                 ),
               ),
-              if (kDebugMode)
+              if (kDebugMode) ...[
+                const Divider(height: 32),
+                ListTile(
+                  title: const Text('模拟 sys.notify Banner'),
+                  subtitle: const Text('验证顶部滑入、自动消失与消息排队'),
+                  onTap: _simulateNotifyBanner,
+                ),
                 ListTile(
                   title: const Text('进入 Mock 直播房'),
                   trailing: const Icon(Icons.live_tv),
                   onTap: () => Get.toNamed(RoutePath.liveRoom, arguments: 'mock_room_001'),
                 ),
+              ],
             ],
           );
         },

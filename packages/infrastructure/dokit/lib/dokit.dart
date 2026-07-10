@@ -8,15 +8,11 @@
 //
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:core';
-import 'dart:io';
-import 'dart:math';
 
 import 'package:dokit/engine/dokit_binding.dart';
 import 'package:dokit/kit/apm/crash_kit.dart';
 import 'package:dokit/kit/apm/log_kit.dart';
-import 'package:dokit/kit/apm/vm/version.dart';
 import 'package:dokit/ui/dokit_app.dart';
 import 'package:dokit/ui/dokit_btn.dart';
 import 'package:dokit/ui/kit_page.dart';
@@ -24,13 +20,11 @@ import 'package:dokit/util/FileOperation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart' as dart;
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:dokit/util/time_util.dart';
 
 import 'kit/apm/leaks/leaks_doctor.dart';
 import 'kit/apm/leaks/leaks_doctor_data.dart';
 import 'kit/apm/leaks/leaks_doctor_event.dart';
-import 'kit/apm/vm/vm_service_wrapper.dart';
 import 'kit/biz/biz.dart';
 
 export 'package:dokit/ui/dokit_app.dart';
@@ -82,11 +76,6 @@ class DoKit {
           app ?? await appCreator!();
       _runWrapperApp(wrapper);
       _zone = Zone.current;
-      try {
-        upLoadUserInfo();
-      } catch (e) {
-        print('真机可能报异常(可忽略) : upLoadUserInfo ${e.toString()}');
-      }
       return;
     }
     await runZonedGuarded(
@@ -279,75 +268,4 @@ void dispose({required BuildContext context}) {
   doKitOverlayKey.currentState?.widget.initialEntries.forEach((element) {
 // element.remove();
   });
-}
-
-void upLoadUserInfo() async {
-  final client = HttpClient();
-  const url = 'https://doraemon.xiaojukeji.com/uploadAppData';
-  final request = await client.postUrl(Uri.parse(url));
-  final packageInfo = await PackageInfo.fromPlatform();
-
-  Locale? locale;
-  void finder(Element element) {
-    if (element.widget is Localizations) {
-      locale ??= (element.widget as Localizations).locale;
-    } else {
-      element.visitChildren(finder);
-    }
-  }
-
-  DoKitApp.appKey.currentContext?.visitChildElements(finder);
-
-  final appId = packageInfo.packageName;
-  // 在iOS上可能获取不到appName
-  // https://github.com/flutter/flutter/issues/42510
-  // 当info.plist文件中只有CFBundleName，没有CFBundleDisplayName时，则无法获取
-  final appName =
-      packageInfo.appName.isEmpty ? 'DoKitFlutterDefault' : packageInfo.appName;
-  final appVersion = packageInfo.version;
-  final version = DK_PACKAGE_VERSION;
-  final from = '1';
-  var type = 'flutter_';
-  if (Platform.isIOS) {
-    type += 'iOS';
-  } else if (Platform.isAndroid) {
-    type += 'android';
-  } else {
-    type += 'other';
-  }
-  final language = locale?.toString() ?? '';
-  final playload = <String, dynamic>{};
-  await VMServiceWrapper.instance
-      .callExtensionService('flutterVersion')
-      .then((value) {
-    if (value != null) {
-      final flutter = FlutterVersion.parse(value.json);
-      playload['flutter_version'] = flutter.version;
-      playload['dart_sdk_version'] = flutter.dartSdkVersion;
-      type +=
-          '-flutter_version_${flutter.version}-dart_sdk_version_${flutter.dartSdkVersion}';
-    }
-  });
-
-  final params = <String, dynamic>{};
-  params['appId'] = appId;
-  params['appName'] = appName;
-  params['appVersion'] = appVersion;
-  params['version'] = version;
-  params['from'] = from;
-  params['type'] = type;
-  params['language'] = language;
-  params['playload'] = playload;
-
-  request.headers
-    ..add('Content-Type', 'application/json')
-    ..add('Accept', 'application/json');
-  request.add(utf8.encode(json.encode(params)));
-
-  final response = await request.close();
-//  final responseBody = await response.transform(utf8.decoder).join();
-  if (response.statusCode == HttpStatus.ok) {
-//    print('用户统计数据上报成功！');
-  }
-  client.close();
 }

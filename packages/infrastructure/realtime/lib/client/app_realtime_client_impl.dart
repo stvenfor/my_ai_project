@@ -4,6 +4,8 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:module_auth/session/auth_session.dart';
+import 'package:module_auth/session/session_guard.dart';
+import 'package:module_auth/session/session_recovery.dart';
 import 'package:module_core/core.dart';
 import 'package:module_core/model/realtime/realtime_connection_state.dart';
 import 'package:module_core/model/realtime/realtime_envelope.dart';
@@ -119,6 +121,7 @@ class AppRealtimeClientImpl implements AppRealtimeClient {
     if (_state == RealtimeConnectionState.connected ||
         _state == RealtimeConnectionState.connecting ||
         _state == RealtimeConnectionState.authenticating) {
+      LogUtils.i('[Realtime] skip connect: already ${_state.label}');
       return;
     }
 
@@ -166,6 +169,20 @@ class AppRealtimeClientImpl implements AppRealtimeClient {
     } catch (e, st) {
       sw.stop();
       _telemetry.error('ws_connect_fail', e);
+      if (SessionGuardHook.isForceLogoutError(e)) {
+        final recovered = await SessionRecovery.tryRecover();
+        if (recovered) {
+          LogUtils.i('[Realtime] session recovered on same device, retry connect');
+          await _connectInternal(isReconnect: isReconnect);
+          return;
+        }
+        _manualDisconnect = true;
+        _reconnectTimer?.cancel();
+        _setState(RealtimeConnectionState.disconnected);
+        LogUtils.w('[Realtime] session invalid, stop reconnect');
+        unawaited(SessionGuardHook.handleIfForceLogout(e));
+        return;
+      }
       LogUtils.e('[Realtime] connect failed', e, st);
       _scheduleReconnect(reason: e.toString());
     }
@@ -190,6 +207,9 @@ class AppRealtimeClientImpl implements AppRealtimeClient {
         _reconnectPolicy.reset();
         _reconnectCount = 0;
         _setState(RealtimeConnectionState.connected);
+        LogUtils.i(
+          '[Realtime] auth_ok topics=${_subscribedTopics.join(',')} lastSeq=${_seqStore.lastSeq}',
+        );
         _startHeartbeat();
         await _afterConnected();
       case 'pong':
@@ -203,9 +223,11 @@ class AppRealtimeClientImpl implements AppRealtimeClient {
         LogUtils.w('[Realtime] server error $code ${envelope.payload}');
         _telemetry.error('ws_server_error', Exception('$code'));
       case 'event':
-        // seq 去重后路由到 watchTopic / GlobalNotifyHandler
-        if (!_seqStore.acceptSeq(envelope.seq)) return;
-        _router.dispatch(envelope);
+        // seq 去重后路由；sys.notify 仍交给 Handler（notifyId 去重，避免 seq 已更新但 Banner 未展示）
+        final seqAccepted = _seqStore.acceptSeq(envelope.seq);
+        if (seqAccepted) {
+          _router.dispatch(envelope);
+        }
         if (envelope.topic == RealtimeTopics.sysNotify) {
           await _notifyHandler.handle(envelope);
         }
@@ -223,8 +245,10 @@ class AppRealtimeClientImpl implements AppRealtimeClient {
         topics: _subscribedTopics.toList(),
       );
       for (final event in sync.events) {
-        if (!_seqStore.acceptSeq(event.seq)) continue;
-        _router.dispatch(event);
+        final seqAccepted = _seqStore.acceptSeq(event.seq);
+        if (seqAccepted) {
+          _router.dispatch(event);
+        }
         if (event.topic == RealtimeTopics.sysNotify) {
           await _notifyHandler.handle(event);
         }
@@ -453,8 +477,10 @@ class AppRealtimeClientImpl implements AppRealtimeClient {
 
   void _setState(RealtimeConnectionState state) {
     if (_state == state) return;
+    final previous = _state;
     _state = state;
     _stateController.add(state);
+    LogUtils.i('[Realtime] state ${previous.name} -> ${state.name} (${state.label})');
     _telemetry.metric('ws_state', params: {'state': state.name});
   }
 

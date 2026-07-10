@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:module_core/core.dart';
 import 'package:module_http/http/backend_http_config.dart';
@@ -26,6 +27,7 @@ class AppHttpBootstrap {
     HttpResponseParser responseParser = const BackendResponseParser(),
     bool enableLog = false,
     int maxRetries = 0,
+    List<Interceptor> interceptors = const [],
   }) {
     _apply(
       headerProvider: headerProvider,
@@ -33,6 +35,7 @@ class AppHttpBootstrap {
       responseParser: responseParser,
       enableLog: enableLog,
       maxRetries: maxRetries,
+      interceptors: interceptors,
     );
   }
 
@@ -42,6 +45,7 @@ class AppHttpBootstrap {
     HttpResponseParser responseParser = const BackendResponseParser(),
     bool enableLog = false,
     int maxRetries = 0,
+    List<Interceptor> interceptors = const [],
   }) {
     _apply(
       headerProvider: headerProvider,
@@ -49,6 +53,7 @@ class AppHttpBootstrap {
       responseParser: responseParser,
       enableLog: enableLog,
       maxRetries: maxRetries,
+      interceptors: interceptors,
     );
   }
 
@@ -58,6 +63,7 @@ class AppHttpBootstrap {
     required HttpResponseParser responseParser,
     required bool enableLog,
     required int maxRetries,
+    List<Interceptor> interceptors = const [],
   }) {
     final config = HttpClientConfig(
       baseUrl: resolveBaseUrl(),
@@ -67,6 +73,7 @@ class AppHttpBootstrap {
       enableLog: enableLog,
       maxRetries: maxRetries,
       interceptors: [
+        ...interceptors,
         EnvHeaderInterceptor(resolveEnvLabel),
       ],
       // 4xx/5xx 仍交给 BackendResponseParser 解析 { code, message } 信封。
