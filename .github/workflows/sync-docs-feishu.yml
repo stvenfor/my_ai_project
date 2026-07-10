@@ -1,0 +1,67 @@
+name: Sync Docs to Feishu
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "**/*.md"
+      - "docs/feishu-sync.config.yaml"
+      - "docs/feishu-sync.manifest.json"
+      - "scripts/feishu_doc_sync/**"
+      - "scripts/sync_docs_to_feishu.sh"
+      - ".github/workflows/sync-docs-feishu.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install lark-cli
+        run: |
+          curl -fsSL "https://github.com/larksuite/cli/releases/download/v1.0.68/lark-cli_Linux_x86_64.tar.gz" -o /tmp/lark-cli.tar.gz
+          tar -xzf /tmp/lark-cli.tar.gz -C /tmp
+          sudo mv /tmp/lark-cli /usr/local/bin/lark-cli
+          lark-cli --version
+
+      - name: Configure lark-cli
+        env:
+          FEISHU_APP_ID: ${{ secrets.FEISHU_APP_ID }}
+          FEISHU_APP_SECRET: ${{ secrets.FEISHU_APP_SECRET }}
+        run: |
+          printf '%s' "$FEISHU_APP_SECRET" | lark-cli config init --app-id "$FEISHU_APP_ID" --app-secret-stdin
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python dependencies
+        run: pip install -r scripts/feishu_doc_sync/requirements.txt
+
+      - name: Sync markdown to Feishu Wiki
+        env:
+          FEISHU_WIKI_SPACE_ID: ${{ secrets.FEISHU_WIKI_SPACE_ID }}
+          FEISHU_SYNC_AS: bot
+        run: python3 scripts/feishu_doc_sync/main.py sync
+
+      - name: Commit manifest updates
+        run: |
+          if git diff --quiet docs/feishu-sync.manifest.json; then
+            echo "Manifest unchanged."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/feishu-sync.manifest.json
+          git commit -m "$(cat <<'EOF'
+chore(docs): update Feishu sync manifest
+
+EOF
+)"
+          git push
