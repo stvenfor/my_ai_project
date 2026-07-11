@@ -1,7 +1,8 @@
 import 'package:module_home/home/model/search_page_model.dart';
 
 abstract final class SearchMockData {
-  static const defaultKeyword = '新标准三年级';
+  static const searchPlaceholder = '搜索客户、订单、课程、视频';
+  static const defaultKeyword = '';
 
   static const searchHistory = [
     '极限文字一排两个显示',

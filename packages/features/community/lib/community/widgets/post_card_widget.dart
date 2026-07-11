@@ -1,6 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:module_community/community/models/post_model.dart';
+import 'package:module_community/community/theme/community_theme.dart';
 import 'package:module_community/community/viewmodel/community_viewmodel.dart';
 import 'package:module_community/community/widgets/comment_preview_widget.dart';
 import 'package:module_community/community/widgets/expand_text_widget.dart';
@@ -30,41 +32,52 @@ class _PostCardWidgetState extends State<PostCardWidget>
     final vm = Get.find<CommunityViewModel>();
     final post = widget.post;
 
-    return Container(
-      color: Theme.of(context).cardColor,
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(child: UserInfoWidget(post: post)),
-              IconButton(
-                icon: const Icon(Icons.more_horiz, size: 22),
-                onPressed: () => _showMore(context, vm, post),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+    return DecoratedBox(
+      decoration: CommunityTheme.groupedCardDecoration,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: UserInfoWidget(post: post)),
+                SizedBox(
+                  width: 44,
+                  height: 44,
+                  child: CupertinoButton(
+                    padding: EdgeInsets.zero,
+                    onPressed: () => _showMore(context, vm, post),
+                    child: const Icon(
+                      CupertinoIcons.ellipsis,
+                      size: 20,
+                      color: CommunityTheme.labelSecondary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            ExpandTextWidget(post: post),
+            if (post.hasImages) ...[
+              const SizedBox(height: 12),
+              ImageGridWidget(images: post.images, postId: post.id),
+            ],
+            if (post.hasVideo) ...[
+              const SizedBox(height: 12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(CommunityTheme.radiusMd),
+                child: VideoCardWidget(
+                  videoUrl: post.videoUrl!,
+                  coverUrl: post.videoCoverUrl,
+                ),
               ),
             ],
-          ),
-          const SizedBox(height: 10),
-          ExpandTextWidget(post: post),
-          if (post.hasImages) ...[
-            const SizedBox(height: 10),
-            ImageGridWidget(images: post.images, postId: post.id),
+            LikeBarWidget(post: post),
+            CommentPreviewWidget(post: post),
           ],
-          if (post.hasVideo) ...[
-            const SizedBox(height: 10),
-            VideoCardWidget(
-              videoUrl: post.videoUrl!,
-              coverUrl: post.videoCoverUrl,
-            ),
-          ],
-          LikeBarWidget(post: post),
-          CommentPreviewWidget(post: post),
-        ],
+        ),
       ),
     );
   }
@@ -80,7 +93,7 @@ class _PostCardWidgetState extends State<PostCardWidget>
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.copy),
+              leading: const Icon(CupertinoIcons.doc_on_doc),
               title: const Text('复制文案'),
               onTap: () {
                 Get.back<void>();
@@ -88,7 +101,7 @@ class _PostCardWidgetState extends State<PostCardWidget>
               },
             ),
             ListTile(
-              leading: const Icon(Icons.flag_outlined),
+              leading: const Icon(CupertinoIcons.flag),
               title: const Text('举报'),
               onTap: () {
                 Get.back<void>();
@@ -97,8 +110,14 @@ class _PostCardWidgetState extends State<PostCardWidget>
             ),
             if (post.isMine)
               ListTile(
-                leading: const Icon(Icons.delete_outline, color: Colors.red),
-                title: const Text('删除', style: TextStyle(color: Colors.red)),
+                leading: const Icon(
+                  CupertinoIcons.delete,
+                  color: CommunityTheme.likeRed,
+                ),
+                title: const Text(
+                  '删除',
+                  style: TextStyle(color: CommunityTheme.likeRed),
+                ),
                 onTap: () {
                   Get.back<void>();
                   vm.deletePost(post.id);
@@ -107,7 +126,10 @@ class _PostCardWidgetState extends State<PostCardWidget>
           ],
         ),
       ),
-      backgroundColor: Theme.of(context).cardColor,
+      backgroundColor: CommunityTheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
+      ),
     );
   }
 }

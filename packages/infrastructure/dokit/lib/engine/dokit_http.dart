@@ -123,6 +123,10 @@ class DoKitHttpClient implements HttpClient {
         final HttpKit? kit = ApmKitManager.instance.getKit(ApmKitName.KIT_HTTP);
         kit?.save(httpInfo);
       }
+      Error.throwWithStackTrace(
+        error is Object ? error : StateError(error.toString()),
+        stackTrace ?? StackTrace.current,
+      );
     });
     final HttpClientRequest request = await future;
     httpInfo ??= HttpInfo(request.uri, request.method);

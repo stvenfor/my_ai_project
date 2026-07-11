@@ -9,39 +9,56 @@ class LoginFooterLinks extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        TextButton(
+        _FooterLink(
+          label: '我要注册',
           onPressed: () => Get.toNamed(RoutePath.register),
-          style: TextButton.styleFrom(
-            padding: EdgeInsets.zero,
-            minimumSize: Size.zero,
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          ),
-          child: const Text(
-            '我要注册',
-            style: TextStyle(color: AuthTheme.linkGray, fontSize: 13),
-          ),
         ),
         Container(
           width: 1,
           height: 12,
-          margin: const EdgeInsets.symmetric(horizontal: 8),
-          color: AuthTheme.dividerGray,
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          color: AuthTheme.separator,
         ),
-        TextButton(
+        _FooterLink(
+          label: '忘记密码',
           onPressed: () {},
-          style: TextButton.styleFrom(
-            padding: EdgeInsets.zero,
-            minimumSize: Size.zero,
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          ),
-          child: const Text(
-            '忘记密码',
-            style: TextStyle(color: AuthTheme.linkGray, fontSize: 13),
-          ),
         ),
       ],
+    );
+  }
+}
+
+class _FooterLink extends StatelessWidget {
+  const _FooterLink({
+    required this.label,
+    required this.onPressed,
+  });
+
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 44,
+      child: TextButton(
+        onPressed: onPressed,
+        style: TextButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          minimumSize: const Size(44, 44),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          foregroundColor: AuthTheme.accent,
+        ),
+        child: Text(
+          label,
+          style: AuthTheme.caption.copyWith(
+            color: AuthTheme.accent,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
     );
   }
 }

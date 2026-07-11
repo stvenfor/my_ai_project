@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:module_http/module_http.dart';
@@ -29,8 +30,8 @@ class SettingsModule extends FeatureModule {
   ModuleTabItem? get mainTab => ModuleTabItem(
         moduleId: moduleId,
         label: '我的',
-        icon: Icons.person_outline_rounded,
-        selectedIcon: Icons.person_rounded,
+        icon: CupertinoIcons.person,
+        selectedIcon: CupertinoIcons.person_fill,
         pageBuilder: () => const MinePage(showBackButton: false),
         order: 3,
       );

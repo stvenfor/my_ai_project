@@ -14,7 +14,7 @@ class HomeSearchBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 12.h),
+      padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 0),
       child: Row(
         children: [
           Expanded(
@@ -22,19 +22,30 @@ class HomeSearchBar extends StatelessWidget {
               onTap: () => Get.toNamed<void>(RoutePath.homeSearch),
               behavior: HitTestBehavior.opaque,
               child: Container(
-                height: 40.h,
+                height: 44.h,
                 padding: EdgeInsets.symmetric(horizontal: 14.w),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(20.r),
+                  color: HomeDashboardTheme.surface,
+                  borderRadius: BorderRadius.circular(HomeDashboardTheme.radiusMd),
+                  border: Border.all(
+                    color: HomeDashboardTheme.separator,
+                    width: 0.5,
+                  ),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.search, size: 20.sp, color: Colors.white70),
+                    Icon(
+                      Icons.search_rounded,
+                      size: 20.sp,
+                      color: HomeDashboardTheme.labelSecondary,
+                    ),
                     SizedBox(width: 8.w),
                     Text(
                       '搜索客户、订单、资讯',
-                      style: TextStyle(fontSize: 14.sp, color: Colors.white60),
+                      style: TextStyle(
+                        fontSize: 15.sp,
+                        color: HomeDashboardTheme.labelTertiary,
+                      ),
                     ),
                   ],
                 ),
@@ -42,14 +53,28 @@ class HomeSearchBar extends StatelessWidget {
             ),
           ),
           SizedBox(width: 12.w),
-          Container(
-            width: 40.w,
-            height: 40.w,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.15),
-              shape: BoxShape.circle,
+          Material(
+            color: HomeDashboardTheme.surface,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(HomeDashboardTheme.radiusMd),
+              side: const BorderSide(
+                color: HomeDashboardTheme.separator,
+                width: 0.5,
+              ),
             ),
-            child: Icon(Icons.qr_code_scanner_rounded, size: 22.sp, color: Colors.white),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(HomeDashboardTheme.radiusMd),
+              onTap: () {},
+              child: SizedBox(
+                width: 44.w,
+                height: 44.w,
+                child: Icon(
+                  Icons.qr_code_scanner_rounded,
+                  size: 22.sp,
+                  color: HomeDashboardTheme.accent,
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -63,56 +88,61 @@ class HomeBannerSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 16.w),
-      height: 140.h,
+      margin: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 0),
+      height: 132.h,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16.r),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF2B5DAE), Color(0xFF1A3A6E)],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF2B5DAE).withValues(alpha: 0.3),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(HomeDashboardTheme.radiusMd),
+        color: HomeDashboardTheme.surface,
+        boxShadow: HomeDashboardTheme.cardShadow,
       ),
+      clipBehavior: Clip.antiAlias,
       child: Stack(
         fit: StackFit.expand,
         children: [
           CacheImageUtils.network(
             'https://picsum.photos/seed/banner/800/400',
             fit: BoxFit.cover,
-            color: Colors.black.withValues(alpha: 0.35),
+            color: Colors.black.withValues(alpha: 0.25),
             colorBlendMode: BlendMode.darken,
-            borderRadius: BorderRadius.circular(16.r),
+          ),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: [
+                  HomeDashboardTheme.accent.withValues(alpha: 0.55),
+                  Colors.transparent,
+                ],
+              ),
+            ),
           ),
           Positioned(
             left: 20.w,
-            top: 28.h,
+            top: 24.h,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '[功能] 朋友圈',
+                  '朋友圈营销',
                   style: TextStyle(
                     color: Colors.white,
-                  fontSize: 20.sp,
-                    shadows: [Shadow(color: Colors.black38, blurRadius: 4)],
-                    fontWeight: FontWeight.bold,
+                    fontSize: 22.sp,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.3,
                   ),
                 ),
-                SizedBox(height: 8.h),
+                SizedBox(height: 6.h),
                 Text(
                   '一键分享，高效触达客户',
-                  style: TextStyle(color: Colors.white70, fontSize: 12.sp),
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.85),
+                    fontSize: 14.sp,
+                  ),
                 ),
                 SizedBox(height: 12.h),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
+                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(20.r),
@@ -120,8 +150,8 @@ class HomeBannerSection extends StatelessWidget {
                   child: Text(
                     '立即体验',
                     style: TextStyle(
-                      color: const Color(0xFF2B5DAE),
-                      fontSize: 13.sp,
+                      color: HomeDashboardTheme.accent,
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -175,8 +205,10 @@ class HomeFeatureGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(8.w, 16.h, 8.w, 0),
+    return Container(
+      margin: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 0),
+      padding: EdgeInsets.fromLTRB(8.w, 16.h, 8.w, 16.h),
+      decoration: HomeDashboardTheme.groupedCardDecoration,
       child: GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
@@ -196,8 +228,8 @@ class HomeFeatureGrid extends StatelessWidget {
                   width: 48.w,
                   height: 48.w,
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(14.r),
+                    color: HomeDashboardTheme.fillSecondary,
+                    borderRadius: BorderRadius.circular(12.r),
                   ),
                   child: item.imageUrl != null
                       ? CacheImageUtils.network(
@@ -205,7 +237,7 @@ class HomeFeatureGrid extends StatelessWidget {
                           width: 48.w,
                           height: 48.w,
                           fit: BoxFit.cover,
-                          borderRadius: BorderRadius.circular(14.r),
+                          borderRadius: BorderRadius.circular(12.r),
                           placeholder: (_, __) => Center(
                             child: SizedBox(
                               width: 20.w,
@@ -214,9 +246,9 @@ class HomeFeatureGrid extends StatelessWidget {
                             ),
                           ),
                           errorWidget: (_, __, ___) => Icon(
-                            Icons.image_outlined,
+                            Icons.apps_rounded,
                             size: 24.sp,
-                            color: Colors.white60,
+                            color: HomeDashboardTheme.accent,
                           ),
                         )
                       : Center(
@@ -231,7 +263,10 @@ class HomeFeatureGrid extends StatelessWidget {
                   item.label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 11.sp, color: Colors.white.withValues(alpha: 0.9)),
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    color: HomeDashboardTheme.labelPrimary,
+                  ),
                 ),
               ],
             ),
@@ -253,33 +288,38 @@ class HomeGreetingSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(16.w, 24.h, 16.w, 8.h),
+      padding: EdgeInsets.fromLTRB(16.w, 24.h, 16.w, 0),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
             child: Text(
               greeting,
-              style: TextStyle(
-                fontSize: 20.sp,
-                fontWeight: FontWeight.bold,
-                color: HomeDashboardTheme.titleBlack,
-              ),
+              style: HomeDashboardTheme.largeTitle.copyWith(fontSize: 28.sp),
             ),
           ),
           Container(
             padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
             decoration: BoxDecoration(
-              color: const Color(0xFFFFF7E6),
-              borderRadius: BorderRadius.circular(12.r),
+              color: HomeDashboardTheme.accent.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(20.r),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.notifications_none_rounded, size: 16.sp, color: const Color(0xFFFFB800)),
+                Icon(
+                  Icons.notifications_none_rounded,
+                  size: 16.sp,
+                  color: HomeDashboardTheme.accent,
+                ),
                 SizedBox(width: 4.w),
                 Text(
                   '3条新消息',
-                  style: TextStyle(fontSize: 11.sp, color: const Color(0xFFFFB800), fontWeight: FontWeight.w500),
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    color: HomeDashboardTheme.accent,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ],
             ),
@@ -298,7 +338,7 @@ class HomeQuickActionGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w),
+      padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 0),
       child: GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
@@ -314,15 +354,12 @@ class HomeQuickActionGrid extends StatelessWidget {
           return Container(
             padding: EdgeInsets.all(14.w),
             decoration: BoxDecoration(
-              color: HomeDashboardTheme.cardWhite,
-              borderRadius: BorderRadius.circular(16.r),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+              color: HomeDashboardTheme.surface,
+              borderRadius: BorderRadius.circular(HomeDashboardTheme.radiusMd),
+              border: Border.all(
+                color: HomeDashboardTheme.separator,
+                width: 0.5,
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -440,11 +477,15 @@ class HomeStoreMetricsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.fromLTRB(16.w, 20.h, 16.w, 0),
+      margin: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 0),
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: HomeDashboardTheme.cardWhite,
-        borderRadius: BorderRadius.circular(16.r),
+        color: HomeDashboardTheme.surface,
+        borderRadius: BorderRadius.circular(HomeDashboardTheme.radiusMd),
+        border: Border.all(
+          color: HomeDashboardTheme.separator,
+          width: 0.5,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -587,7 +628,7 @@ class HomeServiceGrid extends StatelessWidget {
         children: [
           Text(
             '服务推荐',
-            style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold),
+            style: HomeDashboardTheme.sectionTitle.copyWith(fontSize: 20.sp),
           ),
           SizedBox(height: 12.h),
           GridView.builder(
@@ -686,15 +727,16 @@ class HomeContactList extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '联系汽车之家',
-            style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold),
-          ),
+          Text('联系汽车之家', style: HomeDashboardTheme.sectionTitle),
           SizedBox(height: 12.h),
-          Container(
+          DecoratedBox(
             decoration: BoxDecoration(
-              color: HomeDashboardTheme.cardWhite,
-              borderRadius: BorderRadius.circular(16.r),
+              color: HomeDashboardTheme.surface,
+              borderRadius: BorderRadius.circular(HomeDashboardTheme.radiusMd),
+              border: Border.all(
+                color: HomeDashboardTheme.separator,
+                width: 0.5,
+              ),
             ),
             child: Column(
               children: items.asMap().entries.map((entry) {
@@ -706,7 +748,7 @@ class HomeContactList extends StatelessWidget {
                       contentPadding: EdgeInsets.symmetric(horizontal: 16.w),
                       leading: CircleAvatar(
                         radius: 22.r,
-                        backgroundColor: HomeDashboardTheme.background,
+                        backgroundColor: HomeDashboardTheme.fillSecondary,
                         child: item.imageUrl != null
                             ? CacheImageUtils.circle(
                                 item.imageUrl!,
@@ -718,25 +760,39 @@ class HomeContactList extends StatelessWidget {
                                     child: const CircularProgressIndicator(strokeWidth: 1.5),
                                   ),
                                 ),
-                                errorWidget: (_, __, ___) => Text(
-                                  item.emoji ?? '?',
-                                  style: TextStyle(fontSize: 18.sp),
+                                errorWidget: (_, __, ___) => Icon(
+                                  Icons.person_outline,
+                                  size: 20.sp,
+                                  color: HomeDashboardTheme.accent,
                                 ),
                               )
-                            : Text(item.emoji ?? '?', style: TextStyle(fontSize: 20.sp)),
+                            : Icon(
+                                Icons.person_outline,
+                                size: 20.sp,
+                                color: HomeDashboardTheme.accent,
+                              ),
                       ),
                       title: Text(
                         item.title,
-                        style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w500),
+                        style: TextStyle(
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.w500,
+                          color: HomeDashboardTheme.labelPrimary,
+                        ),
                       ),
                       subtitle: Text(
                         item.subtitle,
-                        style: TextStyle(fontSize: 12.sp, color: HomeDashboardTheme.textGray),
+                        style: HomeDashboardTheme.sectionLabel,
                       ),
                       trailing: _trailingIcon(item.trailingType),
                     ),
                     if (index < items.length - 1)
-                      Divider(height: 1, indent: 68.w, endIndent: 16.w, color: HomeDashboardTheme.background),
+                      Divider(
+                        height: 0.5,
+                        indent: 68.w,
+                        endIndent: 16.w,
+                        color: HomeDashboardTheme.separator,
+                      ),
                   ],
                 );
               }).toList(),
@@ -749,10 +805,10 @@ class HomeContactList extends StatelessWidget {
 
   Widget? _trailingIcon(String? type) {
     return switch (type) {
-      'chat' => Icon(Icons.chat_bubble_outline, color: HomeDashboardTheme.primaryBlue),
-      'phone' => Icon(Icons.phone_outlined, color: HomeDashboardTheme.primaryBlue),
-      null => Icon(Icons.chevron_right, color: HomeDashboardTheme.textGray),
-      _ => Icon(Icons.chevron_right, color: HomeDashboardTheme.textGray),
+      'chat' => Icon(Icons.chat_bubble_outline, color: HomeDashboardTheme.accent, size: 20.sp),
+      'phone' => Icon(Icons.phone_outlined, color: HomeDashboardTheme.accent, size: 20.sp),
+      null => Icon(Icons.chevron_right, color: HomeDashboardTheme.labelTertiary, size: 20.sp),
+      _ => Icon(Icons.chevron_right, color: HomeDashboardTheme.labelTertiary, size: 20.sp),
     };
   }
 }
@@ -769,89 +825,103 @@ class HomeNewsList extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '行业动态',
-            style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold),
+          Row(
+            children: [
+              Expanded(
+                child: Text('行业动态', style: HomeDashboardTheme.sectionTitle),
+              ),
+              Text(
+                '查看更多',
+                style: HomeDashboardTheme.sectionLabel.copyWith(
+                  color: HomeDashboardTheme.accent,
+                ),
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 18.sp,
+                color: HomeDashboardTheme.accent,
+              ),
+            ],
           ),
           SizedBox(height: 12.h),
           ...items.map(
             (item) => Padding(
-              padding: EdgeInsets.only(bottom: 16.h),
-              child: Container(
-                padding: EdgeInsets.all(12.w),
+              padding: EdgeInsets.only(bottom: 12.h),
+              child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: HomeDashboardTheme.cardWhite,
-                  borderRadius: BorderRadius.circular(14.r),
+                  color: HomeDashboardTheme.surface,
+                  borderRadius: BorderRadius.circular(HomeDashboardTheme.radiusMd),
+                  border: Border.all(
+                    color: HomeDashboardTheme.separator,
+                    width: 0.5,
+                  ),
                 ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            item.title,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w500,
-                              height: 1.4,
+                child: Padding(
+                  padding: EdgeInsets.all(12.w),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              item.title,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 15.sp,
+                                fontWeight: FontWeight.w500,
+                                color: HomeDashboardTheme.labelPrimary,
+                                height: 1.4,
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 8.h),
-                          Text(
-                            '${item.source}  ${item.date}',
-                            style: TextStyle(
-                              fontSize: 11.sp,
-                              color: HomeDashboardTheme.textGray,
+                            SizedBox(height: 8.h),
+                            Text(
+                              '${item.source}  ${item.date}',
+                              style: HomeDashboardTheme.sectionLabel,
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                    SizedBox(width: 12.w),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(10.r),
-                      child: item.imageUrl != null
-                          ? CacheImageUtils.network(
-                              item.imageUrl!,
-                              width: 96.w,
-                              height: 72.h,
-                              fit: BoxFit.cover,
-                              placeholder: (_, __) => Container(
+                      SizedBox(width: 12.w),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10.r),
+                        child: item.imageUrl != null
+                            ? CacheImageUtils.network(
+                                item.imageUrl!,
                                 width: 96.w,
                                 height: 72.h,
-                                color: HomeDashboardTheme.background,
-                                child: Center(
-                                  child: SizedBox(
-                                    width: 14.w,
-                                    height: 14.w,
-                                    child: const CircularProgressIndicator(strokeWidth: 1.5),
+                                fit: BoxFit.cover,
+                                placeholder: (_, __) => Container(
+                                  width: 96.w,
+                                  height: 72.h,
+                                  color: HomeDashboardTheme.fillSecondary,
+                                ),
+                                errorWidget: (_, __, ___) => Container(
+                                  width: 96.w,
+                                  height: 72.h,
+                                  color: HomeDashboardTheme.fillSecondary,
+                                  child: Icon(
+                                    Icons.article_outlined,
+                                    color: HomeDashboardTheme.labelTertiary,
+                                    size: 28.sp,
                                   ),
                                 ),
-                              ),
-                              errorWidget: (_, __, ___) => Container(
+                              )
+                            : Container(
                                 width: 96.w,
                                 height: 72.h,
-                                color: HomeDashboardTheme.background,
-                                child: Icon(Icons.directions_car_filled_outlined,
-                                    color: HomeDashboardTheme.textGray, size: 28.sp),
+                                color: HomeDashboardTheme.fillSecondary,
+                                child: Icon(
+                                  Icons.article_outlined,
+                                  color: HomeDashboardTheme.labelTertiary,
+                                  size: 28.sp,
+                                ),
                               ),
-                            )
-                          : Container(
-                              width: 96.w,
-                              height: 72.h,
-                              decoration: BoxDecoration(
-                                color: HomeDashboardTheme.background,
-                                borderRadius: BorderRadius.circular(10.r),
-                              ),
-                              child: Icon(Icons.directions_car_filled_outlined,
-                                  color: HomeDashboardTheme.textGray, size: 28.sp),
-                            ),
-                    ),
-                  ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

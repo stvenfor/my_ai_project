@@ -2,135 +2,133 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_home/home/controller/search_controller.dart';
-import 'package:module_home/home/model/search_page_model.dart';
 import 'package:module_home/home/theme/search_page_theme.dart';
 import 'package:module_home/home/view/widgets/search_discovery_section.dart';
 import 'package:module_home/home/view/widgets/search_filter_section.dart';
 import 'package:module_home/home/view/widgets/search_header_bar.dart';
 import 'package:module_home/home/view/widgets/search_history_section.dart';
 import 'package:module_home/home/view/widgets/search_rank_list_item.dart';
-import 'package:module_home/home/view/widgets/search_sticky_tab_delegate.dart';
+import 'package:module_home/home/view/widgets/search_rank_tab_bar.dart';
 
-class SearchPage extends GetView<HomeSearchController> {
+class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  State<SearchPage> createState() => _SearchPageState();
+}
+
+class _SearchPageState extends State<SearchPage> {
+  HomeSearchController get controller => Get.find<HomeSearchController>();
+
+  late final List<Worker> _workers;
+  int _selectedRankTab = 0;
+
+  @override
+  void initState() {
+    super.initState();
     if (!Get.isRegistered<HomeSearchController>()) {
       HomeSearchBinding().dependencies();
     }
+
+    _workers = [
+      ever<List<String>>(controller.searchHistory, (_) => _scheduleRebuild()),
+      ever<List<String>>(controller.searchDiscovery, (_) => _scheduleRebuild()),
+      ever<List<String>>(controller.filterTags, (_) => _scheduleRebuild()),
+    ];
+  }
+
+  void _scheduleRebuild() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  void _onRankTabSelected(int index) {
+    if (_selectedRankTab == index) return;
+    setState(() => _selectedRankTab = index);
+  }
+
+  @override
+  void dispose() {
+    for (final worker in _workers) {
+      worker.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final history = controller.searchHistory.toList();
+    final discovery = controller.searchDiscovery.toList();
+    final filterTags = controller.filterTags.toList();
+    final rankItems = controller.rankLists[_selectedRankTab].toList();
 
     return AppPageScaffold(
       layout: AppPageLayout.edgeToEdge,
       backgroundColor: SearchPageTheme.background,
       body: SafeArea(
         bottom: false,
-        child: NestedScrollView(
-          headerSliverBuilder: (context, innerBoxIsScrolled) {
-            final handle =
-                NestedScrollView.sliverOverlapAbsorberHandleFor(context);
-            return [
-              SliverOverlapAbsorber(
-                handle: handle,
-                sliver: const SliverToBoxAdapter(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: SearchPageTheme.contentMaxWidth,
+            ),
+            child: Column(
+              children: [
+                const SearchHeaderBar(),
+                Expanded(
+                  child: ListView(
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    padding: const EdgeInsets.only(bottom: 24),
                     children: [
-                      SearchHeaderBar(),
-                      SearchHistorySection(),
-                      SearchDiscoverySection(),
-                      SearchFilterSection(),
+                      if (history.isNotEmpty)
+                        SearchHistorySection(
+                          history: history,
+                          onClear: controller.clearHistory,
+                          onTagTap: controller.onTagTap,
+                        )
+                      else
+                        const SizedBox(height: 8),
+                      SearchDiscoverySection(
+                        discovery: discovery,
+                        onRefresh: controller.refreshDiscovery,
+                        onTagTap: controller.onTagTap,
+                      ),
+                      SearchFilterSection(
+                        tags: filterTags,
+                        onTagTap: controller.onTagTap,
+                      ),
+                      SearchRankTabBar(
+                        selectedIndex: _selectedRankTab,
+                        onSelected: _onRankTabSelected,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                        child: DecoratedBox(
+                          decoration: SearchPageTheme.groupedCardDecoration,
+                          child: Column(
+                            children: [
+                              for (var i = 0; i < rankItems.length; i++)
+                                SearchRankListItem(
+                                  item: rankItems[i],
+                                  onTap: () =>
+                                      controller.onRankItemTap(rankItems[i]),
+                                  showDivider: i < rankItems.length - 1,
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
-              ),
-              SliverPersistentHeader(
-                pinned: true,
-                delegate: SearchStickyTabBarDelegate(
-                  tabBar: _buildTabBar(),
-                  backgroundColor: SearchPageTheme.background,
-                ),
-              ),
-            ];
-          },
-          body: TabBarView(
-            controller: controller.tabController,
-            children: [
-              for (var i = 0; i < SearchRankTab.values.length; i++)
-                _SearchRankTabList(tabIndex: i),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
-  }
-
-  TabBar _buildTabBar() {
-    return TabBar(
-      controller: controller.tabController,
-      isScrollable: true,
-      tabAlignment: TabAlignment.start,
-      labelColor: SearchPageTheme.primaryGreen,
-      unselectedLabelColor: SearchPageTheme.textGray,
-      labelStyle: const TextStyle(
-        fontSize: 15,
-        fontWeight: FontWeight.w600,
-      ),
-      unselectedLabelStyle: const TextStyle(
-        fontSize: 15,
-        fontWeight: FontWeight.w400,
-      ),
-      indicatorColor: SearchPageTheme.primaryGreen,
-      indicatorWeight: 3,
-      indicatorSize: TabBarIndicatorSize.label,
-      dividerColor: SearchPageTheme.divider,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      tabs: [
-        for (final tab in SearchRankTab.values) Tab(text: tab.label),
-      ],
-    );
-  }
-}
-
-class _SearchRankTabList extends GetView<HomeSearchController> {
-  const _SearchRankTabList({required this.tabIndex});
-
-  final int tabIndex;
-
-  @override
-  Widget build(BuildContext context) {
-    return Obx(() {
-      final items = controller.rankLists[tabIndex].toList();
-
-      return Builder(
-        builder: (context) {
-          return CustomScrollView(
-            key: PageStorageKey<String>('search_rank_$tabIndex'),
-            slivers: [
-              SliverOverlapInjector(
-                handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
-                  context,
-                ),
-              ),
-              SliverPadding(
-                padding: const EdgeInsets.only(top: 12, bottom: 24),
-                sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final item = items[index];
-                      return SearchRankListItem(
-                        item: item,
-                        onTap: () => controller.onRankItemTap(item),
-                      );
-                    },
-                    childCount: items.length,
-                  ),
-                ),
-              ),
-            ],
-          );
-        },
-      );
-    });
   }
 }

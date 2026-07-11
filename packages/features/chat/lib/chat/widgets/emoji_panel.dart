@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:module_chat/chat/theme/chat_theme.dart';
 import 'package:module_chat/chat/viewmodel/chat_detail_viewmodel.dart';
 
 class EmojiPanel extends StatelessWidget {
@@ -11,7 +12,7 @@ class EmojiPanel extends StatelessWidget {
 
     return Container(
       height: 220,
-      color: const Color(0xFFF7F7F7),
+      color: ChatTheme.background,
       padding: const EdgeInsets.all(12),
       child: GridView.builder(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

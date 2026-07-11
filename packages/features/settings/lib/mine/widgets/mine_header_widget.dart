@@ -1,10 +1,13 @@
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_core/core.dart';
 import 'package:module_settings/mine/controller/mine_controller.dart';
 import 'package:module_settings/mine/model/mine_profile_model.dart';
+import 'package:module_settings/mine/theme/mine_theme.dart';
 import 'package:module_settings/mine/widgets/mine_stats_bar_widget.dart';
 import 'package:module_utils/module_utils.dart';
 
@@ -20,7 +23,7 @@ class MineHeaderWidget extends StatelessWidget {
     return Obx(() {
       final data = controller.profile.value;
       if (data == null) {
-        return const SizedBox(height: 220);
+        return SizedBox(height: 180 + AppSafeInsets.top(context));
       }
       return _HeaderBody(data: data, showBackButton: showBackButton);
     });
@@ -39,185 +42,133 @@ class _HeaderBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<MineController>();
-    final topPadding = MediaQuery.paddingOf(context).top;
+    final topPadding = AppSafeInsets.top(context);
 
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Color(0xFFDCEEF9), Color(0xFFEEF6FB)],
-            ),
-          ),
-          child: Stack(
+    return Padding(
+      padding: EdgeInsets.fromLTRB(16, topPadding + 8, 16, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              Positioned(
-                top: topPadding + 20,
-                right: -30,
-                child: Container(
-                  width: 140,
-                  height: 140,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white.withValues(alpha: 0.35),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.fromLTRB(16, topPadding + 8, 16, 72),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      height: 44,
-                      child: Row(
-                        children: [
-                          if (showBackButton)
-                            IconButton(
-                              icon: const Icon(Icons.arrow_back_ios_new,
-                                  size: 20),
-                              onPressed: () => Get.back<void>(),
-                            )
-                          else
-                            const SizedBox(width: 8),
-                          const Spacer(),
-                          _TopIcon(
-                            icon: Icons.info_outline,
-                            onTap: controller.onInfoTap,
-                          ),
-                          _TopIcon(
-                            icon: Icons.event_available_outlined,
-                            onTap: controller.onCalendarTap,
-                          ),
-                          _TopIcon(
-                            icon: Icons.settings_outlined,
-                            onTap: controller.openSettings,
-                          ),
-                          Obx(() {
-                            final loggedIn =
-                                Get.find<UserService>().isLoggedIn;
-                            return _TopIcon(
-                              icon: loggedIn
-                                  ? Icons.logout_rounded
-                                  : Icons.login_rounded,
-                              onTap: loggedIn
-                                  ? controller.logout
-                                  : controller.goLogin,
-                            );
-                          }),
-                        ],
-                      ),
+              if (showBackButton)
+                SizedBox(
+                  width: 44,
+                  height: 44,
+                  child: CupertinoButton(
+                    padding: EdgeInsets.zero,
+                    onPressed: () => Get.back<void>(),
+                    child: const Icon(
+                      CupertinoIcons.back,
+                      size: 24,
+                      color: MineTheme.accent,
                     ),
-                    const SizedBox(height: 8),
-                    Row(
+                  ),
+                )
+              else
+                Expanded(child: Text('我的', style: MineTheme.largeTitle)),
+              if (showBackButton) const Spacer(),
+              _TopIcon(icon: CupertinoIcons.info, onTap: controller.onInfoTap),
+              _TopIcon(
+                icon: CupertinoIcons.calendar,
+                onTap: controller.onCalendarTap,
+              ),
+              _TopIcon(
+                icon: CupertinoIcons.settings,
+                onTap: controller.openSettings,
+              ),
+              Obx(() {
+                final loggedIn = Get.find<UserService>().isLoggedIn;
+                return _TopIcon(
+                  icon: loggedIn
+                      ? CupertinoIcons.square_arrow_right
+                      : CupertinoIcons.person_crop_circle_badge_plus,
+                  onTap: loggedIn ? controller.logout : controller.goLogin,
+                );
+              }),
+            ],
+          ),
+          if (!showBackButton) const SizedBox(height: 8),
+          const SizedBox(height: 16),
+          DecoratedBox(
+            decoration: MineTheme.groupedCardDecoration,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  GestureDetector(
+                    onTap: controller.onAvatarTap,
+                    child: _Avatar(url: data.avatarUrl),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Flexible(
-                                    child: Text(
-                                      data.displayName,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                        fontSize: 22,
-                                        fontWeight: FontWeight.w700,
-                                        color: Color(0xFF1A1A1A),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  _RoleBadge(label: data.roleBadge),
-                                ],
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                data.displayName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: MineTheme.headline,
                               ),
-                              const SizedBox(height: 8),
-                              GestureDetector(
-                                onTap: controller.onStoreTap,
-                                child: Row(
-                                  children: [
-                                    Flexible(
-                                      child: Text(
-                                        data.storeName,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          color: Colors.grey.shade700,
-                                        ),
-                                      ),
-                                    ),
-                                    Icon(
-                                      Icons.keyboard_arrow_down,
-                                      size: 18,
-                                      color: Colors.grey.shade600,
-                                    ),
-                                  ],
+                            ),
+                            const SizedBox(width: 8),
+                            _RoleBadge(label: data.roleBadge),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        GestureDetector(
+                          onTap: controller.onStoreTap,
+                          child: Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  data.storeName,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: MineTheme.caption,
                                 ),
                               ),
-                              const SizedBox(height: 10),
-                              Row(
-                                children: [
-                                  GestureDetector(
-                                    onTap: controller.onElectronicCardTap,
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(
-                                          Icons.badge_outlined,
-                                          size: 16,
-                                          color: Colors.grey.shade600,
-                                        ),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          '电子名片',
-                                          style: TextStyle(
-                                            fontSize: 13,
-                                            color: Colors.grey.shade700,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Text(
-                                    data.maskedPhone,
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      color: Colors.grey.shade700,
-                                    ),
-                                  ),
-                                ],
+                              const Icon(
+                                CupertinoIcons.chevron_down,
+                                size: 14,
+                                color: MineTheme.labelSecondary,
                               ),
                             ],
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        GestureDetector(
-                          onTap: controller.onAvatarTap,
-                          child: _Avatar(url: data.avatarUrl),
+                        const SizedBox(height: 12),
+                        Wrap(
+                          spacing: 16,
+                          runSpacing: 8,
+                          children: [
+                            _MetaChip(
+                              icon: CupertinoIcons.creditcard,
+                              label: '电子名片',
+                              onTap: controller.onElectronicCardTap,
+                            ),
+                            Text(
+                              data.maskedPhone,
+                              style: MineTheme.caption,
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-        Positioned(
-          left: 16,
-          right: 16,
-          bottom: -28,
-          child: MineStatsBarWidget(stats: data.stats),
-        ),
-      ],
+          const SizedBox(height: 16),
+          MineStatsBarWidget(stats: data.stats),
+          const SizedBox(height: 8),
+        ],
+      ),
     );
   }
 }
@@ -230,10 +181,51 @@ class _TopIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      icon: Icon(icon, size: 22, color: const Color(0xFF333333)),
-      onPressed: onTap,
-      visualDensity: VisualDensity.compact,
+    return SizedBox(
+      width: 44,
+      height: 44,
+      child: CupertinoButton(
+        padding: EdgeInsets.zero,
+        onPressed: onTap,
+        child: Icon(icon, size: 22, color: MineTheme.accent),
+      ),
+    );
+  }
+}
+
+class _MetaChip extends StatelessWidget {
+  const _MetaChip({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: MineTheme.accent.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 14, color: MineTheme.accent),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: MineTheme.caption.copyWith(color: MineTheme.accent),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -246,16 +238,20 @@ class _RoleBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: const Color(0xFF3B8CFF),
-        borderRadius: BorderRadius.circular(4),
+        color: MineTheme.accent,
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.verified, size: 12, color: Colors.white),
-          const SizedBox(width: 3),
+          const Icon(
+            CupertinoIcons.checkmark_seal_fill,
+            size: 12,
+            color: Colors.white,
+          ),
+          const SizedBox(width: 4),
           Text(
             label,
             style: const TextStyle(
@@ -282,18 +278,10 @@ class _Avatar extends StatelessWidget {
       height: 72,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.white, width: 2),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.all(color: MineTheme.surface, width: 2),
+        boxShadow: MineTheme.cardShadow,
       ),
-      child: ClipOval(
-        child: _buildAvatarImage(url),
-      ),
+      child: ClipOval(child: _buildAvatarImage(url)),
     );
   }
 
@@ -320,8 +308,12 @@ class _Avatar extends StatelessWidget {
 
   Widget _placeholder() {
     return Container(
-      color: const Color(0xFFE0E0E0),
-      child: const Icon(Icons.person, size: 36, color: Colors.white),
+      color: MineTheme.fillSecondary,
+      child: const Icon(
+        CupertinoIcons.person_fill,
+        size: 36,
+        color: MineTheme.labelTertiary,
+      ),
     );
   }
 }

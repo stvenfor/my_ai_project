@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:module_chat/chat/theme/chat_theme.dart';
 
 class TimeMessageWidget extends StatelessWidget {
   const TimeMessageWidget({super.key, required this.label});
@@ -10,16 +11,9 @@ class TimeMessageWidget extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Center(
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: const Color(0x22000000),
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: Text(
-            label,
-            style: const TextStyle(fontSize: 12, color: Colors.white),
-          ),
+        child: Text(
+          label,
+          style: ChatTheme.caption.copyWith(fontSize: 12),
         ),
       ),
     );
@@ -39,7 +33,7 @@ class SystemMessageWidget extends StatelessWidget {
         child: Text(
           text,
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+          style: ChatTheme.caption,
         ),
       ),
     );

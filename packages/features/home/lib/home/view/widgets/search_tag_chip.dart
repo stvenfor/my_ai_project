@@ -8,31 +8,42 @@ class SearchTagChip extends StatelessWidget {
     required this.label,
     required this.onTap,
     this.expand = false,
+    this.highlight = false,
   });
 
   final String label;
   final VoidCallback onTap;
   final bool expand;
+  final bool highlight;
 
   @override
   Widget build(BuildContext context) {
+    final bgColor = highlight
+        ? SearchPageTheme.accent.withValues(alpha: 0.1)
+        : SearchPageTheme.fillSecondary;
+    final textColor = highlight
+        ? SearchPageTheme.accent
+        : SearchPageTheme.labelPrimary;
+
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Container(
         width: expand ? double.infinity : null,
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
         decoration: BoxDecoration(
-          color: SearchPageTheme.tagBackground,
-          borderRadius: BorderRadius.circular(4.r),
+          color: bgColor,
+          borderRadius: BorderRadius.circular(20.r),
         ),
         child: Text(
           label,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
+          textAlign: expand ? TextAlign.center : TextAlign.start,
           style: TextStyle(
-            fontSize: 13.sp,
-            color: SearchPageTheme.tagText,
+            fontSize: 14.sp,
+            color: textColor,
+            fontWeight: highlight ? FontWeight.w500 : FontWeight.w400,
           ),
         ),
       ),

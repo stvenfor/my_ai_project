@@ -17,8 +17,10 @@ class HomeController extends BaseViewModel {
 
   final userGreeting = '早上好'.obs;
   final selectedMetricTab = 0.obs;
+  final selectedTopTab = 0.obs;
   final dashboard = Rxn<HomeDashboardData>();
 
+  static const topTabs = ['首页', '视频', 'Club'];
   static const metricTabs = ['今日', '昨日', '近30天'];
 
   @override
@@ -51,6 +53,8 @@ class HomeController extends BaseViewModel {
   }
 
   void selectMetricTab(int index) => selectedMetricTab.value = index;
+
+  void selectTopTab(int index) => selectedTopTab.value = index;
 
   /// 错误页重试（走首次加载流程，含全局 Loading）。
   Future<void> retryInitialLoad() => _loadInitial();

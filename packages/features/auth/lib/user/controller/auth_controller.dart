@@ -42,6 +42,7 @@ class AuthController extends GetxController {
   final displayName = ''.obs;
   final otpCode = ''.obs;
   final otpCooldownSeconds = 0.obs;
+  final phoneOtpSent = false.obs;
 
   static const _lastLoginEmailKey = 'auth_last_login_email';
   static const _lastLoginPasswordKey = 'auth_last_login_password';
@@ -95,6 +96,16 @@ class AuthController extends GetxController {
   bool get canResendOtp => otpCooldownSeconds.value <= 0 && !isLoading.value;
 
   bool get isOtpValid => RegExp(r'^\d{6}$').hasMatch(otpCode.value.trim());
+
+  bool get canSendPhoneOtp =>
+      agreedPrivacy.value &&
+      validatePhone(phone.value) &&
+      canResendOtp;
+
+  bool get canLoginWithPhoneOtp =>
+      agreedPrivacy.value &&
+      validatePhone(phone.value) &&
+      isOtpValid;
 
   void switchCredentialMode(AuthCredentialMode mode) {
     credentialMode.value = mode;
@@ -235,7 +246,7 @@ class AuthController extends GetxController {
     });
   }
 
-  Future<void> sendPhoneOtpAndGo({bool fromRegister = false}) async {
+  Future<bool> sendPhoneOtp({bool fromRegister = false}) async {
     void toast(String message) =>
         fromRegister ? _showRegisterToast(message) : _showToast(message);
     void fail(Object error) =>
@@ -243,11 +254,11 @@ class AuthController extends GetxController {
 
     if (!agreedPrivacy.value) {
       toast('请先阅读并同意隐私条款');
-      return;
+      return false;
     }
     if (!validatePhone(phone.value)) {
       toast('请输入有效的手机号');
-      return;
+      return false;
     }
 
     isLoading.value = true;
@@ -255,12 +266,20 @@ class AuthController extends GetxController {
       _pendingPhone = PhoneAuthUtils.normalizeDigits(phone.value);
       await _authService.sendPhoneOtp(phone: _pendingPhone);
       _startOtpCooldown(60);
+      phoneOtpSent.value = true;
       toast('验证码已发送');
-      await Get.toNamed(RoutePath.loginOtp);
+      return true;
     } catch (error) {
       fail(error);
+      return false;
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> sendPhoneOtpAndGo({bool fromRegister = false}) async {
+    if (await sendPhoneOtp(fromRegister: fromRegister)) {
+      await Get.toNamed(RoutePath.loginOtp);
     }
   }
 
@@ -285,16 +304,26 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<void> verifyPhoneOtp() async {
+  Future<void> verifyPhoneOtp({bool fromRegister = false}) async {
+    void toast(String message) =>
+        fromRegister ? _showRegisterToast(message) : _showToast(message);
+    void fail(Object error) => fromRegister
+        ? _showRegisterAuthFailure(error)
+        : _showAuthFailure(error);
+
+    if (!agreedPrivacy.value) {
+      toast('请先阅读并同意隐私条款');
+      return;
+    }
     if (!isOtpValid) {
-      _showToast('请输入 6 位验证码');
+      toast('请输入 6 位验证码');
       return;
     }
 
     final targetPhone =
         _pendingPhone.isNotEmpty ? _pendingPhone : phone.value;
     if (!validatePhone(targetPhone)) {
-      _showToast('手机号无效');
+      toast('手机号无效');
       return;
     }
 
@@ -304,9 +333,12 @@ class AuthController extends GetxController {
         phone: targetPhone,
         otp: otpCode.value.trim(),
       );
+      if (fromRegister) {
+        _showRegisterSuccess('注册成功');
+      }
       await _navigateAfterAuth();
     } catch (error) {
-      _showAuthFailure(error);
+      fail(error);
     } finally {
       isLoading.value = false;
     }
@@ -385,10 +417,10 @@ class AuthController extends GetxController {
     }
   }
 
-  /// 手机号注册：发送 OTP（Supabase 首次验证自动创建账号）。
+  /// 手机号注册：同页填写验证码，首次验证通过自动创建账号。
   Future<void> registerWithPhone() async {
     _logRegister('start: phone=${phone.value}');
-    await sendPhoneOtpAndGo(fromRegister: true);
+    await verifyPhoneOtp(fromRegister: true);
   }
 
   void _startOtpCooldown(int seconds) {

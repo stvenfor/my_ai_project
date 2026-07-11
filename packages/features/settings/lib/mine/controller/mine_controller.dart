@@ -7,6 +7,7 @@ import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_core/core.dart';
 import 'package:module_route/route/login_redirect.dart';
 import 'package:module_route/route/route_path.dart';
+import 'package:module_settings/mine/model/mine_menu_data.dart';
 import 'package:module_settings/mine/model/mine_function_item.dart';
 import 'package:module_settings/mine/model/mine_profile_model.dart';
 import 'package:module_settings/mine/model/mine_store_data.dart';
@@ -170,6 +171,29 @@ class MineController extends GetxController {
     if (user == null) return;
     await _userService.setUser(user.copyWith(avatar: path));
     UiKitInitializer.toast('头像已更新');
+  }
+
+  void onQuickServiceTap(MineQuickServiceItem item) {
+    UiKitInitializer.toast('${item.label} 开发中');
+  }
+
+  void onMenuTap(MineMenuItem item) {
+    switch (item.id) {
+      case 'settings':
+        openSettings();
+      case 'feedback':
+        UiKitInitializer.toast('意见反馈');
+      case 'fan_group':
+        UiKitInitializer.toast('粉丝群');
+      case 'invite':
+        UiKitInitializer.toast('邀请好友');
+      case 'reminder':
+        UiKitInitializer.toast('提醒事项');
+      case 'cooperation':
+        UiKitInitializer.toast('商务合作');
+      default:
+        UiKitInitializer.toast('${item.label} 开发中');
+    }
   }
 
   void onFunctionTap(MineFunctionItem item) {

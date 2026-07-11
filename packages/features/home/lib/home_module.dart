@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:module_home/home/api/home_http_config.dart';
@@ -6,6 +7,7 @@ import 'package:module_home/home/view/check_in_mall_page.dart';
 import 'package:module_home/home/view/dubbing_home_page.dart';
 import 'package:module_home/home/view/home_learning_report_page.dart';
 import 'package:module_home/home/view/home_page.dart';
+import 'package:module_home/home/view/strategy_page.dart';
 import 'package:module_home/home/view/hot_rank_detail_page.dart';
 import 'package:module_home/home/view/search_page.dart';
 import 'package:module_home/home/binding/used_car_binding.dart';
@@ -26,8 +28,8 @@ class HomeModule extends FeatureModule {
   ModuleTabItem? get mainTab => ModuleTabItem(
         moduleId: moduleId,
         label: '首页',
-        icon: Icons.home_rounded,
-        selectedIcon: Icons.home_rounded,
+        icon: CupertinoIcons.house,
+        selectedIcon: CupertinoIcons.house_fill,
         pageBuilder: () => const HomePage(),
         order: 0,
       );
@@ -42,6 +44,7 @@ class HomeModule extends FeatureModule {
         RoutePath.homeCheckInMall: (_) => const CheckInMallPage(),
         RoutePath.homeAllServices: (_) => const AllServicesPage(),
         RoutePath.homeSearch: (_) => const SearchPage(),
+        RoutePath.homeStrategy: (_) => const StrategyPage(),
         RoutePath.homeDubbingFeed: (_) => const DubbingHomePage(),
         RoutePath.homeHotRankDetail: (_) => const HotRankDetailPage(),
         RoutePath.homeUsedCarList: (_) {

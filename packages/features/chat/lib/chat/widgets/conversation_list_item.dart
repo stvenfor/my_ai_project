@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:module_chat/chat/models/conversation_model.dart';
+import 'package:module_chat/chat/theme/chat_theme.dart';
 import 'package:module_utils/module_utils.dart';
 
 class ConversationListItem extends StatelessWidget {
@@ -26,7 +27,7 @@ class ConversationListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
+      color: ChatTheme.surface,
       child: InkWell(
         onTap: onTap,
         child: Padding(
@@ -38,19 +39,19 @@ class ConversationListItem extends StatelessWidget {
                 children: [
                   CacheImageUtils.circle(
                     conversation.peerAvatar,
-                    size: 48,
+                    size: 52,
                   ),
                   if (conversation.isOnline)
                     Positioned(
-                      right: 0,
-                      bottom: 0,
+                      right: 1,
+                      bottom: 1,
                       child: Container(
                         width: 12,
                         height: 12,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF07C160),
+                          color: ChatTheme.online,
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 2),
+                          border: Border.all(color: ChatTheme.surface, width: 2),
                         ),
                       ),
                     ),
@@ -66,20 +67,14 @@ class ConversationListItem extends StatelessWidget {
                         Expanded(
                           child: Text(
                             conversation.peerName,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                            ),
+                            style: ChatTheme.headline,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         Text(
                           _formatTime(conversation.lastMessageTime),
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey.shade500,
-                          ),
+                          style: ChatTheme.caption,
                         ),
                       ],
                     ),
@@ -89,10 +84,7 @@ class ConversationListItem extends StatelessWidget {
                         Expanded(
                           child: Text(
                             conversation.lastMessage,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey.shade600,
-                            ),
+                            style: ChatTheme.subhead,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -101,11 +93,11 @@ class ConversationListItem extends StatelessWidget {
                           Container(
                             margin: const EdgeInsets.only(left: 8),
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
+                              horizontal: 7,
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.red,
+                              color: ChatTheme.unreadBadge,
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Text(
@@ -114,7 +106,8 @@ class ConversationListItem extends StatelessWidget {
                                   : '${conversation.unreadCount}',
                               style: const TextStyle(
                                 color: Colors.white,
-                                fontSize: 11,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),

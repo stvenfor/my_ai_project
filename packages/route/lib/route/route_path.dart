@@ -8,6 +8,7 @@ class RoutePath{
   static const String homeAllServices = '/home/all_services';
   static const String homeSearch = '/home/search';
   static const String homeDubbingFeed = '/home/dubbing_feed';
+  static const String homeStrategy = '/home/strategy';
   static const String homeHotRankDetail = '/home/hot_rank_detail';
   static const String homeUsedCarList = '/home/used_car';
   static const String homeUsedCarDetail = '/home/used_car/detail';

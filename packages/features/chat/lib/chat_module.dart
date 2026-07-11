@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:module_chat/chat/bindings/chat_detail_binding.dart';
@@ -19,8 +20,8 @@ class ChatModule extends FeatureModule {
   ModuleTabItem? get mainTab => ModuleTabItem(
         moduleId: moduleId,
         label: '聊天',
-        icon: Icons.chat_bubble_outline_rounded,
-        selectedIcon: Icons.chat_bubble_rounded,
+        icon: CupertinoIcons.chat_bubble,
+        selectedIcon: CupertinoIcons.chat_bubble_fill,
         pageBuilder: () => const ChatPage(),
         order: 1,
       );

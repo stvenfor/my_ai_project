@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:module_chat/chat/theme/chat_theme.dart';
 import 'package:module_chat/chat/viewmodel/chat_detail_viewmodel.dart';
 import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_utils/module_utils.dart';
@@ -13,7 +14,7 @@ class MorePanel extends StatelessWidget {
 
     return Container(
       height: 220,
-      color: const Color(0xFFF7F7F7),
+      color: ChatTheme.background,
       padding: const EdgeInsets.all(24),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,

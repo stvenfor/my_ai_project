@@ -2,36 +2,66 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class AppTheme {
-  static const Color seedColor = Color(0xFF53D65B);
+  static const Color accent = Color(0xFF007AFF);
+  static const Color background = Color(0xFFF2F2F7);
+  static const Color surface = Color(0xFFFFFFFF);
+  static const Color separator = Color(0xFFC6C6C8);
+  static const Color labelSecondary = Color(0x993C3C43);
+  static const Color tabBarBackground = Color(0xF2FFFFFF);
+
+  /// 兼容旧引用
+  static const Color seedColor = accent;
 
   static ThemeData get light => ThemeData(
         useMaterial3: true,
         brightness: Brightness.light,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: seedColor,
+          seedColor: accent,
           brightness: Brightness.light,
-          surface: const Color(0xFFF7F9FA),
+          primary: accent,
+          surface: surface,
         ),
-        scaffoldBackgroundColor: const Color(0xFFEEF5F4),
+        scaffoldBackgroundColor: background,
+        cardColor: surface,
+        dividerColor: separator,
         appBarTheme: const AppBarTheme(
           centerTitle: true,
           elevation: 0,
           scrolledUnderElevation: 0,
-          backgroundColor: Colors.white,
-          foregroundColor: Color(0xFF2B2D31),
+          backgroundColor: surface,
+          foregroundColor: Color(0xFF000000),
+          surfaceTintColor: Colors.transparent,
         ),
         navigationBarTheme: NavigationBarThemeData(
           elevation: 0,
-          backgroundColor: Colors.white,
-          indicatorColor: seedColor.withValues(alpha: 0.18),
+          height: 49,
+          backgroundColor: tabBarBackground,
+          indicatorColor: accent.withValues(alpha: 0.12),
+          iconTheme: WidgetStateProperty.resolveWith((states) {
+            final selected = states.contains(WidgetState.selected);
+            return IconThemeData(
+              size: 22,
+              color: selected ? accent : labelSecondary,
+            );
+          }),
           labelTextStyle: WidgetStateProperty.resolveWith((states) {
             final selected = states.contains(WidgetState.selected);
             return TextStyle(
-              fontSize: 12,
+              fontSize: 10,
               fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-              color: selected ? seedColor : const Color(0xFF8E9197),
+              color: selected ? accent : labelSecondary,
             );
           }),
+        ),
+        filledButtonTheme: FilledButtonThemeData(
+          style: FilledButton.styleFrom(
+            backgroundColor: accent,
+            foregroundColor: Colors.white,
+            minimumSize: const Size(64, 44),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
         ),
       );
 
@@ -39,28 +69,32 @@ class AppTheme {
         useMaterial3: true,
         brightness: Brightness.dark,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: seedColor,
+          seedColor: accent,
           brightness: Brightness.dark,
-          surface: const Color(0xFF1E2126),
+          primary: accent,
+          surface: const Color(0xFF1C1C1E),
         ),
-        scaffoldBackgroundColor: const Color(0xFF14171C),
+        scaffoldBackgroundColor: const Color(0xFF000000),
+        cardColor: const Color(0xFF1C1C1E),
         appBarTheme: const AppBarTheme(
           centerTitle: true,
           elevation: 0,
           scrolledUnderElevation: 0,
-          backgroundColor: Color(0xFF1E2126),
+          backgroundColor: Color(0xFF1C1C1E),
           foregroundColor: Colors.white,
+          surfaceTintColor: Colors.transparent,
         ),
         navigationBarTheme: NavigationBarThemeData(
           elevation: 0,
-          backgroundColor: const Color(0xFF1E2126),
-          indicatorColor: seedColor.withValues(alpha: 0.24),
+          height: 49,
+          backgroundColor: const Color(0xCC1C1C1E),
+          indicatorColor: accent.withValues(alpha: 0.24),
           labelTextStyle: WidgetStateProperty.resolveWith((states) {
             final selected = states.contains(WidgetState.selected);
             return TextStyle(
-              fontSize: 12,
+              fontSize: 10,
               fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-              color: selected ? seedColor : const Color(0xFF9EA2A8),
+              color: selected ? accent : const Color(0xFF8E8E93),
             );
           }),
         ),

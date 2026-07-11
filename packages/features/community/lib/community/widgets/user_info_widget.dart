@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:module_community/community/models/post_model.dart';
+import 'package:module_community/community/theme/community_theme.dart';
 import 'package:module_community/community/viewmodel/community_viewmodel.dart';
 import 'package:module_utils/module_utils.dart';
 
@@ -14,22 +15,16 @@ class UserInfoWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         CacheImageUtils.circle(post.avatar, size: 44),
-        const SizedBox(width: 10),
+        const SizedBox(width: 12),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                post.nickname,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+              Text(post.nickname, style: CommunityTheme.headline),
               const SizedBox(height: 2),
               Text(
                 '${CommunityViewModel.formatPublishTime(post.publishTime)} · ${post.source}',
-                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                style: CommunityTheme.caption,
               ),
             ],
           ),

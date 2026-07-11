@@ -8,10 +8,12 @@ class SearchRankListItem extends StatelessWidget {
     super.key,
     required this.item,
     required this.onTap,
+    this.showDivider = true,
   });
 
   final SearchRankItem item;
   final VoidCallback onTap;
+  final bool showDivider;
 
   Color? _rankColor() {
     switch (item.rank) {
@@ -30,76 +32,78 @@ class SearchRankListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final rankColor = _rankColor();
 
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        child: Column(
           children: [
-            Stack(
-              clipBehavior: Clip.none,
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8.r),
-                  child: Image.network(
-                    item.coverUrl,
-                    width: 72.w,
-                    height: 72.w,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _RankIndicator(rank: item.rank, color: rankColor),
+                  SizedBox(width: 12.w),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10.r),
+                    child: CacheImageUtils.network(
+                      item.coverUrl,
                       width: 72.w,
                       height: 72.w,
-                      color: SearchPageTheme.tagBackground,
-                      child: Icon(
-                        Icons.image_outlined,
-                        color: SearchPageTheme.subtitleGray,
-                        size: 24.sp,
+                      fit: BoxFit.cover,
+                      errorWidget: (_, __, ___) => Container(
+                        width: 72.w,
+                        height: 72.w,
+                        color: SearchPageTheme.fillSecondary,
+                        child: Icon(
+                          Icons.play_circle_outline,
+                          color: SearchPageTheme.labelTertiary,
+                          size: 28.sp,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                if (rankColor != null)
-                  Positioned(
-                    left: -2.w,
-                    top: -2.h,
-                    child: _RankBadge(
-                      rank: item.rank,
-                      color: rankColor,
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w600,
+                            color: SearchPageTheme.labelPrimary,
+                          ),
+                        ),
+                        SizedBox(height: 6.h),
+                        Text(
+                          item.subtitle,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: SearchPageTheme.caption.copyWith(height: 1.4),
+                        ),
+                      ],
                     ),
                   ),
-              ],
-            ),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 15.sp,
-                      fontWeight: FontWeight.w600,
-                      color: SearchPageTheme.titleBlack,
-                    ),
-                  ),
-                  SizedBox(height: 6.h),
-                  Text(
-                    item.subtitle,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 13.sp,
-                      color: SearchPageTheme.subtitleGray,
-                      height: 1.4,
-                    ),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    size: 20.sp,
+                    color: SearchPageTheme.labelTertiary,
                   ),
                 ],
               ),
             ),
+            if (showDivider)
+              Divider(
+                height: 0.5,
+                indent: 52.w,
+                endIndent: 16.w,
+                color: SearchPageTheme.separator,
+              ),
           ],
         ),
       ),
@@ -107,42 +111,41 @@ class SearchRankListItem extends StatelessWidget {
   }
 }
 
-class _RankBadge extends StatelessWidget {
-  const _RankBadge({
-    required this.rank,
-    required this.color,
-  });
+class _RankIndicator extends StatelessWidget {
+  const _RankIndicator({required this.rank, this.color});
 
   final int rank;
-  final Color color;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 20.w,
-      height: 22.h,
-      child: Stack(
+    if (color != null) {
+      return Container(
+        width: 24.w,
         alignment: Alignment.center,
-        children: [
-          Image.asset(
-            SearchAssets.path('rank_badge_bg.png'),
-            package: SearchAssets.package,
-            width: 20.w,
-            height: 22.h,
-            fit: BoxFit.fill,
+        child: Text(
+          '$rank',
+          style: TextStyle(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w700,
             color: color,
-            colorBlendMode: BlendMode.srcIn,
+            fontFeatures: const [FontFeature.tabularFigures()],
           ),
-          Text(
-            '$rank',
-            style: TextStyle(
-              fontSize: 11.sp,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
-              height: 1,
-            ),
-          ),
-        ],
+        ),
+      );
+    }
+
+    return SizedBox(
+      width: 24.w,
+      child: Text(
+        '$rank',
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize: 15.sp,
+          fontWeight: FontWeight.w500,
+          color: SearchPageTheme.labelSecondary,
+          fontFeatures: const [FontFeature.tabularFigures()],
+        ),
       ),
     );
   }

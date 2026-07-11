@@ -1,5 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:module_chat/chat/theme/chat_theme.dart';
 import 'package:module_chat/chat/viewmodel/chat_detail_viewmodel.dart';
 import 'package:module_chat/chat/widgets/emoji_panel.dart';
 import 'package:module_chat/chat/widgets/more_panel.dart';
@@ -48,25 +50,29 @@ class _InputPanelState extends State<InputPanel> {
       final showEmoji = mode == InputPanelMode.emoji;
       final showMore = mode == InputPanelMode.more;
       final panelHeight = (showEmoji || showMore) ? 220.0 : 0.0;
+      final hasText = controller.inputText.value.trim().isNotEmpty;
 
       return AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeOut,
-        padding: EdgeInsets.only(bottom: bottomInset > 0 ? 0 : 0),
-        color: const Color(0xFFF7F7F7),
+        color: ChatTheme.surface,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
+              padding: EdgeInsets.fromLTRB(
+                8,
+                8,
+                8,
+                8 + (bottomInset > 0 ? 0 : 0),
+              ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  IconButton(
-                    icon: Icon(
-                      isVoiceMode ? Icons.keyboard : Icons.mic_none,
-                      color: Colors.black54,
-                    ),
+                  _PanelIconButton(
+                    icon: isVoiceMode
+                        ? CupertinoIcons.keyboard
+                        : CupertinoIcons.mic,
                     onPressed: controller.toggleVoiceInput,
                   ),
                   Expanded(
@@ -78,20 +84,17 @@ class _InputPanelState extends State<InputPanel> {
                             onSubmitted: (_) => controller.sendTextMessage(),
                           ),
                   ),
-                  if (!isVoiceMode && controller.inputText.value.trim().isEmpty)
-                    IconButton(
-                      icon: const Icon(Icons.emoji_emotions_outlined,
-                          color: Colors.black54),
+                  if (!isVoiceMode && !hasText) ...[
+                    _PanelIconButton(
+                      icon: CupertinoIcons.smiley,
                       onPressed: controller.toggleEmojiPanel,
                     ),
-                  if (!isVoiceMode && controller.inputText.value.trim().isEmpty)
-                    IconButton(
-                      icon: const Icon(Icons.add_circle_outline,
-                          color: Colors.black54),
+                    _PanelIconButton(
+                      icon: CupertinoIcons.plus,
                       onPressed: controller.toggleMorePanel,
                     ),
-                  if (!isVoiceMode &&
-                      controller.inputText.value.trim().isNotEmpty)
+                  ],
+                  if (!isVoiceMode && hasText)
                     _SendButton(onTap: controller.sendTextMessage),
                 ],
               ),
@@ -105,10 +108,31 @@ class _InputPanelState extends State<InputPanel> {
                       ? const MorePanel()
                       : const SizedBox.shrink(),
             ),
+            if (bottomInset == 0)
+              SizedBox(height: MediaQuery.paddingOf(context).bottom),
           ],
         ),
       );
     });
+  }
+}
+
+class _PanelIconButton extends StatelessWidget {
+  const _PanelIconButton({required this.icon, required this.onPressed});
+
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 44,
+      height: 44,
+      child: IconButton(
+        icon: Icon(icon, color: ChatTheme.labelSecondary, size: 24),
+        onPressed: onPressed,
+      ),
+    );
   }
 }
 
@@ -128,9 +152,9 @@ class _TextInput extends StatelessWidget {
     return Container(
       constraints: const BoxConstraints(minHeight: 40, maxHeight: 120),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: const Color(0xFFE0E0E0)),
+        color: ChatTheme.fillSecondary,
+        borderRadius: BorderRadius.circular(ChatTheme.inputRadius),
+        border: Border.all(color: ChatTheme.separator, width: 0.5),
       ),
       child: TextField(
         controller: controller,
@@ -138,11 +162,14 @@ class _TextInput extends StatelessWidget {
         onSubmitted: onSubmitted,
         maxLines: 4,
         minLines: 1,
+        style: ChatTheme.body,
         textInputAction: TextInputAction.send,
-        decoration: const InputDecoration(
-          hintText: '输入消息...',
+        decoration: InputDecoration(
+          hintText: '信息',
+          hintStyle: ChatTheme.body.copyWith(color: ChatTheme.labelTertiary),
           border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           isDense: true,
         ),
       ),
@@ -157,27 +184,20 @@ class _SendButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0.85, end: 1),
-      duration: const Duration(milliseconds: 150),
-      builder: (context, scale, child) {
-        return Transform.scale(scale: scale, child: child);
-      },
-      child: Padding(
-        padding: const EdgeInsets.only(left: 4, right: 4),
-        child: Material(
-          color: const Color(0xFF07C160),
-          borderRadius: BorderRadius.circular(6),
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(6),
-            child: const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              child: Text(
-                '发送',
-                style: TextStyle(color: Colors.white, fontSize: 14),
-              ),
-            ),
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, right: 4),
+      child: SizedBox(
+        width: 36,
+        height: 36,
+        child: CupertinoButton(
+          padding: EdgeInsets.zero,
+          color: ChatTheme.accent,
+          borderRadius: BorderRadius.circular(18),
+          onPressed: onTap,
+          child: const Icon(
+            CupertinoIcons.arrow_up,
+            color: Colors.white,
+            size: 18,
           ),
         ),
       ),
@@ -205,16 +225,17 @@ class _VoiceHoldButton extends StatelessWidget {
           height: 40,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: recording ? const Color(0xFF07C160) : Colors.white,
-            borderRadius: BorderRadius.circular(6),
+            color: recording ? ChatTheme.accent : ChatTheme.fillSecondary,
+            borderRadius: BorderRadius.circular(ChatTheme.inputRadius),
             border: Border.all(
-              color: recording ? const Color(0xFF07C160) : const Color(0xFFE0E0E0),
+              color: recording ? ChatTheme.accent : ChatTheme.separator,
+              width: 0.5,
             ),
           ),
           child: Text(
             recording ? '松开发送 ${seconds}s' : '按住 说话',
             style: TextStyle(
-              color: recording ? Colors.white : Colors.black87,
+              color: recording ? Colors.white : ChatTheme.labelPrimary,
               fontSize: 15,
             ),
           ),

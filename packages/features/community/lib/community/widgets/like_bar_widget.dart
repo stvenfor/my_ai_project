@@ -1,6 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:module_community/community/models/post_model.dart';
+import 'package:module_community/community/theme/community_theme.dart';
 import 'package:module_community/community/viewmodel/community_viewmodel.dart';
 
 class LikeBarWidget extends StatefulWidget {
@@ -22,12 +24,14 @@ class _LikeBarWidgetState extends State<LikeBarWidget>
     super.initState();
     _heartController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 320),
+      duration: const Duration(milliseconds: 280),
     );
     _scaleAnim = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.35), weight: 40),
-      TweenSequenceItem(tween: Tween(begin: 1.35, end: 1.0), weight: 60),
-    ]).animate(CurvedAnimation(parent: _heartController, curve: Curves.easeOut));
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.28), weight: 40),
+      TweenSequenceItem(tween: Tween(begin: 1.28, end: 1.0), weight: 60),
+    ]).animate(
+      CurvedAnimation(parent: _heartController, curve: Curves.easeOut),
+    );
   }
 
   @override
@@ -40,23 +44,23 @@ class _LikeBarWidgetState extends State<LikeBarWidget>
   Widget build(BuildContext context) {
     final vm = Get.find<CommunityViewModel>();
     final post = widget.post;
-    final color = Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.65);
+    final defaultColor = CommunityTheme.labelSecondary;
 
     return Padding(
-      padding: const EdgeInsets.only(top: 10),
+      padding: const EdgeInsets.only(top: 12),
       child: Row(
         children: [
           _ActionButton(
             icon: ScaleTransition(
               scale: _scaleAnim,
               child: Icon(
-                post.isLiked ? Icons.favorite : Icons.favorite_border,
+                post.isLiked ? CupertinoIcons.heart_fill : CupertinoIcons.heart,
                 size: 20,
-                color: post.isLiked ? Colors.red : color,
+                color: post.isLiked ? CommunityTheme.likeRed : defaultColor,
               ),
             ),
             label: post.likeCount > 0 ? '${post.likeCount}' : '赞',
-            color: post.isLiked ? Colors.red : color,
+            color: post.isLiked ? CommunityTheme.likeRed : defaultColor,
             onTap: () async {
               _heartController.forward(from: 0);
               await vm.toggleLike(post.id);
@@ -64,10 +68,25 @@ class _LikeBarWidgetState extends State<LikeBarWidget>
           ),
           const SizedBox(width: 24),
           _ActionButton(
-            icon: Icon(Icons.chat_bubble_outline, size: 20, color: color),
+            icon: Icon(
+              CupertinoIcons.chat_bubble,
+              size: 20,
+              color: defaultColor,
+            ),
             label: post.commentCount > 0 ? '${post.commentCount}' : '评论',
-            color: color,
+            color: defaultColor,
             onTap: () => vm.showCommentSheet(post),
+          ),
+          const SizedBox(width: 24),
+          _ActionButton(
+            icon: Icon(
+              CupertinoIcons.arrowshape_turn_up_right,
+              size: 20,
+              color: defaultColor,
+            ),
+            label: '分享',
+            color: defaultColor,
+            onTap: () {},
           ),
         ],
       ),
@@ -90,18 +109,24 @@ class _ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(4),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            icon,
-            const SizedBox(width: 4),
-            Text(label, style: TextStyle(fontSize: 13, color: color)),
-          ],
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              icon,
+              const SizedBox(width: 4),
+              Text(
+                label,
+                style: TextStyle(fontSize: 13, color: color),
+              ),
+            ],
+          ),
         ),
       ),
     );

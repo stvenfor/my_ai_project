@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-/// 搜索页视觉令牌（iOS 极简风格）。
-abstract final class SearchPageTheme {
+/// 社区页视觉令牌（iOS 极简风格）。
+abstract final class CommunityTheme {
   static const accent = Color(0xFF007AFF);
   static const background = Color(0xFFF2F2F7);
   static const surface = Color(0xFFFFFFFF);
@@ -10,26 +10,20 @@ abstract final class SearchPageTheme {
   static const labelSecondary = Color(0x993C3C43);
   static const labelTertiary = Color(0x4D3C3C43);
   static const separator = Color(0xFFC6C6C8);
-
-  static const rankGold = Color(0xFFFF9500);
-  static const rankSilver = Color(0xFF8E8E93);
-  static const rankBronze = Color(0xFFCD7F32);
+  static const likeRed = Color(0xFFFF3B30);
 
   static const double radiusMd = 12;
   static const double contentMaxWidth = 720;
-  static const double searchFieldHeight = 44;
 
-  // 兼容旧命名
-  static const primaryGreen = accent;
-  static const titleBlack = labelPrimary;
-  static const textGray = labelSecondary;
-  static const subtitleGray = labelTertiary;
-  static const tagBackground = fillSecondary;
-  static const tagText = labelPrimary;
-  static const searchFieldBackground = surface;
-  static const divider = separator;
+  static TextStyle get largeTitle => const TextStyle(
+        fontSize: 32,
+        fontWeight: FontWeight.w700,
+        color: labelPrimary,
+        height: 1.15,
+        letterSpacing: -0.5,
+      );
 
-  static TextStyle get sectionTitle => const TextStyle(
+  static TextStyle get headline => const TextStyle(
         fontSize: 17,
         fontWeight: FontWeight.w600,
         color: labelPrimary,
@@ -40,7 +34,7 @@ abstract final class SearchPageTheme {
         fontSize: 15,
         fontWeight: FontWeight.w400,
         color: labelPrimary,
-        height: 1.35,
+        height: 1.45,
       );
 
   static TextStyle get caption => const TextStyle(
@@ -55,19 +49,4 @@ abstract final class SearchPageTheme {
         borderRadius: BorderRadius.circular(radiusMd),
         border: Border.all(color: separator, width: 0.5),
       );
-
-  static List<BoxShadow> get cardShadow => [
-        BoxShadow(
-          color: const Color(0xFF8E8E93).withValues(alpha: 0.06),
-          blurRadius: 12,
-          offset: const Offset(0, 4),
-        ),
-      ];
-}
-
-abstract final class SearchAssets {
-  static const package = 'module_home';
-  static const basePath = 'assets/search';
-
-  static String path(String assetName) => '$basePath/$assetName';
 }

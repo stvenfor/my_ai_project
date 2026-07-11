@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:module_community/community/view/community_page.dart';
 import 'package:module_community/community/view/publish_page.dart';
@@ -16,8 +16,8 @@ class CommunityModule extends FeatureModule {
   ModuleTabItem? get mainTab => ModuleTabItem(
         moduleId: moduleId,
         label: '社区',
-        icon: Icons.groups_outlined,
-        selectedIcon: Icons.groups_rounded,
+        icon: CupertinoIcons.person_2,
+        selectedIcon: CupertinoIcons.person_2_fill,
         pageBuilder: () => const CommunityPage(),
         order: 2,
       );

@@ -177,22 +177,22 @@ class _PhoneBottomNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final navigationBar = NavigationBar(
+    final navigationBar = IosTabBar(
       selectedIndex: selectedIndex,
-      onDestinationSelected: onDestinationSelected,
-      destinations: [
+      onTap: onDestinationSelected,
+      items: [
         for (final tab in tabs)
-          NavigationDestination(
-            icon: Icon(tab.icon),
-            selectedIcon: Icon(tab.selectedIcon),
+          IosTabBarItem(
             label: tab.label,
+            icon: tab.icon,
+            selectedIcon: tab.selectedIcon,
           ),
       ],
     );
 
     if (!showMiniPlayer) {
       return Material(
-        color: Theme.of(context).colorScheme.surface,
+        color: Colors.transparent,
         child: SafeArea(
           top: false,
           child: navigationBar,
@@ -202,7 +202,7 @@ class _PhoneBottomNavigationBar extends StatelessWidget {
 
     if (!Get.isRegistered<MusicPlaybackController>()) {
       return Material(
-        color: Theme.of(context).colorScheme.surface,
+        color: Colors.transparent,
         child: SafeArea(
           top: false,
           child: navigationBar,
@@ -217,7 +217,7 @@ class _PhoneBottomNavigationBar extends StatelessWidget {
       final miniVisible = playback.hasActiveSession;
 
       return Material(
-        color: Theme.of(context).colorScheme.surface,
+        color: Colors.transparent,
         elevation: miniVisible ? 8 : 0,
         child: SafeArea(
           top: false,
