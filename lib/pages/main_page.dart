@@ -21,12 +21,19 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   int _currentIndex = 0;
   Worker? _tabSyncWorker;
+  List<_TabConfig>? _tabs;
 
   @override
   void initState() {
     super.initState();
     ModuleRegistry.ensureBindings();
     _syncTabFromController();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _tabs ??= _buildTabs();
   }
 
   @override
@@ -71,7 +78,7 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-  List<_TabConfig> get _tabs {
+  List<_TabConfig> _buildTabs() {
     final l10n = AppLocalizations.of(context);
     return ModuleRegistry.collectMainTabs().map((tab) {
       return _TabConfig(
@@ -97,7 +104,8 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
-    final tabs = _tabs;
+    final tabs = _tabs ?? _buildTabs();
+    _tabs = tabs;
     if (tabs.isEmpty) {
       return const Scaffold(
         body: Center(child: Text('未启用任何 Tab 模块，请检查 module_manifest.dart')),

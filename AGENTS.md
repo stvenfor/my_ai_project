@@ -1,21 +1,204 @@
 # Agent 开发指南
 
-本文档供 AI Agent 与协作者查阅：常见陷阱、正确写法，以及与本项目 **Flutter ↔ Go BFF ↔ Supabase** 架构相关的约束。
+本文档供 AI Agent 与协作者查阅：**四层目录边界**、模块化约定、常见陷阱、正确写法，以及 **Flutter ↔ Go BFF ↔ Supabase** 约束。
 
 > **工作区总览**（Flutter + Go 双仓库）：[my_go_study/AGENTS.md](../my_code_study/my_go_study/AGENTS.md) §一  
+> **分层架构详解**：[docs/architecture.md](docs/architecture.md)  
+> **模块化开发指南**：[docs/MODULE_ARCHITECTURE.md](docs/MODULE_ARCHITECTURE.md)  
 > **后端交互完整说明**：[docs/BACKEND_INTEGRATION.md](docs/BACKEND_INTEGRATION.md)
 
 ---
 
 ## 目录
 
-1. [HTTP / 后端交互](#http--后端交互)
-2. [认证与会话](#认证与会话)
-3. [Realtime WebSocket](#realtime-websocket)
-4. [GetX / Obx 响应式 UI](#getx--obx-响应式-ui)
-5. [Flutter 拖动排序](#flutter-拖动排序longpressdraggable)
-6. [鸿蒙（OpenHarmony）三方库](#鸿蒙-openharmony-三方库)
-7. [视频播放页沉浸式](#视频播放页沉浸式)
+1. [目录分层与依赖](#目录分层与依赖)
+2. [模块化与启动](#模块化与启动)
+3. [HTTP / 后端交互](#http--后端交互)
+4. [认证与会话](#认证与会话)
+5. [GetX / Obx 响应式 UI](#getx--obx-响应式-ui)
+6. [Realtime WebSocket](#realtime-websocket)
+7. [Flutter 拖动排序](#flutter-拖动排序longpressdraggable)
+8. [鸿蒙（OpenHarmony）三方库](#鸿蒙-openharmony-三方库)
+9. [视频播放页沉浸式](#视频播放页沉浸式)
+
+---
+
+## 目录分层与依赖
+
+本项目是 **Flutter 模块化 Monolith**，仓库根下四个**同级**目录层（**已无** `packages/`、`infrastructure/`）：
+
+```text
+.
+├── lib/              # 壳工程：启动、模块清单、Splash/Main、壳级路由
+├── commons/          # 必选基础（6 个 package）
+├── components/       # 可选组合（按需引入）
+└── features/         # 业务模块（12 个 module_*）
+```
+
+**依赖方向**：
+
+```text
+lib → features / components / commons
+features → components / commons
+components → commons
+```
+
+**硬边界**（违反会导致编译耦合或循环依赖）：
+
+| 禁止 | 替代做法 |
+|------|----------|
+| `commons → components/features` | 契约放 `module_core`，实现放 feature/component |
+| `components → features` | 登录态用 `AuthLifecycle` / `UserService` / `SessionGuardService` |
+| feature 互引页面/ViewModel | 路由跳转、`module_core` 抽象服务、EventBus |
+
+### commons（目录名 ≠ pubspec 名）
+
+| 目录 | package | import |
+|------|---------|--------|
+| `commons/core/` | `module_core` | `package:module_core/core.dart` |
+| `commons/network/` | `module_http` | `package:module_http/module_http.dart` |
+| `commons/storage/` | `module_global_cache` | `package:module_global_cache/module_global_cache.dart` |
+| `commons/toolkit/` | `module_utils` | `package:module_utils/module_utils.dart` |
+| `commons/ui/` | `module_common_ui` | `package:module_common_ui/module_common_ui.dart` |
+| `commons/route/` | `module_route` | `package:module_route/module_route.dart` |
+
+**commons 内部分层**：L0 `core`/`toolkit` → L1 `network`/`storage`/`route` → L2 `ui`（`ui` 依赖 `core` + `toolkit` + `route`）。
+
+### components（可选，根 pubspec 按需引入）
+
+| 目录 | package | 职责 |
+|------|---------|------|
+| `components/realtime/` | `module_realtime` | Go BFF WebSocket Realtime |
+| `components/linking/` | `module_linking` | 深链、推送、隐私 consent |
+| `components/rongcloud_im/` | `module_rongcloud_im` | 融云 IM |
+| `components/bluetooth/` | `module_bluetooth` | BLE demo |
+| `components/dokit/` | `dokit` | Vendored DoKit |
+| `components/dokit_bootstrap/` | `module_dokit_bootstrap` | Debug 壳 DoKit 注册 |
+
+根 `pubspec.yaml` 当前直接依赖：linking、realtime/rongcloud_im、dokit_bootstrap；bluetooth 经 `module_settings` 间接使用。
+
+### features（12 个业务包）
+
+| moduleId | 目录 | package | 主 Tab |
+|----------|------|---------|--------|
+| home | `features/home/` | `module_home` | 首页 (0) |
+| chat | `features/chat/` | `module_chat` | 聊天 (1) |
+| community | `features/community/` | `module_community` | 社区 (2) |
+| settings | `features/settings/` | `module_settings` | 我的 (3) |
+| auth | `features/auth/` | `module_auth` | — |
+| video | `features/video/` | `module_video` | — |
+| classroom | `features/classroom/` | `module_classroom` | — |
+| music | `features/music/` | `module_music` | — |
+| live | `features/live/` | `module_live` | — |
+| pay | `features/pay/` | `module_pay` | — |
+| friend | `features/friend/` | `module_friend` | — |
+| bfui | `features/bfui/` | `module_bfui` | — |
+
+**允许的跨 feature 依赖**（最小集，勿随意新增）：
+
+| 模块 | 可依赖 |
+|------|--------|
+| home | auth、music |
+| settings | auth + linking/realtime/im/bluetooth |
+| chat | rongcloud_im |
+| live | realtime |
+| 其余 | 仅 commons + route |
+
+### path 引用约定
+
+```yaml
+# 根 pubspec.yaml
+module_core:
+  path: ./commons/core
+
+# features/xxx/pubspec.yaml（以 home 为例）
+module_core:
+  path: ../../commons/core
+module_auth:
+  path: ../auth
+module_realtime:
+  path: ../../components/realtime
+```
+
+详见 [commons/README.md](commons/README.md)、[components/README.md](components/README.md)。
+
+---
+
+## 模块化与启动
+
+### lib 壳工程关键文件
+
+| 文件 | 职责 |
+|------|------|
+| `lib/main.dart` | `AppInitializer.init()`：工具/DB/HTTP/Auth → `ModuleRegistry` → Linking/IM/Realtime |
+| `lib/config/module_manifest.dart` | **模块开关**：注释 import + `buildEnabledModules()` 列表项即可裁剪 |
+| `lib/app/app_pages.dart` | 合并壳路由 + `ModuleRegistry.collectRoutes()` |
+| `lib/pages/main_page.dart` | 从 `ModuleRegistry.collectMainTabs()` 构建 Tab（`IndexedStack`） |
+| `lib/route/app_route_container.dart` | 壳路由：`/` Splash、`/main` Tab 宿主 |
+| `commons/route/lib/route/route_path.dart` | **全项目路由常量** |
+
+### 启动顺序（`AppInitializer.init`）
+
+```text
+ModuleUtilsInitializer → SpManager/AppDatabase
+→ EnvironmentSession.register()
+→ AppHttpBootstrap.initialize()      # Go BFF HTTP
+→ AuthSession.register()
+→ UiKitInitializer / WebKitInitializer
+→ ModuleRegistry.registerAll(buildEnabledModules())
+→ ModuleRegistry.bootstrap()         # 各模块 onRegister
+→ AppBinding + LinkingBinding + collectBindings()
+→ LinkingInitializer / ImInitializer / RealtimeInitializer (deferred)
+→ runApp(App())                      # initialRoute: /
+```
+
+环境切换时必须 `AppHttpBootstrap.reinitialize()`（见 `lib/main.dart` `_wireEnvironmentHttpRefresh`）。
+
+### FeatureModule 契约
+
+每个 feature 在 `lib/*_module.dart` 实现 `FeatureModule`（`commons/route`）：
+
+```dart
+abstract class FeatureModule {
+  String get moduleId;
+  Map<String, WidgetBuilder> routes();
+  ModuleTabItem? get mainTab => null;   // Tab 模块才实现
+  Bindings? createBinding() => null;
+  Future<void> onRegister(ModuleHostContext context) async {}
+}
+```
+
+**模块内 MVVM 分层**（以 `module_home` 为模板）：
+
+```text
+view/ → controller|viewmodel/ → repository/ → api/ → model/
+```
+
+- 路由常量用 `RoutePath`，**禁止**在 feature 内硬编码路径字符串
+- Binding 注册 ViewModel/Controller；页面优先 `GetView<T>`
+- 请求逻辑自包含在模块内，不依赖主工程 `lib/`
+
+### 路由与 Tab
+
+1. `AppRouteContainer.installShellRouters()` — Splash / Main
+2. `ModuleRegistry.collectRoutes()` — 各模块 `routes()`
+3. `MainPage`：`collectMainTabs()` 按 `order` 排序；**`pageBuilder()` 只调用一次并缓存**（勿在每次 `build` 新建 Tab 页）
+
+### 模块独立运行
+
+```bash
+flutter run -t features/home/lib/main_dev.dart
+```
+
+使用 `ModuleStandaloneRunner.run(XxxModule())`；模块在 `onRegister` 中自行初始化 HTTP。
+
+### 新建/修改模块 Checklist
+
+1. 在 `features/<name>/` 创建 package，实现 `FeatureModule`
+2. 根 `pubspec.yaml` + `lib/config/module_manifest.dart` 注册
+3. 新增路由写入 `RoutePath` + 模块 `routes()`
+4. path 依赖仅指向 `commons/`、`components/`、允许的 feature
+5. **不要**在 `components/` 或 `commons/` 中 import feature 页面
 
 ---
 
@@ -26,17 +209,7 @@
 - Flutter **仅通过 HTTP** 访问 **my_go_study**（Go BFF），**不**在业务层直连 Supabase SDK。
 - 登录/注册：`POST /api/v1/user/*` → Go 代理 **Supabase Auth** → 返回 `access_token`。
 - 业务接口（如二手车）：`GET /api/v1/transactions` → Go 校验 **Supabase JWT** → Supabase PostgREST + RLS。
-- 分层：`ViewModel → Repository → Api → HttpManager → ResultModel<T>`。
-
-### 初始化顺序（壳工程）
-
-```
-EnvironmentSession.register()
-AppHttpBootstrap.initialize(headerProvider: AuthHeaderProvider())
-AuthSession.register()   // BackendAuthService，非 Mock 时
-```
-
-环境切换时必须 `AppHttpBootstrap.reinitialize()`（见 `lib/main.dart`）。
+- 分层：`View → ViewModel → Repository → Api → HttpManager → ResultModel<T>`。
 
 ### ResultModel 信封
 
@@ -83,6 +256,16 @@ AuthSession.register()   // BackendAuthService，非 Mock 时
 - 成功：`UserService.setUser`，token 为 Supabase `access_token`。
 - 错误映射见 `UserAuthApi._mapFailure`：`AccountNotRegisteredFailure`(10003)、`InvalidCredentialsFailure`(10002) 等。
 
+### components 读登录态
+
+`components` **不得**依赖 `module_auth`。读登录/用户用：
+
+- `AuthLifecycle.isLoggedIn` / `AuthLifecycle.currentUser` / `onAfterLogin` / `onAfterLogout`
+- `SessionGuardService`（抽象在 `module_core`，实现由 `AuthSession` 注册）
+
+契约：`commons/core/lib/service/auth_lifecycle.dart`、`session_guard_service.dart`。  
+实现：`features/auth/lib/session/auth_session_guard_service.dart`。
+
 ### 需登录功能入口
 
 ```dart
@@ -114,7 +297,38 @@ You should only use GetX or Obx for the specific widget that will be updated.
 
 通常表示 `Obx` / `GetX` 的 builder **在 build 期间没有读取任何 `.obs` 变量**。
 
-### 正确写法
+另一类：主 Tab **底部栏在、中间白屏**——多为页面未用 `GetView`/`Obx` 订阅，控制器被 SmartManagement 回收后 `fenix` 重建，旧 `ever` 仍挂旧实例。
+
+### 主 Tab / 列表页写法
+
+```dart
+// ✅ GetView + Obx：controller 有引用，加载完成后自动重建
+class HomePage extends GetView<HomeController> {
+  @override
+  Widget build(BuildContext context) {
+    return AppPageScaffold(
+      body: Obx(() {
+        final data = controller.dashboard.value;
+        final error = controller.errorMessage.value;
+        if (data == null) {
+          if (error != null) return ErrorRetry(...);
+          return const Center(child: CircularProgressIndicator());
+        }
+        return HomeDashboard(data: data);
+      }),
+    );
+  }
+}
+```
+
+```dart
+// ❌ StatefulWidget + ever → setState：控制器可被回收，页面停在空占位
+// ❌ data == null 时用 SizedBox.shrink()：加载失败像「白屏」
+```
+
+`MainPage` 的 Tab `pageBuilder()` **只调用一次并缓存**；每次 `build` 新建 `HomePage()` 会反复 dispose/init，加剧生命周期问题。参考：`lib/pages/main_page.dart`、`features/home/lib/home/view/home_page.dart`。
+
+### Obx 订阅写法
 
 ```dart
 // ✅ 在 Obx 内读取 .value / .toList() / .length
@@ -126,13 +340,6 @@ Obx(() {
     onReorder: controller.reorderFunction,
     onItemTap: controller.onFunctionTap,
   );
-});
-
-// ✅ 读取 Rxn / Rx 的 .value
-Obx(() {
-  final profile = controller.profile.value;
-  if (profile == null) return const SizedBox.shrink();
-  return ProfileHeader(data: profile);
 });
 ```
 
@@ -147,17 +354,74 @@ Obx(() => MyGrid(items: list));
 
 ### 规则清单
 
-1. **`Obx` builder 必须是块级函数**，在 return 之前读取 obs。
-2. **先把 `RxList` 快照为普通 `List`** 再传给子组件。
-3. **列表重排**后给 StatefulWidget 加 `ValueKey`（id 拼接）。
-4. **父子响应不同 obs** 时各包一层 `Obx`。
-5. **无 obs 依赖不要包 Obx**。
+1. **依赖 obs 的页面优先 `GetView<T>` + `Obx`**，不要用 `ever` + `setState` 顶替。
+2. **`Obx` builder 必须是块级函数**，在 return 之前读取 obs。
+3. **先把 `RxList` 快照为普通 `List`** 再传给子组件。
+4. **列表重排**后给 StatefulWidget 加 `ValueKey`（id 拼接）。
+5. **父子响应不同 obs** 时各包一层 `Obx`。
+6. **无 obs 依赖不要包 Obx**。
+7. **加载中**用明确占位（Progress / shimmer）；避免空 `SizedBox.shrink()` 伪装成白屏。
 
 ### 参考实现
 
+- `features/home/lib/home/view/home_page.dart`
+- `features/settings/lib/mine/view/mine_page.dart`
 - `features/settings/lib/mine/widgets/mine_function_section_widget.dart`
 - `features/settings/lib/mine/widgets/mine_header_widget.dart`
 - `features/home/lib/home/view/all_services_page.dart`
+
+---
+
+## Realtime WebSocket
+
+### 架构
+
+Flutter `module_realtime` → Go BFF（非直连 Supabase Realtime）：
+
+```text
+登录 token → POST /api/v1/realtime/ws-ticket → WebSocket /realtime/v1/connect
+           → auth → sub → 收 event / ping-pong
+重连       → POST /api/v1/realtime/sync（补拉 sinceSeq 之后事件）
+```
+
+### 配置
+
+| 项 | 位置 | 说明 |
+|----|------|------|
+| `useMockGateway` | `realtime_config.dart` | `false` = 连 Go；`true` = 进程内 Mock |
+| `wsBaseUrl` | `env_config.dart` | 参考地址；实际用 ticket 返回的 `wsUrl` |
+| 模拟器 WS | `backend_ws_config.dart` | `127.0.0.1` → `10.0.2.2` |
+
+### 心跳（应用层）
+
+- 间隔 25s 发 `{type:"ping"}`，10s 内须收到同 id 的 `pong`
+- 连续 2 次超时 → 触发重连（指数退避 1s～60s）
+
+### 常用 API
+
+```dart
+final client = Get.find<AppRealtimeClient>();
+await client.subscribeTopics([RealtimeTopics.sysNotify]);
+client.watchEvents(eventName: 'sys.notify.show').listen((e) { /* Banner */ });
+await client.sendEvent(topic: RealtimeTopics.presenceBulk, eventName: 'presence.report', payload: {});
+```
+
+### 调试
+
+**DoKit（DoraemonKit）**：仅 **Debug 构建**启用（`lib/bootstrap/app_runner_debug.dart`）；Profile/Release 不加载。启动后屏幕边缘有悬浮球，可查看日志、网络、路由等；「业务专区」含链接/Realtime/IM/弹框调度入口。
+
+设置页仍保留 **开发调试** 列表（`/settings/*_debug`）。Go 端推送测试：`POST /api/v1/realtime/push`（需 Bearer token）。
+
+**完整协议、JSON 示例、curl/Python 联调**：Go 仓库 [docs/realtime-websocket.md](../../my_code_study/my_go_study/docs/realtime-websocket.md)
+
+### 参考文件
+
+- `components/dokit/` — vendored DoKit（Dart 3 适配）
+- `components/dokit_bootstrap/` — BizKit 注册
+- `lib/bootstrap/app_runner_debug.dart`
+- `components/realtime/lib/client/app_realtime_client_impl.dart`
+- `components/realtime/lib/connection/heartbeat_scheduler.dart`
+- `components/realtime/lib/config/realtime_config.dart`
 
 ---
 
@@ -233,59 +497,6 @@ Positioned.fill(top: MediaQuery.paddingOf(context).top, child: video),
 - `commons/toolkit/lib/utils/app_video_controls_bar.dart`
 - `features/video/lib/dubbing/widgets/playable_video_header.dart`
 - `features/video/lib/short_video/view/short_video_play_page.dart`
-
----
-
-## Realtime WebSocket
-
-### 架构
-
-Flutter `module_realtime` → Go BFF（非直连 Supabase Realtime）：
-
-```text
-登录 token → POST /api/v1/realtime/ws-ticket → WebSocket /realtime/v1/connect
-           → auth → sub → 收 event / ping-pong
-重连       → POST /api/v1/realtime/sync（补拉 sinceSeq 之后事件）
-```
-
-### 配置
-
-| 项 | 位置 | 说明 |
-|----|------|------|
-| `useMockGateway` | `realtime_config.dart` | `false` = 连 Go；`true` = 进程内 Mock |
-| `wsBaseUrl` | `env_config.dart` | 参考地址；实际用 ticket 返回的 `wsUrl` |
-| 模拟器 WS | `backend_ws_config.dart` | `127.0.0.1` → `10.0.2.2` |
-
-### 心跳（应用层）
-
-- 间隔 25s 发 `{type:"ping"}`，10s 内须收到同 id 的 `pong`
-- 连续 2 次超时 → 触发重连（指数退避 1s～60s）
-
-### 常用 API
-
-```dart
-final client = Get.find<AppRealtimeClient>();
-await client.subscribeTopics([RealtimeTopics.sysNotify]);
-client.watchEvents(eventName: 'sys.notify.show').listen((e) { /* Banner */ });
-await client.sendEvent(topic: RealtimeTopics.presenceBulk, eventName: 'presence.report', payload: {});
-```
-
-### 调试
-
-**DoKit（DoraemonKit）**：仅 **Debug 构建**启用（`lib/bootstrap/app_runner_debug.dart`）；Profile/Release 不加载。启动后屏幕边缘有悬浮球，可查看日志、网络、路由等；「业务专区」含链接/Realtime/IM/弹框调度入口。
-
-设置页仍保留 **开发调试** 列表（`/settings/*_debug`）。Go 端推送测试：`POST /api/v1/realtime/push`（需 Bearer token）。
-
-**完整协议、JSON 示例、curl/Python 联调**：Go 仓库 [docs/realtime-websocket.md](../../my_code_study/my_go_study/docs/realtime-websocket.md)
-
-### 参考文件
-
-- `components/dokit/` — vendored DoKit（Dart 3 适配）
-- `components/dokit_bootstrap/` — BizKit 注册
-- `lib/bootstrap/app_runner_debug.dart`
-- `components/realtime/lib/client/app_realtime_client_impl.dart`
-- `components/realtime/lib/connection/heartbeat_scheduler.dart`
-- `components/realtime/lib/config/realtime_config.dart`
 
 ---
 

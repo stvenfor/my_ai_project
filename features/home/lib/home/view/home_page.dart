@@ -19,115 +19,77 @@ class HomeBinding extends Bindings {
   }
 }
 
-class HomePage extends StatefulWidget {
+class HomePage extends GetView<HomeController> {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  HomeController get controller => Get.find<HomeController>();
-
-  late final List<Worker> _workers;
-  double _bottomInset = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    _workers = [
-      ever(controller.dashboard, (_) => _scheduleRebuild()),
-      ever(controller.userGreeting, (_) => _scheduleRebuild()),
-      ever(controller.selectedTopTab, (_) => _scheduleRebuild()),
-      ever(controller.selectedMetricTab, (_) => _scheduleRebuild()),
-      ever(controller.errorMessage, (_) => _scheduleRebuild()),
-    ];
-    _bindMusicInset();
-  }
-
-  void _bindMusicInset() {
-    if (!Get.isRegistered<MusicPlaybackController>()) return;
-    final playback = Get.find<MusicPlaybackController>();
-    _workers.add(ever(playback.playerState, (_) => _updateBottomInset()));
-    _workers.add(ever(playback.currentIndex, (_) => _updateBottomInset()));
-    WidgetsBinding.instance.addPostFrameCallback((_) => _updateBottomInset());
-  }
-
-  void _updateBottomInset() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final inset = MusicMiniPlayerBar.bottomInsetForHomeSession(context);
-      if ((_bottomInset - inset).abs() > 0.5) {
-        setState(() => _bottomInset = inset);
-      }
-    });
-  }
-
-  void _scheduleRebuild() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) setState(() {});
-    });
-  }
-
-  @override
-  void dispose() {
-    for (final worker in _workers) {
-      worker.dispose();
-    }
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final data = controller.dashboard.value;
-
     return AppPageScaffold(
       layout: AppPageLayout.mainTabRoot,
       backgroundColor: HomeDashboardTheme.background,
-      body: data == null
-          ? _buildPlaceholder()
-          : Padding(
-              padding: EdgeInsets.only(bottom: _bottomInset),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final maxWidth = constraints.maxWidth >= 840
-                      ? HomeDashboardTheme.contentMaxWidth
-                      : double.infinity;
+      body: Obx(() {
+        final data = controller.dashboard.value;
+        final error = controller.errorMessage.value;
+        controller.userGreeting.value;
+        controller.selectedTopTab.value;
+        controller.selectedMetricTab.value;
+        final bottomInset = _musicBottomInset(context);
 
-                  return Align(
-                    alignment: Alignment.topCenter,
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(maxWidth: maxWidth),
-                      child: AppRefreshView(
-                        onRefresh: controller.refreshDashboard,
-                        child: ListView(
-                          padding: EdgeInsets.only(
-                            top: AppSafeInsets.top(context) + 16,
-                            bottom: 24.h,
-                          ),
-                          children: [
-                            HomeGreetingSection(
-                              greeting: controller.userGreeting.value,
-                            ),
-                            const HomeSearchBar(),
-                            HomeTopTabBar(
-                              selectedIndex: controller.selectedTopTab.value,
-                              onSelected: controller.selectTopTab,
-                            ),
-                            _buildTopTabBody(data),
-                          ],
-                        ),
+        if (data == null) {
+          return _buildPlaceholder(error);
+        }
+
+        return Padding(
+          padding: EdgeInsets.only(bottom: bottomInset),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final maxWidth = constraints.maxWidth >= 840
+                  ? HomeDashboardTheme.contentMaxWidth
+                  : double.infinity;
+
+              return Align(
+                alignment: Alignment.topCenter,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: maxWidth),
+                  child: AppRefreshView(
+                    onRefresh: controller.refreshDashboard,
+                    child: ListView(
+                      padding: EdgeInsets.only(
+                        top: AppSafeInsets.top(context) + 16,
+                        bottom: 24.h,
                       ),
+                      children: [
+                        HomeGreetingSection(
+                          greeting: controller.userGreeting.value,
+                        ),
+                        const HomeSearchBar(),
+                        HomeTopTabBar(
+                          selectedIndex: controller.selectedTopTab.value,
+                          onSelected: controller.selectTopTab,
+                        ),
+                        _buildTopTabBody(data),
+                      ],
                     ),
-                  );
-                },
-              ),
-            ),
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      }),
     );
   }
 
-  Widget _buildPlaceholder() {
-    final error = controller.errorMessage.value;
+  double _musicBottomInset(BuildContext context) {
+    if (!Get.isRegistered<MusicPlaybackController>()) return 0;
+    final playback = Get.find<MusicPlaybackController>();
+    // Subscribe so inset updates when the mini player appears/disappears.
+    playback.playerState.value;
+    playback.currentIndex.value;
+    return MusicMiniPlayerBar.bottomInsetForHomeSession(context);
+  }
+
+  Widget _buildPlaceholder(String? error) {
     if (error != null) {
       return Center(
         child: Column(
@@ -149,7 +111,7 @@ class _HomePageState extends State<HomePage> {
         ),
       );
     }
-    return const SizedBox.shrink();
+    return const Center(child: CircularProgressIndicator());
   }
 
   Widget _buildTopTabBody(HomeDashboardData data) {
