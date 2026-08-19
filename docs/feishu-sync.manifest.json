@@ -8,21 +8,21 @@
     "docs/superpowers": "SJskwu27viYiLzkjB8nc61kMnTg",
     "docs/superpowers/specs": "KjIBwssZ0ims6dkNm75caOAEnrb",
     "packages": "UGinwEgXDiPC83kYjl4cKRR6nAg",
-    "packages/commons": "XXYKwpphbiXIfikKFz4c0PX4nGe",
-    "packages/commons/network": "HRY9woMuHicA8CkTTzDcfV80nCh",
-    "packages/commons/storage": "Y0G5wBtRgiI2V6kf9fcccpgFnOc",
-    "packages/commons/toolkit": "EgACwvkCLiKFPhk8Jppc6Nf6noc",
-    "packages/commons/ui": "Nrqbw4VlqiitMGkYHyocKVNLnTf",
-    "packages/features": "QiHdwTReYiyQXgkiOBpcQrYOnIh",
-    "packages/features/auth": "WKE4wrrGLiuPIjkKS4eck21Nnvf",
-    "packages/features/chat": "Ou1Zw0bF7iZGtGkSWAfcYN53n1f",
-    "packages/features/community": "EqSXwNnJ4iTDQUkHC0FcGSr9nA5",
-    "packages/features/friend": "PIrLwqH9yiigBpk8lu2caIwKnrb",
-    "packages/features/home": "Ea2BwMOmci3F7KkfkGxcPBEZnYf",
-    "packages/features/live": "Fg8uwnfkyiiZvckjlNvcVh9PnMs",
-    "packages/features/pay": "QAMswT7ItiRPY5knvzNc05Etn4c",
-    "packages/features/settings": "GaHKwUFRjibVS9kT9YycQjaJnwe",
-    "packages/features/video": "L0TtwvX4Tics8rkZe7KcvKIfnog",
+    "commons": "XXYKwpphbiXIfikKFz4c0PX4nGe",
+    "commons/network": "HRY9woMuHicA8CkTTzDcfV80nCh",
+    "commons/storage": "Y0G5wBtRgiI2V6kf9fcccpgFnOc",
+    "commons/toolkit": "EgACwvkCLiKFPhk8Jppc6Nf6noc",
+    "commons/ui": "Nrqbw4VlqiitMGkYHyocKVNLnTf",
+    "features": "QiHdwTReYiyQXgkiOBpcQrYOnIh",
+    "features/auth": "WKE4wrrGLiuPIjkKS4eck21Nnvf",
+    "features/chat": "Ou1Zw0bF7iZGtGkSWAfcYN53n1f",
+    "features/community": "EqSXwNnJ4iTDQUkHC0FcGSr9nA5",
+    "features/friend": "PIrLwqH9yiigBpk8lu2caIwKnrb",
+    "features/home": "Ea2BwMOmci3F7KkfkGxcPBEZnYf",
+    "features/live": "Fg8uwnfkyiiZvckjlNvcVh9PnMs",
+    "features/pay": "QAMswT7ItiRPY5knvzNc05Etn4c",
+    "features/settings": "GaHKwUFRjibVS9kT9YycQjaJnwe",
+    "features/video": "L0TtwvX4Tics8rkZe7KcvKIfnog",
     "packages/route": "MhKXwLwPniI1aRk0kmXc8A2UnSb"
   },
   "files": {
@@ -81,132 +81,132 @@
       "document_id": "RLaKdUpOZo2l1AxPUgpc7KHLnPc",
       "content_hash": "sha256:f3dd8904618f4b748c464e593e5954781b39453cb42e5553656440733ff73434"
     },
-    "packages/commons/README.md": {
+    "commons/README.md": {
       "node_token": "WAUfwpjchiG8UukIryxc283nnYf",
       "document_id": "Oy5AdzrBxoFZWCxetjMcsI0wnhd",
       "content_hash": "sha256:d3c9376da07ee30ec159b09e3902b0f972fcdbf5acfe65d7984a20f39fa120ef"
     },
-    "packages/commons/network/CHANGELOG.md": {
+    "commons/network/CHANGELOG.md": {
       "node_token": "NOJKwY4p4ikkVpkpbmlcQ5mNnIe",
       "document_id": "FqqzdGPNNoEEX9xTSj5cZ503nrg",
       "content_hash": "sha256:3790c391cc0632af71ae53941e38940072042e23a8649eee2898e939804a918a"
     },
-    "packages/commons/network/README.md": {
+    "commons/network/README.md": {
       "node_token": "GoyOwCRPni1tctkPT7ucvgsznbf",
       "document_id": "FtjBdvf9EoP1ZNxgngJcvDxxnwc",
       "content_hash": "sha256:2dbc61adfa2e5e7da4a74de85648c087a4df7329df87ea8c983a795b39879be7"
     },
-    "packages/commons/storage/CHANGELOG.md": {
+    "commons/storage/CHANGELOG.md": {
       "node_token": "Qj9zwYOZai7GOfkXFnocYCr5nQh",
       "document_id": "Cdd0dCG98oKlkYxnqMJcmBWmn3b",
       "content_hash": "sha256:3790c391cc0632af71ae53941e38940072042e23a8649eee2898e939804a918a"
     },
-    "packages/commons/storage/README.md": {
+    "commons/storage/README.md": {
       "node_token": "ZCogwJSO0iJjqEkcvDecpp7rnfe",
       "document_id": "SmDndbTDiowlB8xxNK4c77GgnIq",
       "content_hash": "sha256:2dbc61adfa2e5e7da4a74de85648c087a4df7329df87ea8c983a795b39879be7"
     },
-    "packages/commons/toolkit/CHANGELOG.md": {
+    "commons/toolkit/CHANGELOG.md": {
       "node_token": "WKwIw4ykSiJNkKkrCjdcL6b4ncf",
       "document_id": "FcLzdExL3osp1wxhBIUcALDgnRc",
       "content_hash": "sha256:3790c391cc0632af71ae53941e38940072042e23a8649eee2898e939804a918a"
     },
-    "packages/commons/toolkit/README.md": {
+    "commons/toolkit/README.md": {
       "node_token": "RIDtwEoyRiP4HJky3r0cG2Qxn4Y",
       "document_id": "XqevdpSf9oxV62xZ1KEctxo6nVg",
       "content_hash": "sha256:2dbc61adfa2e5e7da4a74de85648c087a4df7329df87ea8c983a795b39879be7"
     },
-    "packages/commons/ui/CHANGELOG.md": {
+    "commons/ui/CHANGELOG.md": {
       "node_token": "L9oxwuNIkiO6q3kvBSTc5AG5nwo",
       "document_id": "TWSId8MDIoV0WNxwWxlc3CXjn5d",
       "content_hash": "sha256:3790c391cc0632af71ae53941e38940072042e23a8649eee2898e939804a918a"
     },
-    "packages/commons/ui/README.md": {
+    "commons/ui/README.md": {
       "node_token": "MqHPwltWyibQkXkv4VOci3J0n5e",
       "document_id": "QLlUdSA6jo8KGpxqwM4cLIh1njb",
       "content_hash": "sha256:2dbc61adfa2e5e7da4a74de85648c087a4df7329df87ea8c983a795b39879be7"
     },
-    "packages/features/auth/CHANGELOG.md": {
+    "features/auth/CHANGELOG.md": {
       "node_token": "MEwFwuvmIicFeJkelsXc7soFnVb",
       "document_id": "K0ZfdeVSioi1DlxpOGYcUt0KnMe",
       "content_hash": "sha256:3790c391cc0632af71ae53941e38940072042e23a8649eee2898e939804a918a"
     },
-    "packages/features/auth/README.md": {
+    "features/auth/README.md": {
       "node_token": "OiqJwFTPrigD1ekRxNXcDOBKnte",
       "document_id": "CqUudgPjRoB2GkxVihocwe4rnvd",
       "content_hash": "sha256:2dbc61adfa2e5e7da4a74de85648c087a4df7329df87ea8c983a795b39879be7"
     },
-    "packages/features/chat/CHANGELOG.md": {
+    "features/chat/CHANGELOG.md": {
       "node_token": "Vagjw1LJOiPT5nk3OzxcPJO3ncg",
       "document_id": "FB6pdP4nNo9700xZVt5c4tKOndd",
       "content_hash": "sha256:3790c391cc0632af71ae53941e38940072042e23a8649eee2898e939804a918a"
     },
-    "packages/features/chat/README.md": {
+    "features/chat/README.md": {
       "node_token": "Ut8IwqhDgiNbOjk9V3scF6u6nrh",
       "document_id": "DFKsd6f37oYCwaxIQfPcXAMgnCW",
       "content_hash": "sha256:2dbc61adfa2e5e7da4a74de85648c087a4df7329df87ea8c983a795b39879be7"
     },
-    "packages/features/community/CHANGELOG.md": {
+    "features/community/CHANGELOG.md": {
       "node_token": "WeEYwK2ISiLBoUkBq2Gcx44UnNe",
       "document_id": "MTQTdHRoloTC4exJIcNcitvfnjy",
       "content_hash": "sha256:3790c391cc0632af71ae53941e38940072042e23a8649eee2898e939804a918a"
     },
-    "packages/features/community/README.md": {
+    "features/community/README.md": {
       "node_token": "IXzlwgwediGJ4JkXxB0cA44vnkf",
       "document_id": "FXPDdS4JfoxqdSxTmhvcjxq6ndh",
       "content_hash": "sha256:2dbc61adfa2e5e7da4a74de85648c087a4df7329df87ea8c983a795b39879be7"
     },
-    "packages/features/friend/CHANGELOG.md": {
+    "features/friend/CHANGELOG.md": {
       "node_token": "BzbvwsG9XiyaFyk8poGclrZlnId",
       "document_id": "OlZedtgnmouZstxT6wDcY86GnAc",
       "content_hash": "sha256:3790c391cc0632af71ae53941e38940072042e23a8649eee2898e939804a918a"
     },
-    "packages/features/friend/README.md": {
+    "features/friend/README.md": {
       "node_token": "UZi3w8LHIiBWQzkJbwzcI4HtnWb",
       "document_id": "Eg2ydonPbohvHmxU4ulcBVgFnWx",
       "content_hash": "sha256:2dbc61adfa2e5e7da4a74de85648c087a4df7329df87ea8c983a795b39879be7"
     },
-    "packages/features/home/README.md": {
+    "features/home/README.md": {
       "node_token": "SxGJwXJQTiXiEikcKMLc0XPWnGf",
       "document_id": "H4ePdTsDPoK6w0xHtlUcZtKDnXe",
       "content_hash": "sha256:069ae9504c181ed9b807c83b8cc9f629a604cfb8384382902e1fc638fd15c338"
     },
-    "packages/features/live/CHANGELOG.md": {
+    "features/live/CHANGELOG.md": {
       "node_token": "VNkwwhO68iGBSykFJlhcHTsln7m",
       "document_id": "UPcude2zhoGmhMxR4U9cWPf4nef",
       "content_hash": "sha256:3790c391cc0632af71ae53941e38940072042e23a8649eee2898e939804a918a"
     },
-    "packages/features/live/README.md": {
+    "features/live/README.md": {
       "node_token": "NaRBwQOoqiLkn1knblmcByrCn7f",
       "document_id": "IBFYdCKnroEpKRxvXSgcP1LJnb8",
       "content_hash": "sha256:2dbc61adfa2e5e7da4a74de85648c087a4df7329df87ea8c983a795b39879be7"
     },
-    "packages/features/pay/CHANGELOG.md": {
+    "features/pay/CHANGELOG.md": {
       "node_token": "A8YYw5EpRiGrpCk7hM3cEUR6nMd",
       "document_id": "KURBd7ZIBo4vuWxfSFzcULBRnmt",
       "content_hash": "sha256:3790c391cc0632af71ae53941e38940072042e23a8649eee2898e939804a918a"
     },
-    "packages/features/pay/README.md": {
+    "features/pay/README.md": {
       "node_token": "FtrmwnIQVirsL1kRWhnc8mfDnac",
       "document_id": "TG1UdgyfEoqdlTxmLmAcsY4hnMh",
       "content_hash": "sha256:2dbc61adfa2e5e7da4a74de85648c087a4df7329df87ea8c983a795b39879be7"
     },
-    "packages/features/settings/CHANGELOG.md": {
+    "features/settings/CHANGELOG.md": {
       "node_token": "DinrwokIaiM2D8kfzigcLgwQn1g",
       "document_id": "ZER2dVJXOocyu2xnDA2camjunCc",
       "content_hash": "sha256:3790c391cc0632af71ae53941e38940072042e23a8649eee2898e939804a918a"
     },
-    "packages/features/settings/README.md": {
+    "features/settings/README.md": {
       "node_token": "LY5pwMJKmiYiw1kbjj4c6iMinEd",
       "document_id": "UGnpdzGiUol49AxzJujcysEYnn3",
       "content_hash": "sha256:2dbc61adfa2e5e7da4a74de85648c087a4df7329df87ea8c983a795b39879be7"
     },
-    "packages/features/video/CHANGELOG.md": {
+    "features/video/CHANGELOG.md": {
       "node_token": "XDcWw5pgTiKpbbkariMcnZrDnlc",
       "document_id": "JYCldRe56ofFWxxSbRycgXuAnwh",
       "content_hash": "sha256:3790c391cc0632af71ae53941e38940072042e23a8649eee2898e939804a918a"
     },
-    "packages/features/video/README.md": {
+    "features/video/README.md": {
       "node_token": "L76awsfy4iIYppkIr8vcuP7Wntg",
       "document_id": "O7xpdqM7mocKcvxGywzcQBSLnjg",
       "content_hash": "sha256:2dbc61adfa2e5e7da4a74de85648c087a4df7329df87ea8c983a795b39879be7"

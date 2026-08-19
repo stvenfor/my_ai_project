@@ -263,7 +263,7 @@ flutter:
 ### 8.2 推荐模块落位
 
 ```
-packages/features/music/
+features/music/
   lib/
     music_module.dart
     module_music.dart
@@ -343,7 +343,7 @@ Obx(() {
 
 | 项 | 值 |
 |---|---|
-| 模块 | `packages/features/music/` |
+| 模块 | `features/music/` |
 | 路由 | `/music/list`、`/music/now_playing` |
 | 全部服务入口 | `used_car.png` → **音频列表** → `/music/list` |
 | 控制器 | `MusicPlaybackController`（`permanent`，页面离开继续播放） |

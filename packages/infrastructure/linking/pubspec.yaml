@@ -11,17 +11,17 @@ dependencies:
     sdk: flutter
   get: ^4.7.3
   module_auth:
-    path: ../../features/auth
+    path: ../../../features/auth
   module_common_ui:
-    path: ../../commons/ui
+    path: ../../../commons/ui
   module_core:
-    path: ../../commons/core
+    path: ../../../commons/core
   module_route:
     path: ../../route
   module_utils:
-    path: ../../commons/toolkit
+    path: ../../../commons/toolkit
   module_global_cache:
-    path: ../../commons/storage
+    path: ../../../commons/storage
 
 dev_dependencies:
   flutter_test:

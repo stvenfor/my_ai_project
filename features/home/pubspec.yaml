@@ -1,0 +1,39 @@
+name: module_home
+description: Home module for flutter_module_sample.
+publish_to: 'none'
+version: 0.0.1
+
+environment:
+  sdk: '>=3.0.3 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  get: ^4.7.3
+  module_common_ui:
+    path: ../../commons/ui
+  module_auth:
+    path: ../auth
+  module_core:
+    path: ../../commons/core
+  module_http:
+    path: ../../commons/network
+  module_route:
+    path: ../../packages/route
+  module_music:
+    path: ../music
+  module_utils:
+    path: ../../commons/toolkit
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/all_services/
+    - assets/search/
+    - assets/dubbing_home/
+    - assets/dubbing_home/hot_rank/

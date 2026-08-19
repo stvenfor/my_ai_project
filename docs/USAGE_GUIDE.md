@@ -130,7 +130,7 @@ main()
 
 | 模块 | 目录 | 入口 | 说明 |
 |------|------|------|------|
-| 登录 | `packages/features/auth` | `lib/main_dev.dart` | `USE_MOCK_AUTH=true`，Mock 认证 |
+| 登录 | `features/auth` | `lib/main_dev.dart` | `USE_MOCK_AUTH=true`，Mock 认证 |
 | 首页 | `module_home` | `lib/main_dev.dart` | 注入 Mock 用户 + 默认环境 |
 | 我的/设置 | `module_settings` | `lib/main_dev.dart` | 注入 Mock 用户 + 默认环境 |
 | 聊天 | `module_chat` | `lib/main_dev.dart` | 基础 Runner |
@@ -448,7 +448,7 @@ ModuleStandaloneConfig(
 
 业务模块代码无需改动。
 
-业务模块 **不要** 直接 `import cached_network_image` 等第三方库，统一使用 `packages/commons/toolkit` 封装：
+业务模块 **不要** 直接 `import cached_network_image` 等第三方库，统一使用 `commons/toolkit` 封装：
 
 ```dart
 import 'package:module_utils/module_utils.dart';
@@ -467,7 +467,7 @@ CacheImageUtils.circle(avatarUrl, size: 56);
 |------|------|
 | **Core action** | `WebBridgeActions.coreActions`，壳工程 `WebKitCoreHandlers` **统一注册** |
 | **Module action** | `WebBridgeActions.moduleActions`，各模块 `onRegister` 用 `registerModule` **扩展** |
-| **常量表** | `packages/commons/core/lib/web/web_bridge_actions.dart`，新增 action 先在此声明 |
+| **常量表** | `commons/core/lib/web/web_bridge_actions.dart`，新增 action 先在此声明 |
 
 ### Action 常量表
 
@@ -549,7 +549,7 @@ Flutter 注入参数：`window.__FLUTTER_PARAMS__`，事件：`flutterReady`。
 
 ### 替换 flutter_inappwebview
 
-只需修改 `packages/commons/ui/lib/kit/web/` 内实现；Core/Module action 常量表与 H5 协议不变。
+只需修改 `commons/ui/lib/kit/web/` 内实现；Core/Module action 常量表与 H5 协议不变。
 
 ---
 
@@ -652,10 +652,10 @@ git worktree list
 | 壳工程启动 | `lib/main.dart` |
 | 模块清单 | `lib/config/module_manifest.dart` |
 | 环境配置 | `module_core/lib/env/env_config.dart` |
-| 环境服务实现 | `packages/features/settings/lib/env/environment_service_impl.dart` |
-| HTTP 统一初始化 | `packages/commons/network/lib/http/app_http_bootstrap.dart` |
-| 工具模块 | `packages/commons/toolkit/lib/utils/cache_image_utils.dart` |
-| WanAndroid 遗留演示 | `packages/features/home/lib/legacy/wanandroid/` |
+| 环境服务实现 | `features/settings/lib/env/environment_service_impl.dart` |
+| HTTP 统一初始化 | `commons/network/lib/http/app_http_bootstrap.dart` |
+| 工具模块 | `commons/toolkit/lib/utils/cache_image_utils.dart` |
+| WanAndroid 遗留演示 | `features/home/lib/legacy/wanandroid/` |
 | 环境切换 UI | `module_settings/lib/settings/view/settings_page.dart` |
 | 独立运行 Runner | `module_route/lib/module/module_standalone_runner.dart` |
 | 登录 Controller | `module_auth/lib/user/controller/auth_controller.dart` |

@@ -1,5 +1,5 @@
-name: module_route
-description: Routing infrastructure for flutter_module_sample.
+name: module_live
+description: Live module.
 publish_to: 'none'
 version: 0.0.1
 
@@ -12,6 +12,12 @@ dependencies:
   get: ^4.7.3
   module_core:
     path: ../../commons/core
+  module_realtime:
+    path: ../../packages/infrastructure/realtime
+  module_common_ui:
+    path: ../../commons/ui
+  module_route:
+    path: ../../packages/route
   module_utils:
     path: ../../commons/toolkit
 

@@ -56,11 +56,11 @@ fi
 shift || true
 
 case "$MODULE" in
-  auth) DIR="packages/features/auth" ;;
-  home) DIR="packages/features/home" ;;
-  mine|settings) DIR="packages/features/settings" ;;
-  chat) DIR="packages/features/chat" ;;
-  community) DIR="packages/features/community" ;;
+  auth) DIR="features/auth" ;;
+  home) DIR="features/home" ;;
+  mine|settings) DIR="features/settings" ;;
+  chat) DIR="features/chat" ;;
+  community) DIR="features/community" ;;
   *)
     echo "未知模块: $MODULE"
     exit 1

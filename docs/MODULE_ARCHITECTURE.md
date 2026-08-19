@@ -1,24 +1,32 @@
 # Flutter 模块化 + MVVM 架构使用文档
 
-本文档说明 `flutter_module_sample` 的项目结构、模块配置方式、MVVM 分层规范、独立运行方法，以及如何安全地启用/禁用模块。
+本文档说明 `module_sample` 的项目结构、模块配置方式、MVVM 分层规范、独立运行方法，以及如何安全地启用/禁用模块。
+
+> **三层架构总览**（lib / commons / features）：详见 [architecture.md](./architecture.md)
 
 ---
 
 ## 1. 总体架构
 
+**lib / commons / features 三层物理同级**，辅助包（route、infrastructure）留在 `packages/`：
+
 ```
-module_sample（主工程壳）
-├── lib/                         # 启动、manifest、Splash/Main
-├── packages/
-│   ├── core/                    # 契约 + 跨模块模型
-│   ├── route/                   # 路由基础设施 + FeatureModule
-│   ├── network/                 # Dio + AppHttpBootstrap
-│   ├── storage/                 # sqflite、AppSettings
-│   ├── toolkit/                 # 第三方工具封装（唯一安装点）
-│   ├── ui/                      # 主题、Loading/Refresh、BaseViewModel
-│   └── features/                # 业务模块（禁止互依赖）
-│       ├── home / settings / auth / chat / …
+module_sample
+├── lib/                              # 壳工程层
+├── commons/                          # 公共能力层
+│   ├── core/                         # module_core — 契约 + 跨模块模型
+│   ├── network/                      # module_http — Dio + AppHttpBootstrap
+│   ├── storage/                      # module_global_cache — sqflite、AppSettings
+│   ├── toolkit/                      # module_utils — 第三方工具封装（唯一安装点）
+│   └── ui/                           # module_common_ui — 主题、Loading/Refresh、BaseViewModel
+├── features/                         # 业务模块层
+│   └── home / settings / auth / chat / …
+└── packages/                         # 辅助包
+    ├── route/                        # module_route — FeatureModule + ModuleRegistry
+    └── infrastructure/               # realtime / linking / IM / dokit
 ```
+
+> 详见 [architecture.md §1](./architecture.md#1-总体定位)。
 
 **设计原则：**
 
@@ -151,12 +159,17 @@ List<FeatureModule> buildEnabledModules() {
 
 ```
 main()
+  → AppRunner.launch()                    // Debug: DoKit | Release: 直接启动
   → AppInitializer.init()
-      → SpManager / AppDatabase 初始化
+      → ModuleUtilsInitializer
+      → SpManager / AppDatabase
+      → EnvironmentSession + AppHttpBootstrap (Go BFF)
+      → AuthSession.register()
+      → UiKitInitializer / WebKitInitializer
       → ModuleRegistry.registerAll(buildEnabledModules())
       → ModuleRegistry.bootstrap()        // 各模块 onRegister
-      → RepositoryApi.initHttp()          // 全局 HTTP（可选）
-      → AppBinding + 各模块 Binding
+      → AppBinding + LinkingBinding + 各模块 Binding
+      → Linking / IM / Realtime (deferred)
       → AppController.loadSettings()
   → runApp(App())                         // GetMaterialApp
 ```
@@ -180,7 +193,7 @@ flutter pub get
 flutter run -t lib/main_dev.dart
 
 # 或在主工程根目录指定 package
-flutter run -t module_home/lib/main_dev.dart
+flutter run -t features/home/lib/main_dev.dart
 ```
 
 独立运行时：
@@ -193,10 +206,10 @@ flutter run -t module_home/lib/main_dev.dart
 
 | 模块 | 入口文件 |
 |------|----------|
-| module_home | `module_home/lib/main_dev.dart` |
-| module_chat | `module_chat/lib/main_dev.dart` |
-| module_community | `module_community/lib/main_dev.dart` |
-| module_settings | `module_settings/lib/main_dev.dart` |
+| module_home | `features/home/lib/main_dev.dart` |
+| module_chat | `features/chat/lib/main_dev.dart` |
+| module_community | `features/community/lib/main_dev.dart` |
+| module_settings | `features/settings/lib/main_dev.dart` |
 
 ---
 
@@ -204,7 +217,7 @@ flutter run -t module_home/lib/main_dev.dart
 
 ### 5.1 模块内自包含
 
-请求逻辑放在模块的 `api/` 层，**不要**从主工程或 `module_repository` 直接调用业务接口。
+请求逻辑放在模块的 `api/` 层，**不要**从主工程直接调用业务接口。
 
 ```
 ViewModel → Repository → Api → HttpManager
@@ -246,7 +259,7 @@ class HomeApi {
 生成 `AppSettings` 代码：
 
 ```bash
-cd module_global_cache
+cd commons/storage
 dart run build_runner build
 ```
 
@@ -256,8 +269,8 @@ dart run build_runner build
 
 | 模块 | 用途 |
 |------|------|
-| `module_utils`（packages/commons/toolkit） | **工具统一入口**：Log/SP/CacheImage/Svg/Lottie/Html/ScreenUtil |
-| `module_common_ui`（packages/commons/ui） | 主题、UiKit、BaseViewModel |
+| `module_utils`（commons/toolkit） | **工具统一入口**：Log/SP/CacheImage/Svg/Lottie/Html/ScreenUtil |
+| `module_common_ui`（commons/ui） | 主题、UiKit、BaseViewModel |
 | `module_route` | `RoutePath`、`FeatureModule`、`ModuleRegistry` |
 | `module_http` | 统一 Dio 客户端 |
 
@@ -285,7 +298,7 @@ builder: (context, child) => ModuleUtilsInitializer.wrapApp(
 
 ```yaml
 module_utils:
-  path: ../module_utils
+  path: ../../commons/toolkit
 ```
 
 **模块间禁止：** 业务模块互相 import 页面/ViewModel。需要通信时使用：
@@ -311,19 +324,24 @@ module_utils:
 
 ## 9. 当前已注册模块
 
-| moduleId | 包名 | Tab | 路由 | MVVM | 独立运行 |
-|----------|------|-----|------|------|----------|
-| home | module_home | ✅ | `/home` | ✅ | ✅ |
-| chat | module_chat | ✅ | `/chat` | ✅ | ✅ |
-| community | module_community | ✅ | `/community` | ✅ | ✅ |
-| settings | module_settings | ✅（Mine） | `/mine`, `/settings`, `/mine/http_test` | ✅ | ✅ |
-| auth | module_auth | — | `/login`, `/register` | 占位 | — |
-| friend | module_friend | — | `/friend` | 占位 | — |
-| live | module_live | — | `/live` | 占位 | — |
-| pay | module_pay | — | `/pay` | 占位 | — |
-| video | module_video | — | `/video` | 占位 | — |
+| moduleId | 包名 | Tab | 主要路由 | 成熟度 | 独立运行 |
+|----------|------|-----|----------|--------|----------|
+| home | module_home | ✅ (0) | `/home`, `/home/all_services`, `/home/used_car` | 高 | ✅ |
+| chat | module_chat | ✅ (1) | `/chat`, `/chat/detail` | 高 | ✅ |
+| community | module_community | ✅ (2) | `/community`, `/community/publish` | 中 | ✅ |
+| settings | module_settings | ✅ (3) | `/mine`, `/settings`, `/settings/*_debug` | 高 | ✅ |
+| auth | module_auth | — | `/login`, `/register` | 高 | — |
+| video | module_video | — | `/video/short`, `/video/dubbing/*` | 中 | — |
+| classroom | module_classroom | — | `/classroom/*` | 中 | — |
+| music | module_music | — | `/music/list`, `/music/now_playing` | 中 | — |
+| live | module_live | — | `/live`, `/live/room` | 低 | — |
+| pay | module_pay | — | `/pay`, `/pay/membership` | 低 | — |
+| friend | module_friend | — | `/friend` | 低 | — |
+| bfui | module_bfui | — | `/bfui/*` | Demo | — |
 
-基础设施模块（不参与 manifest）：`packages/commons/network`、`packages/route`、`packages/commons/ui`、`packages/commons/storage`、`packages/commons/toolkit`
+基础设施模块（不参与 manifest）：`commons/*`、`packages/route`、`packages/infrastructure/*`
+
+完整模块职责与依赖关系见 [architecture.md §4](./architecture.md#4-features--业务模块层)。
 
 ---
 
@@ -338,10 +356,10 @@ flutter run
 flutter gen-l10n
 
 # 模块独立运行
-flutter run -t module_home/lib/main_dev.dart
+flutter run -t features/home/lib/main_dev.dart
 
 # 分析核心代码
-flutter analyze lib/ module_home/ module_settings/ module_route/
+flutter analyze lib/ features/home/ features/settings/ packages/route/
 ```
 
 ---
@@ -399,15 +417,17 @@ Obx 重建 UI
 
 | 文件 | 说明 |
 |------|------|
+| [docs/architecture.md](./architecture.md) | 三层架构总览（lib / commons / features） |
+| [AGENTS.md](../AGENTS.md) | HTTP/Auth/Realtime/GetX 开发规范 |
 | `lib/config/module_manifest.dart` | 模块启用清单 |
-| `module_route/lib/module/feature_module.dart` | 模块契约 |
-| `module_route/lib/module/module_registry.dart` | 注册中心 |
-| `module_common_ui/lib/base/base_viewmodel.dart` | ViewModel 基类 |
-| `module_home/lib/home_module.dart` | 标准模块实现范例 |
-| `module_settings/lib/mine/viewmodel/mine_http_test_viewmodel.dart` | 网络页 ViewModel 范例 |
+| `packages/route/lib/module/feature_module.dart` | 模块契约 |
+| `packages/route/lib/module/module_registry.dart` | 注册中心 |
+| `commons/ui/lib/base/base_viewmodel.dart` | ViewModel 基类 |
+| `features/home/lib/home_module.dart` | 标准模块实现范例 |
+| `features/settings/lib/mine/viewmodel/mine_http_test_viewmodel.dart` | 网络页 ViewModel 范例 |
 | `lib/pages/main_page.dart` | 动态 Tab 容器 |
 | `lib/main.dart` | 启动与模块 bootstrap |
 
 ---
 
-如有新模块或架构变更，请同步更新本文档与 `module_manifest.dart`。
+如有新模块或架构变更，请同步更新本文档、[architecture.md](./architecture.md) 与 `module_manifest.dart`。

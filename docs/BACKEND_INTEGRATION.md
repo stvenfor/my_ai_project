@@ -44,15 +44,15 @@ my_go_study :8080
 | 层级 | 包 / 路径 | 职责 |
 |------|-----------|------|
 | 壳工程启动 | `lib/main.dart` | `EnvironmentSession` → `AppHttpBootstrap` → `AuthSession` |
-| HTTP 引导 | `packages/commons/network/lib/http/app_http_bootstrap.dart` | baseUrl、环境头、Parser |
-| BaseUrl | `packages/commons/network/lib/http/backend_http_config.dart` | 环境 URL + 模拟器 localhost 映射 |
-| 鉴权头 | `packages/commons/network/lib/http/auth_header_provider.dart` | Bearer token |
-| 响应解析 | `packages/commons/network/lib/http/backend_response_parser.dart` | `{ code, message, data }` 信封 |
-| 信封模型 | `packages/commons/network/lib/api/result_model.dart` | `ResultModel` / `ListData` / `PageResult` |
-| 认证 API | `packages/features/auth/lib/api/user_auth_api.dart` | `/api/v1/user/login|register` |
-| 认证服务 | `packages/features/auth/lib/session/backend_auth_service.dart` | 登录态持久化 |
-| 会话 | `packages/features/auth/lib/session/auth_session.dart` | Mock / Backend 切换 |
-| 业务示例 | `packages/features/home/lib/home/api/transaction_api.dart` | 二手车 transactions |
+| HTTP 引导 | `commons/network/lib/http/app_http_bootstrap.dart` | baseUrl、环境头、Parser |
+| BaseUrl | `commons/network/lib/http/backend_http_config.dart` | 环境 URL + 模拟器 localhost 映射 |
+| 鉴权头 | `commons/network/lib/http/auth_header_provider.dart` | Bearer token |
+| 响应解析 | `commons/network/lib/http/backend_response_parser.dart` | `{ code, message, data }` 信封 |
+| 信封模型 | `commons/network/lib/api/result_model.dart` | `ResultModel` / `ListData` / `PageResult` |
+| 认证 API | `features/auth/lib/api/user_auth_api.dart` | `/api/v1/user/login|register` |
+| 认证服务 | `features/auth/lib/session/backend_auth_service.dart` | 登录态持久化 |
+| 会话 | `features/auth/lib/session/auth_session.dart` | Mock / Backend 切换 |
+| 业务示例 | `features/home/lib/home/api/transaction_api.dart` | 二手车 transactions |
 
 Go 后端仓库（独立）：`my_go_study`（默认 `http://127.0.0.1:8080`）。
 
@@ -62,7 +62,7 @@ Go 后端仓库（独立）：`my_go_study`（默认 `http://127.0.0.1:8080`）�
 
 ### 2.1 Flutter 三套环境
 
-配置在 [`packages/commons/core/lib/env/env_config.dart`](../packages/commons/core/lib/env/env_config.dart)：
+配置在 [`commons/core/lib/env/env_config.dart`](../commons/core/lib/env/env_config.dart)：
 
 | AppEnv | backendBaseUrl（默认） | 说明 |
 |--------|------------------------|------|
@@ -74,7 +74,7 @@ Go 后端仓库（独立）：`my_go_study`（默认 `http://127.0.0.1:8080`）�
 
 ### 2.2 模拟器 / 真机 localhost
 
-[`BackendHttpConfig`](../packages/commons/network/lib/http/backend_http_config.dart) 会自动映射：
+[`BackendHttpConfig`](../commons/network/lib/http/backend_http_config.dart) 会自动映射：
 
 | 平台 | 配置 `127.0.0.1:8080` 实际请求 |
 |------|----------------------------------|
@@ -131,7 +131,7 @@ Go 管理端接口（如登录、register、manage 列表）返回：
 ```
 
 或带信封的 `{ "code": 0, "data": { "list": [...] } }`。  
-[`TransactionApi`](../packages/features/home/lib/home/api/transaction_api.dart) 的 converter **两种都支持**。
+[`TransactionApi`](../features/home/lib/home/api/transaction_api.dart) 的 converter **两种都支持**。
 
 ### 3.3 错误码（Go BFF）
 
@@ -177,7 +177,7 @@ sequenceDiagram
 
 注册同理：`POST /api/v1/user/register` → Supabase Signup；若返回 `token` 则自动登录，否则需邮箱验证后再登录。
 
-**单设备登录**：同一账号全局仅 1 个 mobile 会话。新设备登录后旧设备下次 API 返回 401「账号已在其他设备登录」；[`SessionGuardHook`](../packages/features/auth/lib/session/session_guard.dart) 自动登出并跳转登录页。
+**单设备登录**：同一账号全局仅 1 个 mobile 会话。新设备登录后旧设备下次 API 返回 401「账号已在其他设备登录」；[`SessionGuardHook`](../features/auth/lib/session/session_guard.dart) 自动登出并跳转登录页。
 
 ### 4.2 API 约定
 
@@ -258,7 +258,7 @@ POST /api/v1/user/refresh
 
 ### 4.3 本地会话
 
-登录成功后 [`BackendAuthService`](../packages/features/auth/lib/session/backend_auth_service.dart) 写入：
+登录成功后 [`BackendAuthService`](../features/auth/lib/session/backend_auth_service.dart) 写入：
 
 ```dart
 User(
@@ -286,7 +286,7 @@ User(
 需要登录的功能入口应使用统一模式（示例：二手车）：
 
 ```dart
-// packages/features/home/lib/home/navigation/used_car_navigation.dart
+// features/home/lib/home/navigation/used_car_navigation.dart
 if (AuthSession.isLoggedIn) {
   await Get.toNamed(RoutePath.homeUsedCarList);
 } else {
@@ -450,7 +450,7 @@ curl -X POST http://127.0.0.1:8080/api/v1/realtime/push \
 | `packages/infrastructure/realtime/lib/api/ws_sync_api.dart` | 同步 HTTP |
 | `packages/infrastructure/realtime/lib/connection/heartbeat_scheduler.dart` | ping/pong |
 | `packages/infrastructure/realtime/lib/handlers/global_notify_handler.dart` | 通知 Banner |
-| `packages/commons/network/lib/http/backend_ws_config.dart` | WS URL 平台映射 |
+| `commons/network/lib/http/backend_ws_config.dart` | WS URL 平台映射 |
 
 ---
 
@@ -485,10 +485,10 @@ curl -X POST http://127.0.0.1:8080/api/v1/user/login \
 ## 8. 新增业务 API 检查清单
 
 1. **Go**：在 `my_go_study` 增加 handler，需登录接口挂 `SupabaseAuth` 中间件。
-2. **Flutter 模型**：`packages/features/<module>/lib/.../model/` 定义 `fromJson`。
+2. **Flutter 模型**：`features/<module>/lib/.../model/` 定义 `fromJson`。
 3. **Flutter Api**：`HttpManager.get/post<ResultModel<T>>`，converter 用 `ResultModel.listPage` 或 `ResultModel.object`。
 4. **Repository**：解包 `result.data`，不要向 UI 暴露 `ResultModel`。
-5. **HttpConfig**：模块内 `XxxHttpConfig.ensureInitialized()` 调用 `AppHttpBootstrap.reinitialize`（与 [`AuthHttpConfig`](../packages/features/auth/lib/api/auth_http_config.dart) 相同模式）。
+5. **HttpConfig**：模块内 `XxxHttpConfig.ensureInitialized()` 调用 `AppHttpBootstrap.reinitialize`（与 [`AuthHttpConfig`](../features/auth/lib/api/auth_http_config.dart) 相同模式）。
 6. **需登录入口**：`AuthSession.isLoggedIn` + `AuthNavigation.openLogin(redirectRoute: ...)`。
 7. **Obx / 列表**：遵循 [AGENTS.md](../AGENTS.md) GetX 规范。
 

@@ -19,41 +19,41 @@ dependencies:
   intl: any
 
   module_core:
-    path: ./packages/commons/core
+    path: ./commons/core
   module_auth:
-    path: ./packages/features/auth
+    path: ./features/auth
   module_chat:
-    path: ./packages/features/chat
+    path: ./features/chat
   module_common_ui:
-    path: ./packages/commons/ui
+    path: ./commons/ui
   module_community:
-    path: ./packages/features/community
+    path: ./features/community
   module_friend:
-    path: ./packages/features/friend
+    path: ./features/friend
   module_global_cache:
-    path: ./packages/commons/storage
+    path: ./commons/storage
   module_home:
-    path: ./packages/features/home
+    path: ./features/home
   module_classroom:
-    path: ./packages/features/classroom
+    path: ./features/classroom
   module_http:
-    path: ./packages/commons/network
+    path: ./commons/network
   module_live:
-    path: ./packages/features/live
+    path: ./features/live
   module_pay:
-    path: ./packages/features/pay
+    path: ./features/pay
   module_route:
     path: ./packages/route
   module_settings:
-    path: ./packages/features/settings
+    path: ./features/settings
   module_utils:
-    path: ./packages/commons/toolkit
+    path: ./commons/toolkit
   module_video:
-    path: ./packages/features/video
+    path: ./features/video
   module_bfui:
-    path: ./packages/features/bfui
+    path: ./features/bfui
   module_music:
-    path: ./packages/features/music
+    path: ./features/music
   module_linking:
     path: ./packages/infrastructure/linking
   module_realtime:
@@ -82,7 +82,7 @@ flutter:
     - assets/images/
     - assets/lotties/
     - assets/web/
-    - packages/commons/toolkit/assets/data/video_mock_sources.json
+    - commons/toolkit/assets/data/video_mock_sources.json
 
 dependency_overrides:
   rxdart: ^0.27.7

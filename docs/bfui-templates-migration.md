@@ -9,12 +9,12 @@
 | 仓库 | https://github.com/mitesh77/Best-Flutter-UI-Templates |
 | Pin Commit | `c85450cb4367742e879ebfae6cda2b7b4da1c3cd` |
 | 模块包名 | `module_bfui` |
-| 模块路径 | `packages/features/bfui/` |
+| 模块路径 | `features/bfui/` |
 
 ## 模块结构
 
 ```
-packages/features/bfui/
+features/bfui/
   lib/
     bfui_module.dart              # FeatureModule 路由注册
     module_bfui.dart              # 对外 export
@@ -100,6 +100,6 @@ packages/features/bfui/
 
 ## 相关文件
 
-- 入口数据：[`all_services_data.dart`](../packages/features/home/lib/home/model/all_services_data.dart)
-- 点击跳转：[`all_services_controller.dart`](../packages/features/home/lib/home/controller/all_services_controller.dart)
-- 路由注册：[`bfui_module.dart`](../packages/features/bfui/lib/bfui_module.dart)
+- 入口数据：[`all_services_data.dart`](../features/home/lib/home/model/all_services_data.dart)
+- 点击跳转：[`all_services_controller.dart`](../features/home/lib/home/controller/all_services_controller.dart)
+- 路由注册：[`bfui_module.dart`](../features/bfui/lib/bfui_module.dart)

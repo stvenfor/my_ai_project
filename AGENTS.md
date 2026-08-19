@@ -60,10 +60,10 @@ AuthSession.register()   // BackendAuthService，非 Mock 时
 
 ### 参考文件
 
-- `packages/commons/network/lib/http/app_http_bootstrap.dart`
-- `packages/commons/network/lib/http/backend_response_parser.dart`
-- `packages/commons/network/lib/api/result_model.dart`
-- `packages/features/home/lib/home/api/transaction_api.dart`
+- `commons/network/lib/http/app_http_bootstrap.dart`
+- `commons/network/lib/http/backend_response_parser.dart`
+- `commons/network/lib/api/result_model.dart`
+- `features/home/lib/home/api/transaction_api.dart`
 - `docs/BACKEND_INTEGRATION.md`
 
 ---
@@ -93,7 +93,7 @@ if (AuthSession.isLoggedIn) {
 }
 ```
 
-参考：`packages/features/home/lib/home/navigation/used_car_navigation.dart`。
+参考：`features/home/lib/home/navigation/used_car_navigation.dart`。
 
 ### 密钥与 Git
 
@@ -155,9 +155,9 @@ Obx(() => MyGrid(items: list));
 
 ### 参考实现
 
-- `packages/features/settings/lib/mine/widgets/mine_function_section_widget.dart`
-- `packages/features/settings/lib/mine/widgets/mine_header_widget.dart`
-- `packages/features/home/lib/home/view/all_services_page.dart`
+- `features/settings/lib/mine/widgets/mine_function_section_widget.dart`
+- `features/settings/lib/mine/widgets/mine_header_widget.dart`
+- `features/home/lib/home/view/all_services_page.dart`
 
 ---
 
@@ -178,7 +178,7 @@ Cannot hit test a render box with no size
 3. **拖动状态变更**用 `SchedulerBinding.instance.addPostFrameCallback` 延迟 `setState`。
 4. **宫格 reorder** 优先 `childDragAnchorStrategy`；`feedback` 用 `Transform.scale(0.94)` + 明确 `SizedBox`。
 
-参考：`packages/features/settings/lib/mine/widgets/mine_reorderable_function_grid.dart`
+参考：`features/settings/lib/mine/widgets/mine_reorderable_function_grid.dart`
 
 ---
 
@@ -229,10 +229,10 @@ Positioned.fill(top: MediaQuery.paddingOf(context).top, child: video),
 
 ### 参考实现
 
-- `packages/commons/ui/lib/layout/video_playback_immersive_scope.dart`
-- `packages/commons/toolkit/lib/utils/app_video_controls_bar.dart`
-- `packages/features/video/lib/dubbing/widgets/playable_video_header.dart`
-- `packages/features/video/lib/short_video/view/short_video_play_page.dart`
+- `commons/ui/lib/layout/video_playback_immersive_scope.dart`
+- `commons/toolkit/lib/utils/app_video_controls_bar.dart`
+- `features/video/lib/dubbing/widgets/playable_video_header.dart`
+- `features/video/lib/short_video/view/short_video_play_page.dart`
 
 ---
 

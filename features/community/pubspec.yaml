@@ -1,5 +1,5 @@
-name: module_route
-description: Routing infrastructure for flutter_module_sample.
+name: module_community
+description: Community module.
 publish_to: 'none'
 version: 0.0.1
 
@@ -10,8 +10,13 @@ dependencies:
   flutter:
     sdk: flutter
   get: ^4.7.3
+  photo_view: ^0.15.0
+  module_common_ui:
+    path: ../../commons/ui
   module_core:
     path: ../../commons/core
+  module_route:
+    path: ../../packages/route
   module_utils:
     path: ../../commons/toolkit
 
@@ -21,3 +26,4 @@ dev_dependencies:
   flutter_lints: ^2.0.0
 
 flutter:
+  uses-material-design: true

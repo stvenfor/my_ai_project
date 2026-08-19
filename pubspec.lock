@@ -921,14 +921,14 @@ packages:
   module_auth:
     dependency: "direct main"
     description:
-      path: "packages/features/auth"
+      path: "features/auth"
       relative: true
     source: path
     version: "0.0.1"
   module_bfui:
     dependency: "direct main"
     description:
-      path: "packages/features/bfui"
+      path: "features/bfui"
       relative: true
     source: path
     version: "0.0.1"
@@ -942,35 +942,35 @@ packages:
   module_chat:
     dependency: "direct main"
     description:
-      path: "packages/features/chat"
+      path: "features/chat"
       relative: true
     source: path
     version: "0.0.1"
   module_classroom:
     dependency: "direct main"
     description:
-      path: "packages/features/classroom"
+      path: "features/classroom"
       relative: true
     source: path
     version: "0.0.1"
   module_common_ui:
     dependency: "direct main"
     description:
-      path: "packages/commons/ui"
+      path: "commons/ui"
       relative: true
     source: path
     version: "0.0.1"
   module_community:
     dependency: "direct main"
     description:
-      path: "packages/features/community"
+      path: "features/community"
       relative: true
     source: path
     version: "0.0.1"
   module_core:
     dependency: "direct main"
     description:
-      path: "packages/commons/core"
+      path: "commons/core"
       relative: true
     source: path
     version: "0.0.1"
@@ -984,28 +984,28 @@ packages:
   module_friend:
     dependency: "direct main"
     description:
-      path: "packages/features/friend"
+      path: "features/friend"
       relative: true
     source: path
     version: "0.0.1"
   module_global_cache:
     dependency: "direct main"
     description:
-      path: "packages/commons/storage"
+      path: "commons/storage"
       relative: true
     source: path
     version: "0.0.1"
   module_home:
     dependency: "direct main"
     description:
-      path: "packages/features/home"
+      path: "features/home"
       relative: true
     source: path
     version: "0.0.1"
   module_http:
     dependency: "direct main"
     description:
-      path: "packages/commons/network"
+      path: "commons/network"
       relative: true
     source: path
     version: "0.0.1"
@@ -1019,21 +1019,21 @@ packages:
   module_live:
     dependency: "direct main"
     description:
-      path: "packages/features/live"
+      path: "features/live"
       relative: true
     source: path
     version: "0.0.1"
   module_music:
     dependency: "direct main"
     description:
-      path: "packages/features/music"
+      path: "features/music"
       relative: true
     source: path
     version: "0.0.1"
   module_pay:
     dependency: "direct main"
     description:
-      path: "packages/features/pay"
+      path: "features/pay"
       relative: true
     source: path
     version: "0.0.1"
@@ -1061,21 +1061,21 @@ packages:
   module_settings:
     dependency: "direct main"
     description:
-      path: "packages/features/settings"
+      path: "features/settings"
       relative: true
     source: path
     version: "0.0.1"
   module_utils:
     dependency: "direct main"
     description:
-      path: "packages/commons/toolkit"
+      path: "commons/toolkit"
       relative: true
     source: path
     version: "0.0.1"
   module_video:
     dependency: "direct main"
     description:
-      path: "packages/features/video"
+      path: "features/video"
       relative: true
     source: path
     version: "0.0.1"

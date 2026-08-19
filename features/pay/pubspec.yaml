@@ -1,5 +1,5 @@
-name: module_bluetooth
-description: Bluetooth LE infrastructure for flutter_module_sample.
+name: module_pay
+description: Pay module.
 publish_to: 'none'
 version: 0.0.1
 
@@ -9,13 +9,13 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_blue_plus: ^2.3.8
   get: ^4.7.3
-  permission_handler: ^12.0.3
   module_common_ui:
-    path: ../../../commons/ui
+    path: ../../commons/ui
   module_route:
-    path: ../../route
+    path: ../../packages/route
+  module_utils:
+    path: ../../commons/toolkit
 
 dev_dependencies:
   flutter_test:
@@ -23,3 +23,6 @@ dev_dependencies:
   flutter_lints: ^2.0.0
 
 flutter:
+  uses-material-design: true
+  assets:
+    - assets/membership/
