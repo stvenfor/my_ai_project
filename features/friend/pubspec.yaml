@@ -12,7 +12,7 @@ dependencies:
   module_common_ui:
     path: ../../commons/ui
   module_route:
-    path: ../../packages/route
+    path: ../../commons/route
   module_utils:
     path: ../../commons/toolkit
 

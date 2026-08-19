@@ -11,9 +11,9 @@ dependencies:
     sdk: flutter
   get: ^4.7.3
   module_core:
-    path: ../../commons/core
+    path: ../core
   module_utils:
-    path: ../../commons/toolkit
+    path: ../toolkit
 
 dev_dependencies:
   flutter_test:

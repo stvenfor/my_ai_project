@@ -16,7 +16,7 @@ dependencies:
   vector_math: ^2.1.4
   get: ^4.7.3
   module_route:
-    path: ../../packages/route
+    path: ../../commons/route
 
 dev_dependencies:
   flutter_test:

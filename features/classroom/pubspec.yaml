@@ -15,7 +15,7 @@ dependencies:
   module_core:
     path: ../../commons/core
   module_route:
-    path: ../../packages/route
+    path: ../../commons/route
 
 dev_dependencies:
   flutter_test:

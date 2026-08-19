@@ -17,19 +17,19 @@ dependencies:
   module_http:
     path: ../../commons/network
   module_route:
-    path: ../../packages/route
+    path: ../../commons/route
   module_auth:
     path: ../auth
   module_utils:
     path: ../../commons/toolkit
   module_linking:
-    path: ../../packages/infrastructure/linking
+    path: ../../components/linking
   module_realtime:
-    path: ../../packages/infrastructure/realtime
+    path: ../../components/realtime
   module_rongcloud_im:
-    path: ../../packages/infrastructure/rongcloud_im
+    path: ../../components/rongcloud_im
   module_bluetooth:
-    path: ../../packages/infrastructure/bluetooth
+    path: ../../components/bluetooth
 
 dev_dependencies:
   flutter_test:

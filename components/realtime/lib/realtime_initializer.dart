@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
-import 'package:module_auth/session/auth_session.dart';
+import 'package:module_core/core.dart';
 import 'package:module_core/model/realtime/realtime_connection_state.dart';
 import 'package:module_core/service/app_realtime_client.dart';
 import 'package:module_core/service/environment_service.dart';
@@ -37,8 +37,9 @@ class RealtimeInitializer {
       PrivacyConsentService.onGranted,
     );
 
-    AuthSession.onAfterLogout = _chainAfterLogout(AuthSession.onAfterLogout);
-    AuthSession.onAfterLogin = _chainAfterLogin(AuthSession.onAfterLogin);
+    AuthLifecycle.onAfterLogout =
+        _chainAfterLogout(AuthLifecycle.onAfterLogout);
+    AuthLifecycle.onAfterLogin = _chainAfterLogin(AuthLifecycle.onAfterLogin);
 
     _lifecycleListener = AppLifecycleListener(
       onStateChange: impl.onAppLifecycle,
@@ -88,8 +89,8 @@ class RealtimeInitializer {
 
   static Future<void> tryConnectIfReady({String trigger = 'manual'}) async {
     final privacyGranted = _privacyGranted();
-    final loggedIn = AuthSession.isLoggedIn;
-    final user = AuthSession.maybeService?.currentUser.value;
+    final loggedIn = AuthLifecycle.isLoggedIn;
+    final user = AuthLifecycle.currentUser;
     final currentState = _clientImpl?.currentState;
     LogUtils.i(
       '[Realtime] tryConnect trigger=$trigger '

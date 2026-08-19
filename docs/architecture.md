@@ -1,4 +1,4 @@
-# 项目架构（lib / commons / features）
+# 项目架构（lib / commons / components / features）
 
 本文基于当前仓库代码整理，描述 `module_sample` 主工程与本地 Flutter package 之间的职责、依赖和运行关系。
 
@@ -10,36 +10,35 @@
 
 ## 1. 总体定位
 
-本项目是 **Flutter 模块化 Monolith**，代码组织为 **三个同级架构层**：
+本项目是 **Flutter 模块化 Monolith**，代码组织为 **四个同级目录层**：
 
 | 层级 | 路径 | 职责 |
 |------|------|------|
 | **lib** | `lib/` | 壳工程：启动、全局 DI、模块清单、Tab 容器、壳级路由 |
-| **commons** | `commons/` | 公共能力：模型契约、HTTP、UI 组件、工具、本地存储 |
+| **commons** | `commons/` | 必选基础：模型契约、HTTP、UI、工具、存储、路由/模块注册 |
+| **components** | `components/` | 可选组合：Realtime、深链、IM、蓝牙、DoKit；部分 feature 才引入 |
 | **features** | `features/` | 业务模块：各功能域的页面、ViewModel、Repository、Api |
 
-三者**架构同级、职责分离**：`lib` 负责装配与编排，`commons` 提供可复用基础能力，`features` 承载业务实现；`lib` 不实现业务，`features` 不互相依赖页面。
-
-辅助包（非三层主体，但与壳工程协作）：
-
-| 路径 | 包名 | 职责 |
-|------|------|------|
-| `packages/route/` | `module_route` | 路由常量、`FeatureModule` 契约、`ModuleRegistry` |
-| `packages/infrastructure/` | 多个 | Realtime WebSocket、深链/推送、RongCloud IM、DoKit 调试 |
+依赖方向：`lib → features/components/commons`，`features → components/commons`，`components → commons`。  
+**禁止** `commons → components/features`，**禁止** `components → features`。
 
 后端交互：**Flutter → Go BFF (`my_go_study`) → Supabase**（业务层不直连 Supabase SDK）。
 
 ### 1.1 架构总览
 
 ```mermaid
-flowchart LR
+flowchart TB
     lib["lib 壳工程"]
     commons["commons 公共层"]
+    components["components 组合层"]
     features["features 业务层"]
 
-    lib -->|"装配 / 启动"| commons
-    lib -->|"注册模块"| features
-    features -->|"依赖"| commons
+    lib --> commons
+    lib --> components
+    lib --> features
+    features --> components
+    features --> commons
+    components --> commons
 ```
 
 **各层内容**：
@@ -47,10 +46,9 @@ flowchart LR
 | 层 | 包含 |
 |----|------|
 | lib | `AppInitializer`、`module_manifest`、`Splash/Main`、路由合并 |
-| commons | `module_core`、`module_http`、`module_common_ui`、`module_utils`、`module_global_cache` |
+| commons | `module_core`、`module_http`、`module_common_ui`、`module_utils`、`module_global_cache`、`module_route` |
+| components | `module_realtime`、`module_linking`、`module_rongcloud_im`、`module_bluetooth`、`dokit*` |
 | features | `module_home`、`module_auth`、`module_chat` 等 12 个业务包 |
-
-**辅助包**（非三层主体）：`module_route`（路由注册）、`infrastructure/*`（Realtime、IM、Linking、DoKit）
 
 **commons 内部依赖**：
 
@@ -61,39 +59,44 @@ graph BT
     http[module_http]
     cache[module_global_cache]
     ui[module_common_ui]
+    route[module_route]
 
     http --> core
     cache --> utils
     ui --> core
     ui --> utils
+    ui --> route
+    route --> core
+    route --> utils
 ```
 
 ### 1.2 仓库目录
 
-**三层物理同级**（与 `lib/` 并列）与辅助包：
-
 ```text
 .
 ├── lib/                              # 壳工程层
-├── commons/                          # 公共能力层（5 个子包）
+├── commons/                          # 公共能力层
 │   ├── core/                         # module_core
 │   ├── network/                      # module_http
 │   ├── storage/                      # module_global_cache
 │   ├── toolkit/                      # module_utils
-│   └── ui/                           # module_common_ui
+│   ├── ui/                           # module_common_ui
+│   └── route/                        # module_route（路由 + FeatureModule）
 ├── features/                         # 业务模块层（12 个 module_*）
 │   ├── home/
 │   ├── auth/
 │   ├── chat/
 │   └── ...
-├── packages/                         # 辅助包（非三层主体）
-│   ├── route/                        # module_route
-│   └── infrastructure/               # realtime / linking / IM / dokit
+├── components/                       # 可选组合层
+│   ├── realtime/
+│   ├── linking/
+│   ├── rongcloud_im/
+│   ├── bluetooth/
+│   ├── dokit/
+│   └── dokit_bootstrap/
 ├── android/
 ├── ios/
 └── docs/
-    ├── architecture.md
-    └── MODULE_ARCHITECTURE.md
 ```
 
 ---
@@ -166,7 +169,7 @@ main
 2. `ModuleRegistry.collectRoutes()` — 各 `FeatureModule.routes()`
 3. 合并后转为 `GetPage` 列表
 
-**路径常量**统一在 `packages/route/lib/route/route_path.dart`。
+**路径常量**统一在 `commons/route/lib/route/route_path.dart`。
 
 **Tab 构建**：`MainPage` 调用 `ModuleRegistry.collectMainTabs()`，按 `order` 排序。当前 4 个 Tab：
 
@@ -185,7 +188,7 @@ Home、Classroom、Chat、Community、Settings、Auth、Friend、Live、Pay、Vi
 
 ## 3. commons — 公共能力层
 
-位于 `commons/`，共 **5 个子包**。**目录名 ≠ pubspec 名**，import 以 pubspec 为准。
+位于 `commons/`，共 **6 个子包**。**目录名 ≠ pubspec 名**，import 以 pubspec 为准。
 
 ### 3.1 包一览
 
@@ -195,6 +198,7 @@ Home、Classroom、Chat、Community、Settings、Auth、Friend、Live、Pay、Vi
 | `toolkit/` | `module_utils` | `package:module_utils/module_utils.dart` | L0 基础 | 日志、权限、图片/扫码、短视频播放器、EventBus、`ModuleUtilsInitializer` |
 | `network/` | `module_http` | `package:module_http/module_http.dart` | L1 基础设施 | Dio `HttpManager`、`AppHttpBootstrap`、`ResultModel<T>` 信封、Go BFF 解析与拦截器 |
 | `storage/` | `module_global_cache` | `package:module_global_cache/module_global_cache.dart` | L1 基础设施 | `SpManager` + sqflite `AppDatabase` |
+| `route/` | `module_route` | `package:module_route/module_route.dart` | L1 基础设施 | 路由常量、`FeatureModule`、`ModuleRegistry`、独立运行 runner |
 | `ui/` | `module_common_ui` | `package:module_common_ui/module_common_ui.dart` | L2 表现层 | 主题、Dialog、Layout（含沉浸式视频 Scope）、Refresh/Loading、`BaseViewModel`、`UiKitInitializer` |
 
 ### 3.2 内部依赖
@@ -205,19 +209,23 @@ graph BT
     utils[module_utils]
     http[module_http]
     cache[module_global_cache]
+    route[module_route]
     ui[module_common_ui]
 
     http --> core
     cache --> utils
+    route --> core
+    route --> utils
     ui --> core
     ui --> utils
+    ui --> route
 ```
 
 **分层约定**：
 
 - L0（core、utils）不依赖其他 commons 包
-- L1（http、storage）依赖 L0
-- L2（ui）依赖 L0，并引用 `module_route`
+- L1（http、storage、route）依赖 L0
+- L2（ui）依赖 L0 + route
 
 ### 3.3 各包详细职责
 
@@ -295,7 +303,7 @@ View → ViewModel → Repository → Api → HttpManager → Go BFF
 
 ## 4. features — 业务模块层
 
-位于 `features/`，每个模块实现 `FeatureModule` 契约（`packages/route/lib/module/feature_module.dart`）：
+位于 `features/`，每个模块实现 `FeatureModule` 契约（`commons/route/lib/module/feature_module.dart`）：
 
 ```dart
 abstract class FeatureModule {
@@ -358,7 +366,7 @@ Feature 模块 **禁止** 互相 import 页面/ViewModel。当前允许的跨模
 | 模块 | 依赖 |
 |------|------|
 | home | auth、music |
-| settings | auth + infrastructure（linking、realtime、im、bluetooth） |
+| settings | auth + components（linking、realtime、im、bluetooth） |
 | chat | module_rongcloud_im |
 | live | module_realtime |
 
@@ -405,9 +413,9 @@ flutter run -t features/home/lib/main_dev.dart
 
 ---
 
-## 5. 附录：route 与 infrastructure
+## 5. 附录：route 与 components
 
-### 5.1 module_route（`packages/route/`）
+### 5.1 module_route（`commons/route/`）
 
 | 组件 | 职责 |
 |------|------|
@@ -417,14 +425,14 @@ flutter run -t features/home/lib/main_dev.dart
 | `ModuleHostContext` | 集成/独立运行上下文 |
 | `ModuleStandaloneRunner` | 模块独立运行入口 |
 
-### 5.2 infrastructure（`packages/infrastructure/`）
+### 5.2 components（`components/`）
 
 | 包 | 职责 |
 |----|------|
 | `module_realtime` | WebSocket 客户端、Go BFF Realtime、心跳/重连 |
 | `module_linking` | 深链 + 推送（JPush）、隐私 consent |
 | `module_rongcloud_im` | RongCloud IM 引擎、会话 API |
-| `module_bluetooth` | BLE demo/infrastructure |
+| `module_bluetooth` | BLE demo/components |
 | `module_dokit` | Vendored DoKit 调试工具 |
 | `module_dokit_bootstrap` | Debug 构建 DoKit 注册 |
 
@@ -438,10 +446,9 @@ flutter run -t features/home/lib/main_dev.dart
 
 | 类别 | 包 |
 |------|-----|
-| Commons | `module_core`、`module_http`、`module_common_ui`、`module_global_cache`、`module_utils` |
+| Commons | `module_core`、`module_http`、`module_common_ui`、`module_global_cache`、`module_utils`、`module_route` |
 | Features | `module_auth`、`module_home`、`module_chat`、`module_community`、`module_settings`、`module_classroom`、`module_friend`、`module_live`、`module_pay`、`module_video`、`module_bfui`、`module_music` |
-| Route | `module_route` |
-| Infrastructure | `module_linking`、`module_realtime`、`module_rongcloud_im`、`module_dokit_bootstrap` |
+| Components | `module_linking`、`module_realtime`、`module_rongcloud_im`、`module_dokit_bootstrap` |
 
 ---
 

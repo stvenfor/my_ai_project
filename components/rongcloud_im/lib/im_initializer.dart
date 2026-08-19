@@ -1,21 +1,12 @@
 import 'package:get/get.dart';
-import 'package:module_auth/session/auth_session.dart';
 import 'package:module_core/core.dart';
 import 'package:module_core/service/im_backup_service.dart';
 import 'package:module_core/service/im_session_service.dart';
-import 'package:module_core/service/im_user_profile_service.dart';
 import 'package:module_global_cache/prefs/sp_keys.dart';
 import 'package:module_global_cache/prefs/sp_manager.dart';
 import 'package:module_linking/privacy/privacy_consent_service.dart';
-import 'package:module_rongcloud_im/api/im_session_api.dart';
-import 'package:module_rongcloud_im/api/im_user_profile_api.dart';
-import 'package:module_rongcloud_im/backup/mock_im_backup_service.dart';
-import 'package:module_rongcloud_im/cache/cached_im_user_profile_service.dart';
-import 'package:module_rongcloud_im/engine/rong_engine_holder.dart';
 import 'package:module_rongcloud_im/im_binding.dart';
-import 'package:module_rongcloud_im/registry/im_user_id_registry.dart';
 import 'package:module_rongcloud_im/session/im_session_service_impl.dart';
-import 'package:module_rongcloud_im/telemetry/im_telemetry.dart';
 import 'package:module_utils/module_utils.dart';
 
 class ImInitializer {
@@ -34,8 +25,9 @@ class ImInitializer {
       PrivacyConsentService.onGranted,
     );
 
-    AuthSession.onAfterLogin = _chainAfterLogin(AuthSession.onAfterLogin);
-    AuthSession.onAfterLogout = _chainAfterLogout(AuthSession.onAfterLogout);
+    AuthLifecycle.onAfterLogin = _chainAfterLogin(AuthLifecycle.onAfterLogin);
+    AuthLifecycle.onAfterLogout =
+        _chainAfterLogout(AuthLifecycle.onAfterLogout);
 
     if (Get.isRegistered<EnvironmentService>()) {
       final env = Get.find<EnvironmentService>();
@@ -82,11 +74,11 @@ class ImInitializer {
       LogUtils.i('[ImInitializer] skip: privacy not granted');
       return;
     }
-    if (!AuthSession.isLoggedIn) {
+    if (!AuthLifecycle.isLoggedIn) {
       LogUtils.i('[ImInitializer] skip: not logged in');
       return;
     }
-    final user = AuthSession.maybeService?.currentUser.value;
+    final user = AuthLifecycle.currentUser;
     if (user == null || user.id.isEmpty) return;
 
     final session = _sessionImpl;

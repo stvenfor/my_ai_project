@@ -17,7 +17,7 @@ sync:
     - "packages/**/CHANGELOG.md"
   exclude:
     - "**/Assets.xcassets/**/README.md"
-    - "packages/infrastructure/dokit/**"
+    - "components/dokit/**"
 
 paths:
   manifest: "docs/feishu-sync.manifest.json"

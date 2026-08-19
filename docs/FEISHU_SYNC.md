@@ -12,8 +12,9 @@
     ├── docs/
     │   ├── USAGE_GUIDE
     │   └── ...
-    └── packages/
-        └── features/auth/README
+    ├── commons/
+    ├── features/
+    └── components/
 ```
 
 配置见 [`feishu-sync.config.yaml`](./feishu-sync.config.yaml)，节点映射见 [`feishu-sync.manifest.json`](./feishu-sync.manifest.json)。

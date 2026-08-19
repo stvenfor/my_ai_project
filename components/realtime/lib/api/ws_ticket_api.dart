@@ -1,4 +1,3 @@
-import 'package:module_auth/api/auth_http_config.dart';
 import 'package:module_core/env/app_env.dart';
 import 'package:module_core/service/environment_service.dart';
 import 'package:module_http/module_http.dart';
@@ -21,8 +20,6 @@ class WsTicketApi {
     if (accessToken.isEmpty) {
       throw StateError('缺少 access token，请先登录');
     }
-    AuthHttpConfig.ensureInitialized();
-
     final result = await HttpManager.instance.post<WsTicketResult>(
       RealtimeConfig.ticketPath,
       data: const {

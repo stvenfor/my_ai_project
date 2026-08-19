@@ -43,7 +43,7 @@ dependencies:
   module_pay:
     path: ./features/pay
   module_route:
-    path: ./packages/route
+    path: ./commons/route
   module_settings:
     path: ./features/settings
   module_utils:
@@ -55,13 +55,13 @@ dependencies:
   module_music:
     path: ./features/music
   module_linking:
-    path: ./packages/infrastructure/linking
+    path: ./components/linking
   module_realtime:
-    path: ./packages/infrastructure/realtime
+    path: ./components/realtime
   module_rongcloud_im:
-    path: ./packages/infrastructure/rongcloud_im
+    path: ./components/rongcloud_im
   module_dokit_bootstrap:
-    path: ./packages/infrastructure/dokit_bootstrap
+    path: ./components/dokit_bootstrap
   permission_handler_ohos:
     git:
       url: https://gitcode.com/openharmony-sig/flutter_permission_handler.git

@@ -348,7 +348,7 @@ packages:
   dokit:
     dependency: transitive
     description:
-      path: "packages/infrastructure/dokit"
+      path: "components/dokit"
       relative: true
     source: path
     version: "0.8.2-nullsafety.10"
@@ -935,7 +935,7 @@ packages:
   module_bluetooth:
     dependency: transitive
     description:
-      path: "packages/infrastructure/bluetooth"
+      path: "components/bluetooth"
       relative: true
     source: path
     version: "0.0.1"
@@ -977,7 +977,7 @@ packages:
   module_dokit_bootstrap:
     dependency: "direct main"
     description:
-      path: "packages/infrastructure/dokit_bootstrap"
+      path: "components/dokit_bootstrap"
       relative: true
     source: path
     version: "0.0.1"
@@ -1012,7 +1012,7 @@ packages:
   module_linking:
     dependency: "direct main"
     description:
-      path: "packages/infrastructure/linking"
+      path: "components/linking"
       relative: true
     source: path
     version: "0.0.1"
@@ -1040,21 +1040,21 @@ packages:
   module_realtime:
     dependency: "direct main"
     description:
-      path: "packages/infrastructure/realtime"
+      path: "components/realtime"
       relative: true
     source: path
     version: "0.0.1"
   module_rongcloud_im:
     dependency: "direct main"
     description:
-      path: "packages/infrastructure/rongcloud_im"
+      path: "components/rongcloud_im"
       relative: true
     source: path
     version: "0.0.1"
   module_route:
     dependency: "direct main"
     description:
-      path: "packages/route"
+      path: "commons/route"
       relative: true
     source: path
     version: "0.0.1"

@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:module_auth/session/auth_session_guard_service.dart';
 import 'package:module_auth/session/backend_auth_service.dart';
 import 'package:module_auth/session/user_service_impl.dart';
 import 'package:module_auth/session/session_recovery.dart';
@@ -9,13 +10,21 @@ class AuthSession {
   AuthSession._();
 
   /// 登录成功后回调（Realtime 等基础设施注册）。
-  static Future<void> Function()? onAfterLogin;
+  static Future<void> Function()? get onAfterLogin => AuthLifecycle.onAfterLogin;
+
+  static set onAfterLogin(Future<void> Function()? value) {
+    AuthLifecycle.onAfterLogin = value;
+  }
 
   /// 登出完成后回调。
-  static Future<void> Function()? onAfterLogout;
+  static Future<void> Function()? get onAfterLogout => AuthLifecycle.onAfterLogout;
+
+  static set onAfterLogout(Future<void> Function()? value) {
+    AuthLifecycle.onAfterLogout = value;
+  }
 
   static Future<void> notifyAfterLogin() async {
-    await onAfterLogin?.call();
+    await AuthLifecycle.notifyAfterLogin();
   }
 
   /// 注册全局认证与会话服务（壳工程与独立运行均需调用，幂等）。
@@ -30,10 +39,16 @@ class AuthSession {
 
     if (mock) {
       await _registerMock(permanent: permanent);
-      return;
+    } else {
+      await _registerBackend(permanent: permanent);
     }
 
-    await _registerBackend(permanent: permanent);
+    if (!Get.isRegistered<SessionGuardService>()) {
+      Get.put<SessionGuardService>(
+        AuthSessionGuardService(),
+        permanent: permanent,
+      );
+    }
   }
 
   static Future<void> _registerBackend({required bool permanent}) async {
@@ -83,11 +98,10 @@ class AuthSession {
     } else if (Get.isRegistered<UserService>()) {
       await Get.find<UserService>().clearUser();
     }
-    await onAfterLogout?.call();
+    await AuthLifecycle.notifyAfterLogout();
   }
 
-  static UserService? get maybeService =>
-      Get.isRegistered<UserService>() ? Get.find<UserService>() : null;
+  static UserService? get maybeService => AuthLifecycle.maybeUserService;
 
-  static bool get isLoggedIn => maybeService?.isLoggedIn ?? false;
+  static bool get isLoggedIn => AuthLifecycle.isLoggedIn;
 }

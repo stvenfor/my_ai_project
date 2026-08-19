@@ -1,7 +1,5 @@
 import 'package:get/get.dart';
-import 'package:module_auth/session/auth_session.dart';
-import 'package:module_auth/user/binding/auth_binding.dart';
-import 'package:module_auth/user/controller/auth_controller.dart';
+import 'package:module_core/core.dart';
 import 'package:module_core/web/web_page_config.dart';
 import 'package:module_linking/analytics/linking_analytics.dart';
 import 'package:module_linking/models/app_route_intent.dart';
@@ -25,11 +23,8 @@ class AppNavigator {
   Future<void> navigate(AppRouteIntent intent) async {
     _analytics.trackNavigateStart(intent);
     try {
-      if (_requiresLogin(intent) && !AuthSession.isLoggedIn) {
+      if (_requiresLogin(intent) && !AuthLifecycle.isLoggedIn) {
         PendingNavigation.set(intent);
-        if (!Get.isRegistered<AuthController>()) {
-          AuthBinding().dependencies();
-        }
         await Get.toNamed(RoutePath.login);
         _analytics.trackNavigateFailure(intent, 'login_required');
         return;

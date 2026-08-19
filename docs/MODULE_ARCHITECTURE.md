@@ -2,28 +2,22 @@
 
 本文档说明 `module_sample` 的项目结构、模块配置方式、MVVM 分层规范、独立运行方法，以及如何安全地启用/禁用模块。
 
-> **三层架构总览**（lib / commons / features）：详见 [architecture.md](./architecture.md)
+> **四层架构总览**（lib / commons / components / features）：详见 [architecture.md](./architecture.md)
 
 ---
 
 ## 1. 总体架构
 
-**lib / commons / features 三层物理同级**，辅助包（route、infrastructure）留在 `packages/`：
+**lib / commons / components / features 四层物理同级**；路由在 `commons/route`，可选能力在 `components/`：
 
 ```
 module_sample
 ├── lib/                              # 壳工程层
-├── commons/                          # 公共能力层
-│   ├── core/                         # module_core — 契约 + 跨模块模型
-│   ├── network/                      # module_http — Dio + AppHttpBootstrap
-│   ├── storage/                      # module_global_cache — sqflite、AppSettings
-│   ├── toolkit/                      # module_utils — 第三方工具封装（唯一安装点）
-│   └── ui/                           # module_common_ui — 主题、Loading/Refresh、BaseViewModel
-├── features/                         # 业务模块层
+├── commons/                          # 必选公共能力
+│   ├── core/ network/ storage/ toolkit/ ui/ route/
+├── components/                       # 可选组合：realtime / linking / IM / dokit / bluetooth
+├── features/                         # 业务模块
 │   └── home / settings / auth / chat / …
-└── packages/                         # 辅助包
-    ├── route/                        # module_route — FeatureModule + ModuleRegistry
-    └── infrastructure/               # realtime / linking / IM / dokit
 ```
 
 > 详见 [architecture.md §1](./architecture.md#1-总体定位)。
@@ -339,7 +333,7 @@ module_utils:
 | friend | module_friend | — | `/friend` | 低 | — |
 | bfui | module_bfui | — | `/bfui/*` | Demo | — |
 
-基础设施模块（不参与 manifest）：`commons/*`、`packages/route`、`packages/infrastructure/*`
+基础设施模块（不参与 manifest）：`commons/*`、`components/*`
 
 完整模块职责与依赖关系见 [architecture.md §4](./architecture.md#4-features--业务模块层)。
 
@@ -359,7 +353,7 @@ flutter gen-l10n
 flutter run -t features/home/lib/main_dev.dart
 
 # 分析核心代码
-flutter analyze lib/ features/home/ features/settings/ packages/route/
+flutter analyze lib/ features/home/ features/settings/ commons/route/
 ```
 
 ---
@@ -420,8 +414,8 @@ Obx 重建 UI
 | [docs/architecture.md](./architecture.md) | 三层架构总览（lib / commons / features） |
 | [AGENTS.md](../AGENTS.md) | HTTP/Auth/Realtime/GetX 开发规范 |
 | `lib/config/module_manifest.dart` | 模块启用清单 |
-| `packages/route/lib/module/feature_module.dart` | 模块契约 |
-| `packages/route/lib/module/module_registry.dart` | 注册中心 |
+| `commons/route/lib/module/feature_module.dart` | 模块契约 |
+| `commons/route/lib/module/module_registry.dart` | 注册中心 |
 | `commons/ui/lib/base/base_viewmodel.dart` | ViewModel 基类 |
 | `features/home/lib/home_module.dart` | 标准模块实现范例 |
 | `features/settings/lib/mine/viewmodel/mine_http_test_viewmodel.dart` | 网络页 ViewModel 范例 |

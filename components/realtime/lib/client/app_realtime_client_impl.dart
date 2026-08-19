@@ -3,9 +3,6 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
-import 'package:module_auth/session/auth_session.dart';
-import 'package:module_auth/session/session_guard.dart';
-import 'package:module_auth/session/session_recovery.dart';
 import 'package:module_core/core.dart';
 import 'package:module_core/model/realtime/realtime_connection_state.dart';
 import 'package:module_core/model/realtime/realtime_envelope.dart';
@@ -113,7 +110,7 @@ class AppRealtimeClientImpl implements AppRealtimeClient {
 
   @override
   Future<void> connect() async {
-    if (!AuthSession.isLoggedIn) {
+    if (!AuthLifecycle.isLoggedIn) {
       LogUtils.i('[Realtime] skip connect: not logged in');
       return;
     }
@@ -169,8 +166,11 @@ class AppRealtimeClientImpl implements AppRealtimeClient {
     } catch (e, st) {
       sw.stop();
       _telemetry.error('ws_connect_fail', e);
-      if (SessionGuardHook.isForceLogoutError(e)) {
-        final recovered = await SessionRecovery.tryRecover();
+      final guard = Get.isRegistered<SessionGuardService>()
+          ? Get.find<SessionGuardService>()
+          : null;
+      if (guard != null && guard.isForceLogoutError(e)) {
+        final recovered = await guard.tryRecover();
         if (recovered) {
           LogUtils.i('[Realtime] session recovered on same device, retry connect');
           await _connectInternal(isReconnect: isReconnect);
@@ -180,7 +180,7 @@ class AppRealtimeClientImpl implements AppRealtimeClient {
         _reconnectTimer?.cancel();
         _setState(RealtimeConnectionState.disconnected);
         LogUtils.w('[Realtime] session invalid, stop reconnect');
-        unawaited(SessionGuardHook.handleIfForceLogout(e));
+        unawaited(guard.handleIfForceLogout(e));
         return;
       }
       LogUtils.e('[Realtime] connect failed', e, st);

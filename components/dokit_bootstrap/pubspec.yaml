@@ -13,4 +13,4 @@ dependencies:
     path: ../dokit
   get: ^4.7.3
   module_route:
-    path: ../../route
+    path: ../../commons/route

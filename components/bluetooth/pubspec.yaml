@@ -13,9 +13,9 @@ dependencies:
   get: ^4.7.3
   permission_handler: ^12.0.3
   module_common_ui:
-    path: ../../../commons/ui
+    path: ../../commons/ui
   module_route:
-    path: ../../route
+    path: ../../commons/route
 
 dev_dependencies:
   flutter_test:

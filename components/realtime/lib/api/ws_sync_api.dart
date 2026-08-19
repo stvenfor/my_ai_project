@@ -1,4 +1,3 @@
-import 'package:module_auth/api/auth_http_config.dart';
 import 'package:module_core/model/realtime/realtime_envelope.dart';
 import 'package:module_http/module_http.dart';
 import 'package:module_realtime/config/realtime_config.dart';
@@ -10,8 +9,6 @@ class WsSyncApi {
     required int sinceSeq,
     required List<String> topics,
   }) async {
-    AuthHttpConfig.ensureInitialized();
-
     final result = await HttpManager.instance.post<WsSyncResult>(
       RealtimeConfig.syncPath,
       data: {

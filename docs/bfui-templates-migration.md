@@ -87,7 +87,7 @@ features/bfui/
 
 1. [`lib/config/module_manifest.dart`](../lib/config/module_manifest.dart) 注册 `BfuiModule()`
 2. 根 [`pubspec.yaml`](../pubspec.yaml) 依赖 `module_bfui`
-3. [`RoutePath`](../packages/route/lib/route/route_path.dart) 含 17 个 `/bfui/*` 常量
+3. [`RoutePath`](../commons/route/lib/route/route_path.dart) 含 17 个 `/bfui/*` 常量
 
 ## OHOS 验证清单
 

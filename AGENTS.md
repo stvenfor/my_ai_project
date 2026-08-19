@@ -280,12 +280,12 @@ await client.sendEvent(topic: RealtimeTopics.presenceBulk, eventName: 'presence.
 
 ### 参考文件
 
-- `packages/infrastructure/dokit/` — vendored DoKit（Dart 3 适配）
-- `packages/infrastructure/dokit_bootstrap/` — BizKit 注册
+- `components/dokit/` — vendored DoKit（Dart 3 适配）
+- `components/dokit_bootstrap/` — BizKit 注册
 - `lib/bootstrap/app_runner_debug.dart`
-- `packages/infrastructure/realtime/lib/client/app_realtime_client_impl.dart`
-- `packages/infrastructure/realtime/lib/connection/heartbeat_scheduler.dart`
-- `packages/infrastructure/realtime/lib/config/realtime_config.dart`
+- `components/realtime/lib/client/app_realtime_client_impl.dart`
+- `components/realtime/lib/connection/heartbeat_scheduler.dart`
+- `components/realtime/lib/config/realtime_config.dart`
 
 ---
 

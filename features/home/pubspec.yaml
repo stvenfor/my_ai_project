@@ -19,7 +19,7 @@ dependencies:
   module_http:
     path: ../../commons/network
   module_route:
-    path: ../../packages/route
+    path: ../../commons/route
   module_music:
     path: ../music
   module_utils:

@@ -445,11 +445,11 @@ curl -X POST http://127.0.0.1:8080/api/v1/realtime/push \
 
 | 文件 | 职责 |
 |------|------|
-| `packages/infrastructure/realtime/lib/client/app_realtime_client_impl.dart` | 连接、auth、sync、重连 |
-| `packages/infrastructure/realtime/lib/api/ws_ticket_api.dart` | 换票 HTTP |
-| `packages/infrastructure/realtime/lib/api/ws_sync_api.dart` | 同步 HTTP |
-| `packages/infrastructure/realtime/lib/connection/heartbeat_scheduler.dart` | ping/pong |
-| `packages/infrastructure/realtime/lib/handlers/global_notify_handler.dart` | 通知 Banner |
+| `components/realtime/lib/client/app_realtime_client_impl.dart` | 连接、auth、sync、重连 |
+| `components/realtime/lib/api/ws_ticket_api.dart` | 换票 HTTP |
+| `components/realtime/lib/api/ws_sync_api.dart` | 同步 HTTP |
+| `components/realtime/lib/connection/heartbeat_scheduler.dart` | ping/pong |
+| `components/realtime/lib/handlers/global_notify_handler.dart` | 通知 Banner |
 | `commons/network/lib/http/backend_ws_config.dart` | WS URL 平台映射 |
 
 ---

@@ -14,15 +14,11 @@
 module_sample/                 # 壳工程（完整 App）
 ├── lib/main.dart              # 启动入口 + 全局 DI
 ├── lib/config/module_manifest.dart
-├── packages/
-│   ├── core/                  # 契约：User、AuthService、AppLoading、EnvironmentService
-│   ├── network/               # Dio + AppHttpBootstrap + ResultModel
-│   ├── route/                 # FeatureModule、Registry、独立运行 Runner
-│   ├── storage/               # sqflite、AppSettings
-│   ├── toolkit/               # 工具封装（Log/SP/CacheImage/Svg/Lottie…）
-│   ├── ui/                    # 主题、UiKit、BaseViewModel
-│   └── features/              # 业务模块
-│       ├── auth/ home/ settings/ chat/ …
+├── commons/                   # 公共能力（含 route）
+│   ├── core/ network/ storage/ toolkit/ ui/ route/
+├── features/                  # 业务模块
+│   └── auth/ home/ settings/ chat/ …
+├── components/            # realtime / linking / IM / dokit
 └── scripts/run_module.sh
 ```
 
