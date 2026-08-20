@@ -60,9 +60,12 @@ components → commons
 | `commons/storage/` | `module_global_cache` | `package:module_global_cache/module_global_cache.dart` |
 | `commons/toolkit/` | `module_utils` | `package:module_utils/module_utils.dart` |
 | `commons/ui/` | `module_common_ui` | `package:module_common_ui/module_common_ui.dart` |
-| `commons/route/` | `module_route` | `package:module_route/module_route.dart` |
+| `commons/wys_router/` | `wys_router` | `package:wys_router/wys_router.dart` |
+| `commons/wys_network/` | `wys_network` | （tpj-flt 迁入，与 `module_http` 并存） |
+| `commons/wys_account/` | `wys_account` | （tpj-flt 迁入，与 auth 并存） |
+| `commons/wys_common/` | `wys_common` | （tpj-flt 迁入，与 ui/utils 并存） |
 
-**commons 内部分层**：L0 `core`/`toolkit` → L1 `network`/`storage`/`route` → L2 `ui`（`ui` 依赖 `core` + `toolkit` + `route`）。
+**commons 内部分层**：L0 `core`/`toolkit` → L1 `network`/`storage`/`wys_router` → L2 `ui`（`ui` 依赖 `core` + `toolkit` + `wys_router`）。`wys_network` / `wys_account` / `wys_common` 为并存栈，新业务优先 `module_*`。
 
 ### components（可选，根 pubspec 按需引入）
 
@@ -74,8 +77,11 @@ components → commons
 | `components/bluetooth/` | `module_bluetooth` | BLE demo |
 | `components/dokit/` | `dokit` | Vendored DoKit |
 | `components/dokit_bootstrap/` | `module_dokit_bootstrap` | Debug 壳 DoKit 注册 |
+| `components/wys_push/` | `wys_push` | 极光推送（tpj-flt） |
+| `components/wys_face_verify/` | `wys_face_verify` | 腾讯云人脸核身（tpj-flt） |
+| `components/wys_login_share_pay/` | `wys_login_share_pay` | 微信/支付宝（tpj-flt） |
 
-根 `pubspec.yaml` 当前直接依赖：linking、realtime/rongcloud_im、dokit_bootstrap；bluetooth 经 `module_settings` 间接使用。
+根 `pubspec.yaml` 当前直接依赖：linking、realtime/rongcloud_im、dokit_bootstrap，以及迁入的 `wys_*`；bluetooth 经 `module_settings` 间接使用。
 
 ### features（12 个业务包）
 
@@ -135,7 +141,7 @@ module_realtime:
 | `lib/app/app_pages.dart` | 合并壳路由 + `ModuleRegistry.collectRoutes()` |
 | `lib/pages/main_page.dart` | 从 `ModuleRegistry.collectMainTabs()` 构建 Tab（`IndexedStack`） |
 | `lib/route/app_route_container.dart` | 壳路由：`/` Splash、`/main` Tab 宿主 |
-| `commons/route/lib/route/route_path.dart` | **全项目路由常量** |
+| `commons/wys_router/lib/src/route/route_path.dart` | **全项目路由常量** |
 
 ### 启动顺序（`AppInitializer.init`）
 
@@ -156,7 +162,7 @@ ModuleUtilsInitializer → SpManager/AppDatabase
 
 ### FeatureModule 契约
 
-每个 feature 在 `lib/*_module.dart` 实现 `FeatureModule`（`commons/route`）：
+每个 feature 在 `lib/*_module.dart` 实现 `FeatureModule`（`commons/wys_router`）：
 
 ```dart
 abstract class FeatureModule {

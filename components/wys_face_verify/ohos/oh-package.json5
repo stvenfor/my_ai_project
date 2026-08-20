@@ -1,0 +1,11 @@
+{
+  "name": "wys_face_verify",
+  "version": "1.0.0",
+  "description": "TF 腾讯云慧眼人脸核身 Flutter plugin",
+  "main": "index.ets",
+  "author": "",
+  "license": "",
+  "dependencies": {
+    "wbcloudfaceverifysdk": "file:./libs/WbCloudFaceVerifySdk@face-1.8.0-2d7c096e.har"
+  }
+}

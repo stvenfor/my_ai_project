@@ -1,6 +1,6 @@
 import 'package:module_linking/config/linking_config.dart';
 import 'package:module_linking/models/app_route_intent.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:wys_router/src/route/route_path.dart';
 
 /// Mock 4 条 Deeplink 路由表（先切 Tab 再 push 子页）。
 class DeeplinkRouteTable {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:module_auth/user/theme/auth_theme.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:wys_router/src/route/route_path.dart';
 
 class LoginFooterLinks extends StatelessWidget {
   const LoginFooterLinks({super.key});

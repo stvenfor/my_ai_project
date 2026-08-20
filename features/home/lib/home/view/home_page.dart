@@ -10,7 +10,7 @@ import 'package:module_home/home/view/widgets/home_top_tab_bar.dart';
 import 'package:module_home/home/view/widgets/home_video_tab_content.dart';
 import 'package:module_music/controller/music_playback_controller.dart';
 import 'package:module_music/widgets/music_mini_player_bar.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:wys_router/src/route/route_path.dart';
 
 class HomeBinding extends Bindings {
   @override

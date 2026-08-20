@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:module_community/community/models/rich_segment.dart';
 import 'package:module_community/community/services/rich_text_parser.dart';
 import 'package:module_common_ui/module_common_ui.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:wys_router/src/route/route_path.dart';
 
 class RichTextContentWidget extends StatelessWidget {
   const RichTextContentWidget({

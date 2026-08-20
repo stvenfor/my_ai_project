@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:module_bfui/wrappers/bfui_demo_pages.dart';
-import 'package:module_route/module/feature_module.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:wys_router/src/module/feature_module.dart';
+import 'package:wys_router/src/route/route_path.dart';
 
 class BfuiModule extends FeatureModule {
   @override

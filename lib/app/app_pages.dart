@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:module_route/module/module_registry.dart';
+import 'package:wys_router/src/module/module_registry.dart';
 import 'package:module_sample/route/app_route_container.dart';
 
 class AppPages {

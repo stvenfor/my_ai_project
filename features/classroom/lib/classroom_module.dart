@@ -7,8 +7,8 @@ import 'package:module_classroom/view/homework_detail_teacher_page.dart';
 import 'package:module_classroom/view/homework_review_page.dart';
 import 'package:module_classroom/view/my_class_list_page.dart';
 import 'package:module_classroom/view/video_detail_page.dart';
-import 'package:module_route/module/feature_module.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:wys_router/src/module/feature_module.dart';
+import 'package:wys_router/src/route/route_path.dart';
 
 class ClassroomModule extends FeatureModule {
   @override

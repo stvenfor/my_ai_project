@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:module_friend/friend/view/friend_page.dart';
-import 'package:module_route/module/feature_module.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:wys_router/src/module/feature_module.dart';
+import 'package:wys_router/src/route/route_path.dart';
 
 class FriendModule extends FeatureModule {
   @override

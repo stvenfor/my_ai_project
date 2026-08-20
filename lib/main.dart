@@ -7,8 +7,6 @@ import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_core/core.dart';
 import 'package:module_global_cache/module_global_cache.dart';
 import 'package:module_http/module_http.dart';
-import 'package:module_route/module/module_host_context.dart';
-import 'package:module_route/module/module_registry.dart';
 import 'package:module_sample/app/app_binding.dart';
 import 'package:module_sample/app/app_controller.dart';
 import 'package:module_sample/bootstrap/app_runner_debug.dart'
@@ -20,6 +18,7 @@ import 'package:module_rongcloud_im/im_initializer.dart';
 import 'package:module_sample/config/module_manifest.dart';
 import 'package:module_settings/env/environment_session.dart';
 import 'package:module_utils/module_utils.dart';
+import 'package:wys_router/wys_router.dart';
 
 class AppInitializer {
   static Future<void> init() async {
@@ -53,6 +52,8 @@ class AppInitializer {
     final webRegistry = await WebKitInitializer.initialize();
     WebKitCoreHandlers.register(webRegistry);
 
+    _configureWysRouter();
+
     ModuleRegistry.registerAll(buildEnabledModules());
 
     final hostContext = ModuleHostContext.integrated(
@@ -78,6 +79,20 @@ class AppInitializer {
       'loggedIn=${AuthSession.isLoggedIn} '
       'ws=${wsClient?.currentState.label ?? '未初始化'}',
     );
+  }
+
+  static void _configureWysRouter() {
+    WysRouter.configure(
+      WysRouteConfiguration(
+        scheme: 'xiaomao',
+        onUnknownRoute: (urlOrPath, arguments) async {
+          LogUtils.w('[WysRouter] unknown route: $urlOrPath');
+          return null;
+        },
+      ),
+    );
+    WysRouter.registerPath(WysCapabilityRoutes.h5, RoutePath.web);
+    WysRouter.registerPath(WysCapabilityRoutes.web, RoutePath.web);
   }
 
   static void _wireEnvironmentHttpRefresh() {

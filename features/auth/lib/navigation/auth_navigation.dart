@@ -2,8 +2,8 @@ import 'package:get/get.dart';
 import 'package:module_auth/user/binding/auth_binding.dart';
 import 'package:module_auth/user/controller/auth_controller.dart';
 import 'package:module_auth/user/view/login_page.dart';
-import 'package:module_route/route/login_redirect.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:wys_router/src/route/login_redirect.dart';
+import 'package:wys_router/src/route/route_path.dart';
 
 /// 登录模块统一导航入口。
 abstract final class AuthNavigation {

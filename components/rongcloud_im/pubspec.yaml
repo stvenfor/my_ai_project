@@ -17,8 +17,8 @@ dependencies:
     path: ../../commons/core
   module_global_cache:
     path: ../../commons/storage
-  module_route:
-    path: ../../commons/route
+  wys_router:
+    path: ../../commons/wys_router
   module_utils:
     path: ../../commons/toolkit
 

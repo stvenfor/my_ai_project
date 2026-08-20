@@ -2,6 +2,7 @@ name: module_sample
 description: A new Flutter project.
 publish_to: 'none'
 
+# App Store / Xcode：name=1.0.0，number=1（CFBundleShortVersionString / CFBundleVersion）
 version: 1.0.0+1
 
 environment:
@@ -42,8 +43,8 @@ dependencies:
     path: ./features/live
   module_pay:
     path: ./features/pay
-  module_route:
-    path: ./commons/route
+  wys_router:
+    path: ./commons/wys_router
   module_settings:
     path: ./features/settings
   module_utils:
@@ -62,6 +63,22 @@ dependencies:
     path: ./components/rongcloud_im
   module_dokit_bootstrap:
     path: ./components/dokit_bootstrap
+
+  # ---------------------------------------------------------------------------
+  # 自 tpj-flt 迁入的 wys_* 栈（与 module_* 并存；不含 fluttertoast / audioplayers_ohos 包）
+  # ---------------------------------------------------------------------------
+  wys_account:
+    path: ./commons/wys_account
+  wys_common:
+    path: ./commons/wys_common
+  wys_network:
+    path: ./commons/wys_network
+  wys_push:
+    path: ./components/wys_push
+  wys_face_verify:
+    path: ./components/wys_face_verify
+  wys_login_share_pay:
+    path: ./components/wys_login_share_pay
 
   # ---------------------------------------------------------------------------
   # OpenHarmony（Flutter 3.35）：已适配库放在 dependencies（git），不放 overrides。
@@ -151,6 +168,17 @@ flutter:
     - assets/lotties/
     - assets/web/
     - commons/toolkit/assets/data/video_mock_sources.json
+
+# 支付宝 tobias：iOS 回跳 scheme（禁止含 `_`；须与支付宝开放平台配置一致）
+tobias:
+  url_scheme: xiaomaoalipay
+
+# 微信 fluwx：iOS URL Scheme / Universal Link（app_id 与 WysWechatConfig 对齐）
+fluwx:
+  app_id: wxd92d02603e1c59dc
+  ios:
+    # 正式环境请换成已备案的 Universal Link
+    universal_link: https://example.com/app/
 
 dependency_overrides:
   # 非鸿蒙钉选

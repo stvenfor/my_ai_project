@@ -7,10 +7,10 @@ import 'package:module_chat/chat/view/chat_detail_page.dart';
 import 'package:module_chat/chat/view/chat_page.dart';
 import 'package:module_chat/chat/viewmodel/chat_viewmodel.dart';
 import 'package:module_core/model/im/conversation_type.dart';
-import 'package:module_route/module/feature_module.dart';
-import 'package:module_route/module/module_host_context.dart';
-import 'package:module_route/module/module_tab_item.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:wys_router/src/module/feature_module.dart';
+import 'package:wys_router/src/module/module_host_context.dart';
+import 'package:wys_router/src/module/module_tab_item.dart';
+import 'package:wys_router/src/route/route_path.dart';
 
 class ChatModule extends FeatureModule {
   @override

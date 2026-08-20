@@ -15,8 +15,8 @@ dependencies:
   animations: ^2.1.1
   vector_math: ^2.1.4
   get: ^4.7.3
-  module_route:
-    path: ../../commons/route
+  wys_router:
+    path: ../../commons/wys_router
 
 dev_dependencies:
   flutter_test:

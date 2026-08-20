@@ -4,7 +4,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:get/get.dart';
 import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_core/core.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:wys_router/src/route/route_path.dart';
 import 'package:module_utils/module_utils.dart';
 import 'package:module_video/short_video/mapper/short_video_player_mapper.dart';
 import 'package:module_video/short_video/mock/short_video_mock_data.dart';

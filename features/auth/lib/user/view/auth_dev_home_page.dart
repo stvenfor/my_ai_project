@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_auth/user/controller/auth_controller.dart';
 import 'package:module_core/core.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:wys_router/src/route/route_path.dart';
 import 'package:module_utils/module_utils.dart';
 
 /// 登录模块独立运行时的登录成功页。

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:module_route/module/feature_module.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:wys_router/src/module/feature_module.dart';
+import 'package:wys_router/src/route/route_path.dart';
 import 'package:module_video/dubbing/view/dubbing_video_detail_page.dart';
 import 'package:module_video/dubbing/view/dubbing_video_list_page.dart';
 import 'package:module_video/dubbing/view/dubbing_work_detail_page.dart';

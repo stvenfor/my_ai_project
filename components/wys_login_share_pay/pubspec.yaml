@@ -1,0 +1,22 @@
+name: wys_login_share_pay
+description: 统一微信登录分享、微信支付与支付宝支付组件（自 tpj-flt 迁入）
+publish_to: 'none'
+version: 1.0.0
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  fluwx: ^5.7.5
+  image: ^4.5.4
+  tobias:
+    git:
+      url: https://gitcode.com/CPF-Flutter/fluttertpc_tobias.git
+      ref: br_v5.1.2_ohos
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0

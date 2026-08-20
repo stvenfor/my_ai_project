@@ -168,7 +168,7 @@ flutter run -t module_home/lib/main_dev.dart
 
 ### 3.5 独立运行原理
 
-[`ModuleStandaloneRunner`](../module_route/lib/module/module_standalone_runner.dart) 统一处理：
+[`ModuleStandaloneRunner`](../wys_router/lib/src/module/module_standalone_runner.dart) 统一处理：
 
 ```dart
 ModuleStandaloneRunner.run(
@@ -492,7 +492,7 @@ await ModuleRegistry.bootstrap(hostContext); // 各模块 registerModule 扩展
 ```dart
 import 'package:get/get.dart';
 import 'package:module_common_ui/module_common_ui.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:wys_router/src/route/route_path.dart';
 
 Get.toNamed(
   RoutePath.web,
@@ -565,7 +565,7 @@ git worktree add .worktrees/feature-home -b feat/home-dashboard-ui
 
 | 分支 | 允许修改 |
 |------|----------|
-| auth | `module_auth/**`、`module_route/route_path.dart`（路由常量） |
+| auth | `module_auth/**`、`wys_router/route_path.dart`（路由常量） |
 | home | `module_home/**` |
 | 共享 | `module_core/**`、壳工程 `lib/**` 应在 main 先合入 |
 
@@ -653,12 +653,12 @@ git worktree list
 | 工具模块 | `commons/toolkit/lib/utils/cache_image_utils.dart` |
 | WanAndroid 遗留演示 | `features/home/lib/legacy/wanandroid/` |
 | 环境切换 UI | `module_settings/lib/settings/view/settings_page.dart` |
-| 独立运行 Runner | `module_route/lib/module/module_standalone_runner.dart` |
+| 独立运行 Runner | `wys_router/lib/src/module/module_standalone_runner.dart` |
 | 登录 Controller | `module_auth/lib/user/controller/auth_controller.dart` |
 | UiKit 入口 | `module_common_ui/lib/kit/ui_kit_initializer.dart` |
 | AppLoading 契约 | `module_core/lib/service/app_loading.dart` |
 | Home Loading/Refresh 示例 | `module_home/lib/home/controller/home_controller.dart` |
-| 路由常量 | `module_route/lib/route/route_path.dart` |
+| 路由常量 | `wys_router/lib/src/route/route_path.dart` |
 | 模块运行脚本 | `scripts/run_module.sh` |
 
 ---

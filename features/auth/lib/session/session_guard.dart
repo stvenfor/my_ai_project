@@ -7,7 +7,7 @@ import 'package:module_auth/session/session_recovery.dart';
 import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_http/http/http.dart';
 import 'package:module_http/http/rsp_interceptor.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:wys_router/src/route/route_path.dart';
 
 /// 全局 HTTP 401 会话失效处理（单设备登录被动踢下线）。
 class SessionGuardHook implements HttpResponseHook {

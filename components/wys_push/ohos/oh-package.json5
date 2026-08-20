@@ -1,0 +1,9 @@
+{
+  "name": "wys_push",
+  "version": "1.0.0",
+  "description": "TF FanGroup push and deep-link Flutter plugin",
+  "main": "index.ets",
+  "author": "TF",
+  "license": "MIT",
+  "dependencies": {}
+}

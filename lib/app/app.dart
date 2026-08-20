@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:module_sample/l10n/app_localizations.dart';
 import 'package:get/get.dart';
 import 'package:module_common_ui/module_common_ui.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:wys_router/src/route/route_path.dart';
 import 'package:module_linking/ui/in_app_push_banner_host.dart';
 import 'package:module_realtime/ui/realtime_notify_banner_host.dart';
 import 'package:module_sample/app/app_controller.dart';

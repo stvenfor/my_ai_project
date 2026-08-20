@@ -22,21 +22,53 @@
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>weixin</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>wxd92d02603e1c59dc</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>alipay</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>xiaomaoalipay</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>weixin</string>
+		<string>weixinULAPI</string>
+		<string>weixinURLParamsAPI</string>
+		<string>alipay</string>
+		<string>alipays</string>
+		<string>alipayshare</string>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
+		<key>NSAllowsArbitraryLoadsInWebContent</key>
+		<true/>
 	</dict>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>用于扫描并连接附近的蓝牙设备</string>
 	<key>NSCameraUsageDescription</key>
 	<string>用于扫描二维码、条形码及拍摄聊天图片</string>
-	<key>io.flutter.embedded_views_preview</key>
-	<true/>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -77,5 +109,7 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>io.flutter.embedded_views_preview</key>
+	<true/>
 </dict>
 </plist>

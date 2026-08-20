@@ -4,8 +4,8 @@ import 'package:get/get.dart';
 import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_linking/linking_initializer.dart';
 import 'package:module_linking/privacy/privacy_consent_dialog.dart';
-import 'package:module_route/module/module_registry.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:wys_router/src/module/module_registry.dart';
+import 'package:wys_router/src/route/route_path.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});

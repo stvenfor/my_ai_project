@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:get/get.dart';
 import 'package:module_auth/session/auth_session.dart';
 import 'package:module_core/core.dart';
-import 'package:module_route/module/module_registry.dart';
-import 'package:module_route/route/login_redirect.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:wys_router/src/module/module_registry.dart';
+import 'package:wys_router/src/route/login_redirect.dart';
+import 'package:wys_router/src/route/route_path.dart';
 import 'package:module_utils/module_utils.dart';
 
 class AuthController extends GetxController {

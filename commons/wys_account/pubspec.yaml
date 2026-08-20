@@ -1,0 +1,22 @@
+name: wys_account
+description: 账号中心 — 各 module 获取登录状态与用户信息（自 tpj-flt 迁入）
+publish_to: 'none'
+version: 1.0.0
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  shared_preferences: ^2.5.5
+  wys_network:
+    path: ../wys_network
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true

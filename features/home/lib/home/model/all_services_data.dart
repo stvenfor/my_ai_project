@@ -1,5 +1,5 @@
 import 'package:module_home/home/model/all_services_model.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:wys_router/src/route/route_path.dart';
 
 /// 全部服务页静态数据。
 abstract final class AllServicesData {

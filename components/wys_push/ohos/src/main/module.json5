@@ -1,0 +1,8 @@
+{
+  "module": {
+    "name": "wys_push",
+    "type": "har",
+    "description": "$string:module_desc",
+    "deviceTypes": ["default", "tablet", "2in1"]
+  }
+}

@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 import 'package:module_core/core.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:wys_router/src/route/route_path.dart';
 
 /// 打开统一 WebView 页的便捷入口（内部即 [RoutePath.web] 命名路由）。
 ///

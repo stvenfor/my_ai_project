@@ -16,8 +16,8 @@ dependencies:
     path: ../../commons/core
   module_http:
     path: ../../commons/network
-  module_route:
-    path: ../../commons/route
+  wys_router:
+    path: ../../commons/wys_router
   module_auth:
     path: ../auth
   module_utils:

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:module_live/live/view/live_page.dart';
 import 'package:module_live/live/view/live_room_page.dart';
-import 'package:module_route/module/feature_module.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:wys_router/src/module/feature_module.dart';
+import 'package:wys_router/src/route/route_path.dart';
 
 class LiveModule extends FeatureModule {
   @override

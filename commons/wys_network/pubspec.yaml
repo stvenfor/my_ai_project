@@ -1,0 +1,17 @@
+name: wys_network
+description: 网络请求基础组件（Dio 封装，自 tpj-flt 迁入；与 module_http 并存）
+publish_to: 'none'
+version: 1.0.0
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  dio: ^5.7.0
+  pointycastle: ^3.9.1
+  shared_preferences: ^2.5.5
+
+dev_dependencies:
+  flutter_lints: ^5.0.0

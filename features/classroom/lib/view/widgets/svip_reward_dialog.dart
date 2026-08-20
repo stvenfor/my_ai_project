@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:module_classroom/theme/classroom_theme.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:wys_router/src/route/route_path.dart';
 
 /// SVIP 卡领取弹窗。
 class SvipRewardDialog extends StatelessWidget {

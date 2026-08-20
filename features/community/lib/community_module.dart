@@ -3,10 +3,10 @@ import 'package:get/get.dart';
 import 'package:module_community/community/view/community_page.dart';
 import 'package:module_community/community/view/publish_page.dart';
 import 'package:module_community/community/viewmodel/community_viewmodel.dart';
-import 'package:module_route/module/feature_module.dart';
-import 'package:module_route/module/module_host_context.dart';
-import 'package:module_route/module/module_tab_item.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:wys_router/src/module/feature_module.dart';
+import 'package:wys_router/src/module/module_host_context.dart';
+import 'package:wys_router/src/module/module_tab_item.dart';
+import 'package:wys_router/src/route/route_path.dart';
 
 class CommunityModule extends FeatureModule {
   @override

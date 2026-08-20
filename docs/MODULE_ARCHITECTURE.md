@@ -172,7 +172,7 @@ main()
 
 - **Tab**：`MainPage` 调用 `ModuleRegistry.collectMainTabs()`，按 `order` 排序
 - **路由**：`AppPages.routes()` = 壳路由 + `ModuleRegistry.collectRoutes()`
-- **路径常量**：统一在 `module_route/lib/route/route_path.dart`
+- **路径常量**：统一在 `wys_router/lib/src/route/route_path.dart`
 
 ---
 
@@ -265,7 +265,7 @@ dart run build_runner build
 |------|------|
 | `module_utils`（commons/toolkit） | **工具统一入口**：Log/SP/CacheImage/Svg/Lottie/Html/ScreenUtil |
 | `module_common_ui`（commons/ui） | 主题、UiKit、BaseViewModel |
-| `module_route` | `RoutePath`、`FeatureModule`、`ModuleRegistry` |
+|`wys_router/` | `wys_router` | `RoutePath`、`FeatureModule`、`ModuleRegistry` |
 | `module_http` | 统一 Dio 客户端 |
 
 ### 7.1 工具模块启动（必须最早）
@@ -305,10 +305,10 @@ module_utils:
 
 ## 8. 新建业务模块 checklist
 
-1. 创建 `module_xxx/` 目录与 `pubspec.yaml`（依赖 `module_route`、`get`，按需 `module_http`、`module_common_ui`）
+1. 创建 `module_xxx/` 目录与 `pubspec.yaml`（依赖`wys_router/` | `wys_router`、`get`，按需 `module_http`、`module_common_ui`）
 2. 按 **§2** 建立 `view / viewmodel / repository / api / model` 目录
 3. 实现 `xxx_module.dart`（`FeatureModule`）
-4. 在 `module_route/route/route_path.dart` 添加路由常量
+4. 在 `wys_router/route/route_path.dart` 添加路由常量
 5. 在 `lib/config/module_manifest.dart` 注册
 6. 在根 `pubspec.yaml` 添加 path 依赖
 7. 添加 `lib/main_dev.dart` 支持独立运行
@@ -353,7 +353,7 @@ flutter gen-l10n
 flutter run -t features/home/lib/main_dev.dart
 
 # 分析核心代码
-flutter analyze lib/ features/home/ features/settings/ commons/route/
+flutter analyze lib/ features/home/ features/settings/ commons/wys_router/
 ```
 
 ---
@@ -414,8 +414,8 @@ Obx 重建 UI
 | [docs/architecture.md](./architecture.md) | 三层架构总览（lib / commons / features） |
 | [AGENTS.md](../AGENTS.md) | HTTP/Auth/Realtime/GetX 开发规范 |
 | `lib/config/module_manifest.dart` | 模块启用清单 |
-| `commons/route/lib/module/feature_module.dart` | 模块契约 |
-| `commons/route/lib/module/module_registry.dart` | 注册中心 |
+| `commons/wys_router/lib/module/feature_module.dart` | 模块契约 |
+| `commons/wys_router/lib/module/module_registry.dart` | 注册中心 |
 | `commons/ui/lib/base/base_viewmodel.dart` | ViewModel 基类 |
 | `features/home/lib/home_module.dart` | 标准模块实现范例 |
 | `features/settings/lib/mine/viewmodel/mine_http_test_viewmodel.dart` | 网络页 ViewModel 范例 |

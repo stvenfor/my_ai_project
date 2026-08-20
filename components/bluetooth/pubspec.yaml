@@ -14,8 +14,8 @@ dependencies:
   permission_handler: ^12.0.3
   module_common_ui:
     path: ../../commons/ui
-  module_route:
-    path: ../../commons/route
+  wys_router:
+    path: ../../commons/wys_router
 
 dev_dependencies:
   flutter_test:

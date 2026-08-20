@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_core/core.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:wys_router/src/route/route_path.dart';
 import 'package:module_settings/settings/viewmodel/settings_viewmodel.dart';
 
 class SettingsPage extends StatefulWidget {

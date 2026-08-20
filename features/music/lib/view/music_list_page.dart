@@ -6,7 +6,7 @@ import 'package:module_music/model/local_song.dart';
 import 'package:module_music/theme/music_theme.dart';
 import 'package:module_music/widgets/music_cover_image.dart';
 import 'package:module_music/widgets/music_mini_player_bar.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:wys_router/src/route/route_path.dart';
 
 class MusicListPage extends GetView<MusicPlaybackController> {
   const MusicListPage({super.key});

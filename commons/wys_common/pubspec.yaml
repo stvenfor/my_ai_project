@@ -1,0 +1,42 @@
+name: wys_common
+description: 通用 UI/工具（自 tpj-flt 迁入；与 module_common_ui / module_utils 并存）
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  lottie: ^3.3.3
+  # 不 vendoring commons/fluttertoast；按需 git 依赖 CPF 适配版
+  fluttertoast:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_fluttertoast.git
+      ref: br_v9.0.0_ohos
+  easy_refresh: ^3.4.0
+  webview_flutter: ^4.13.0
+  dio: ^5.7.0
+  photo_view: ^0.15.0
+  path_provider: ^2.1.5
+  shared_preferences: ^2.5.5
+  mobile_scanner:
+    git:
+      url: https://gitcode.com/CPF-Flutter/fluttertpc_mobile_scanner.git
+      ref: br_v7.1.4_ohos
+  video_player: ^2.10.1
+  image_gallery_saver_plus:
+    git:
+      url: https://gitcode.com/CPF-Flutter/fluttertpc_image_gallery_saver_plus.git
+      ref: br_3.22
+  phone_numbers_parser: ^9.0.25
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true

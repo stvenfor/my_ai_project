@@ -6,7 +6,7 @@ import 'package:module_classroom/model/classroom_models.dart';
 import 'package:module_classroom/theme/classroom_theme.dart';
 import 'package:module_classroom/view/widgets/custom_time_range_sheet.dart';
 import 'package:module_common_ui/module_common_ui.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:wys_router/src/route/route_path.dart';
 
 class ClassHomeworkStatsPage extends GetView<HomeworkStatsController> {
   const ClassHomeworkStatsPage({super.key});

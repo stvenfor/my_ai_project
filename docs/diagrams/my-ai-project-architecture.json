@@ -1,0 +1,213 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "module_sample 系统架构",
+    "output": "my-ai-project-architecture.html",
+    "quality_profile": "showcase",
+    "viewBox": [1180, 680],
+    "views": [
+      {
+        "id": "api-path",
+        "label": "业务 API 主路径",
+        "focus": ["users", "lib-shell", "features", "commons", "go-bff", "supabase"],
+        "note": "ViewModel → Repository → Api → HttpManager → Go BFF → Supabase PostgREST。"
+      },
+      {
+        "id": "auth-path",
+        "label": "认证链路",
+        "focus": ["commons", "go-bff", "supabase-auth"],
+        "note": "登录/注册经 Go BFF 代理 Supabase Auth，客户端保存 access_token。"
+      },
+      {
+        "id": "realtime-im",
+        "label": "实时与 IM",
+        "focus": ["components", "go-bff", "rongcloud", "jpush"],
+        "note": "Realtime WebSocket 经 Go BFF；IM 走 RongCloud；深链/推送走 JPush。"
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "users",
+      "type": "external",
+      "label": "用户设备",
+      "sublabel": "iOS / Android / 鸿蒙",
+      "pos": [40, 300],
+      "size": [130, 64]
+    },
+    {
+      "id": "lib-shell",
+      "type": "frontend",
+      "label": "lib 壳工程",
+      "sublabel": "启动 · 路由 · DI",
+      "pos": [210, 300],
+      "size": [140, 64],
+      "tag": "ModuleRegistry"
+    },
+    {
+      "id": "features",
+      "type": "frontend",
+      "label": "features",
+      "sublabel": "12 个业务模块 · MVVM",
+      "pos": [390, 300],
+      "size": [150, 64]
+    },
+    {
+      "id": "commons",
+      "type": "frontend",
+      "label": "commons",
+      "sublabel": "HTTP · UI · Route · Core",
+      "pos": [580, 300],
+      "size": [150, 64],
+      "tag": "ResultModel"
+    },
+    {
+      "id": "go-bff",
+      "type": "backend",
+      "label": "my_go_study",
+      "sublabel": "Go BFF :8080",
+      "pos": [770, 300],
+      "size": [150, 64]
+    },
+    {
+      "id": "supabase-auth",
+      "type": "security",
+      "label": "Supabase Auth",
+      "sublabel": "JWT 签发",
+      "pos": [770, 140],
+      "size": [150, 64]
+    },
+    {
+      "id": "supabase",
+      "type": "database",
+      "label": "Supabase",
+      "sublabel": "PostgreSQL + RLS",
+      "pos": [960, 300],
+      "size": [150, 64]
+    },
+    {
+      "id": "components",
+      "type": "frontend",
+      "label": "components",
+      "sublabel": "Realtime · IM · 深链",
+      "pos": [210, 480],
+      "size": [150, 64]
+    },
+    {
+      "id": "rongcloud",
+      "type": "external",
+      "label": "RongCloud",
+      "sublabel": "IM 引擎",
+      "pos": [390, 480],
+      "size": [140, 64]
+    },
+    {
+      "id": "jpush",
+      "type": "external",
+      "label": "JPush",
+      "sublabel": "推送 · 深链",
+      "pos": [960, 480],
+      "size": [140, 64]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Flutter 客户端 (module_sample)",
+      "wraps": ["lib-shell", "features", "components", "commons"]
+    },
+    {
+      "kind": "region",
+      "label": "云端后端",
+      "wraps": ["go-bff", "supabase-auth", "supabase"]
+    }
+  ],
+  "connections": [
+    {
+      "id": "users-open-app",
+      "from": "users",
+      "to": "lib-shell",
+      "label": "打开 App",
+      "variant": "emphasis",
+      "labelDy": 56
+    },
+    {
+      "id": "shell-features",
+      "from": "lib-shell",
+      "to": "features",
+      "label": "装配模块",
+      "labelDy": 56
+    },
+    {
+      "id": "features-commons",
+      "from": "features",
+      "to": "commons",
+      "label": "Api → HttpManager",
+      "labelDy": 63
+    },
+    {
+      "id": "components-commons",
+      "from": "components",
+      "to": "commons",
+      "label": "共享契约",
+      "fromSide": "top",
+      "toSide": "bottom",
+      "via": [[285, 420], [655, 420]],
+      "labelAt": [470, 408]
+    },
+    {
+      "id": "commons-bff",
+      "from": "commons",
+      "to": "go-bff",
+      "label": "HTTP JSON",
+      "variant": "emphasis",
+      "labelDy": 56
+    },
+    {
+      "id": "bff-auth",
+      "from": "go-bff",
+      "to": "supabase-auth",
+      "label": "代理 Auth",
+      "variant": "security",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "bff-db",
+      "from": "go-bff",
+      "to": "supabase",
+      "label": "PostgREST + RLS",
+      "labelDy": 56
+    },
+    {
+      "id": "components-ws",
+      "from": "components",
+      "to": "go-bff",
+      "label": "WebSocket Realtime",
+      "variant": "dashed",
+      "fromSide": "right",
+      "toSide": "bottom",
+      "via": [[380, 512], [380, 448], [845, 448], [845, 388]],
+      "labelAt": [700, 456]
+    },
+    {
+      "id": "components-im",
+      "from": "components",
+      "to": "rongcloud",
+      "label": "IM SDK",
+      "labelDy": 51
+    },
+    {
+      "id": "components-push",
+      "from": "components",
+      "to": "jpush",
+      "label": "推送注册",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "left",
+      "via": [[285, 580], [930, 580], [930, 512]],
+      "labelAt": [610, 594]
+    }
+  ]
+}

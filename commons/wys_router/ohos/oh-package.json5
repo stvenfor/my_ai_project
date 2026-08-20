@@ -1,0 +1,9 @@
+{
+  "name": "wys_router",
+  "version": "1.0.0",
+  "description": "TF FanGroup unified router plugin",
+  "main": "index.ets",
+  "author": "TF",
+  "license": "MIT",
+  "dependencies": {}
+}

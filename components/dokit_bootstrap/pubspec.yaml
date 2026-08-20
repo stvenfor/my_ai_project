@@ -12,5 +12,5 @@ dependencies:
   dokit:
     path: ../dokit
   get: ^4.7.3
-  module_route:
-    path: ../../commons/route
+  wys_router:
+    path: ../../commons/wys_router

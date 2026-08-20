@@ -1,0 +1,32 @@
+name: wys_push
+description: "极光推送虚拟 API 层，对齐安卓 libPush 模块。"
+publish_to: none
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  wys_network:
+    path: ../../commons/wys_network
+
+  jpush_flutter:
+    git:
+      url: https://gitcode.com/CPF-Flutter/fluttertpc_jpush_flutter.git
+      ref: 3.3.6-ohos-1.0.0-beta.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  plugin:
+    platforms:
+      ohos:
+        pluginClass: TfDeepLinkPlugin

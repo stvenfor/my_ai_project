@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:module_home/home/theme/home_dashboard_theme.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:wys_router/src/route/route_path.dart';
 import 'package:module_utils/module_utils.dart';
 
 class HomeVideoTabContent extends StatelessWidget {

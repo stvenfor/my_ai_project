@@ -6,7 +6,7 @@ import 'package:module_auth/user/controller/auth_controller.dart';
 import 'package:module_auth/user/theme/auth_theme.dart';
 import 'package:module_auth/user/widgets/auth_form_widgets.dart';
 import 'package:module_auth/user/widgets/phone_otp_form_section.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:wys_router/src/route/route_path.dart';
 
 enum _RegisterMode { email, phone }
 

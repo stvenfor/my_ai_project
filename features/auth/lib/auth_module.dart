@@ -8,9 +8,9 @@ import 'package:module_auth/user/view/login_otp_page.dart';
 import 'package:module_auth/user/view/login_page.dart';
 import 'package:module_auth/user/view/login_password_page.dart';
 import 'package:module_auth/user/view/register_page.dart';
-import 'package:module_route/module/feature_module.dart';
-import 'package:module_route/module/module_host_context.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:wys_router/src/module/feature_module.dart';
+import 'package:wys_router/src/module/module_host_context.dart';
+import 'package:wys_router/src/route/route_path.dart';
 
 class AuthModule extends FeatureModule {
   @override

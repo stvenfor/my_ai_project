@@ -2,7 +2,7 @@ import 'package:module_core/web/web_page_config.dart';
 import 'package:module_linking/config/linking_config.dart';
 import 'package:module_linking/deeplink/deeplink_route_table.dart';
 import 'package:module_linking/models/app_route_intent.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:wys_router/src/route/route_path.dart';
 
 /// HTTPS / Custom Scheme 统一解析。
 class AppLinkParser {

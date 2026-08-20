@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_common_ui/kit/web/app_web_view_page.dart';
 import 'package:module_core/core.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:wys_router/src/route/route_path.dart';
 
 /// Get 命名路由入口：从 [Get.arguments] 读取 [WebPageConfig] 并交给 [AppWebViewPage]。
 class WebRoutePage extends StatelessWidget {

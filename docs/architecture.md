@@ -46,7 +46,7 @@ flowchart TB
 | 层 | 包含 |
 |----|------|
 | lib | `AppInitializer`、`module_manifest`、`Splash/Main`、路由合并 |
-| commons | `module_core`、`module_http`、`module_common_ui`、`module_utils`、`module_global_cache`、`module_route` |
+| commons | `module_core`、`module_http`、`module_common_ui`、`module_utils`、`module_global_cache`、`wys_router` |
 | components | `module_realtime`、`module_linking`、`module_rongcloud_im`、`module_bluetooth`、`dokit*` |
 | features | `module_home`、`module_auth`、`module_chat` 等 12 个业务包 |
 
@@ -59,7 +59,7 @@ graph BT
     http[module_http]
     cache[module_global_cache]
     ui[module_common_ui]
-    route[module_route]
+    route[wys_router]
 
     http --> core
     cache --> utils
@@ -81,7 +81,7 @@ graph BT
 │   ├── storage/                      # module_global_cache
 │   ├── toolkit/                      # module_utils
 │   ├── ui/                           # module_common_ui
-│   └── route/                        # module_route（路由 + FeatureModule）
+│   └── wys_router/                   # wys_router（RoutePath + FeatureModule + URL 桥）
 ├── features/                         # 业务模块层（12 个 module_*）
 │   ├── home/
 │   ├── auth/
@@ -169,7 +169,7 @@ main
 2. `ModuleRegistry.collectRoutes()` — 各 `FeatureModule.routes()`
 3. 合并后转为 `GetPage` 列表
 
-**路径常量**统一在 `commons/route/lib/route/route_path.dart`。
+**路径常量**统一在 `commons/wys_router/lib/src/route/route_path.dart`。
 
 **Tab 构建**：`MainPage` 调用 `ModuleRegistry.collectMainTabs()`，按 `order` 排序。当前 4 个 Tab：
 
@@ -198,7 +198,7 @@ Home、Classroom、Chat、Community、Settings、Auth、Friend、Live、Pay、Vi
 | `toolkit/` | `module_utils` | `package:module_utils/module_utils.dart` | L0 基础 | 日志、权限、图片/扫码、短视频播放器、EventBus、`ModuleUtilsInitializer` |
 | `network/` | `module_http` | `package:module_http/module_http.dart` | L1 基础设施 | Dio `HttpManager`、`AppHttpBootstrap`、`ResultModel<T>` 信封、Go BFF 解析与拦截器 |
 | `storage/` | `module_global_cache` | `package:module_global_cache/module_global_cache.dart` | L1 基础设施 | `SpManager` + sqflite `AppDatabase` |
-| `route/` | `module_route` | `package:module_route/module_route.dart` | L1 基础设施 | 路由常量、`FeatureModule`、`ModuleRegistry`、独立运行 runner |
+| `wys_router/` | `wys_router` | `package:wys_router/wys_router.dart` | L1 基础设施 | 路由常量、`FeatureModule`、`ModuleRegistry`、URL/原生桥、独立运行 runner |
 | `ui/` | `module_common_ui` | `package:module_common_ui/module_common_ui.dart` | L2 表现层 | 主题、Dialog、Layout（含沉浸式视频 Scope）、Refresh/Loading、`BaseViewModel`、`UiKitInitializer` |
 
 ### 3.2 内部依赖
@@ -209,7 +209,7 @@ graph BT
     utils[module_utils]
     http[module_http]
     cache[module_global_cache]
-    route[module_route]
+    route[wys_router]
     ui[module_common_ui]
 
     http --> core
@@ -303,7 +303,7 @@ View → ViewModel → Repository → Api → HttpManager → Go BFF
 
 ## 4. features — 业务模块层
 
-位于 `features/`，每个模块实现 `FeatureModule` 契约（`commons/route/lib/module/feature_module.dart`）：
+位于 `features/`，每个模块实现 `FeatureModule` 契约（`commons/wys_router/lib/src/module/feature_module.dart`）：
 
 ```dart
 abstract class FeatureModule {
@@ -415,7 +415,7 @@ flutter run -t features/home/lib/main_dev.dart
 
 ## 5. 附录：route 与 components
 
-### 5.1 module_route（`commons/route/`）
+### 5.1 wys_router（`commons/wys_router/`）
 
 | 组件 | 职责 |
 |------|------|
@@ -446,7 +446,7 @@ flutter run -t features/home/lib/main_dev.dart
 
 | 类别 | 包 |
 |------|-----|
-| Commons | `module_core`、`module_http`、`module_common_ui`、`module_global_cache`、`module_utils`、`module_route` |
+| Commons | `module_core`、`module_http`、`module_common_ui`、`module_global_cache`、`module_utils`、`wys_router` |
 | Features | `module_auth`、`module_home`、`module_chat`、`module_community`、`module_settings`、`module_classroom`、`module_friend`、`module_live`、`module_pay`、`module_video`、`module_bfui`、`module_music` |
 | Components | `module_linking`、`module_realtime`、`module_rongcloud_im`、`module_dokit_bootstrap` |
 

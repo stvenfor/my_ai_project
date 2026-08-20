@@ -7,8 +7,8 @@ import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_linking/navigation/main_tab_controller.dart';
 import 'package:module_music/controller/music_playback_controller.dart';
 import 'package:module_music/widgets/music_mini_player_bar.dart';
-import 'package:module_route/module/module_registry.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:wys_router/src/module/module_registry.dart';
+import 'package:wys_router/src/route/route_path.dart';
 import 'package:module_sample/l10n/app_localizations.dart';
 
 class MainPage extends StatefulWidget {

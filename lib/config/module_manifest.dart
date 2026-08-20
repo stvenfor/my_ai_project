@@ -11,7 +11,7 @@ import 'package:module_home/home_module.dart';
 import 'package:module_live/live_module.dart';
 import 'package:module_music/music_module.dart';
 import 'package:module_pay/pay_module.dart';
-import 'package:module_route/module/feature_module.dart';
+import 'package:wys_router/src/module/feature_module.dart';
 import 'package:module_settings/settings_module.dart';
 import 'package:module_video/video_module.dart';
 

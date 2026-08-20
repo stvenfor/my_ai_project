@@ -18,8 +18,29 @@ PODS:
   - flutter_inappwebview_ios/Core (0.0.1):
     - Flutter
     - OrderedSet (~> 6.0.3)
+  - fluttertoast (0.0.2):
+    - Flutter
+    - Toast
+  - fluwx (0.0.1):
+    - Flutter
+    - fluwx/pay (= 0.0.1)
+  - fluwx/pay (0.0.1):
+    - Flutter
+    - WechatOpenSDK-XCFramework (~> 2.0.5)
+  - image_gallery_saver_plus (0.0.1):
+    - Flutter
   - image_picker_ios (0.0.1):
     - Flutter
+  - JCore (5.4.2)
+  - JPush (5.7.0):
+    - JCore (>= 4.8.0)
+  - jpush_flutter (0.0.2):
+    - Flutter
+    - JCore (>= 5.1.0)
+    - JPush (= 5.7.0)
+  - mobile_scanner (7.0.0):
+    - Flutter
+    - FlutterMacOS
   - OrderedSet (6.0.3)
   - package_info_plus (0.4.5):
     - Flutter
@@ -38,12 +59,26 @@ PODS:
   - sqflite_darwin (0.0.4):
     - Flutter
     - FlutterMacOS
+  - Toast (4.1.1)
+  - tobias (0.0.1):
+    - Flutter
+    - tobias/normal (= 0.0.1)
+  - tobias/normal (0.0.1):
+    - Flutter
+  - url_launcher_ios (0.0.1):
+    - Flutter
   - video_player_avfoundation (0.0.1):
     - Flutter
     - FlutterMacOS
   - volume_controller (0.0.1):
     - Flutter
   - wakelock_plus (0.0.1):
+    - Flutter
+  - webview_flutter_wkwebview (0.0.1):
+    - Flutter
+    - FlutterMacOS
+  - WechatOpenSDK-XCFramework (2.0.7)
+  - wys_router (1.0.0):
     - Flutter
 
 DEPENDENCIES:
@@ -53,7 +88,12 @@ DEPENDENCIES:
   - Flutter (from `Flutter`)
   - flutter_blue_plus_darwin (from `.symlinks/plugins/flutter_blue_plus_darwin/darwin`)
   - flutter_inappwebview_ios (from `.symlinks/plugins/flutter_inappwebview_ios/ios`)
+  - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
+  - fluwx (from `.symlinks/plugins/fluwx/ios`)
+  - image_gallery_saver_plus (from `.symlinks/plugins/image_gallery_saver_plus/ios`)
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
+  - jpush_flutter (from `.symlinks/plugins/jpush_flutter/ios`)
+  - mobile_scanner (from `.symlinks/plugins/mobile_scanner/darwin`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
@@ -61,13 +101,21 @@ DEPENDENCIES:
   - screen_brightness_ios (from `.symlinks/plugins/screen_brightness_ios/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - sqflite_darwin (from `.symlinks/plugins/sqflite_darwin/darwin`)
+  - tobias (from `.symlinks/plugins/tobias/ios`)
+  - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
   - video_player_avfoundation (from `.symlinks/plugins/video_player_avfoundation/darwin`)
   - volume_controller (from `.symlinks/plugins/volume_controller/ios`)
   - wakelock_plus (from `.symlinks/plugins/wakelock_plus/ios`)
+  - webview_flutter_wkwebview (from `.symlinks/plugins/webview_flutter_wkwebview/darwin`)
+  - wys_router (from `.symlinks/plugins/wys_router/ios`)
 
 SPEC REPOS:
   trunk:
+    - JCore
+    - JPush
     - OrderedSet
+    - Toast
+    - WechatOpenSDK-XCFramework
 
 EXTERNAL SOURCES:
   audioplayers_darwin:
@@ -82,8 +130,18 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_blue_plus_darwin/darwin"
   flutter_inappwebview_ios:
     :path: ".symlinks/plugins/flutter_inappwebview_ios/ios"
+  fluttertoast:
+    :path: ".symlinks/plugins/fluttertoast/ios"
+  fluwx:
+    :path: ".symlinks/plugins/fluwx/ios"
+  image_gallery_saver_plus:
+    :path: ".symlinks/plugins/image_gallery_saver_plus/ios"
   image_picker_ios:
     :path: ".symlinks/plugins/image_picker_ios/ios"
+  jpush_flutter:
+    :path: ".symlinks/plugins/jpush_flutter/ios"
+  mobile_scanner:
+    :path: ".symlinks/plugins/mobile_scanner/darwin"
   package_info_plus:
     :path: ".symlinks/plugins/package_info_plus/ios"
   path_provider_foundation:
@@ -98,12 +156,20 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
   sqflite_darwin:
     :path: ".symlinks/plugins/sqflite_darwin/darwin"
+  tobias:
+    :path: ".symlinks/plugins/tobias/ios"
+  url_launcher_ios:
+    :path: ".symlinks/plugins/url_launcher_ios/ios"
   video_player_avfoundation:
     :path: ".symlinks/plugins/video_player_avfoundation/darwin"
   volume_controller:
     :path: ".symlinks/plugins/volume_controller/ios"
   wakelock_plus:
     :path: ".symlinks/plugins/wakelock_plus/ios"
+  webview_flutter_wkwebview:
+    :path: ".symlinks/plugins/webview_flutter_wkwebview/darwin"
+  wys_router:
+    :path: ".symlinks/plugins/wys_router/ios"
 
 SPEC CHECKSUMS:
   audioplayers_darwin: 4f9ca89d92d3d21cec7ec580e78ca888e5fb68bd
@@ -112,7 +178,14 @@ SPEC CHECKSUMS:
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   flutter_blue_plus_darwin: ee2377ea51a6c9e481f2ed76ec597717ef5d287d
   flutter_inappwebview_ios: b89ba3482b96fb25e00c967aae065701b66e9b99
+  fluttertoast: 76fea30fcf04176325f6864c87306927bd7d2038
+  fluwx: 2ef787502fccb3f3596b380509001a8ea71cbbff
+  image_gallery_saver_plus: e597bf65a7846979417a3eae0763b71b6dfec6c3
   image_picker_ios: e0ece4aa2a75771a7de3fa735d26d90817041326
+  JCore: 3483b83da976d2dbfe882c377c9d33577cf2e0f1
+  JPush: 3d76286b63609a8790cdb0004ba19a3c0eea8828
+  jpush_flutter: 8780f0f76ce98c70825da3f952c4c8d4d3bed5a1
+  mobile_scanner: 9157936403f5a0644ca3779a38ff8404c5434a93
   OrderedSet: e539b66b644ff081c73a262d24ad552a69be3a94
   package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
   path_provider_foundation: bb55f6dbba17d0dccd6737fe6f7f34fbd0376880
@@ -121,9 +194,15 @@ SPEC CHECKSUMS:
   screen_brightness_ios: 9953fd7da5bd480f1a93990daeec2eb42d4f3b52
   shared_preferences_foundation: 7036424c3d8ec98dfe75ff1667cb0cd531ec82bb
   sqflite_darwin: 20b2a3a3b70e43edae938624ce550a3cbf66a3d0
+  Toast: 1f5ea13423a1e6674c4abdac5be53587ae481c4e
+  tobias: f9c405df3ded93ad34539200fe3e7779cfb19081
+  url_launcher_ios: 7a95fa5b60cc718a708b8f2966718e93db0cef1b
   video_player_avfoundation: dd410b52df6d2466a42d28550e33e4146928280a
   volume_controller: 3657a1f65bedb98fa41ff7dc5793537919f31b12
   wakelock_plus: e29112ab3ef0b318e58cfa5c32326458be66b556
+  webview_flutter_wkwebview: 8ebf4fded22593026f7dbff1fbff31ea98573c8d
+  WechatOpenSDK-XCFramework: 5df9b250e9839dcc306ad8b00f46822eead1ed47
+  wys_router: 934ca3e525dba7d43b53238d0bf6c120831af497
 
 PODFILE CHECKSUM: 3c63482e143d1b91d2d2560aee9fb04ecc74ac7e
 

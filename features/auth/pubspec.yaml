@@ -12,8 +12,8 @@ dependencies:
   get: ^4.7.3
   module_core:
     path: ../../commons/core
-  module_route:
-    path: ../../commons/route
+  wys_router:
+    path: ../../commons/wys_router
   module_utils:
     path: ../../commons/toolkit
   module_common_ui:

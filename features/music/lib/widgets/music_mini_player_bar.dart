@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:module_music/controller/music_playback_controller.dart';
 import 'package:module_music/theme/music_theme.dart';
 import 'package:module_music/widgets/music_cover_image.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:wys_router/src/route/route_path.dart';
 
 /// 首页 Tab（MainPage 底部栏）与音频列表页底部迷你播放条。
 class MusicMiniPlayerBar extends GetView<MusicPlaybackController> {

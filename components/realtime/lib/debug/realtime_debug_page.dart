@@ -10,7 +10,7 @@ import 'package:module_core/model/realtime/realtime_envelope.dart';
 import 'package:module_realtime/config/realtime_config.dart';
 import 'package:module_realtime/realtime_initializer.dart';
 import 'package:module_realtime/ui/realtime_notify_banner_controller.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:wys_router/src/route/route_path.dart';
 
 /// Realtime 调试页。
 class RealtimeDebugPage extends StatefulWidget {

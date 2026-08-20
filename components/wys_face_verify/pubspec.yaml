@@ -1,0 +1,24 @@
+name: wys_face_verify
+description: 腾讯云慧眼人脸核身 Flutter 组件
+publish_to: 'none'
+version: 1.0.0
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  wys_network:
+    path: ../../commons/wys_network
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  plugin:
+    platforms:
+      ohos:
+        pluginClass: TfFaceVerifyPlugin

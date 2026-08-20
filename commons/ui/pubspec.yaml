@@ -18,8 +18,8 @@ dependencies:
     path: ../core
   module_utils:
     path: ../toolkit
-  module_route:
-    path: ../route
+  wys_router:
+    path: ../wys_router
 
 dev_dependencies:
   flutter_test:

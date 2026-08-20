@@ -11,7 +11,7 @@ import 'package:module_linking/push/mock_push_service.dart';
 import 'package:module_linking/push/push_registration_api.dart';
 import 'package:module_linking/push/push_service.dart';
 import 'package:module_linking/ui/in_app_push_banner_controller.dart';
-import 'package:module_route/route/login_redirect.dart';
+import 'package:wys_router/src/route/login_redirect.dart';
 import 'package:module_utils/module_utils.dart';
 
 /// Deeplink + Push 统一初始化。

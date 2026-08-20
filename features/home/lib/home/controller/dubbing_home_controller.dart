@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:module_home/home/mock/dubbing_home_mock_data.dart';
 import 'package:module_home/home/model/dubbing_home_model.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:wys_router/src/route/route_path.dart';
 
 class DubbingHomeBinding extends Bindings {
   @override

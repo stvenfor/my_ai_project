@@ -6,7 +6,7 @@ import 'package:module_community/community/theme/community_theme.dart';
 import 'package:module_community/community/viewmodel/community_viewmodel.dart';
 import 'package:module_community/community/widgets/post_card_widget.dart';
 import 'package:module_community/community/widgets/post_skeleton_widget.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:wys_router/src/route/route_path.dart';
 
 class CommunityPage extends GetView<CommunityViewModel> {
   const CommunityPage({super.key});

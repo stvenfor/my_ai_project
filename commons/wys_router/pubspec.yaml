@@ -1,0 +1,32 @@
+name: wys_router
+description: 路由基础设施 — FeatureModule/RoutePath + URL/原生桥（合并原 module_route）
+publish_to: 'none'
+version: 1.0.0
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  get: ^4.7.3
+  url_launcher: ^6.3.1
+  module_core:
+    path: ../core
+  module_utils:
+    path: ../toolkit
+
+dev_dependencies:
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  plugin:
+    platforms:
+      android:
+        package: com.sf.tf.router
+        pluginClass: NativeRouterPlugin
+      ios:
+        pluginClass: NativeRouterPlugin
+      ohos:
+        pluginClass: NativeRouterPlugin

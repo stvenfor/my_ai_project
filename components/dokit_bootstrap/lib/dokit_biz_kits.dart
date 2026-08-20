@@ -1,6 +1,6 @@
 import 'package:dokit/kit/biz/biz.dart';
 import 'package:get/get.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:wys_router/src/route/route_path.dart';
 
 /// 将壳工程已有调试页注册到 DoKit「业务专区」。
 abstract final class DokitBizKits {

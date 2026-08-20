@@ -5,8 +5,8 @@ import 'package:module_linking/analytics/linking_analytics.dart';
 import 'package:module_linking/models/app_route_intent.dart';
 import 'package:module_linking/navigation/main_tab_controller.dart';
 import 'package:module_linking/navigation/pending_navigation.dart';
-import 'package:module_route/module/module_registry.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:wys_router/src/module/module_registry.dart';
+import 'package:wys_router/src/route/route_path.dart';
 import 'package:module_utils/module_utils.dart';
 
 /// 统一导航：Tab 切换 + 子页 push。

@@ -3,8 +3,8 @@ import 'package:get/get.dart';
 import 'package:module_music/controller/music_playback_controller.dart';
 import 'package:module_music/view/music_list_page.dart';
 import 'package:module_music/view/now_playing_page.dart';
-import 'package:module_route/module/feature_module.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:wys_router/src/module/feature_module.dart';
+import 'package:wys_router/src/route/route_path.dart';
 
 class MusicModule extends FeatureModule {
   @override

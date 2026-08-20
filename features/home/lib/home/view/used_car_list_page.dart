@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_home/home/controller/used_car_list_controller.dart';
 import 'package:module_home/home/widgets/transaction_list_item.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:wys_router/src/route/route_path.dart';
 
 class UsedCarListPage extends GetView<UsedCarListController> {
   const UsedCarListPage({super.key});

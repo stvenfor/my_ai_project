@@ -16,8 +16,8 @@ dependencies:
     path: ../../components/realtime
   module_common_ui:
     path: ../../commons/ui
-  module_route:
-    path: ../../commons/route
+  wys_router:
+    path: ../../commons/wys_router
   module_utils:
     path: ../../commons/toolkit
 

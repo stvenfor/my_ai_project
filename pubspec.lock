@@ -302,10 +302,10 @@ packages:
     dependency: "direct main"
     description:
       name: cupertino_icons
-      sha256: d57953e10f9f8327ce64a508a355f0b1ec902193f66288e8cb5070e7c47eeb2d
+      sha256: "41e005c33bd814be4d3096aff55b1908d419fde52ca656c8c47719ec745873cd"
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "1.0.6"
+    version: "1.0.9"
   dart_style:
     dependency: transitive
     description:
@@ -370,6 +370,14 @@ packages:
       relative: true
     source: path
     version: "0.8.2-nullsafety.10"
+  easy_refresh:
+    dependency: transitive
+    description:
+      name: easy_refresh
+      sha256: "513a5dc82c044f8a9c9a3d600b3d5d3256070575bfd8761940533d8e209ba79b"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "3.5.1"
   equatable:
     dependency: transitive
     description:
@@ -654,6 +662,23 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  fluttertoast:
+    dependency: transitive
+    description:
+      path: "."
+      ref: "br_v9.0.0_ohos"
+      resolved-ref: "66d587d5114c18cc5b8cdb23699d76dc812da393"
+      url: "https://gitcode.com/CPF-Flutter/flutter_fluttertoast.git"
+    source: git
+    version: "9.0.0"
+  fluwx:
+    dependency: transitive
+    description:
+      name: fluwx
+      sha256: ae870e8ac0aaf13bd4fb0833e077a6294055f528c24890efa578817e93fbe674
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "5.7.7"
   font_awesome_flutter:
     dependency: transitive
     description:
@@ -734,6 +759,15 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "4.8.0"
+  image_gallery_saver_plus:
+    dependency: transitive
+    description:
+      path: "."
+      ref: "br_3.22"
+      resolved-ref: f1755172d8182b3bd4240b2714eaf005ee980e46
+      url: "https://gitcode.com/CPF-Flutter/fluttertpc_image_gallery_saver_plus.git"
+    source: git
+    version: "3.0.5"
   image_picker:
     dependency: "direct main"
     description:
@@ -840,6 +874,23 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.0.1"
+  jpush_flutter:
+    dependency: transitive
+    description:
+      path: "."
+      ref: "3.3.6-ohos-1.0.0-beta.1"
+      resolved-ref: b7c2feff1d1f80ac9159d7ea5b9eed8fe58ef519
+      url: "https://gitcode.com/CPF-Flutter/fluttertpc_jpush_flutter.git"
+    source: git
+    version: "3.3.6"
+  js:
+    dependency: transitive
+    description:
+      name: js
+      sha256: "53385261521cc4a0c4658fd0ad07a7d14591cf8fc33abbceae306ddb974888dc"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.7.2"
   json_annotation:
     dependency: "direct main"
     description:
@@ -944,6 +995,15 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.0.0"
+  mobile_scanner:
+    dependency: transitive
+    description:
+      path: "."
+      ref: "br_v7.1.4_ohos"
+      resolved-ref: f5a4ff52f003e1645db1d4de743a2db0313665a8
+      url: "https://gitcode.com/CPF-Flutter/fluttertpc_mobile_scanner.git"
+    source: git
+    version: "7.1.4"
   module_auth:
     dependency: "direct main"
     description:
@@ -1077,13 +1137,6 @@ packages:
       relative: true
     source: path
     version: "0.0.1"
-  module_route:
-    dependency: "direct main"
-    description:
-      path: "commons/route"
-      relative: true
-    source: path
-    version: "0.0.1"
   module_settings:
     dependency: "direct main"
     description:
@@ -1154,6 +1207,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.9.1"
+  path_drawing:
+    dependency: transitive
+    description:
+      name: path_drawing
+      sha256: bbb1934c0cbb03091af082a6389ca2080345291ef07a5fa6d6e078ba8682f977
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "1.0.1"
   path_parsing:
     dependency: transitive
     description:
@@ -1286,6 +1347,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "7.0.2"
+  phone_numbers_parser:
+    dependency: transitive
+    description:
+      name: phone_numbers_parser
+      sha256: f0d669e9bb3def72b479ee034a42ddc2eecb5d39af9e598459d6f1c489bb19c7
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "9.0.25"
   photo_view:
     dependency: transitive
     description:
@@ -1310,6 +1379,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.1.8"
+  pointycastle:
+    dependency: transitive
+    description:
+      name: pointycastle
+      sha256: "4be0097fcf3fd3e8449e53730c631200ebc7b88016acecab2b0da2f0149222fe"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "3.9.1"
   pool:
     dependency: transitive
     description:
@@ -1632,6 +1709,15 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "0.7.6"
+  tobias:
+    dependency: transitive
+    description:
+      path: "."
+      ref: "br_v5.1.2_ohos"
+      resolved-ref: "36d6b9d61c9231a6680dd4e33cde1c0cb9735cf4"
+      url: "https://gitcode.com/CPF-Flutter/fluttertpc_tobias.git"
+    source: git
+    version: "5.1.2"
   typed_data:
     dependency: transitive
     description:
@@ -1640,6 +1726,70 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.4.0"
+  url_launcher:
+    dependency: transitive
+    description:
+      name: url_launcher
+      sha256: f6a7e5c4835bb4e3026a04793a4199ca2d14c739ec378fdfe23fc8075d0439f8
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "6.3.2"
+  url_launcher_android:
+    dependency: transitive
+    description:
+      name: url_launcher_android
+      sha256: "3bb000251e55d4a209aa0e2e563309dc9bb2befea2295fd0cec1f51760aac572"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "6.3.29"
+  url_launcher_ios:
+    dependency: transitive
+    description:
+      name: url_launcher_ios
+      sha256: cfde38aa257dae62ffe79c87fab20165dfdf6988c1d31b58ebf59b9106062aad
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "6.3.6"
+  url_launcher_linux:
+    dependency: transitive
+    description:
+      name: url_launcher_linux
+      sha256: d5e14138b3bc193a0f63c10a53c94b91d399df0512b1f29b94a043db7482384a
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "3.2.2"
+  url_launcher_macos:
+    dependency: transitive
+    description:
+      name: url_launcher_macos
+      sha256: "368adf46f71ad3c21b8f06614adb38346f193f3a59ba8fe9a2fd74133070ba18"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "3.2.5"
+  url_launcher_platform_interface:
+    dependency: transitive
+    description:
+      name: url_launcher_platform_interface
+      sha256: "552f8a1e663569be95a8190206a38187b531910283c3e982193e4f2733f01029"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "2.3.2"
+  url_launcher_web:
+    dependency: transitive
+    description:
+      name: url_launcher_web
+      sha256: "4bd2b7b4dc4d4d0b94e5babfffbca8eac1a126c7f3d6ecbc1a11013faa3abba2"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "2.4.1"
+  url_launcher_windows:
+    dependency: transitive
+    description:
+      name: url_launcher_windows
+      sha256: "712c70ab1b99744ff066053cbe3e80c73332b38d46e5e945c98689b2e66fc15f"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "3.1.5"
   uuid:
     dependency: transitive
     description:
@@ -1785,6 +1935,38 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "3.0.3"
+  webview_flutter:
+    dependency: transitive
+    description:
+      name: webview_flutter
+      sha256: a3da219916aba44947d3a5478b1927876a09781174b5a2b67fa5be0555154bf9
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "4.13.1"
+  webview_flutter_android:
+    dependency: transitive
+    description:
+      name: webview_flutter_android
+      sha256: ad5182eff9a550925330cb9f0cb038eddfdd5712aba8b77aa0f0400e50f6e688
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "4.12.0"
+  webview_flutter_platform_interface:
+    dependency: transitive
+    description:
+      name: webview_flutter_platform_interface
+      sha256: "1221c1b12f5278791042f2ec2841743784cf25c5a644e23d6680e5d718824f04"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "2.15.1"
+  webview_flutter_wkwebview:
+    dependency: transitive
+    description:
+      name: webview_flutter_wkwebview
+      sha256: e50cd97ad28e888f6a4f862a05eab917a635417f9b134df64c3abb78250c6446
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "3.25.0"
   win32:
     dependency: transitive
     description:
@@ -1801,6 +1983,55 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.1.0"
+  wys_account:
+    dependency: "direct main"
+    description:
+      path: "commons/wys_account"
+      relative: true
+    source: path
+    version: "1.0.0"
+  wys_common:
+    dependency: "direct main"
+    description:
+      path: "commons/wys_common"
+      relative: true
+    source: path
+    version: "1.0.0+1"
+  wys_face_verify:
+    dependency: "direct main"
+    description:
+      path: "components/wys_face_verify"
+      relative: true
+    source: path
+    version: "1.0.0"
+  wys_login_share_pay:
+    dependency: "direct main"
+    description:
+      path: "components/wys_login_share_pay"
+      relative: true
+    source: path
+    version: "1.0.0"
+  wys_network:
+    dependency: "direct main"
+    description:
+      path: "commons/wys_network"
+      relative: true
+    source: path
+    version: "1.0.0"
+  wys_push:
+    dependency: "direct main"
+    description:
+      path: "components/wys_push"
+      relative: true
+    source: path
+    version: "1.0.0+1"
+  wys_router:
+    dependency: "direct main"
+    description:
+      path: "commons/wys_router"
+      relative: true
+    source: path
+    version: "1.0.0"
   xdg_directories:
     dependency: transitive
     description:

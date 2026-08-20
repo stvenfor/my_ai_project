@@ -16,8 +16,8 @@ dependencies:
     path: ../../commons/core
   module_rongcloud_im:
     path: ../../components/rongcloud_im
-  module_route:
-    path: ../../commons/route
+  wys_router:
+    path: ../../commons/wys_router
   module_utils:
     path: ../../commons/toolkit
 

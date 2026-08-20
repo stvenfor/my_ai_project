@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:wys_router/src/route/route_path.dart';
 import 'package:module_settings/deal_invoice/mock/deal_invoice_mock_repository.dart';
 import 'package:module_settings/deal_invoice/model/deal_invoice_models.dart';
 

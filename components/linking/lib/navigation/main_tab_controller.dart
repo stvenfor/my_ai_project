@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:module_route/module/module_registry.dart';
+import 'package:wys_router/src/module/module_registry.dart';
 
 /// 主 Tab 切换控制器（Deeplink / Push 先切 Tab 再 push）。
 class MainTabController extends GetxController {

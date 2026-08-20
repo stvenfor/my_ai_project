@@ -5,7 +5,7 @@ import 'package:module_home/home/controller/home_controller.dart';
 import 'package:module_home/home/model/home_dashboard_model.dart';
 import 'package:module_home/home/theme/home_dashboard_theme.dart';
 import 'package:module_home/home/navigation/used_car_navigation.dart';
-import 'package:module_route/route/route_path.dart';
+import 'package:wys_router/src/route/route_path.dart';
 import 'package:module_utils/module_utils.dart';
 
 class HomeSearchBar extends StatelessWidget {
