@@ -8,9 +8,14 @@ import 'package:module_core/core.dart';
 class BackendHttpConfig {
   BackendHttpConfig._();
 
+  /// 真机调试：`flutter run --dart-define=BACKEND_HOST=192.168.x.x`
+  static const String backendHostOverride = String.fromEnvironment(
+    'BACKEND_HOST',
+  );
+
   static String resolveBackendBaseUrl() {
     final configured = _readConfiguredBaseUrl();
-    return _remapLocalhostForPlatform(configured);
+    return remapLocalhostForPlatform(configured);
   }
 
   static String _readConfiguredBaseUrl() {
@@ -20,15 +25,20 @@ class BackendHttpConfig {
     return EnvConfig.of(AppEnv.test).backendBaseUrl;
   }
 
-  /// 模拟器无法访问宿主机 127.0.0.1，Android / 鸿蒙需映射为 10.0.2.2。
-  static String _remapLocalhostForPlatform(String baseUrl) {
+  /// Android 模拟器：127.0.0.1 → 10.0.2.2。
+  /// 鸿蒙/iOS 真机：用 [BACKEND_HOST]（局域网 IP），勿映射到 10.0.2.2。
+  static String remapLocalhostForPlatform(String baseUrl) {
     if (kIsWeb) return baseUrl;
     try {
-      if (!_needsEmulatorHostRemap) return baseUrl;
       final uri = Uri.tryParse(baseUrl);
       if (uri == null) return baseUrl;
       final host = uri.host;
-      if (host == '127.0.0.1' || host == 'localhost') {
+      if (host != '127.0.0.1' && host != 'localhost') return baseUrl;
+
+      if (backendHostOverride.isNotEmpty) {
+        return uri.replace(host: backendHostOverride).toString();
+      }
+      if (_isAndroidEmulatorStyleHost) {
         return uri.replace(host: '10.0.2.2').toString();
       }
     } catch (_) {
@@ -37,8 +47,9 @@ class BackendHttpConfig {
     return baseUrl;
   }
 
-  static bool get _needsEmulatorHostRemap {
+  /// 仅 Android 需要模拟器 localhost 映射；鸿蒙真机不是模拟器。
+  static bool get _isAndroidEmulatorStyleHost {
     if (Platform.isAndroid) return true;
-    return Platform.operatingSystem.toLowerCase() == 'ohos';
+    return false;
   }
 }

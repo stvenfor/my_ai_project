@@ -6,6 +6,6 @@
   "author": "",
   "license": "",
   "dependencies": {
-    "wbcloudfaceverifysdk": "file:./libs/WbCloudFaceVerifySdk@face-1.8.0-2d7c096e.har"
+    "wbcloudfaceverifysdk": "file:./libs/WbCloudFaceVerifySdk-face-1.8.0-2d7c096e.har"
   }
 }

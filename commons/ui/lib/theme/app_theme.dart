@@ -126,10 +126,9 @@ class ImmersiveHelper {
     required Brightness brightness,
     bool immersive = true,
   }) async {
-    await SystemChrome.setEnabledSystemUIMode(
-      immersive
-          ? SystemUiMode.edgeToEdge
-          : SystemUiMode.manual,
+    // OHOS Flutter 的 SystemChrome MethodChannel 偶发不回包，await 会卡死启动白屏。
+    await _setEnabledSystemUiMode(
+      immersive ? SystemUiMode.edgeToEdge : SystemUiMode.manual,
       overlays: immersive ? null : SystemUiOverlay.values,
     );
     SystemChrome.setSystemUIOverlayStyle(
@@ -139,7 +138,7 @@ class ImmersiveHelper {
 
   /// 视频播放页：隐藏状态栏时间与系统图标（immersiveSticky）。
   static Future<void> applyPlayback() async {
-    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    await _setEnabledSystemUiMode(SystemUiMode.immersiveSticky);
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle.light.copyWith(
         statusBarColor: Colors.transparent,
@@ -148,6 +147,20 @@ class ImmersiveHelper {
         systemNavigationBarIconBrightness: Brightness.light,
       ),
     );
+  }
+
+  static Future<void> _setEnabledSystemUiMode(
+    SystemUiMode mode, {
+    List<SystemUiOverlay>? overlays,
+  }) async {
+    try {
+      await SystemChrome.setEnabledSystemUIMode(
+        mode,
+        overlays: overlays,
+      ).timeout(const Duration(milliseconds: 500));
+    } catch (_) {
+      // Ignore timeout / unimplemented — overlay style still applies.
+    }
   }
 
   /// 离开播放页后恢复为应用默认 edgeToEdge 沉浸式。

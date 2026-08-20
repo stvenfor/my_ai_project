@@ -11,7 +11,10 @@ class EnvConfig {
   });
 
   final AppEnv env;
-  /// Go 后端 my_go_study 地址；Android 模拟器请改为 http://10.0.2.2:8080
+  /// Go 后端 my_go_study 地址。
+  /// - 本机 / iOS 模拟器：127.0.0.1
+  /// - Android 模拟器：自动映射为 10.0.2.2
+  /// - 鸿蒙/真机：`flutter run --dart-define=BACKEND_HOST=192.168.x.x`
   final String backendBaseUrl;
   final String wsBaseUrl;
   final String rongAppKey;

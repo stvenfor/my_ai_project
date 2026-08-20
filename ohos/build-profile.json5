@@ -1,4 +1,3 @@
-
 {
   "app": {
     "signingConfigs": [],
@@ -8,6 +7,11 @@
         "signingConfig": "default",
         "compatibleSdkVersion": "5.1.0(18)",
         "runtimeOS": "HarmonyOS",
+        "buildOption": {
+          "strictMode": {
+            "useNormalizedOHMUrl": true
+          }
+        }
       }
     ],
     "buildModeSet": [

@@ -68,7 +68,9 @@ class AppInitializer {
     for (final binding in ModuleRegistry.collectBindings()) {
       binding.dependencies();
     }
+    LogUtils.i('[App] bindings ready, loading settings');
     await Get.find<AppController>().loadSettings();
+    LogUtils.i('[App] settings loaded');
 
     await LinkingInitializer.initDeferred();
     await RealtimeInitializer.initDeferred();
@@ -76,6 +78,7 @@ class AppInitializer {
     final wsClient = RealtimeInitializer.client;
     LogUtils.i(
       '[App] 应用初始化完成 env=${Get.find<EnvironmentService>().config.label} '
+      'baseUrl=${AppHttpBootstrap.resolveBaseUrl()} '
       'loggedIn=${AuthSession.isLoggedIn} '
       'ws=${wsClient?.currentState.label ?? '未初始化'}',
     );
