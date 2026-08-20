@@ -62,11 +62,79 @@ dependencies:
     path: ./components/rongcloud_im
   module_dokit_bootstrap:
     path: ./components/dokit_bootstrap
-  permission_handler_ohos:
+
+  # ---------------------------------------------------------------------------
+  # OpenHarmony（Flutter 3.35）：已适配库放在 dependencies（git），不放 overrides。
+  # 写法参考 CPF / openharmony-tpc README，只声明主包；*_ohos 由主包 path 带入。
+  # 官方仓：CPF-Flutter、openharmony-tpc/flutter_packages
+  # ---------------------------------------------------------------------------
+
+  # flutter_packages（openharmony-tpc）
+  image_picker:
     git:
-      url: https://gitcode.com/openharmony-sig/flutter_permission_handler.git
-      path: permission_handler_ohos
+      url: https://gitcode.com/openharmony-tpc/flutter_packages.git
+      path: packages/image_picker/image_picker
+      ref: br_image_picker-v1.2.1_ohos
+  path_provider:
+    git:
+      url: https://gitcode.com/openharmony-tpc/flutter_packages.git
+      path: packages/path_provider/path_provider
+      ref: br_path_provider-v2.1.5_ohos
+  shared_preferences:
+    git:
+      url: https://gitcode.com/openharmony-tpc/flutter_packages.git
+      path: packages/shared_preferences/shared_preferences
+      ref: br_shared_preferences-v2.5.4_ohos
+  # video_player OHOS 暂不接入：video_player_ohos → pigeon(git) 锁定旧 analyzer，
+  # 与 json_serializable ^6.9 / json_annotation ^4.12 冲突。短视频仍用 pub.dev。
+
+  # plus_plugins（CPF-Flutter）
+  connectivity_plus:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_plus_plugins.git
+      path: packages/connectivity_plus/connectivity_plus
+      ref: br_connectivity_plus-v6.1.0_ohos
+  device_info_plus:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_plus_plugins.git
+      path: packages/device_info_plus/device_info_plus
+      ref: br_device_info_plus-v12.3.0_ohos
+  package_info_plus:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_plus_plugins.git
+      path: packages/package_info_plus/package_info_plus
+      ref: br_package_info_plus-v9.0.0_ohos
+
+  # 独立仓（CPF-Flutter）
+  scan:
+    git:
+      url: https://gitcode.com/CPF-Flutter/fluttertpc_scan.git
+      ref: master
+  permission_handler:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_permission_handler.git
+      path: permission_handler
       ref: br_v12.0.1_ohos
+  sqflite:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_sqflite.git
+      path: sqflite
+      ref: br_v2.4.2_ohos
+  audioplayers:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_audioplayers.git
+      path: packages/audioplayers
+      ref: br_v6.5.1_ohos
+  flutter_inappwebview:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_inappwebview.git
+      path: flutter_inappwebview
+      ref: br_v6.1.5_ohos
+  wakelock_plus:
+    git:
+      url: https://gitcode.com/CPF-Flutter/fluttertpc_wakelock_plus.git
+      path: wakelock_plus
+      ref: br_v1.4.0_ohos
 
 dev_dependencies:
   flutter_test:
@@ -85,22 +153,70 @@ flutter:
     - commons/toolkit/assets/data/video_mock_sources.json
 
 dependency_overrides:
+  # 非鸿蒙钉选
   rxdart: ^0.27.7
-  # Flutter 3.35.x iOS 嵌入层暂无 FlutterSceneLifeCycleDelegate，锁定 federated 实现版本。
   screen_brightness_ios: 2.1.2
-  # OpenHarmony 适配：CPF-Flutter/flutter_packages
+  # ---------------------------------------------------------------------------
+  # OHOS git 同源消解：features/commons 仍写 pub.dev 版本，pub 会与根
+  # dependencies 的 git 源冲突。下列条目与 dependencies 完全一致，仅用于
+  # 强制解析到鸿蒙适配源；权威声明仍在 dependencies。
+  # ---------------------------------------------------------------------------
   image_picker:
     git:
-      url: https://gitcode.com/CPF-Flutter/flutter_packages.git
-      ref: br_image_picker-v1.1.2_ohos
+      url: https://gitcode.com/openharmony-tpc/flutter_packages.git
       path: packages/image_picker/image_picker
-  image_picker_ohos:
+      ref: br_image_picker-v1.2.1_ohos
+  path_provider:
     git:
-      url: https://gitcode.com/CPF-Flutter/flutter_packages.git
-      ref: br_image_picker-v1.1.2_ohos
-      path: packages/image_picker/image_picker_ohos
+      url: https://gitcode.com/openharmony-tpc/flutter_packages.git
+      path: packages/path_provider/path_provider
+      ref: br_path_provider-v2.1.5_ohos
+  shared_preferences:
+    git:
+      url: https://gitcode.com/openharmony-tpc/flutter_packages.git
+      path: packages/shared_preferences/shared_preferences
+      ref: br_shared_preferences-v2.5.4_ohos
+  connectivity_plus:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_plus_plugins.git
+      path: packages/connectivity_plus/connectivity_plus
+      ref: br_connectivity_plus-v6.1.0_ohos
+  device_info_plus:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_plus_plugins.git
+      path: packages/device_info_plus/device_info_plus
+      ref: br_device_info_plus-v12.3.0_ohos
+  package_info_plus:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_plus_plugins.git
+      path: packages/package_info_plus/package_info_plus
+      ref: br_package_info_plus-v9.0.0_ohos
   scan:
     git:
       url: https://gitcode.com/CPF-Flutter/fluttertpc_scan.git
       ref: master
-  # audioplayers OHOS override 仅用于鸿蒙 Flutter SDK 构建，见 docs/flutter-example-apps-music-migration.md
+  permission_handler:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_permission_handler.git
+      path: permission_handler
+      ref: br_v12.0.1_ohos
+  sqflite:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_sqflite.git
+      path: sqflite
+      ref: br_v2.4.2_ohos
+  audioplayers:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_audioplayers.git
+      path: packages/audioplayers
+      ref: br_v6.5.1_ohos
+  flutter_inappwebview:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_inappwebview.git
+      path: flutter_inappwebview
+      ref: br_v6.1.5_ohos
+  wakelock_plus:
+    git:
+      url: https://gitcode.com/CPF-Flutter/fluttertpc_wakelock_plus.git
+      path: wakelock_plus
+      ref: br_v1.4.0_ohos

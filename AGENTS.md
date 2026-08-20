@@ -448,27 +448,66 @@ Cannot hit test a render box with no size
 
 ## 鸿蒙（OpenHarmony）三方库
 
+对照组织：[CPF-Flutter](https://gitcode.com/CPF-Flutter)（SDK / packages / 三方适配列表）。
+
 ### Flutter SDK
 
-使用 [CPF-Flutter/flutter_flutter](https://gitcode.com/CPF-Flutter/flutter_flutter/tree/3.35.8-ohos-1.0.1) **3.35.8-ohos-1.0.1**。IDE 指向 `.fvm/versions/custom_3.35-ohos`，**不要**用标准 pub.dev Flutter 编此项目。
+使用 [CPF-Flutter/flutter_flutter](https://gitcode.com/CPF-Flutter/flutter_flutter) **3.35.x-ohos** 稳定线。IDE 指向 `.fvm/versions/custom_3.35-ohos`，**不要**用标准 pub.dev Flutter 编鸿蒙目标。
 
 ### 原则
 
-带原生能力的库**必须**有鸿蒙适配后再引入；根 `pubspec.yaml` `dependency_overrides` 指向 CPF git 源。
+带原生能力的库**必须**有鸿蒙适配后再引入。
 
 ### 依赖写法
 
-1. Feature 模块 `pubspec.yaml` 保持 pub.dev 语义化版本。
-2. 根 `dependency_overrides` 统一鸿蒙 git 源（federated 插件需同时 override 主包与 `*_ohos`）。
-3. `flutter pub get` 后检查 `ohos/entry/oh-package.json5` har 依赖。
+1. Feature / commons 模块 `pubspec.yaml` 仍写 **pub.dev 语义化版本**。
+2. **已适配 Flutter 3.35 的 OHOS 库放在根 `dependencies`（git）**。只声明主包；`*_ohos` 由主包 path 带入。
+3. 官方仓可用：
+   - [CPF-Flutter](https://gitcode.com/CPF-Flutter)（`flutter_plus_plugins`、独立插件仓）
+   - [openharmony-tpc/flutter_packages](https://gitcode.com/openharmony-tpc/flutter_packages)
+4. features/commons 仍写 pub.dev 时，根 `dependency_overrides` 需**镜像同名 git 条目**做 hosted↔git 同源消解；另保留 `rxdart` / `screen_brightness_ios` 等非鸿蒙钉选。
+5. `flutter pub get`（OHOS Flutter SDK）后检查 `ohos/entry/oh-package.json5` 是否写入 har。
 
-### 本项目已接入
+```yaml
+# plus 插件示例
+connectivity_plus:
+  git:
+    url: https://gitcode.com/CPF-Flutter/flutter_plus_plugins.git
+    path: packages/connectivity_plus/connectivity_plus
+    ref: br_connectivity_plus-v6.1.0_ohos
 
-- `ImagePickerUtils` / `MediaSourceBottomSheet` / `image_picker_ohos`
-- `permission_handler_ohos`
-- `ScanUtils` / `scan`（git override）
+# flutter_packages 示例（openharmony-tpc）
+path_provider:
+  git:
+    url: https://gitcode.com/openharmony-tpc/flutter_packages.git
+    path: packages/path_provider/path_provider
+    ref: br_path_provider-v2.1.5_ohos
+```
 
-详见根 [`pubspec.yaml`](pubspec.yaml) 与各 feature 模块 `pubspec.yaml`。
+### 本项目根工程已接入（3.35）
+
+| 能力 | 主包 | 来源 / 分支 |
+|------|------|-------------|
+| 选图 | `image_picker` | openharmony-tpc / `br_image_picker-v1.2.1_ohos` |
+| 路径 | `path_provider` | openharmony-tpc / `br_path_provider-v2.1.5_ohos` |
+| SP | `shared_preferences` | openharmony-tpc / `br_shared_preferences-v2.5.4_ohos` |
+| 扫码 | `scan` | CPF `fluttertpc_scan` / `master` |
+| 权限 | `permission_handler` | CPF / `br_v12.0.1_ohos` |
+| SQLite | `sqflite` | CPF / `br_v2.4.2_ohos` |
+| 音频 | `audioplayers` | CPF / `br_v6.5.1_ohos` |
+| WebView | `flutter_inappwebview` | CPF / `br_v6.1.5_ohos` |
+| 网络状态 | `connectivity_plus` | CPF plus_plugins / `br_connectivity_plus-v6.1.0_ohos` |
+| 设备信息 | `device_info_plus` | CPF plus_plugins / `br_device_info_plus-v12.3.0_ohos` |
+| 包信息 | `package_info_plus` | CPF plus_plugins / `br_package_info_plus-v9.0.0_ohos` |
+| 常亮 | `wakelock_plus` | CPF / `br_v1.4.0_ohos` |
+
+### 暂缓 / 仍用 pub.dev
+
+- `video_player`：OHOS 分支已有，但 `video_player_ohos → pigeon` 锁定旧 `analyzer`，与 `json_serializable` 冲突
+- `flutter_blue_plus`（蓝牙 demo）
+- `screen_brightness` / `volume_controller`（短视频控制条）
+
+详见根 [`pubspec.yaml`](pubspec.yaml)。
 
 ---
 
