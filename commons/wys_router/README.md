@@ -5,6 +5,7 @@
 - **本工程 path 真源**：[RoutePath]（Splash `/`、Main `/main`、各 feature）
 - **模块契约**：`FeatureModule` / `ModuleRegistry` / `ModuleStandaloneRunner`
 - **URL / 原生桥**：`WysRouter.routeURL`、Capability 路由、Android / iOS / OHOS plugin
+- **路由条目模型**：`WysRouteEntry`（单条元数据）；跳转引擎为 `WysRouter`
 
 ## 依赖
 

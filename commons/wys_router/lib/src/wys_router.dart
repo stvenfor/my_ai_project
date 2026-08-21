@@ -8,8 +8,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'wys_capability_routes.dart';
 import 'wys_native_page_name_map.dart';
 import 'wys_native_route_registry.dart';
-import 'wys_route.dart';
 import 'wys_route_configuration.dart';
+import 'wys_route_entry.dart';
 import 'wys_route_interceptor.dart';
 import 'wys_url_utils.dart';
 
@@ -18,7 +18,7 @@ abstract final class WysRouter {
   WysRouter._();
 
   static WysRouteConfiguration? _configuration;
-  static final Map<String, WysRoute> _routes = {};
+  static final Map<String, WysRouteEntry> _routes = {};
   static final List<WysRouteInterceptor> _globalInterceptors = [];
   static const MethodChannel _nativeRouteChannel = MethodChannel(
     'com.tf.flutter/native_router',
@@ -42,7 +42,7 @@ abstract final class WysRouter {
     _registerBuiltInCapabilityRoutes();
   }
 
-  static void registerRoute(WysRoute route) {
+  static void registerRoute(WysRouteEntry route) {
     final key = _routeKey(route.pattern);
     _routes[key] = route;
   }
@@ -54,7 +54,7 @@ abstract final class WysRouter {
     WysRouteInterceptor? interceptor,
   }) {
     registerRoute(
-      WysRoute(
+      WysRouteEntry(
         pattern: pattern,
         getPath: (_, __) => getPath,
         interceptor: interceptor,
@@ -69,7 +69,7 @@ abstract final class WysRouter {
     WysRouteInterceptor? interceptor,
   }) {
     registerRoute(
-      WysRoute(
+      WysRouteEntry(
         pattern: pattern,
         targetType: WysRouteTargetType.handler,
         handler: handler,
@@ -275,7 +275,7 @@ abstract final class WysRouter {
     return pattern.trim();
   }
 
-  static WysRoute? _resolveRoute(String urlOrPath) {
+  static WysRouteEntry? _resolveRoute(String urlOrPath) {
     final path = WysUrlUtils.standardPath(urlOrPath);
     if (path.isNotEmpty && _routes.containsKey(path)) {
       return _routes[path];

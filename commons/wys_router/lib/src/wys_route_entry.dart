@@ -12,9 +12,9 @@ enum WysRouteTargetType {
   handler,
 }
 
-/// 单条路由元数据。
-class WysRoute {
-  WysRoute({
+/// 单条路由元数据（注册表条目，非跳转引擎；引擎见 [WysRouter]）。
+class WysRouteEntry {
+  WysRouteEntry({
     required this.pattern,
     this.targetType = WysRouteTargetType.flutterPage,
     this.getPath,
