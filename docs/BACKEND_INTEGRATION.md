@@ -82,10 +82,11 @@ Go 后端仓库（独立）：`my_go_study`（默认 `http://127.0.0.1:8080`）�
 | Android / 鸿蒙模拟器 | `10.0.2.2:8080` |
 | 真机（LAN） | `--dart-define=BACKEND_HOST=<Mac 局域网 IP>` 或 `--dart-define-from-file=.env.lan` |
 
-**本机局域网后端（推荐）**：与 Go 仓 `make lan-up` 对齐，见 [my_go_study/docs/lan-backend-host.md](../../my_code_study/my_go_study/docs/lan-backend-host.md)。
+**本机局域网后端（推荐）**：完整步骤见 Go 仓  
+[dual-end-lan-startup.md](../../my_code_study/my_go_study/docs/dual-end-lan-startup.md)（与 `make lan-up` 对齐）。专题：[lan-backend-host.md](../../my_code_study/my_go_study/docs/lan-backend-host.md)。
 
 ```bash
-cp .env.lan.example .env.lan   # 填写 BACKEND_HOST=与 Go REALTIME_PUBLIC_WS_HOST 相同的 IP
+cp .env.lan.example .env.lan   # BACKEND_HOST=与 Go REALTIME_PUBLIC_WS_HOST 相同的 IP
 flutter run --dart-define-from-file=.env.lan
 ```
 

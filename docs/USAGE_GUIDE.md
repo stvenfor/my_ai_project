@@ -3,7 +3,8 @@
 本文档基于当前工程实践，涵盖：**壳工程运行**、**业务模块独立运行**、**三套环境切换**、**登录与用户状态**、**Git Worktree 并行开发** 等日常开发场景。
 
 > 架构设计详见 [MODULE_ARCHITECTURE.md](./MODULE_ARCHITECTURE.md)。  
-> **Flutter ↔ Go 后端 ↔ Supabase 交互**（API、认证、ResultModel、调试）详见 [BACKEND_INTEGRATION.md](./BACKEND_INTEGRATION.md)。  
+> **Flutter ↔ Go 后端**详见 [BACKEND_INTEGRATION.md](./BACKEND_INTEGRATION.md)。  
+> **局域网真机两端启动**详见 Go 仓 [dual-end-lan-startup.md](../../my_code_study/my_go_study/docs/dual-end-lan-startup.md)。  
 > **Git Markdown → 飞书 Wiki 同步**详见 [FEISHU_SYNC.md](./FEISHU_SYNC.md)。
 
 ---
@@ -45,6 +46,18 @@ module_sample/                 # 壳工程（完整 App）
 cd /path/to/flutter_module_sample
 cp .env.example .env   # 仅需 USE_MOCK_AUTH 开关
 flutter pub get
+
+# 先起模拟器（任选其一）
+./scripts/start_emulator.sh android          # 或 start_android_emulator.sh
+./scripts/start_emulator.sh ios              # 或 start_ios_simulator.sh
+./scripts/start_emulator.sh harmony          # 或 start_harmony_emulator.sh
+./scripts/start_emulator.sh android --list   # 查看可用机型
+
+# 一键：起模拟器并 flutter run
+./scripts/run_app.sh --android
+./scripts/run_app.sh --ios
+./scripts/run_app.sh --harmony
+
 ./scripts/run_app.sh   # 或 flutter run --dart-define-from-file=.env
 ```
 
