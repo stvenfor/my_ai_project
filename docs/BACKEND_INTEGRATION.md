@@ -80,7 +80,16 @@ Go 后端仓库（独立）：`my_go_study`（默认 `http://127.0.0.1:8080`）�
 |------|----------------------------------|
 | iOS 模拟器 | `127.0.0.1:8080` |
 | Android / 鸿蒙模拟器 | `10.0.2.2:8080` |
-| 真机 | 需改为电脑 **局域网 IP**，如 `http://192.168.x.x:8080` |
+| 真机（LAN） | `--dart-define=BACKEND_HOST=<Mac 局域网 IP>` 或 `--dart-define-from-file=.env.lan` |
+
+**本机局域网后端（推荐）**：与 Go 仓 `make lan-up` 对齐，见 [my_go_study/docs/lan-backend-host.md](../../my_code_study/my_go_study/docs/lan-backend-host.md)。
+
+```bash
+cp .env.lan.example .env.lan   # 填写 BACKEND_HOST=与 Go REALTIME_PUBLIC_WS_HOST 相同的 IP
+flutter run --dart-define-from-file=.env.lan
+```
+
+`.env.lan` 不入库。Android 主 Manifest 已 `usesCleartextTraffic=true`，明文 `http://` 可用。Realtime WS 主机以 Go ticket 返回为准（依赖后端 `REALTIME_PUBLIC_WS_HOST`）。
 
 ### 2.3 请求头
 

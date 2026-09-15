@@ -15,6 +15,7 @@ class EnvConfig {
   /// - 本机 / iOS 模拟器：127.0.0.1
   /// - Android 模拟器：自动映射为 10.0.2.2
   /// - 鸿蒙/真机：`flutter run --dart-define=BACKEND_HOST=192.168.x.x`
+  /// - 局域网联调：`flutter run --dart-define-from-file=.env.lan`（见 `.env.lan.example`）
   final String backendBaseUrl;
   final String wsBaseUrl;
   final String rongAppKey;
