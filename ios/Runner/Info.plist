@@ -65,6 +65,12 @@
 		<key>NSAllowsArbitraryLoadsInWebContent</key>
 		<true/>
 	</dict>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>用于连接同一 Wi‑Fi 下的开发调试服务器（my_go_study）</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_http._tcp</string>
+	</array>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>用于扫描并连接附近的蓝牙设备</string>
 	<key>NSCameraUsageDescription</key>

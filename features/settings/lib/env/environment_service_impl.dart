@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:module_core/core.dart';
 import 'package:module_core/env/app_env.dart';
+import 'package:module_http/module_http.dart';
 import 'package:module_utils/module_utils.dart';
 
 /// 环境服务实现：持久化当前 App 环境（测试/预发/线上）。
@@ -11,6 +12,15 @@ class EnvironmentServiceImpl extends EnvironmentService {
 
   @override
   final Rx<AppEnv> currentEnv = AppEnv.test.obs;
+
+  /// 展示/联调用已 remap 的地址（真机 BACKEND_HOST），与 HTTP 实际请求一致。
+  @override
+  String get backendBaseUrl =>
+      BackendHttpConfig.remapLocalhostForPlatform(config.backendBaseUrl);
+
+  @override
+  String get wsBaseUrl =>
+      BackendHttpConfig.remapLocalhostForPlatform(config.wsBaseUrl);
 
   static Future<EnvironmentServiceImpl> create() async {
     final service = EnvironmentServiceImpl();

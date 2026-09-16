@@ -5,27 +5,66 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "my_ai_project (LAN 真机)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "toolArgs": [
+                "--dart-define-from-file=.env.lan"
+            ]
+        },
+        {
+            "name": "my_ai_project (LAN 真机 · profile)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile",
+            "toolArgs": [
+                "--dart-define-from-file=.env.lan"
+            ]
+        },
+        {
+            "name": "my_ai_project (LAN 真机 · release)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release",
+            "toolArgs": [
+                "--dart-define-from-file=.env.lan"
+            ]
+        },
+        {
             "name": "flutter_module_sample",
             "request": "launch",
             "type": "dart",
+            "program": "lib/main.dart",
             "toolArgs": [
-                "--dart-define-from-file=.env"
+                "--dart-define-from-file=.env.lan"
             ]
         },
         {
             "name": "flutter_module_sample (profile mode)",
             "request": "launch",
             "type": "dart",
+            "program": "lib/main.dart",
             "flutterMode": "profile",
             "toolArgs": [
-                "--dart-define-from-file=.env"
+                "--dart-define-from-file=.env.lan"
             ]
         },
         {
             "name": "flutter_module_sample (release mode)",
             "request": "launch",
             "type": "dart",
+            "program": "lib/main.dart",
             "flutterMode": "release",
+            "toolArgs": [
+                "--dart-define-from-file=.env.lan"
+            ]
+        },
+        {
+            "name": "flutter_module_sample (模拟器 / 本机 .env)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
             "toolArgs": [
                 "--dart-define-from-file=.env"
             ]

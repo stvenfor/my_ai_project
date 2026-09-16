@@ -4,6 +4,7 @@ import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_auth/user/controller/auth_controller.dart';
 import 'package:module_auth/user/theme/auth_theme.dart';
 import 'package:module_auth/user/view/login_footer_links.dart';
+import 'package:module_utils/module_utils.dart';
 
 class LoginPasswordPage extends StatefulWidget {
   const LoginPasswordPage({super.key});
@@ -87,7 +88,10 @@ class _LoginPasswordPageState extends State<LoginPasswordPage> {
                   child: FilledButton(
                     onPressed: _controller.isLoginPasswordValid &&
                             !_controller.isLoading.value
-                        ? _controller.loginWithPassword
+                        ? AppDebounce.wrapThrottle(
+                            'auth.login_password_button',
+                            _controller.loginWithPassword,
+                          )
                         : null,
                     style: FilledButton.styleFrom(
                       backgroundColor: AuthTheme.primaryBlue,

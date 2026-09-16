@@ -11,6 +11,8 @@ BUILD_TARGET=""
 MODE_ARGS=()
 EXTRA_ARGS=()
 ENV_FILE="$ROOT/.env"
+USE_LAN=false          # true → .env.lan（真机局域网）
+LAN_EXPLICIT=false     # 用户显式 --lan / --env-file
 START_PLATFORM=""   # android | ios | harmony
 DEVICE_ID=""
 
@@ -22,6 +24,7 @@ usage() {
 运行（默认 debug）:
   ./scripts/run_app.sh
   ./scripts/run_app.sh -d <device_id>
+  ./scripts/run_app.sh --lan -d <真机_id>   # 强制 .env.lan（BACKEND_HOST）
   ./scripts/run_app.sh --android          # 启动 Android 模拟器并 run
   ./scripts/run_app.sh --ios              # 启动 iOS 模拟器并 run
   ./scripts/run_app.sh --harmony          # 启动鸿蒙模拟器并 run
@@ -32,6 +35,10 @@ usage() {
   --android | --and
   --ios | --iphone
   --harmony | --ohos | --hos
+
+局域网真机:
+  --lan                使用 --dart-define-from-file=.env.lan
+  （对物理机 -d 时若未指定 --env-file，也会自动改用 .env.lan）
 
 Release / Profile 模式:
   -r, --release    flutter run --release（或 build 时显式 release）
@@ -46,6 +53,7 @@ Release / Profile 模式:
       hap | ohos         → flutter build hap（需 OHOS Flutter SDK）
 
 示例:
+  ./scripts/run_app.sh --lan -d <iPhone_udid>
   ./scripts/run_app.sh --android
   ./scripts/run_app.sh --ios -r
   ./scripts/run_app.sh --harmony
@@ -54,8 +62,9 @@ Release / Profile 模式:
   ./scripts/run_app.sh --build hap
 
 说明:
-  始终注入 --dart-define-from-file=.env。
-  首次运行请先执行: cp .env.example .env
+  默认注入 --dart-define-from-file=.env；真机 / --lan 用 .env.lan。
+  首次: cp .env.example .env ；真机再: cp .env.lan.example .env.lan
+  IDE: 选 launch「my_ai_project (LAN 真机)」即可。
   仅启动模拟器: ./scripts/start_emulator.sh android|ios|harmony
 EOF
 }
@@ -106,7 +115,16 @@ ensure_env_file() {
   if [[ -f "$ENV_FILE" ]]; then
     return
   fi
-  cat >&2 <<EOF
+  if [[ "$USE_LAN" == true ]]; then
+    cat >&2 <<EOF
+错误: 未找到 $ENV_FILE
+
+真机局域网请先:
+  cp .env.lan.example .env.lan
+并填写 BACKEND_HOST=<Mac 局域网 IP>（与 Go REALTIME_PUBLIC_WS_HOST 相同）。
+EOF
+  else
+    cat >&2 <<EOF
 错误: 未找到 $ENV_FILE
 
 请先创建本地配置:
@@ -114,8 +132,39 @@ ensure_env_file() {
 
 如果只是本地跑 Mock 登录，可将 .env 中 USE_MOCK_AUTH 改为 true。
 如果要联调真实登录，请保持 USE_MOCK_AUTH=false 并启动 my_go_study 后端。
+真机局域网请用: ./scripts/run_app.sh --lan -d <device_id>
 EOF
+  fi
   exit 1
+}
+
+# 判断 flutter devices 行是否像物理机（非 simulator / emulator）
+device_line_is_physical() {
+  local line="$1"
+  [[ "$line" != *"(simulator)"* ]] \
+    && [[ "$line" != *"emulator-"* ]] \
+    && [[ "$line" != *"chrome"* ]] \
+    && [[ "$line" != *"macos"* ]]
+}
+
+# 若 -d 指向物理机且用户未显式指定 env，改用 .env.lan
+maybe_switch_env_for_physical_device() {
+  local flutter_bin="$1"
+  [[ "$LAN_EXPLICIT" == true ]] && return
+  [[ -z "$DEVICE_ID" ]] && return
+  [[ ! -f "$ROOT/.env.lan" ]] && return
+
+  local line
+  while IFS= read -r line; do
+    if [[ "$line" == *"• ${DEVICE_ID} •"* ]] || [[ "$line" == *"• ${DEVICE_ID}"* ]]; then
+      if device_line_is_physical "$line"; then
+        USE_LAN=true
+        ENV_FILE="$ROOT/.env.lan"
+        echo "→ 检测到物理设备，使用 --dart-define-from-file=.env.lan"
+      fi
+      return
+    fi
+  done < <("$flutter_bin" devices 2>/dev/null || true)
 }
 
 start_emulator_for() {
@@ -213,6 +262,27 @@ while [[ $# -gt 0 ]]; do
       START_PLATFORM=harmony
       shift
       ;;
+    --lan)
+      USE_LAN=true
+      LAN_EXPLICIT=true
+      ENV_FILE="$ROOT/.env.lan"
+      shift
+      ;;
+    --env-file)
+      LAN_EXPLICIT=true
+      ENV_FILE="${2:-}"
+      if [[ -z "$ENV_FILE" ]]; then
+        echo "错误: --env-file 需要路径" >&2
+        exit 1
+      fi
+      if [[ "$ENV_FILE" != /* ]]; then
+        ENV_FILE="$ROOT/$ENV_FILE"
+      fi
+      if [[ "$ENV_FILE" == *".env.lan" ]]; then
+        USE_LAN=true
+      fi
+      shift 2
+      ;;
     -d)
       DEVICE_ID="${2:-}"
       if [[ -z "$DEVICE_ID" ]]; then
@@ -247,10 +317,8 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-ensure_env_file
 prepare_android_env
 FLUTTER="$(find_flutter)"
-ENV_ARGS=(--dart-define-from-file="$ENV_FILE")
 
 if [[ -n "$START_PLATFORM" ]]; then
   start_emulator_for "$START_PLATFORM"
@@ -269,6 +337,12 @@ if [[ -n "$START_PLATFORM" ]]; then
     EXTRA_ARGS+=(-d "$DEVICE_ID")
   fi
 fi
+
+# 物理机 -d 且未显式 --env-file/--lan 时，自动改用 .env.lan
+maybe_switch_env_for_physical_device "$FLUTTER"
+ensure_env_file
+ENV_ARGS=(--dart-define-from-file="$ENV_FILE")
+echo "→ dart-define-from-file=$(basename "$ENV_FILE")"
 
 "$FLUTTER" pub get
 

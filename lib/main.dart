@@ -79,6 +79,7 @@ class AppInitializer {
     LogUtils.i(
       '[App] 应用初始化完成 env=${Get.find<EnvironmentService>().config.label} '
       'baseUrl=${AppHttpBootstrap.resolveBaseUrl()} '
+      'BACKEND_HOST=${BackendHttpConfig.effectiveBackendHost.isEmpty ? "(未注入)" : BackendHttpConfig.effectiveBackendHost} '
       'loggedIn=${AuthSession.isLoggedIn} '
       'ws=${wsClient?.currentState.label ?? '未初始化'}',
     );

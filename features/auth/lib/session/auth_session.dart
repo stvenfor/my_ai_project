@@ -82,12 +82,19 @@ class AuthSession {
   }
 
   /// 启动时静默 refresh（本地已有 refresh_token 时）。
+  /// 真机后端不可达时避免长时间卡住启动；超时后清会话交给登录页。
   static Future<void> refreshIfNeeded() async {
     if (!isLoggedIn || !Get.isRegistered<AuthService>()) return;
-    await SessionRecovery.syncStoredDeviceId();
-    final auth = Get.find<AuthService>();
-    if (auth is SessionRefreshable) {
-      await (auth as SessionRefreshable).refreshSession();
+    try {
+      await SessionRecovery.syncStoredDeviceId();
+      final auth = Get.find<AuthService>();
+      if (auth is SessionRefreshable) {
+        await (auth as SessionRefreshable)
+            .refreshSession()
+            .timeout(const Duration(seconds: 8));
+      }
+    } catch (_) {
+      // 网络超时 / 后端不可达：不阻塞启动；本地会话可能过期，用户可重新登录。
     }
   }
 

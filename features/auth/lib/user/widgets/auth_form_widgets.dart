@@ -97,10 +97,13 @@ class AuthPrimaryButton extends StatelessWidget {
       height: AuthTheme.buttonHeight,
       child: FilledButton(
         onPressed: enabled && !isLoading
-            ? () {
-                AppKeyboard.dismiss();
-                onPressed();
-              }
+            ? AppDebounce.wrapThrottle(
+                'auth.primary_button',
+                () {
+                  AppKeyboard.dismiss();
+                  onPressed();
+                },
+              )
             : null,
         style: FilledButton.styleFrom(
           backgroundColor: AuthTheme.accent,

@@ -7,6 +7,7 @@ import 'package:module_auth/user/theme/auth_theme.dart';
 import 'package:module_auth/user/view/login_footer_links.dart';
 import 'package:module_auth/user/widgets/phone_otp_form_section.dart';
 import 'package:module_core/core.dart';
+import 'package:module_utils/module_utils.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -248,9 +249,12 @@ class _LoginPageState extends State<LoginPage> {
       height: AuthTheme.buttonHeight,
       child: FilledButton(
         onPressed: enabled
-            ? (isEmail
-                ? _controller.loginWithPassword
-                : _controller.verifyPhoneOtp)
+            ? AppDebounce.wrapThrottle(
+                'auth.login_button',
+                isEmail
+                    ? _controller.loginWithPassword
+                    : _controller.verifyPhoneOtp,
+              )
             : null,
         style: FilledButton.styleFrom(
           backgroundColor: AuthTheme.accent,

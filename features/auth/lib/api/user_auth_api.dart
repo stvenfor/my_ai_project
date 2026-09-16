@@ -294,11 +294,21 @@ class UserAuthApi {
     }
     if (_isConnectionFailure(text)) {
       final baseUrl = BackendHttpConfig.resolveBackendBaseUrl();
+      final hint = _lanHint(baseUrl);
       return NetworkAuthFailure(
-        '无法连接服务端（$baseUrl），请确认 my_go_study 已启动',
+        '无法连接服务端（$baseUrl），请确认 my_go_study 已启动$hint',
       );
     }
     return UnknownAuthFailure(text.isNotEmpty ? text : '登录失败，请稍后重试');
+  }
+
+  /// 真机仍打 127.0.0.1 时给出可操作提示（缺 BACKEND_HOST / 未用 LAN 启动配置）。
+  String _lanHint(String baseUrl) {
+    final host = Uri.tryParse(baseUrl)?.host ?? '';
+    if (host == '127.0.0.1' || host == 'localhost') {
+      return '。真机请用 IDE「LAN 真机」或 --dart-define-from-file=.env.lan（BACKEND_HOST=Mac局域网IP）';
+    }
+    return '。若已填 BACKEND_HOST：检查同 Wi‑Fi、本机防火墙，并允许「本地网络」权限';
   }
 
   bool _isConnectionFailure(String text) {

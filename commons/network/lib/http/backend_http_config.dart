@@ -1,17 +1,28 @@
 import 'dart:io' show Platform;
 
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, kReleaseMode;
 import 'package:get/get.dart';
 import 'package:module_core/core.dart';
+import 'package:module_http/http/lan_host.dart';
 
 /// 解析 my_go_study Go 后端 baseUrl。
 class BackendHttpConfig {
   BackendHttpConfig._();
 
-  /// 真机调试：`flutter run --dart-define=BACKEND_HOST=192.168.x.x`
+  /// `flutter run --dart-define=BACKEND_HOST=` 或 `--dart-define-from-file=.env.lan`
   static const String backendHostOverride = String.fromEnvironment(
     'BACKEND_HOST',
   );
+
+  /// dart-define 优先；非 release 且未注入时用 [LanHost.debugFallback]（真机裸启动）。
+  /// 当前回退：`172.16.0.43`（见 `commons/network/lib/http/lan_host.dart`）。
+  static String get effectiveBackendHost {
+    if (backendHostOverride.isNotEmpty) return backendHostOverride;
+    if (!kReleaseMode && LanHost.debugFallback.isNotEmpty) {
+      return LanHost.debugFallback;
+    }
+    return '';
+  }
 
   static String resolveBackendBaseUrl() {
     final configured = _readConfiguredBaseUrl();
@@ -26,7 +37,7 @@ class BackendHttpConfig {
   }
 
   /// Android 模拟器：127.0.0.1 → 10.0.2.2。
-  /// 鸿蒙/iOS 真机：用 [BACKEND_HOST]（局域网 IP），勿映射到 10.0.2.2。
+  /// 真机 / 未注入 dart-define：用 [effectiveBackendHost]。
   static String remapLocalhostForPlatform(String baseUrl) {
     if (kIsWeb) return baseUrl;
     try {
@@ -35,8 +46,9 @@ class BackendHttpConfig {
       final host = uri.host;
       if (host != '127.0.0.1' && host != 'localhost') return baseUrl;
 
-      if (backendHostOverride.isNotEmpty) {
-        return uri.replace(host: backendHostOverride).toString();
+      final lanHost = effectiveBackendHost;
+      if (lanHost.isNotEmpty) {
+        return uri.replace(host: lanHost).toString();
       }
       if (_isAndroidEmulatorStyleHost) {
         return uri.replace(host: '10.0.2.2').toString();

@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:module_auth/user/controller/auth_controller.dart';
 import 'package:module_auth/user/theme/auth_theme.dart';
 import 'package:module_core/core.dart';
+import 'package:module_utils/module_utils.dart';
 
 /// 手机号 + 验证码同页表单（登录 / 注册复用）。
 class PhoneOtpFormSection extends StatelessWidget {
@@ -156,7 +157,10 @@ class _SendOtpButton extends StatelessWidget {
         height: AuthTheme.fieldHeight,
         child: TextButton(
           onPressed: canSend
-              ? () => controller.sendPhoneOtp(fromRegister: fromRegister)
+              ? AppDebounce.wrapThrottle(
+                  'auth.send_otp_button',
+                  () => controller.sendPhoneOtp(fromRegister: fromRegister),
+                )
               : null,
           style: TextButton.styleFrom(
             foregroundColor: AuthTheme.accent,

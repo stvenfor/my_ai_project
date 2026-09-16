@@ -5,6 +5,7 @@ import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_auth/user/controller/auth_controller.dart';
 import 'package:module_auth/user/theme/auth_theme.dart';
 import 'package:module_core/core.dart';
+import 'package:module_utils/module_utils.dart';
 
 class LoginOtpPage extends GetView<AuthController> {
   const LoginOtpPage({super.key});
@@ -82,7 +83,10 @@ class LoginOtpPage extends GetView<AuthController> {
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: controller.canResendOtp
-                        ? controller.resendPhoneOtp
+                        ? AppDebounce.wrapThrottle(
+                            'auth.resend_otp_button',
+                            controller.resendPhoneOtp,
+                          )
                         : null,
                     child: Text(
                       controller.otpCooldownSeconds.value > 0
@@ -99,7 +103,10 @@ class LoginOtpPage extends GetView<AuthController> {
                   height: 48,
                   child: FilledButton(
                     onPressed: controller.isOtpValid && !controller.isLoading.value
-                        ? controller.verifyPhoneOtp
+                        ? AppDebounce.wrapThrottle(
+                            'auth.otp_login_button',
+                            controller.verifyPhoneOtp,
+                          )
                         : null,
                     style: FilledButton.styleFrom(
                       backgroundColor: AuthTheme.primaryBlue,

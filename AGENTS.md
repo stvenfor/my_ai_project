@@ -233,7 +233,7 @@ flutter run -t features/home/lib/main_dev.dart
 |------|------|------|
 | `FormatException: Invalid HTTP header` | `X-App-Env` 用了中文 | 使用 `AppEnv.name`（`test`/`staging`/`production`） |
 | 登录显示 `Internal Server Error` | Dio 未解析 4xx body | 已用 `validateStatus < 600` + `BackendResponseParser` |
-| 模拟器连不上 `127.0.0.1:8080` | 网络隔离 | Android/鸿蒙自动映射 `10.0.2.2`；真机用 `.env.lan` + `BACKEND_HOST`（完整手册：Go `docs/dual-end-lan-startup.md`） |
+| 模拟器连不上 `127.0.0.1:8080` | 网络隔离 | Android/鸿蒙自动映射 `10.0.2.2`；真机用 IDE「LAN 真机」或 `./scripts/run_app.sh --lan`（`.env.lan` + `BACKEND_HOST`；手册：Go `docs/dual-end-lan-startup.md`） |
 | 二手车 401 | token 过期或未登录 | 须经 Go 后端登录获取 access_token |
 | `.env` 修改不生效 | 热重载不读 define | **Hot Restart** 或重新 `flutter run` |
 

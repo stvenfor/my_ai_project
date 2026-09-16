@@ -83,14 +83,21 @@ Go 后端仓库（独立）：`my_go_study`（默认 `http://127.0.0.1:8080`）�
 | 真机（LAN） | `--dart-define=BACKEND_HOST=<Mac 局域网 IP>` 或 `--dart-define-from-file=.env.lan` |
 
 **本机局域网后端（推荐）**：完整步骤见 Go 仓  
-[dual-end-lan-startup.md](../../my_code_study/my_go_study/docs/dual-end-lan-startup.md)（与 `make lan-up` 对齐）。专题：[lan-backend-host.md](../../my_code_study/my_go_study/docs/lan-backend-host.md)。
+[dual-end-lan-startup.md](../../my_code_study/my_go_study/docs/dual-end-lan-startup.md)（与 `make lan-run` / `lan-up` 对齐）。专题：[lan-backend-host.md](../../my_code_study/my_go_study/docs/lan-backend-host.md)。
 
 ```bash
 cp .env.lan.example .env.lan   # BACKEND_HOST=与 Go REALTIME_PUBLIC_WS_HOST 相同的 IP
-flutter run --dart-define-from-file=.env.lan
+
+# IDE：Run 选「my_ai_project (LAN 真机)」（已带 --dart-define-from-file=.env.lan）
+# CLI：
+./scripts/run_app.sh --lan -d <device_id>
+# 或只传真机 -d（脚本会自动改用 .env.lan）
+./scripts/run_app.sh -d <device_id>
 ```
 
 `.env.lan` 不入库。Android 主 Manifest 已 `usesCleartextTraffic=true`，明文 `http://` 可用。Realtime WS 主机以 Go ticket 返回为准（依赖后端 `REALTIME_PUBLIC_WS_HOST`）。
+
+**真机仍连 `127.0.0.1`**：看启动日志 `BACKEND_HOST=`；若为 `(未注入)` 说明未带 `.env.lan`（Xcode / 裸 run 常见）。须完整重装，或依赖 debug 回退 `commons/network/lib/http/lan_host.dart`（与 Mac 局域网 IP 对齐）。完整调试记录见 Go 仓 [ios-lan-device-debug-2026-09-16.md](../../my_code_study/my_go_study/docs/ios-lan-device-debug-2026-09-16.md)。
 
 ### 2.3 请求头
 
@@ -342,7 +349,8 @@ UsedCarNavigation.open()
 | 现象 | 原因 | 处理 |
 |------|------|------|
 | 401 未授权 | token 过期或未登录 | 重新登录 |
-| 无法连接服务端 | Go 未启动或 baseUrl 错误 | 启动 `my_go_study`，检查模拟器 IP |
+| 无法连接服务端（`127.0.0.1`） | 真机未注入 `BACKEND_HOST` | IDE「LAN 真机」/ `--lan` 完整重装；见 Go 仓 ios-lan-device-debug 文档 |
+| 无法连接服务端（局域网 IP） | Go 未起 / 网络 / 本地网络权限 | `curl`+Safari `/health`；关防火墙；允许本地网络 |
 | 空列表 | Supabase 无数据 | 正常，非错误 |
 
 ---

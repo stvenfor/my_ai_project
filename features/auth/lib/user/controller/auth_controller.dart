@@ -46,10 +46,11 @@ class AuthController extends GetxController {
 
   static const _lastLoginEmailKey = 'auth_last_login_email';
   static const _lastLoginPasswordKey = 'auth_last_login_password';
+  static const _lastLoginPhoneKey = 'auth_last_login_phone';
+  static const _lastLoginModeKey = 'auth_last_login_mode';
 
   String _pendingEmail = '';
   String _pendingPhone = '';
-  String _lastSavedLoginEmail = '';
   Timer? _otpTimer;
 
   @override
@@ -58,23 +59,49 @@ class AuthController extends GetxController {
     _restoreLastLoginCredentials();
   }
 
+  /// 从本地恢复上次登录成功的邮箱/密码、手机号，以及登录方式 Tab。
   void _restoreLastLoginCredentials() {
     final savedEmail = SpUtils.getString(_lastLoginEmailKey);
     final savedPassword = SpUtils.getString(_lastLoginPasswordKey);
+    final savedPhone = SpUtils.getString(_lastLoginPhoneKey);
+    final savedMode = SpUtils.getString(_lastLoginModeKey);
+
     if (savedEmail != null && savedEmail.isNotEmpty) {
       email.value = savedEmail;
       _pendingEmail = savedEmail;
-      _lastSavedLoginEmail = savedEmail;
     }
     if (savedPassword != null && savedPassword.isNotEmpty) {
       password.value = savedPassword;
     }
+    if (savedPhone != null && savedPhone.isNotEmpty) {
+      phone.value = savedPhone;
+      _pendingPhone = savedPhone;
+    }
+
+    if (savedMode == AuthCredentialMode.phone.name) {
+      credentialMode.value = AuthCredentialMode.phone;
+    } else if (savedMode == AuthCredentialMode.email.name) {
+      credentialMode.value = AuthCredentialMode.email;
+    }
   }
 
-  Future<void> _persistLastLoginCredentials(String loginEmail) async {
-    _lastSavedLoginEmail = loginEmail;
-    await SpUtils.setString(_lastLoginEmailKey, loginEmail);
+  /// 邮箱登录成功后记住邮箱 + 密码（仅本地）。
+  Future<void> _persistEmailLoginCredentials(String loginEmail) async {
+    final normalized = loginEmail.trim();
+    _pendingEmail = normalized;
+    email.value = normalized;
+    await SpUtils.setString(_lastLoginEmailKey, normalized);
     await SpUtils.setString(_lastLoginPasswordKey, password.value);
+    await SpUtils.setString(_lastLoginModeKey, AuthCredentialMode.email.name);
+  }
+
+  /// 短信登录成功后记住手机号（仅本地，不存验证码）。
+  Future<void> _persistPhoneLoginCredentials(String loginPhone) async {
+    final normalized = PhoneAuthUtils.normalizeDigits(loginPhone);
+    _pendingPhone = normalized;
+    phone.value = normalized;
+    await SpUtils.setString(_lastLoginPhoneKey, normalized);
+    await SpUtils.setString(_lastLoginModeKey, AuthCredentialMode.phone.name);
   }
 
   String get greeting {
@@ -261,6 +288,9 @@ class AuthController extends GetxController {
       toast('请输入有效的手机号');
       return false;
     }
+    if (!AppDebounce.tryThrottle('auth.sendPhoneOtp')) {
+      return false;
+    }
 
     isLoading.value = true;
     try {
@@ -291,6 +321,9 @@ class AuthController extends GetxController {
         _pendingPhone.isNotEmpty ? _pendingPhone : phone.value;
     if (!validatePhone(targetPhone)) {
       _showToast('手机号无效');
+      return;
+    }
+    if (!AppDebounce.tryThrottle('auth.resendPhoneOtp')) {
       return;
     }
 
@@ -329,6 +362,9 @@ class AuthController extends GetxController {
       toast('手机号无效');
       return;
     }
+    if (!AppDebounce.tryThrottle('auth.verifyPhoneOtp')) {
+      return;
+    }
 
     isLoading.value = true;
     try {
@@ -336,6 +372,8 @@ class AuthController extends GetxController {
         phone: targetPhone,
         otp: otpCode.value.trim(),
       );
+      await _persistPhoneLoginCredentials(targetPhone);
+      otpCode.value = '';
       if (fromRegister) {
         _showRegisterSuccess('注册成功');
       }
@@ -361,6 +399,9 @@ class AuthController extends GetxController {
       _showLoginToast('请输入至少6位密码');
       return;
     }
+    if (!AppDebounce.tryThrottle('auth.loginWithPassword')) {
+      return;
+    }
 
     isLoading.value = true;
     final loginEmail = email.value.trim();
@@ -372,7 +413,7 @@ class AuthController extends GetxController {
         password: password.value,
       );
       _logAuth('AuthLogin', 'success: email=$loginEmail', level: 'success');
-      await _persistLastLoginCredentials(loginEmail);
+      await _persistEmailLoginCredentials(loginEmail);
       await _navigateAfterAuth();
     } catch (error) {
       _showLoginAuthFailure(error);
@@ -399,6 +440,9 @@ class AuthController extends GetxController {
       }
       return;
     }
+    if (!AppDebounce.tryThrottle('auth.registerWithEmail')) {
+      return;
+    }
 
     isLoading.value = true;
     _logRegister(
@@ -412,7 +456,7 @@ class AuthController extends GetxController {
       );
       await _refreshUserSession();
       final registeredEmail = email.value.trim();
-      await _persistLastLoginCredentials(registeredEmail);
+      await _persistEmailLoginCredentials(registeredEmail);
       _showRegisterSuccess('注册成功');
       await _navigateAfterAuth();
     } catch (error) {
