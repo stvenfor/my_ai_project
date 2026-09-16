@@ -1,6 +1,6 @@
 import 'dart:io' show Platform;
 
-import 'package:flutter/foundation.dart' show kIsWeb, kReleaseMode;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:get/get.dart';
 import 'package:module_core/core.dart';
 import 'package:module_http/http/lan_host.dart';
@@ -14,13 +14,11 @@ class BackendHttpConfig {
     'BACKEND_HOST',
   );
 
-  /// dart-define 优先；非 release 且未注入时用 [LanHost.debugFallback]（真机裸启动）。
+  /// dart-define 优先；未注入时用 [LanHost.fallback]（真机 Run / Release 与 Debug 一致）。
   /// 当前回退：`172.16.0.43`（见 `commons/network/lib/http/lan_host.dart`）。
   static String get effectiveBackendHost {
     if (backendHostOverride.isNotEmpty) return backendHostOverride;
-    if (!kReleaseMode && LanHost.debugFallback.isNotEmpty) {
-      return LanHost.debugFallback;
-    }
+    if (LanHost.fallback.isNotEmpty) return LanHost.fallback;
     return '';
   }
 
