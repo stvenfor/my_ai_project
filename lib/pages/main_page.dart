@@ -201,20 +201,14 @@ class _PhoneBottomNavigationBar extends StatelessWidget {
     if (!showMiniPlayer) {
       return Material(
         color: Colors.transparent,
-        child: SafeArea(
-          top: false,
-          child: navigationBar,
-        ),
+        child: navigationBar,
       );
     }
 
     if (!Get.isRegistered<MusicPlaybackController>()) {
       return Material(
         color: Colors.transparent,
-        child: SafeArea(
-          top: false,
-          child: navigationBar,
-        ),
+        child: navigationBar,
       );
     }
 
@@ -227,15 +221,12 @@ class _PhoneBottomNavigationBar extends StatelessWidget {
       return Material(
         color: Colors.transparent,
         elevation: miniVisible ? 8 : 0,
-        child: SafeArea(
-          top: false,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (miniVisible) const MusicMiniPlayerBar(),
-              navigationBar,
-            ],
-          ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (miniVisible) const MusicMiniPlayerBar(),
+            navigationBar,
+          ],
         ),
       );
     });
