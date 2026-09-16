@@ -1,2 +1,7 @@
 #include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"
 #include "Generated.xcconfig"
+
+// OHOS Flutter 生成的 Generated.xcconfig 会写入
+// EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386 arm64，在 Apple Silicon 上会导致
+// 仅剩 x86_64 模拟器可用，iPhone 17 / iOS 26 arm64 模拟器无法作为 destination。
+EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386

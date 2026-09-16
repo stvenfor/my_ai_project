@@ -79,9 +79,9 @@ class AuthController extends GetxController {
 
   String get greeting {
     final hour = DateTime.now().hour;
-    if (hour < 12) return '早上好，欢迎使用i车商';
-    if (hour < 18) return '下午好，欢迎使用i车商';
-    return '晚上好，欢迎使用i车商';
+    if (hour < 12) return '早上好，欢迎使用iHome';
+    if (hour < 18) return '下午好，欢迎使用iHome';
+    return '晚上好，欢迎使用iHome';
   }
 
   static const minPasswordLength = 6;
@@ -247,6 +247,7 @@ class AuthController extends GetxController {
   }
 
   Future<bool> sendPhoneOtp({bool fromRegister = false}) async {
+    AppKeyboard.dismiss();
     void toast(String message) =>
         fromRegister ? _showRegisterToast(message) : _showToast(message);
     void fail(Object error) =>
@@ -284,6 +285,7 @@ class AuthController extends GetxController {
   }
 
   Future<void> resendPhoneOtp() async {
+    AppKeyboard.dismiss();
     if (!canResendOtp) return;
     final targetPhone =
         _pendingPhone.isNotEmpty ? _pendingPhone : phone.value;
@@ -305,6 +307,7 @@ class AuthController extends GetxController {
   }
 
   Future<void> verifyPhoneOtp({bool fromRegister = false}) async {
+    AppKeyboard.dismiss();
     void toast(String message) =>
         fromRegister ? _showRegisterToast(message) : _showToast(message);
     void fail(Object error) => fromRegister
@@ -345,6 +348,7 @@ class AuthController extends GetxController {
   }
 
   Future<void> loginWithPassword() async {
+    AppKeyboard.dismiss();
     if (!agreedPrivacy.value) {
       _showLoginToast('请先阅读并同意隐私条款');
       return;
@@ -378,6 +382,7 @@ class AuthController extends GetxController {
   }
 
   Future<void> registerWithEmail() async {
+    AppKeyboard.dismiss();
     if (!agreedPrivacy.value) {
       _showRegisterToast('请先阅读并同意隐私条款');
       return;

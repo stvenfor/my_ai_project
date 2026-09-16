@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_home/home/mock/search_mock_data.dart';
 import 'package:module_home/home/model/search_page_model.dart';
+import 'package:module_utils/module_utils.dart';
 
 class HomeSearchController extends GetxController {
   static const _rotateInterval = Duration(seconds: 2);
@@ -121,6 +122,7 @@ class HomeSearchController extends GetxController {
   void submitCurrentKeyword() => onSearchSubmit();
 
   void onSearchSubmit([String? value]) {
+    AppKeyboard.dismiss();
     final text = value?.trim().isNotEmpty == true
         ? value!.trim()
         : currentSearchKeyword;

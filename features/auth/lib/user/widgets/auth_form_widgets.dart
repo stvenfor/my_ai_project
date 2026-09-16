@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:module_auth/user/controller/auth_controller.dart';
 import 'package:module_auth/user/theme/auth_theme.dart';
+import 'package:module_utils/module_utils.dart';
 
 class AuthPrivacyRow extends StatelessWidget {
   const AuthPrivacyRow({super.key, required this.controller});
@@ -95,7 +96,12 @@ class AuthPrimaryButton extends StatelessWidget {
       width: double.infinity,
       height: AuthTheme.buttonHeight,
       child: FilledButton(
-        onPressed: enabled && !isLoading ? onPressed : null,
+        onPressed: enabled && !isLoading
+            ? () {
+                AppKeyboard.dismiss();
+                onPressed();
+              }
+            : null,
         style: FilledButton.styleFrom(
           backgroundColor: AuthTheme.accent,
           disabledBackgroundColor: AuthTheme.buttonDisabled,

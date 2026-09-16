@@ -11,6 +11,8 @@ BUILD_TARGET=""
 MODE_ARGS=()
 EXTRA_ARGS=()
 ENV_FILE="$ROOT/.env"
+START_PLATFORM=""   # android | ios | harmony
+DEVICE_ID=""
 
 usage() {
   cat <<'EOF'
@@ -20,8 +22,16 @@ usage() {
 运行（默认 debug）:
   ./scripts/run_app.sh
   ./scripts/run_app.sh -d <device_id>
+  ./scripts/run_app.sh --android          # 启动 Android 模拟器并 run
+  ./scripts/run_app.sh --ios              # 启动 iOS 模拟器并 run
+  ./scripts/run_app.sh --harmony          # 启动鸿蒙模拟器并 run
   ./scripts/run_app.sh -r
   ./scripts/run_app.sh --release -d iPhone
+
+平台快捷（会先调用 start_emulator.sh --wait）:
+  --android | --and
+  --ios | --iphone
+  --harmony | --ohos | --hos
 
 Release / Profile 模式:
   -r, --release    flutter run --release（或 build 时显式 release）
@@ -33,35 +43,58 @@ Release / Profile 模式:
       appbundle | aab    → flutter build appbundle
       ios                → flutter build ios（需 Xcode 签名）
       ipa                → flutter build ipa
+      hap | ohos         → flutter build hap（需 OHOS Flutter SDK）
 
 示例:
+  ./scripts/run_app.sh --android
+  ./scripts/run_app.sh --ios -r
+  ./scripts/run_app.sh --harmony
   ./scripts/run_app.sh -r -d 00008110-xxxxxxxx
   ./scripts/run_app.sh --build apk
-  ./scripts/run_app.sh --build ios --release --no-codesign
-  ./scripts/run_app.sh --build appbundle -r
+  ./scripts/run_app.sh --build hap
 
 说明:
   始终注入 --dart-define-from-file=.env。
   首次运行请先执行: cp .env.example .env
+  仅启动模拟器: ./scripts/start_emulator.sh android|ios|harmony
 EOF
 }
 
 find_flutter() {
   if [[ -n "${FLUTTER_BIN:-}" ]]; then
     echo "$FLUTTER_BIN"
-  elif [[ -x "$ROOT/.fvm/flutter_sdk/bin/flutter" ]]; then
-    echo "$ROOT/.fvm/flutter_sdk/bin/flutter"
-  elif [[ -x "/Users/stvenfor/fvm/default/bin/flutter" ]]; then
-    echo "/Users/stvenfor/fvm/default/bin/flutter"
-  else
-    command -v flutter
+    return
   fi
+  local candidates=(
+    "$ROOT/.fvm/flutter_sdk/bin/flutter"
+    "$HOME/fvm/versions/custom_3.35-ohos/bin/flutter"
+    "/Users/mac/fvm/versions/custom_3.35-ohos/bin/flutter"
+    "/Users/stvenfor/fvm/default/bin/flutter"
+  )
+  local c
+  for c in "${candidates[@]}"; do
+    if [[ -x "$c" ]]; then
+      echo "$c"
+      return
+    fi
+  done
+  command -v flutter
 }
 
 prepare_android_env() {
-  if [[ -d "/Users/stvenfor/Library/Android/sdk" ]]; then
-    export ANDROID_HOME="${ANDROID_HOME:-/Users/stvenfor/Library/Android/sdk}"
-    export ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT:-/Users/stvenfor/Library/Android/sdk}"
+  if [[ -z "${ANDROID_HOME:-}" ]]; then
+    local sdk
+    for sdk in \
+      "$HOME/Library/Android/sdk" \
+      "/Users/stvenfor/Library/Android/sdk"; do
+      if [[ -d "$sdk" ]]; then
+        export ANDROID_HOME="$sdk"
+        export ANDROID_SDK_ROOT="$sdk"
+        break
+      fi
+    done
+  else
+    export ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
   fi
   if [[ "${JAVA_HOME:-}" == "/usr/local/opt/openjdk@17" &&
         ! -d "$JAVA_HOME" ]]; then
@@ -85,6 +118,75 @@ EOF
   exit 1
 }
 
+start_emulator_for() {
+  local platform="$1"
+  echo "→ 启动 ${platform} 模拟器..."
+  "$ROOT/scripts/start_emulator.sh" "$platform" --wait
+}
+
+# 从 flutter devices 解析目标 device id
+resolve_device_id() {
+  local platform="$1"
+  local flutter_bin="$2"
+  local line id
+
+  # Prefer machine-readable lines: "<name> • <id> • <platform> • ..."
+  while IFS= read -r line; do
+    case "$platform" in
+      android)
+        if [[ "$line" == *"• android"* ]] || [[ "$line" == *emulator-* ]]; then
+          id="$(printf '%s\n' "$line" | awk -F ' • ' '{print $2}' | xargs)"
+          if [[ -n "$id" && "$id" != "macos" && "$id" != "chrome" ]]; then
+            echo "$id"
+            return
+          fi
+        fi
+        ;;
+      ios)
+        if [[ "$line" == *"• ios"* ]] && [[ "$line" != *"wireless"* ]]; then
+          id="$(printf '%s\n' "$line" | awk -F ' • ' '{print $2}' | xargs)"
+          # Prefer simulator UDID (contains many hyphens / hex)
+          if [[ -n "$id" ]]; then
+            echo "$id"
+            return
+          fi
+        fi
+        ;;
+      harmony|ohos)
+        if [[ "$line" == *"• ohos"* ]] || [[ "$line" == *"harmony"* ]]; then
+          id="$(printf '%s\n' "$line" | awk -F ' • ' '{print $2}' | xargs)"
+          if [[ -n "$id" ]]; then
+            echo "$id"
+            return
+          fi
+        fi
+        ;;
+    esac
+  done < <("$flutter_bin" devices 2>/dev/null || true)
+
+  return 1
+}
+
+wait_flutter_device() {
+  local platform="$1"
+  local flutter_bin="$2"
+  local i=0
+  local id=""
+  echo "→ 等待 Flutter 识别 ${platform} 设备..."
+  while ((i < 90)); do
+    if id="$(resolve_device_id "$platform" "$flutter_bin")"; then
+      echo "→ 设备: $id"
+      DEVICE_ID="$id"
+      return
+    fi
+    sleep 2
+    i=$((i + 2))
+  done
+  echo "错误: Flutter 未识别到 ${platform} 设备。请检查模拟器是否已启动。" >&2
+  "$flutter_bin" devices || true
+  exit 1
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -h|--help)
@@ -99,11 +201,32 @@ while [[ $# -gt 0 ]]; do
       MODE_ARGS+=(--profile)
       shift
       ;;
+    --android|--and)
+      START_PLATFORM=android
+      shift
+      ;;
+    --ios|--iphone)
+      START_PLATFORM=ios
+      shift
+      ;;
+    --harmony|--ohos|--hos)
+      START_PLATFORM=harmony
+      shift
+      ;;
+    -d)
+      DEVICE_ID="${2:-}"
+      if [[ -z "$DEVICE_ID" ]]; then
+        echo "错误: -d 需要 device id" >&2
+        exit 1
+      fi
+      EXTRA_ARGS+=(-d "$DEVICE_ID")
+      shift 2
+      ;;
     -b|--build)
       BUILD=true
       BUILD_TARGET="${2:-}"
       if [[ -z "$BUILD_TARGET" ]]; then
-        echo "错误: --build 需要指定目标 (apk|android|appbundle|aab|ios|ipa)" >&2
+        echo "错误: --build 需要指定目标 (apk|android|appbundle|aab|ios|ipa|hap|ohos)" >&2
         exit 1
       fi
       shift 2
@@ -112,7 +235,7 @@ while [[ $# -gt 0 ]]; do
       BUILD=true
       BUILD_TARGET="${2:-}"
       if [[ -z "$BUILD_TARGET" ]]; then
-        echo "错误: build 需要指定目标 (apk|android|appbundle|aab|ios|ipa)" >&2
+        echo "错误: build 需要指定目标 (apk|android|appbundle|aab|ios|ipa|hap|ohos)" >&2
         exit 1
       fi
       shift 2
@@ -128,6 +251,24 @@ ensure_env_file
 prepare_android_env
 FLUTTER="$(find_flutter)"
 ENV_ARGS=(--dart-define-from-file="$ENV_FILE")
+
+if [[ -n "$START_PLATFORM" ]]; then
+  start_emulator_for "$START_PLATFORM"
+  wait_flutter_device "$START_PLATFORM" "$FLUTTER"
+  # Avoid duplicate -d if user also passed one
+  local_has_d=false
+  if ((${#EXTRA_ARGS[@]} > 0)); then
+    for a in "${EXTRA_ARGS[@]}"; do
+      if [[ "$a" == "-d" ]]; then
+        local_has_d=true
+        break
+      fi
+    done
+  fi
+  if [[ "$local_has_d" == false ]]; then
+    EXTRA_ARGS+=(-d "$DEVICE_ID")
+  fi
+fi
 
 "$FLUTTER" pub get
 
@@ -154,9 +295,12 @@ if [[ "$BUILD" == true ]]; then
     ipa)
       run_flutter build ipa
       ;;
+    hap|ohos|harmony)
+      run_flutter build hap
+      ;;
     *)
       echo "未知构建目标: $BUILD_TARGET" >&2
-      echo "支持: apk, android, appbundle, aab, ios, ipa" >&2
+      echo "支持: apk, android, appbundle, aab, ios, ipa, hap, ohos" >&2
       exit 1
       ;;
   esac

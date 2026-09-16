@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
@@ -60,10 +61,12 @@
         <!-- 极光 JPush 占位（控制台创建应用后替换 AppKey；厂商通道后续接入） -->
         <meta-data
             android:name="JPUSH_APPKEY"
-            android:value="DEV_JPUSH_APP_KEY_PLACEHOLDER" />
+            android:value="DEV_JPUSH_APP_KEY_PLACEHOLDER"
+            tools:replace="android:value" />
         <meta-data
             android:name="JPUSH_CHANNEL"
-            android:value="developer-default" />
+            android:value="developer-default"
+            tools:replace="android:value" />
 
         <meta-data
             android:name="flutterEmbedding"

@@ -51,6 +51,7 @@ class _WysCheckCodeDialogState extends State<WysCheckCodeDialog> {
   void _refreshCode() => setState(() => _code = _generateCode());
 
   void _submit() {
+    FocusManager.instance.primaryFocus?.unfocus();
     if (!_canConfirm) return;
     if (_inputController.text.toLowerCase() == _code.toLowerCase()) {
       Navigator.of(context).pop(true);

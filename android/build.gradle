@@ -1,5 +1,8 @@
 allprojects {
     repositories {
+        maven { name 'aliyun-google'; url 'https://maven.aliyun.com/repository/google' }
+        maven { name 'aliyun-central'; url 'https://maven.aliyun.com/repository/central' }
+        maven { name 'aliyun-public'; url 'https://maven.aliyun.com/repository/public' }
         google()
         mavenCentral()
     }
@@ -21,6 +24,27 @@ subprojects {
             force 'androidx.activity:activity-ktx:1.10.1'
             force 'androidx.core:core:1.16.0'
             force 'androidx.core:core-ktx:1.16.0'
+        }
+    }
+}
+
+// AGP 8+ requires namespace; some git OHOS plugins (e.g. scan) still only set package in Manifest.
+subprojects { subproject ->
+    subproject.pluginManager.withPlugin('com.android.library') {
+        def androidExt = subproject.extensions.findByName('android')
+        if (androidExt == null) {
+            return
+        }
+        if (androidExt.namespace != null && !androidExt.namespace.toString().trim().isEmpty()) {
+            return
+        }
+        def manifest = subproject.file('src/main/AndroidManifest.xml')
+        if (!manifest.exists()) {
+            return
+        }
+        def pkg = new XmlParser().parse(manifest).attribute('package')
+        if (pkg != null) {
+            androidExt.namespace = pkg.toString()
         }
     }
 }

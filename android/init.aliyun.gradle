@@ -1,0 +1,20 @@
+// Prepend Aliyun mirrors for project/buildscript repos without clearing settings repos.
+// Usage: ./gradlew assembleDebug -I init.aliyun.gradle
+
+def prependAliyun = { RepositoryHandler repos ->
+    def urls = repos.collect { it.url?.toString() }
+    if (!urls.any { it?.contains('maven.aliyun.com/repository/public') }) {
+        repos.maven { name = 'aliyun-public'; url = 'https://maven.aliyun.com/repository/public' }
+    }
+    if (!urls.any { it?.contains('maven.aliyun.com/repository/google') }) {
+        repos.maven { name = 'aliyun-google'; url = 'https://maven.aliyun.com/repository/google' }
+    }
+    if (!urls.any { it?.contains('maven.aliyun.com/repository/central') }) {
+        repos.maven { name = 'aliyun-central'; url = 'https://maven.aliyun.com/repository/central' }
+    }
+}
+
+allprojects { project ->
+    project.buildscript.repositories.prependAliyun
+    project.repositories.prependAliyun
+}

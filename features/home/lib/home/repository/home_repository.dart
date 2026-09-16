@@ -113,7 +113,7 @@ class HomeRepository {
         ),
         HomeNewsItem(
           title: '经销商数字化转型白皮书：从流量到留量',
-          source: 'i车商资讯',
+          source: 'iHome资讯',
           date: '2024.05.09',
           imageUrl: 'https://picsum.photos/seed/news3/400/200',
         ),

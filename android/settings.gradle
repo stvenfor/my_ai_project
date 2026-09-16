@@ -11,6 +11,11 @@ pluginManagement {
     includeBuild("${settings.ext.flutterSdkPath}/packages/flutter_tools/gradle")
 
     repositories {
+        // 国内镜像优先，避免 plugins.gradle.org 下载卡住
+        maven { name 'aliyun-google'; url 'https://maven.aliyun.com/repository/google' }
+        maven { name 'aliyun-central'; url 'https://maven.aliyun.com/repository/central' }
+        maven { name 'aliyun-gradle-plugin'; url 'https://maven.aliyun.com/repository/gradle-plugin' }
+        maven { name 'aliyun-public'; url 'https://maven.aliyun.com/repository/public' }
         google()
         mavenCentral()
         gradlePluginPortal()
