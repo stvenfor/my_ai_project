@@ -2,14 +2,5 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<!-- Associated Domains (Universal Links) 已关闭：
-	     Personal Team 不支持该能力，会导致无法创建 Development provisioning profile。
-	     深链暂用自定义 Scheme（Info.plist CFBundleURLTypes / xiaomao://）即可。
-	     换企业/付费开发者账号后再加回：
-	     <key>com.apple.developer.associated-domains</key>
-	     <array>
-	       <string>applinks:xiaomaomain.com</string>
-	     </array>
-	-->
 </dict>
 </plist>

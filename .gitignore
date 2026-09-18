@@ -62,3 +62,16 @@ app.*.map.json
 # 禁止本地 CocoaPods vendor，OrderedSet 等依赖走远程 trunk
 ios/vendor/
 /packages/infrastructure/dokit/example/local.properties
+
+# OpenHarmony / OHOS — 本地构建产物与机器相关依赖
+# （ohos/.gitignore 只覆盖 /ohos；组件目录下的 ohos/ 需在此声明）
+**/ohos/build/
+**/ohos/.hvigor/
+**/ohos/node_modules/
+**/ohos/local.properties
+**/ohos/oh-package-lock.json5
+**/ohos/oh_modules/flutter_native_x86_64
+**/ohos/BuildProfile.ets
+
+# DevEco 本地写入的签名配置（含密钥路径/口令）；克隆后复制 example 为 build-profile.json5
+/ohos/build-profile.json5
