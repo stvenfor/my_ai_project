@@ -12,6 +12,8 @@ class RoutePath{
   static const String homeHotRankDetail = '/home/hot_rank_detail';
   static const String homeUsedCarList = '/home/used_car';
   static const String homeUsedCarDetail = '/home/used_car/detail';
+  static const String homeDataAnalyticsList = '/home/data_analytics';
+  static const String homeDataAnalyticsDetail = '/home/data_analytics/detail';
   static const String login = '/login';
   static const String loginPassword = '/login/password';
   static const String loginOtp = '/login/otp';

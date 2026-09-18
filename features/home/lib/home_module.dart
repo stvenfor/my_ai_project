@@ -10,7 +10,10 @@ import 'package:module_home/home/view/home_page.dart';
 import 'package:module_home/home/view/strategy_page.dart';
 import 'package:module_home/home/view/hot_rank_detail_page.dart';
 import 'package:module_home/home/view/search_page.dart';
+import 'package:module_home/home/binding/analytics_binding.dart';
 import 'package:module_home/home/binding/used_car_binding.dart';
+import 'package:module_home/home/view/analytics_detail_page.dart';
+import 'package:module_home/home/view/analytics_list_page.dart';
 import 'package:module_home/home/view/used_car_detail_page.dart';
 import 'package:module_home/home/view/used_car_list_page.dart';
 import 'package:module_home/home/web/home_web_handlers.dart';
@@ -54,6 +57,14 @@ class HomeModule extends FeatureModule {
         RoutePath.homeUsedCarDetail: (_) {
           UsedCarDetailBinding().dependencies();
           return const UsedCarDetailPage();
+        },
+        RoutePath.homeDataAnalyticsList: (_) {
+          AnalyticsListBinding().dependencies();
+          return const AnalyticsListPage();
+        },
+        RoutePath.homeDataAnalyticsDetail: (_) {
+          AnalyticsDetailBinding().dependencies();
+          return const AnalyticsDetailPage();
         },
       };
 

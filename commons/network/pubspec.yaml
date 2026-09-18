@@ -13,6 +13,9 @@ dependencies:
   get: ^4.7.3
   module_core:
     path: ../core
+  grpc: ^4.0.1
+  protobuf: ^4.1.0
+  fixnum: ^1.1.1
 
 dev_dependencies:
   flutter_test:

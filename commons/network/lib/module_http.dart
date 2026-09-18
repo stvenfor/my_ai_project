@@ -14,3 +14,7 @@ export 'http/log_print_interceptor.dart';
 export 'http/my_interceptor.dart';
 export 'http/retry_interceptor.dart';
 export 'http/rsp_interceptor.dart';
+export 'grpc/backend_grpc_config.dart';
+export 'grpc/analytics_grpc_api.dart';
+export 'grpc/generated/analytics/v1/analytics.pb.dart';
+export 'grpc/generated/analytics/v1/analytics.pbgrpc.dart';
