@@ -450,6 +450,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.1.1"
+  fl_chart:
+    dependency: transitive
+    description:
+      name: fl_chart
+      sha256: "5276944c6ffc975ae796569a826c38a62d2abcf264e26b88fa6f482e107f4237"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.70.2"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -2030,6 +2038,13 @@ packages:
       relative: true
     source: path
     version: "1.0.0"
+  wys_chart:
+    dependency: "direct main"
+    description:
+      path: "components/wys_chart"
+      relative: true
+    source: path
+    version: "0.0.1"
   wys_common:
     dependency: "direct main"
     description:

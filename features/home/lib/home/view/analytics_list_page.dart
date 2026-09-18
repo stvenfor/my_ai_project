@@ -4,6 +4,7 @@ import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_home/home/controller/analytics_list_controller.dart';
 import 'package:module_home/home/model/analytics_record_model.dart';
 import 'package:module_home/home/theme/analytics_theme.dart';
+import 'package:wys_chart/wys_chart.dart';
 import 'package:wys_router/src/route/route_path.dart';
 
 class AnalyticsListPage extends GetView<AnalyticsListController> {
@@ -151,86 +152,135 @@ class _AnalyticsListTile extends StatelessWidget {
   final AnalyticsRecordModel item;
   final VoidCallback onTap;
 
+  Color? get _cueColor {
+    if (item.flagAnomaly) return AnalyticsTheme.destructive;
+    if (item.flagFeatured) return AnalyticsTheme.accent;
+    return null;
+  }
+
+  double? get _conversionRate {
+    if (item.metricClick <= 0) return null;
+    return item.metricConvert / item.metricClick;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final anomaly = item.flagAnomaly;
+    final cue = _cueColor;
+    final pv = item.metricPv.toDouble();
+
     return Padding(
       padding: const EdgeInsets.only(bottom: AnalyticsTheme.gridGap),
       child: Material(
         color: AnalyticsTheme.card,
         borderRadius: BorderRadius.circular(AnalyticsTheme.cardRadius),
+        clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(AnalyticsTheme.cardRadius),
-          child: Container(
-            constraints: const BoxConstraints(minHeight: 88),
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(AnalyticsTheme.cardRadius),
-              border: Border.all(
-                color: anomaly
-                    ? AnalyticsTheme.destructive.withValues(alpha: 0.35)
-                    : AnalyticsTheme.border,
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        item.title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: AnalyticsTheme.foreground,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
+                if (cue != null)
+                  Container(width: 4, color: cue)
+                else
+                  const SizedBox(width: 4),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                item.title,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: AnalyticsTheme.foreground,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            _StatusChip(status: item.status),
+                          ],
                         ),
-                      ),
+                        const SizedBox(height: 4),
+                        Text(
+                          item.subtitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: AnalyticsTheme.muted,
+                            fontSize: 13,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            WysConversionRing(
+                              rate: _conversionRate,
+                              colors: AnalyticsTheme.chartColors,
+                              size: 64,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: WysMiniBarChart(
+                                baseMax: pv > 0 ? pv : 1,
+                                colors: AnalyticsTheme.chartColors,
+                                height: 64,
+                                data: [
+                                  WysBarDatum(
+                                      label: 'PV',
+                                      value: item.metricPv.toDouble()),
+                                  WysBarDatum(
+                                      label: 'UV',
+                                      value: item.metricUv.toDouble()),
+                                  WysBarDatum(
+                                      label: '点',
+                                      value: item.metricClick.toDouble()),
+                                  WysBarDatum(
+                                      label: '转',
+                                      value: item.metricConvert.toDouble()),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            _MetricPill(
+                                label: 'UV', value: _compact(item.metricUv)),
+                            const SizedBox(width: 8),
+                            _MetricPill(
+                              label: 'ROI',
+                              value: item.metricRoi.toStringAsFixed(2),
+                              accent: true,
+                            ),
+                            const Spacer(),
+                            Text(
+                              item.code,
+                              style: const TextStyle(
+                                fontFamily: 'monospace',
+                                fontSize: 12,
+                                color: AnalyticsTheme.muted,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const Icon(
+                              Icons.chevron_right,
+                              size: 20,
+                              color: AnalyticsTheme.muted,
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 8),
-                    _StatusChip(status: item.status),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  item.subtitle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: AnalyticsTheme.muted,
-                    fontSize: 13,
                   ),
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    _MetricPill(label: 'UV', value: _compact(item.metricUv)),
-                    const SizedBox(width: 8),
-                    _MetricPill(
-                      label: 'ROI',
-                      value: item.metricRoi.toStringAsFixed(2),
-                      accent: true,
-                    ),
-                    const Spacer(),
-                    Text(
-                      item.code,
-                      style: const TextStyle(
-                        fontFamily: 'monospace',
-                        fontSize: 12,
-                        color: AnalyticsTheme.muted,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    const Icon(
-                      Icons.chevron_right,
-                      size: 20,
-                      color: AnalyticsTheme.muted,
-                    ),
-                  ],
                 ),
               ],
             ),

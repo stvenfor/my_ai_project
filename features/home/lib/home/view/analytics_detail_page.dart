@@ -4,6 +4,7 @@ import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_home/home/controller/analytics_detail_controller.dart';
 import 'package:module_home/home/model/analytics_record_model.dart';
 import 'package:module_home/home/theme/analytics_theme.dart';
+import 'package:wys_chart/wys_chart.dart';
 
 class AnalyticsDetailPage extends GetView<AnalyticsDetailController> {
   const AnalyticsDetailPage({super.key});
@@ -52,10 +53,78 @@ class AnalyticsDetailPage extends GetView<AnalyticsDetailController> {
         final item = controller.record.value;
         if (item == null) return const SizedBox.shrink();
 
+        final pv = item.metricPv.toDouble();
+        final stickiness = _stickinessScore(item.metricBounceRate);
+
         return ListView(
           padding: const EdgeInsets.fromLTRB(12, 12, 12, 28),
           children: [
+            if (item.flagAnomaly)
+              const _CueBanner(
+                color: AnalyticsTheme.destructive,
+                icon: Icons.warning_amber_rounded,
+                title: '异常记录',
+                subtitle: '该观测被标记为异常，请优先核对流量与转化。',
+              )
+            else if (item.flagFeatured)
+              const _CueBanner(
+                color: AnalyticsTheme.accent,
+                icon: Icons.star_rounded,
+                title: '精选记录',
+                subtitle: '该观测被标记为精选，适合作为对照样例。',
+              ),
+            if (item.flagAnomaly || item.flagFeatured)
+              const SizedBox(height: 12),
             _HeroCard(item: item),
+            const SizedBox(height: 12),
+            _ChartSection(
+              title: '流量漏斗',
+              icon: Icons.filter_alt_outlined,
+              child: WysFunnelBarChart(
+                baseMax: pv > 0 ? pv : 1,
+                colors: AnalyticsTheme.chartColors,
+                data: [
+                  WysBarDatum(label: 'PV', value: item.metricPv.toDouble()),
+                  WysBarDatum(label: 'UV', value: item.metricUv.toDouble()),
+                  WysBarDatum(label: '点击', value: item.metricClick.toDouble()),
+                  WysBarDatum(
+                      label: '转化', value: item.metricConvert.toDouble()),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            _ChartSection(
+              title: '收支对比',
+              icon: Icons.payments_outlined,
+              child: WysCompareBarChart(
+                colors: AnalyticsTheme.chartColors,
+                data: [
+                  WysBarDatum(
+                    label: '收入',
+                    value: item.metricRevenue,
+                    color: AnalyticsTheme.success,
+                  ),
+                  WysBarDatum(
+                    label: '成本',
+                    value: item.metricCost,
+                    color: AnalyticsTheme.destructive,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            _ChartSection(
+              title: '质量 / 风险',
+              icon: Icons.radar_outlined,
+              child: WysScoreRadarChart(
+                colors: AnalyticsTheme.chartColors,
+                data: [
+                  WysRadarDatum(label: '质量', value: item.scoreQuality),
+                  WysRadarDatum(label: '风险', value: item.scoreRisk),
+                  WysRadarDatum(label: '粘性', value: stickiness),
+                ],
+              ),
+            ),
             const SizedBox(height: 12),
             _SectionCard(
               title: '概况',
@@ -142,6 +211,124 @@ class AnalyticsDetailPage extends GetView<AnalyticsDetailController> {
           ],
         );
       }),
+    );
+  }
+
+  /// Bounce as 0–1 or 0–100 → stickiness 0–100 (higher is better).
+  static double _stickinessScore(double bounce) {
+    if (!bounce.isFinite || bounce < 0) return 0;
+    final rate = bounce <= 1 ? bounce : (bounce / 100).clamp(0.0, 1.0);
+    return ((1 - rate) * 100).clamp(0, 100);
+  }
+}
+
+class _CueBanner extends StatelessWidget {
+  const _CueBanner({
+    required this.color,
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
+
+  final Color color;
+  final IconData icon;
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(AnalyticsTheme.cardRadius),
+        border: Border.all(color: color.withValues(alpha: 0.35)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: color, size: 22),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    color: AnalyticsTheme.muted,
+                    fontSize: 12,
+                    height: 1.35,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ChartSection extends StatelessWidget {
+  const _ChartSection({
+    required this.title,
+    required this.icon,
+    required this.child,
+  });
+
+  final String title;
+  final IconData icon;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+      decoration: BoxDecoration(
+        color: AnalyticsTheme.card,
+        borderRadius: BorderRadius.circular(AnalyticsTheme.cardRadius),
+        border: Border.all(color: AnalyticsTheme.border),
+        boxShadow: [
+          BoxShadow(
+            color: AnalyticsTheme.primary.withValues(alpha: 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 18, color: AnalyticsTheme.primary),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: const TextStyle(
+                  color: AnalyticsTheme.foreground,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          child,
+        ],
+      ),
     );
   }
 }

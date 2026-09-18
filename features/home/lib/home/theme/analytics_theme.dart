@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wys_chart/wys_chart.dart';
 
 /// 数据分析页设计 token（ui-ux-pro-max Analytics Dashboard）。
 abstract final class AnalyticsTheme {
@@ -15,4 +16,15 @@ abstract final class AnalyticsTheme {
 
   static const double cardRadius = 14;
   static const double gridGap = 8;
+
+  static const WysChartColors chartColors = WysChartColors(
+    primary: primary,
+    secondary: secondary,
+    accent: accent,
+    success: success,
+    destructive: destructive,
+    muted: muted,
+    grid: border,
+    foreground: foreground,
+  );
 }

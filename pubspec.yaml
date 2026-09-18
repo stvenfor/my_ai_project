@@ -79,6 +79,8 @@ dependencies:
     path: ./components/wys_face_verify
   wys_login_share_pay:
     path: ./components/wys_login_share_pay
+  wys_chart:
+    path: ./components/wys_chart
 
   # ---------------------------------------------------------------------------
   # OpenHarmony（Flutter 3.35）：已适配库放在 dependencies（git），不放 overrides。

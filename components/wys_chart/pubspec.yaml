@@ -1,0 +1,20 @@
+name: wys_chart
+description: Flutter chart primitives (fl_chart wrappers) for analytics UIs.
+publish_to: 'none'
+version: 0.0.1
+
+environment:
+  sdk: '>=3.0.3 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  fl_chart: ^0.70.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true

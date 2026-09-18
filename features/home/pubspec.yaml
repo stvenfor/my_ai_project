@@ -24,6 +24,8 @@ dependencies:
     path: ../music
   module_utils:
     path: ../../commons/toolkit
+  wys_chart:
+    path: ../../components/wys_chart
 
 dev_dependencies:
   flutter_test:
