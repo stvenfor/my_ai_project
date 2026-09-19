@@ -1,0 +1,17 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "sync-lan-ip",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "../my_code_study/my_go_study/scripts/sync-lan-ip.sh"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

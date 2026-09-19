@@ -15,7 +15,7 @@ class BackendHttpConfig {
   );
 
   /// dart-define 优先；未注入时用 [LanHost.fallback]（真机 Run / Release 与 Debug 一致）。
-  /// 当前回退：`172.16.0.43`（见 `commons/network/lib/http/lan_host.dart`）。
+  /// fallback 由 Go 仓 `make sync-lan-ip` 按当前网卡写入，不手填固定 IP。
   static String get effectiveBackendHost {
     if (backendHostOverride.isNotEmpty) return backendHostOverride;
     if (LanHost.fallback.isNotEmpty) return LanHost.fallback;

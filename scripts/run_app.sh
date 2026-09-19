@@ -340,6 +340,14 @@ fi
 
 # 物理机 -d 且未显式 --env-file/--lan 时，自动改用 .env.lan
 maybe_switch_env_for_physical_device "$FLUTTER"
+if [[ "$USE_LAN" == true ]]; then
+  SYNC="$ROOT/../my_code_study/my_go_study/scripts/sync-lan-ip.sh"
+  if [[ -f "$SYNC" ]]; then
+    bash "$SYNC"
+  else
+    echo "警告: 未找到 $SYNC，沿用现有 .env.lan" >&2
+  fi
+fi
 ensure_env_file
 ENV_ARGS=(--dart-define-from-file="$ENV_FILE")
 echo "→ dart-define-from-file=$(basename "$ENV_FILE")"
