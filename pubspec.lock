@@ -2038,13 +2038,6 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.1.0"
-  wys_account:
-    dependency: "direct main"
-    description:
-      path: "commons/wys_account"
-      relative: true
-    source: path
-    version: "1.0.0"
   wys_chart:
     dependency: "direct main"
     description:

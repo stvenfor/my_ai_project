@@ -1,66 +1,17 @@
-# wys_account
+# wys_account — DEPRECATED
 
-各 **feature module** 统一获取 **登录状态** 与 **用户信息**（内存 + `shared_preferences` 持久化）。
+**本包已废弃，请勿在新代码中初始化或依赖。**
 
-## 初始化（主工程）
+产品 Session Owner 为 **`module_auth`**（见 [ADR 0006](../../docs/adr/0006-auth-session-owner-module-auth.md)、[ADR 0009](../../docs/adr/0009-deprecate-wys-account.md)）。
 
-```dart
-import 'package:wys_account/wys_account.dart';
+| 需求 | 使用 |
+|------|------|
+| 登录态 / 当前用户 | `AuthLifecycle` / `UserService`（`module_core` + `module_auth`） |
+| HTTP 带 token | `module_http`（壳工程 `AppHttpBootstrap`） |
+| 需登录跳转 | `AuthNavigation.openLogin` |
 
-Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await WysAccount.initialize(bindNetHeaders: true); // 自动给 wys_network 带 token 头
-  runApp(...);
-}
-```
+- **不要**调用 `WysAccount.initialize` / `WysAccount.setSession` / `WysAccount.logout`
+- 包目录本轮**保留、未删除**；根工程已不再 path 依赖
+- 历史示例（`wys_network` / `wys_push` README）中的 `WysAccount.*` 仅作遗留文档，勿照抄
 
-`pubspec.yaml`：
-
-```yaml
-wys_account:
-  path: commons/wys_account
-```
-
-业务 module 同样 path 依赖 `../../commons/wys_account`。
-
-## 其它 module 用法
-
-```dart
-import 'package:wys_account/wys_account.dart';
-
-// 是否登录
-if (WysAccount.isLoggedIn) { ... }
-
-// 当前用户
-final user = WysAccount.currentUser; // AccountUser?
-final token = WysAccount.token;
-
-// 监听登录/登出
-WysAccount.repo.authStateChanges.listen((AccountUser? user) {
-  // user == null 表示已登出
-});
-
-// 登出（一般在「我的」）
-await WysAccount.logout();
-```
-
-## 登录模块写入会话
-
-`module_login` 在接口成功后：
-
-```dart
-await WysAccount.setSession(AccountUser(
-  userId: '...',
-  token: '...',
-  phone: phone,
-  nickname: '...',
-));
-```
-
-## 模型
-
-`AccountUser`：`userId`、`token`、`nickname`、`avatarUrl`、`phone`、`extra`。
-
-## 与 wys_network
-
-`initialize(bindNetHeaders: true)` 会设置 `globalHeaderProvider`，请求自动附加 `Authorization` / `token`（可按后端改 `wys_account.dart`）。
+详情见 `features/auth` 与 [Auth Session CONTEXT](../../docs/contexts/auth-session/CONTEXT.md)。

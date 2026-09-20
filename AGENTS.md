@@ -62,10 +62,10 @@ components → commons
 | `commons/ui/` | `module_common_ui` | `package:module_common_ui/module_common_ui.dart` |
 | `commons/wys_router/` | `wys_router` | `package:wys_router/wys_router.dart` |
 | `commons/wys_network/` | `wys_network` | （与 `module_http` 并存） |
-| `commons/wys_account/` | `wys_account` | （与 auth 并存） |
+| `commons/wys_account/` | `wys_account` | **DEPRECATED**（ADR 0009）；Session Owner 为 `module_auth`，勿初始化 |
 | `commons/wys_common/` | `wys_common` | （与 ui/utils 并存） |
 
-**commons 内部分层**：L0 `core`/`toolkit` → L1 `network`/`storage`/`wys_router` → L2 `ui`（`ui` 依赖 `core` + `toolkit` + `wys_router`）。`wys_network` / `wys_account` / `wys_common` 为并存栈，新业务优先 `module_*`。
+**commons 内部分层**：L0 `core`/`toolkit` → L1 `network`/`storage`/`wys_router` → L2 `ui`（`ui` 依赖 `core` + `toolkit` + `wys_router`）。`wys_network` / `wys_common` 为并存栈，新业务优先 `module_*`；`wys_account` 已废弃（ADR 0009），勿接入。
 
 ### components（可选，根 pubspec 按需引入）
 
@@ -262,6 +262,8 @@ flutter run -t features/home/lib/main_dev.dart
 - 请求体 `username` = **完整邮箱**；密码 ≥ **6 位**。
 - 成功：`UserService.setUser`，token 为 Supabase `access_token`。
 - 错误映射见 `UserAuthApi._mapFailure`：`AccountNotRegisteredFailure`(10003)、`InvalidCredentialsFailure`(10002) 等。
+- 开发环境手机号 OTP（Go 非 release）：测试号 `13400000000`，验证码 `123456`（ADR 0010）；生产短信未开放。
+- Session Owner 为 `module_auth`；`wys_account` 已废弃（ADR 0009），勿再初始化。
 
 ### components 读登录态
 

@@ -68,9 +68,8 @@ dependencies:
 
   # ---------------------------------------------------------------------------
   # wys_* 栈（与 module_* 并存；不含 fluttertoast / audioplayers_ohos 包）
+  # wys_account 已废弃（ADR 0009），Session Owner 为 module_auth；包目录保留但未接线
   # ---------------------------------------------------------------------------
-  wys_account:
-    path: ./commons/wys_account
   wys_common:
     path: ./commons/wys_common
   wys_network:

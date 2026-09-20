@@ -13,5 +13,5 @@
 - **App Visual Design → AI 小石头**: 助手页使用生产 Token / 脚手架，不走 bfui 演示主题
 - **AI 小石头 ↛ Chat（融云）**: 助手停留会话与 IM 聊天会话分离；不复用 RongCloud 消息模型
 - **Auth Session → 各需登录 feature**: 业务只读 Session Owner 暴露的登录态，经 Login Gate 邀请登录；不自建 token 存储
-- **Auth Session ↛ wys_account**: 当前产品不把 `wys_account` 当 Session Owner
+- **Auth Session ↛ wys_account**: `wys_account` 已废弃（ADR 0009）；Session Owner 仅为 `module_auth`，包目录本轮保留不删
 - **bfui**: 不在 App Visual Design 范围内；保持独立演示主题

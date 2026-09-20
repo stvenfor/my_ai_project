@@ -44,15 +44,20 @@ class _FakeUserAuthApi extends UserAuthApi {
   Object? logoutError;
   Object? registerError;
   Object? loginError;
+  Object? sendOtpError;
+  Object? verifyOtpError;
 
   RegisterResult? registerResult;
   LoginResult? loginResult;
   RefreshTokenResult? refreshResult;
+  LoginResult? verifyOtpResult;
 
   int logoutCalls = 0;
   int refreshCalls = 0;
   int registerCalls = 0;
   int loginCalls = 0;
+  int sendOtpCalls = 0;
+  int verifyOtpCalls = 0;
 
   @override
   Future<RefreshTokenResult> refresh({
@@ -122,6 +127,36 @@ class _FakeUserAuthApi extends UserAuthApi {
             id: 'u1',
             username: username.split('@').first,
             email: username,
+          ),
+        );
+  }
+
+  @override
+  Future<void> sendPhoneOtp({required String phone}) async {
+    sendOtpCalls++;
+    final error = sendOtpError;
+    if (error != null) throw error;
+  }
+
+  @override
+  Future<LoginResult> verifyPhoneOtp({
+    required String phone,
+    required String otp,
+    required String deviceId,
+    required String platform,
+  }) async {
+    verifyOtpCalls++;
+    final error = verifyOtpError;
+    if (error != null) throw error;
+    return verifyOtpResult ??
+        LoginResult(
+          token: 'otp_token',
+          refreshToken: 'otp_refresh',
+          sessionId: 'otp_sess',
+          user: BackendUser(
+            id: 'otp-user',
+            username: 'dev-$phone',
+            email: '$phone@dev.test.local',
           ),
         );
   }
@@ -326,6 +361,32 @@ void main() {
 
       expect(userService.isLoggedIn, isFalse);
       expect(api.loginCalls, 0);
+    });
+  });
+
+  group('Phone OTP (dev test number)', () {
+    test('verifyPhoneOtp writes Auth Session', () async {
+      await auth.verifyPhoneOtp(phone: '13400000000', otp: '123456');
+
+      expect(userService.isLoggedIn, isTrue);
+      expect(userService.currentUser.value?.token, 'otp_token');
+      expect(api.verifyOtpCalls, 1);
+      expect(auth.currentState, AuthSessionState.signedIn);
+    });
+
+    test('sendPhoneOtp forwards to API', () async {
+      await auth.sendPhoneOtp(phone: '13400000000');
+      expect(api.sendOtpCalls, 1);
+    });
+
+    test('verifyPhoneOtp surfaces InvalidOtpFailure without session', () async {
+      api.verifyOtpError = const InvalidOtpFailure();
+
+      await expectLater(
+        auth.verifyPhoneOtp(phone: '13400000000', otp: '000000'),
+        throwsA(isA<InvalidOtpFailure>()),
+      );
+      expect(userService.isLoggedIn, isFalse);
     });
   });
 }

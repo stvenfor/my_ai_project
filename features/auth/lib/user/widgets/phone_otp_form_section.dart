@@ -114,7 +114,7 @@ class PhoneOtpFormSection extends StatelessWidget {
           }
           if (_showTestPhoneHint()) {
             return Text(
-              '测试号 ${MockAuthService.mockTestPhone}，验证码 ${MockAuthService.mockOtpCode}',
+              '开发测试号 ${MockAuthService.mockTestPhone}，验证码 ${MockAuthService.mockOtpCode}',
               style: AuthTheme.caption.copyWith(color: AuthTheme.accent),
             );
           }
