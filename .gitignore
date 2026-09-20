@@ -75,3 +75,4 @@ ios/vendor/
 
 # DevEco 本地写入的签名配置（含密钥路径/口令）；克隆后复制 example 为 build-profile.json5
 /ohos/build-profile.json5
+features/ai/build/
