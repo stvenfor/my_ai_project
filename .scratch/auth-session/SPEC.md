@@ -1,5 +1,5 @@
 ---
-label: ready-for-agent
+label: done
 feature: auth-session
 source: grill-with-docs; docs/contexts/auth-session/CONTEXT.md
 adrs: 0006, 0007, 0008
