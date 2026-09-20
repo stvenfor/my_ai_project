@@ -14,12 +14,27 @@ class AuthLifecycle {
   /// 登出完成后回调。
   static Future<void> Function()? onAfterLogout;
 
+  /// Invite Login：由壳 / auth 注册（通常指向 AuthNavigation.openLogin）。
+  /// components 只调 [inviteLogin]，不依赖 module_auth。
+  static Future<void> Function({String? redirectRoute})? inviteLoginHandler;
+
   static Future<void> notifyAfterLogin() async {
     await onAfterLogin?.call();
   }
 
   static Future<void> notifyAfterLogout() async {
     await onAfterLogout?.call();
+  }
+
+  /// 邀请用户打开登录门（可带回跳）。
+  static Future<void> inviteLogin({String? redirectRoute}) async {
+    final handler = inviteLoginHandler;
+    if (handler == null) {
+      throw StateError(
+        'Invite Login 未注册，请先 AuthSession.register() / 绑定 AuthNavigation.openLogin',
+      );
+    }
+    await handler(redirectRoute: redirectRoute);
   }
 
   static UserService? get maybeUserService =>

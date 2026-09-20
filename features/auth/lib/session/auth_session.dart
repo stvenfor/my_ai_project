@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:module_auth/navigation/auth_navigation.dart';
 import 'package:module_auth/session/auth_session_guard_service.dart';
 import 'package:module_auth/session/backend_auth_service.dart';
 import 'package:module_auth/session/user_service_impl.dart';
@@ -42,6 +43,11 @@ class AuthSession {
     } else {
       await _registerBackend(permanent: permanent);
     }
+
+    AuthLifecycle.inviteLoginHandler =
+        ({String? redirectRoute}) => AuthNavigation.openLogin(
+              redirectRoute: redirectRoute,
+            );
 
     if (!Get.isRegistered<SessionGuardService>()) {
       Get.put<SessionGuardService>(

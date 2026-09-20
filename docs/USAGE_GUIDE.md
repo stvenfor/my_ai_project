@@ -139,7 +139,7 @@ main()
 
 | 模块 | 目录 | 入口 | 说明 |
 |------|------|------|------|
-| 登录 | `features/auth` | `lib/main_dev.dart` | `USE_MOCK_AUTH=true`，Mock 认证 |
+| 登录 | `features/auth` | `lib/main_dev.dart` | **非登录门**：仅占位说明；登录/注册请走壳工程 |
 | 首页 | `module_home` | `lib/main_dev.dart` | 注入 Mock 用户 + 默认环境 |
 | 我的/设置 | `module_settings` | `lib/main_dev.dart` | 注入 Mock 用户 + 默认环境 |
 | 聊天 | `module_chat` | `lib/main_dev.dart` | 基础 Runner |
@@ -199,7 +199,7 @@ ModuleStandaloneRunner.run(
 |--------|------|
 | `injectMockUser` | 注入 `MockUserService`，无需真实登录 |
 | `injectDefaultEnvironment` | 注入内存版环境服务（默认测试环境） |
-| `onSetup` | 如 Auth 模块设置 `AuthController.standaloneMode = true` |
+| `onSetup` | 模块特有初始化（如 `UiKitInitializer`） |
 
 ---
 

@@ -25,7 +25,7 @@ class AppNavigator {
     try {
       if (_requiresLogin(intent) && !AuthLifecycle.isLoggedIn) {
         PendingNavigation.set(intent);
-        await Get.toNamed(RoutePath.login);
+        await AuthLifecycle.inviteLogin(redirectRoute: intent.route);
         _analytics.trackNavigateFailure(intent, 'login_required');
         return;
       }

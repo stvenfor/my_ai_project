@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # 在业务模块目录独立运行：./scripts/run_module.sh auth [flutter run 额外参数...]
+# 注意：auth 独立运行不再提供登录/注册（ADR 0007）；产品登录门仅在壳工程。
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -39,15 +40,16 @@ ensure_env_file() {
 请先创建本地配置:
   cp .env.example .env
 
-如果只是本地跑 Mock 登录，可将 .env 中 USE_MOCK_AUTH 改为 true。
-如果要联调真实登录，请保持 USE_MOCK_AUTH=false 并启动 my_go_study 后端。
+壳工程联调：若只跑 Mock 登录，可将 .env 中 USE_MOCK_AUTH 改为 true。
+若要联调真实登录，请保持 USE_MOCK_AUTH=false 并启动 my_go_study 后端。
+（auth 模块独立运行不再提供登录入口；请用壳工程验收登录。）
 EOF
   exit 1
 }
 
 if [[ -z "$MODULE" ]]; then
   echo "用法: $0 <模块名> [flutter run 额外参数...]"
-  echo "示例: $0 auth"
+  echo "示例: $0 auth   # auth 独立运行仅占位页，不提供登录"
   echo "      $0 home -d chrome"
   echo "可用: auth, home, settings(mine), chat, community"
   exit 1
@@ -66,6 +68,10 @@ case "$MODULE" in
     exit 1
     ;;
 esac
+
+if [[ "$MODULE" == "auth" ]]; then
+  echo "提示: auth 独立运行不再提供登录/注册（ADR 0007）。产品登录请跑壳工程。" >&2
+fi
 
 cd "$ROOT/$DIR"
 ensure_env_file

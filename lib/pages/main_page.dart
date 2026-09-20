@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:module_auth/user/binding/auth_binding.dart';
-import 'package:module_auth/user/controller/auth_controller.dart';
+import 'package:module_auth/navigation/auth_navigation.dart';
 import 'package:module_auth/session/auth_session.dart';
 import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_linking/navigation/main_tab_controller.dart';
@@ -55,12 +54,7 @@ class _MainPageState extends State<MainPage> {
     });
   }
 
-  void _goLogin() {
-    if (!Get.isRegistered<AuthController>()) {
-      AuthBinding().dependencies();
-    }
-    Get.toNamed(RoutePath.login);
-  }
+  Future<void> _goLogin() => AuthNavigation.openLogin();
 
   void _onTabSelected(int index, List<_TabConfig> tabs) {
     final tab = tabs[index];

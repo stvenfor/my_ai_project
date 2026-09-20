@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:get/get.dart';
+import 'package:module_auth/navigation/auth_navigation.dart';
 import 'package:module_auth/session/auth_session.dart';
 import 'package:module_core/core.dart';
 import 'package:wys_router/src/module/module_registry.dart';
@@ -16,9 +17,6 @@ class AuthController extends GetxController {
   })  : _authService = authService ?? _resolveAuthService(),
         _userService = userService ?? Get.find<UserService>(),
         _loading = loading ?? Get.find<AppLoading>();
-
-  /// 独立运行 main_dev 时设为 true
-  static bool standaloneMode = false;
 
   final AuthService _authService;
   final UserService _userService;
@@ -257,11 +255,6 @@ class AuthController extends GetxController {
 
     final redirect = LoginRedirect.takePending();
 
-    if (standaloneMode) {
-      Get.offAllNamed(RoutePath.authDevHome);
-      return;
-    }
-
     ModuleRegistry.ensureBindings();
     Get.offAllNamed(RoutePath.main);
     Future.microtask(() async {
@@ -486,8 +479,16 @@ class AuthController extends GetxController {
   }
 
   Future<void> logout() async {
-    await AuthSession.logout();
-    Get.offAllNamed(RoutePath.login);
+    try {
+      await AuthSession.logout();
+    } on AuthFailure catch (error) {
+      _showAuthFailure(error);
+      return;
+    } catch (error) {
+      _showAuthFailure(error);
+      return;
+    }
+    await AuthNavigation.resetToLogin();
   }
 
   String get maskedPendingPhone {

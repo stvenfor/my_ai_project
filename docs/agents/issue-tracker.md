@@ -10,3 +10,4 @@
 Active features:
 - App Visual Design: `vercel-ui`
 - AI 小石头 (SSE): `ai-little-stone`
+- Auth Session (shell real login): `auth-session`

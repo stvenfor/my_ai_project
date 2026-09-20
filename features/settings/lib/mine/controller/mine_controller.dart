@@ -1,11 +1,8 @@
 import 'package:get/get.dart';
 import 'package:module_auth/navigation/auth_navigation.dart';
 import 'package:module_auth/session/auth_session.dart';
-import 'package:module_auth/user/binding/auth_binding.dart';
-import 'package:module_auth/user/controller/auth_controller.dart';
 import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_core/core.dart';
-import 'package:wys_router/src/route/login_redirect.dart';
 import 'package:wys_router/src/route/route_path.dart';
 import 'package:module_settings/mine/model/mine_menu_data.dart';
 import 'package:module_settings/mine/model/mine_function_item.dart';
@@ -92,13 +89,7 @@ class MineController extends GetxController {
   void openSettings() => Get.toNamed(RoutePath.settings);
 
   Future<void> goLogin({String? redirectRoute}) async {
-    if (!Get.isRegistered<AuthController>()) {
-      AuthBinding().dependencies();
-    }
-    if (redirectRoute != null) {
-      LoginRedirect.setPending(redirectRoute);
-    }
-    await Get.toNamed(RoutePath.login);
+    await AuthNavigation.openLogin(redirectRoute: redirectRoute);
   }
 
   Future<void> openShortVideo() async {
@@ -110,12 +101,19 @@ class MineController extends GetxController {
   }
 
   Future<void> logout() async {
-    await AuthSession.logout();
-    if (!Get.isRegistered<AuthController>()) {
-      AuthBinding().dependencies();
+    try {
+      await AuthSession.logout();
+    } on AuthFailure catch (error) {
+      UiKitInitializer.toast(error.message);
+      return;
+    } catch (error) {
+      UiKitInitializer.toast(
+        error is AuthFailure ? error.message : '登出失败，请稍后重试',
+      );
+      return;
     }
     _syncUser(null);
-    await Get.offAllNamed(RoutePath.login);
+    await AuthNavigation.resetToLogin();
   }
 
   bool get isLoggedIn => AuthSession.isLoggedIn;

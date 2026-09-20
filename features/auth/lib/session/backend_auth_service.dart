@@ -15,8 +15,12 @@ import 'package:module_utils/module_utils.dart';
 /// 初学者导读：my_go_study/docs/auth-beginner-walkthrough.md
 /// =============================================================================
 class BackendAuthService extends AuthService implements SessionRefreshable {
-  BackendAuthService(this._userService, {UserAuthApi? api})
-      : _api = api ?? UserAuthApi() {
+  BackendAuthService(
+    this._userService, {
+    UserAuthApi? api,
+    Future<DeviceAuthPayload> Function()? resolveDevice,
+  })  : _api = api ?? UserAuthApi(),
+        _resolveDevice = resolveDevice ?? DeviceAuthContext.resolve {
     if (_userService.isLoggedIn) {
       _emit(AuthSessionState.signedIn);
     }
@@ -24,6 +28,7 @@ class BackendAuthService extends AuthService implements SessionRefreshable {
 
   final UserService _userService;
   final UserAuthApi _api;
+  final Future<DeviceAuthPayload> Function() _resolveDevice;
   final _state = AuthSessionState.initial.obs;
   final _events = StreamController<AuthSessionState>.broadcast();
 
@@ -49,7 +54,7 @@ class BackendAuthService extends AuthService implements SessionRefreshable {
       email: normalizedEmail,
       displayName: displayName,
     );
-    final device = await DeviceAuthContext.resolve();
+    final device = await _resolveDevice();
     final result = await _api.register(
       username: username,
       password: password,
@@ -78,7 +83,7 @@ class BackendAuthService extends AuthService implements SessionRefreshable {
     required String password,
   }) async {
     final normalizedEmail = email.trim();
-    final device = await DeviceAuthContext.resolve();
+    final device = await _resolveDevice();
     final result = await _api.login(
       username: normalizedEmail,
       password: password,
@@ -101,8 +106,11 @@ class BackendAuthService extends AuthService implements SessionRefreshable {
           sessionId: user.sessionId,
           deviceId: user.deviceId,
         );
-      } catch (_) {
-        // 退出以清本地凭证为准；服务端失败不阻塞 UI。
+      } catch (error) {
+        // Server-Confirmed Logout: only Gone failures clear local session.
+        if (!isLogoutSessionGone(error)) {
+          rethrow;
+        }
       }
     }
     await _userService.clearUser();
@@ -114,7 +122,7 @@ class BackendAuthService extends AuthService implements SessionRefreshable {
     final user = _userService.currentUser.value;
     if (user == null || user.refreshToken.isEmpty) return;
 
-    final device = await DeviceAuthContext.resolve();
+    final device = await _resolveDevice();
     final deviceId = user.deviceId.isNotEmpty &&
             !DeviceInfoUtils.isPlaceholderDeviceId(user.deviceId)
         ? user.deviceId
@@ -140,8 +148,7 @@ class BackendAuthService extends AuthService implements SessionRefreshable {
       }
       _emit(AuthSessionState.signedIn);
     } catch (_) {
-      await _userService.clearUser();
-      _emit(AuthSessionState.signedOut);
+      // Cold Start Keep: refresh failure must not clear local Auth Session.
     }
   }
 
@@ -157,7 +164,7 @@ class BackendAuthService extends AuthService implements SessionRefreshable {
     required String otp,
   }) async {
     final e164 = PhoneAuthUtils.toE164China(phone);
-    final device = await DeviceAuthContext.resolve();
+    final device = await _resolveDevice();
     final result = await _api.verifyPhoneOtp(
       phone: e164,
       otp: otp.trim(),
@@ -204,4 +211,19 @@ class BackendAuthService extends AuthService implements SessionRefreshable {
     _events.close();
     super.onClose();
   }
+}
+
+/// True when logout failure means the server session is already gone / invalid.
+///
+/// Used by Server-Confirmed Logout so Gone clears local Auth Session while
+/// network and other failures keep it.
+bool isLogoutSessionGone(Object error) {
+  if (error is InvalidCredentialsFailure) return true;
+  if (error is! AuthFailure) return false;
+  final text = error.message;
+  if (text.contains('Unauthorized')) return true;
+  if (text.contains('未登录')) return true;
+  if (text.toLowerCase().contains('session not found')) return true;
+  if (text.contains('会话不存在') || text.contains('会话已失效')) return true;
+  return false;
 }

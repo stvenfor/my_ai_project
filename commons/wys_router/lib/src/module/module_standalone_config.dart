@@ -28,7 +28,7 @@ class ModuleStandaloneConfig {
   /// 在 [FeatureModule.onRegister] 之后解析初始路由（如根据登录态跳转）。
   final String? Function()? resolveInitialRoute;
 
-  /// 注册 MockUserService、AuthController.standaloneMode 等模块特有初始化。
+  /// 模块特有初始化（如 UiKitInitializer）。
   final Future<void> Function()? onSetup;
 
   /// 环境切换后重建 HTTP（独立运行时在 main_dev 中传入 AppHttpBootstrap.reinitialize）。

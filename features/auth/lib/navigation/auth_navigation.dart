@@ -5,9 +5,9 @@ import 'package:module_auth/user/view/login_page.dart';
 import 'package:wys_router/src/route/login_redirect.dart';
 import 'package:wys_router/src/route/route_path.dart';
 
-/// 登录模块统一导航入口。
+/// 登录模块统一导航入口（Invite Login / Force Reset Login）。
 abstract final class AuthNavigation {
-  /// 以 modal 方式（自底部向上）打开完整登录路由栈。
+  /// Invite Login：以 modal 方式打开登录门。
   ///
   /// [redirectRoute] 登录成功后通过 [LoginRedirect] 回跳。
   static Future<void> openLogin({String? redirectRoute}) async {
@@ -23,5 +23,14 @@ abstract final class AuthNavigation {
       transition: Transition.downToUp,
       fullscreenDialog: true,
     );
+  }
+
+  /// Force Reset Login：清栈并停在登录门（会话失效 / 登出成功后）。
+  static Future<void> resetToLogin() async {
+    if (!Get.isRegistered<AuthController>()) {
+      AuthBinding().dependencies();
+    }
+    if (Get.currentRoute == RoutePath.login) return;
+    await Get.offAllNamed(RoutePath.login);
   }
 }

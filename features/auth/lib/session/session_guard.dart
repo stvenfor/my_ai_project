@@ -2,12 +2,13 @@ import 'dart:async';
 
 import 'package:dio/dio.dart';
 import 'package:get/get.dart' hide Response;
+import 'package:module_auth/navigation/auth_navigation.dart';
 import 'package:module_auth/session/auth_session.dart';
 import 'package:module_auth/session/session_recovery.dart';
 import 'package:module_common_ui/module_common_ui.dart';
+import 'package:module_core/core.dart';
 import 'package:module_http/http/http.dart';
 import 'package:module_http/http/rsp_interceptor.dart';
-import 'package:wys_router/src/route/route_path.dart';
 
 /// 全局 HTTP 401 会话失效处理（单设备登录被动踢下线）。
 class SessionGuardHook implements HttpResponseHook {
@@ -92,10 +93,17 @@ class SessionGuardHook implements HttpResponseHook {
           ? '账号已在其他设备登录，请重新登录'
           : '登录已失效，请重新登录';
       UiKitInitializer.toast(text);
-      await AuthSession.logout();
-      if (Get.currentRoute != RoutePath.login) {
-        Get.offAllNamed(RoutePath.login);
+      try {
+        await AuthSession.logout();
+      } catch (_) {
+        // 会话已被判定失效：登出 API 失败仍强制清本地，再 Force Reset Login。
+        final userService = AuthLifecycle.maybeUserService;
+        if (userService != null) {
+          await userService.clearUser();
+        }
+        await AuthLifecycle.notifyAfterLogout();
       }
+      await AuthNavigation.resetToLogin();
     } finally {
       _handling = false;
     }

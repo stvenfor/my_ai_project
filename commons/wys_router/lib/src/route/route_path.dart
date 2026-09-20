@@ -21,7 +21,6 @@ class RoutePath{
   static const String login = '/login';
   static const String loginPassword = '/login/password';
   static const String loginOtp = '/login/otp';
-  static const String authDevHome = '/auth/dev_home';
   static const String register = '/register';
   static const String chat = '/chat';
   /// 聊天详情（模块内跳转，外部模块无需引用）
