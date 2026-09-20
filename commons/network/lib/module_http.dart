@@ -18,3 +18,7 @@ export 'grpc/backend_grpc_config.dart';
 export 'grpc/analytics_grpc_api.dart';
 export 'grpc/generated/analytics/v1/analytics.pb.dart';
 export 'grpc/generated/analytics/v1/analytics.pbgrpc.dart';
+export 'sse/sse_client.dart';
+export 'sse/sse_exception.dart';
+export 'sse/sse_frame.dart';
+export 'sse/sse_parser.dart';

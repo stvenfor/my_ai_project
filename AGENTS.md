@@ -61,9 +61,9 @@ components → commons
 | `commons/toolkit/` | `module_utils` | `package:module_utils/module_utils.dart` |
 | `commons/ui/` | `module_common_ui` | `package:module_common_ui/module_common_ui.dart` |
 | `commons/wys_router/` | `wys_router` | `package:wys_router/wys_router.dart` |
-| `commons/wys_network/` | `wys_network` | （tpj-flt 迁入，与 `module_http` 并存） |
-| `commons/wys_account/` | `wys_account` | （tpj-flt 迁入，与 auth 并存） |
-| `commons/wys_common/` | `wys_common` | （tpj-flt 迁入，与 ui/utils 并存） |
+| `commons/wys_network/` | `wys_network` | （与 `module_http` 并存） |
+| `commons/wys_account/` | `wys_account` | （与 auth 并存） |
+| `commons/wys_common/` | `wys_common` | （与 ui/utils 并存） |
 
 **commons 内部分层**：L0 `core`/`toolkit` → L1 `network`/`storage`/`wys_router` → L2 `ui`（`ui` 依赖 `core` + `toolkit` + `wys_router`）。`wys_network` / `wys_account` / `wys_common` 为并存栈，新业务优先 `module_*`。
 
@@ -77,11 +77,11 @@ components → commons
 | `components/bluetooth/` | `module_bluetooth` | BLE demo |
 | `components/dokit/` | `dokit` | Vendored DoKit |
 | `components/dokit_bootstrap/` | `module_dokit_bootstrap` | Debug 壳 DoKit 注册 |
-| `components/wys_push/` | `wys_push` | 极光推送（tpj-flt） |
-| `components/wys_face_verify/` | `wys_face_verify` | 腾讯云人脸核身（tpj-flt） |
-| `components/wys_login_share_pay/` | `wys_login_share_pay` | 微信/支付宝（tpj-flt） |
+| `components/wys_push/` | `wys_push` | 极光推送 |
+| `components/wys_face_verify/` | `wys_face_verify` | 腾讯云人脸核身 |
+| `components/wys_login_share_pay/` | `wys_login_share_pay` | 微信/支付宝 |
 
-根 `pubspec.yaml` 当前直接依赖：linking、realtime/rongcloud_im、dokit_bootstrap，以及迁入的 `wys_*`；bluetooth 经 `module_settings` 间接使用。
+根 `pubspec.yaml` 当前直接依赖：linking、realtime/rongcloud_im、dokit_bootstrap，以及 `wys_*`；bluetooth 经 `module_settings` 间接使用。
 
 ### features（12 个业务包）
 
@@ -92,6 +92,7 @@ components → commons
 | community | `features/community/` | `module_community` | 社区 (2) |
 | settings | `features/settings/` | `module_settings` | 我的 (3) |
 | auth | `features/auth/` | `module_auth` | — |
+| ai | `features/ai/` | `module_ai` | —（AI 小石头 SSE） |
 | video | `features/video/` | `module_video` | — |
 | classroom | `features/classroom/` | `module_classroom` | — |
 | music | `features/music/` | `module_music` | — |

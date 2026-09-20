@@ -14,6 +14,10 @@ class RoutePath{
   static const String homeUsedCarDetail = '/home/used_car/detail';
   static const String homeDataAnalyticsList = '/home/data_analytics';
   static const String homeDataAnalyticsDetail = '/home/data_analytics/detail';
+
+  /// AI 小石头助手页（SSE 气泡对话）
+  static const String aiStream = '/ai/stream';
+
   static const String login = '/login';
   static const String loginPassword = '/login/password';
   static const String loginOtp = '/login/otp';

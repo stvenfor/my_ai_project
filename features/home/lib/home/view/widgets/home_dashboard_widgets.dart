@@ -4,6 +4,7 @@ import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_home/home/controller/home_controller.dart';
 import 'package:module_home/home/model/home_dashboard_model.dart';
 import 'package:module_home/home/theme/home_dashboard_theme.dart';
+import 'package:module_home/home/navigation/ai_stone_navigation.dart';
 import 'package:module_home/home/navigation/analytics_navigation.dart';
 import 'package:module_home/home/navigation/used_car_navigation.dart';
 import 'package:wys_router/src/route/route_path.dart';
@@ -182,6 +183,10 @@ class HomeFeatureGrid extends StatelessWidget {
     }
     if (item.label == '二手车') {
       UsedCarNavigation.open();
+      return;
+    }
+    if (item.label == 'AI小石头') {
+      AiStoneNavigation.open();
       return;
     }
     if (item.label == '数据分析') {

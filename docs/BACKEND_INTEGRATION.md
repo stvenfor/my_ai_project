@@ -56,6 +56,15 @@ my_go_study :8080
 
 Go 后端仓库（独立）：`my_go_study`（默认 `http://127.0.0.1:8080`）。
 
+### 1.4 SSE 流式输出（拟定）
+
+请求作用域的 AI/文本生成流采用 **HTTP SSE**，与 Realtime WebSocket 正交。完整协议、Go/Flutter 落点、验收清单见：
+
+- [sse-streaming-design.md](./sse-streaming-design.md)（权威）
+- Go 仓入口：[sse-streaming.md](../../my_code_study/my_go_study/docs/sse-streaming.md)
+
+要点：`POST /api/v1/sse/completions` + Session Auth；流帧**不用** ResultModel；Flutter 经 `SseClient`（`ResponseType.stream`），不走 `HttpManager.request` JSON 解析。
+
 ---
 
 ## 2. 环境与 Base URL

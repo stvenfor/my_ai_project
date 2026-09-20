@@ -13,8 +13,12 @@ class AuthHeaderProvider implements HttpHeaderProvider {
         ? Get.find<UserService>().currentUser.value
         : null;
     final token = user?.token;
+    // 保留请求侧已设的 Accept（如 SSE 的 text/event-stream），勿强制 JSON。
+    final hasAccept = options.headers.keys.any(
+      (key) => key.toString().toLowerCase() == Headers.acceptHeader,
+    );
     final headers = <String, dynamic>{
-      Headers.acceptHeader: Headers.jsonContentType,
+      if (!hasAccept) Headers.acceptHeader: Headers.jsonContentType,
       if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
     };
     final sessionId = user?.sessionId;

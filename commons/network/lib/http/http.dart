@@ -216,6 +216,8 @@ class HttpRequestException implements Exception {
         return _unwrapDioError(error) ?? '网络连接异常';
       case DioExceptionType.unknown:
         return _unwrapDioError(error) ?? error.message ?? '未知网络异常';
+      default:
+        return error.message ?? '未知网络异常';
     }
   }
 

@@ -35,6 +35,8 @@ dependencies:
     path: ./commons/storage
   module_home:
     path: ./features/home
+  module_ai:
+    path: ./features/ai
   module_classroom:
     path: ./features/classroom
   module_http:
@@ -65,7 +67,7 @@ dependencies:
     path: ./components/dokit_bootstrap
 
   # ---------------------------------------------------------------------------
-  # 自 tpj-flt 迁入的 wys_* 栈（与 module_* 并存；不含 fluttertoast / audioplayers_ohos 包）
+  # wys_* 栈（与 module_* 并存；不含 fluttertoast / audioplayers_ohos 包）
   # ---------------------------------------------------------------------------
   wys_account:
     path: ./commons/wys_account

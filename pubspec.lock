@@ -1044,6 +1044,13 @@ packages:
       url: "https://gitcode.com/CPF-Flutter/fluttertpc_mobile_scanner.git"
     source: git
     version: "7.1.4"
+  module_ai:
+    dependency: "direct main"
+    description:
+      path: "features/ai"
+      relative: true
+    source: path
+    version: "0.0.1"
   module_auth:
     dependency: "direct main"
     description:
