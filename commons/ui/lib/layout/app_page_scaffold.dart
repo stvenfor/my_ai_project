@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:module_common_ui/layout/app_page_layout.dart';
 import 'package:module_common_ui/layout/app_safe_insets.dart';
 import 'package:module_common_ui/theme/app_theme.dart';
+import 'package:module_common_ui/theme/vercel_tokens.dart';
 
 /// 统一页面容器：沉浸式 + 自定义 NavBar + 安全区。
 class AppPageScaffold extends StatelessWidget {
@@ -32,7 +33,10 @@ class AppPageScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bg = backgroundColor ?? Theme.of(context).scaffoldBackgroundColor;
+    final tokens = VercelTokens.of(context);
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final bg = backgroundColor ??
+        (isLight ? tokens.canvasSoft2 : tokens.canvas);
 
     return ImmersiveAnnotated(
       child: Scaffold(

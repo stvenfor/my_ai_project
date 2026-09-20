@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_music/controller/music_playback_controller.dart';
 import 'package:module_music/model/local_song.dart';
 import 'package:module_music/widgets/music_album_art.dart';
 import 'package:module_music/widgets/music_blur_background.dart';
-import 'package:module_music/theme/music_theme.dart';
 import 'package:module_music/widgets/music_control_button.dart';
 
 class NowPlayingPage extends GetView<MusicPlaybackController> {
@@ -15,22 +15,19 @@ class NowPlayingPage extends GetView<MusicPlaybackController> {
     return Obx(() {
       final song = controller.currentSong;
       if (song == null) {
-        return Scaffold(
-          appBar: AppBar(title: const Text('Now Playing')),
+        return AppPageScaffold(
+          navBar: const AppNavBar(title: 'Now Playing', showBackButton: true),
           body: const Center(child: Text('暂无播放歌曲')),
         );
       }
 
-      return Theme(
-        data: musicDarkTheme,
-        child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Now Playing'),
-          centerTitle: true,
-          backgroundColor: Colors.black,
-          foregroundColor: Colors.white,
+      return AppPageScaffold(
+        layout: AppPageLayout.edgeToEdge,
+        navBar: AppNavBar(
+          title: 'Now Playing',
+          showBackButton: true,
+          onBack: () => Get.back<void>(),
         ),
-        backgroundColor: Colors.black,
         body: Stack(
           fit: StackFit.expand,
           children: [
@@ -58,7 +55,6 @@ class NowPlayingPage extends GetView<MusicPlaybackController> {
             ),
           ],
         ),
-      ),
       );
     });
   }
@@ -72,19 +68,18 @@ class _PlayerControls extends GetView<MusicPlaybackController> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final tokens = VercelTokens.of(context);
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           song.title,
-          style: theme.textTheme.headlineSmall,
+          style: theme.textTheme.headlineSmall?.copyWith(color: tokens.ink),
           textAlign: TextAlign.center,
         ),
         Text(
           song.artist,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-          ),
+          style: theme.textTheme.bodySmall?.copyWith(color: tokens.mute),
         ),
         const SizedBox(height: 20),
         Obx(() {
@@ -123,7 +118,7 @@ class _PlayerControls extends GetView<MusicPlaybackController> {
               Text(
                 '${MusicPlaybackController.formatDuration(position)} / '
                 '${MusicPlaybackController.formatDuration(duration)}',
-                style: theme.textTheme.titleMedium,
+                style: theme.textTheme.titleMedium?.copyWith(color: tokens.body),
               ),
             ],
           );
@@ -134,7 +129,7 @@ class _PlayerControls extends GetView<MusicPlaybackController> {
           return IconButton(
             onPressed: controller.toggleMute,
             icon: Icon(muted ? Icons.headset_off : Icons.headset),
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+            color: tokens.mute,
           );
         }),
       ],

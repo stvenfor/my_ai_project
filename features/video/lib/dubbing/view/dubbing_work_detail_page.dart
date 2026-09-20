@@ -13,8 +13,8 @@ class DubbingWorkDetailPage extends StatefulWidget {
 
 class _DubbingWorkDetailPageState extends State<DubbingWorkDetailPage>
     with SingleTickerProviderStateMixin {
-  static const _primaryGreen = Color(0xFF52C41A);
-  static const _textGray = Color(0xFF8C8C8C);
+  static const _primary = Color(0xFF171717);
+  static const _textGray = Color(0xFF888888);
 
   late TabController _tabController;
 
@@ -54,9 +54,9 @@ class _DubbingWorkDetailPageState extends State<DubbingWorkDetailPage>
             color: Colors.white,
             child: TabBar(
               controller: _tabController,
-              labelColor: _primaryGreen,
+              labelColor: _primary,
               unselectedLabelColor: _textGray,
-              indicatorColor: _primaryGreen,
+              indicatorColor: _primary,
               tabs: [
                 const Tab(text: '简介'),
                 Tab(text: '评论 ${item.commentCount}'),
@@ -120,8 +120,8 @@ class _IntroTab extends StatelessWidget {
             OutlinedButton(
               onPressed: () {},
               style: OutlinedButton.styleFrom(
-                foregroundColor: _DubbingWorkDetailPageState._primaryGreen,
-                side: const BorderSide(color: _DubbingWorkDetailPageState._primaryGreen),
+                foregroundColor: _DubbingWorkDetailPageState._primary,
+                side: const BorderSide(color: _DubbingWorkDetailPageState._primary),
                 padding: const EdgeInsets.symmetric(horizontal: 12),
               ),
               child: const Text('已关注', style: TextStyle(fontSize: 12)),
@@ -192,7 +192,7 @@ class _MoreWorkRow extends StatelessWidget {
               errorBuilder: (_, __, ___) => Container(
                 width: 80,
                 height: 56,
-                color: const Color(0xFFEEEEEE),
+                color: const Color(0xFFEBEBEB),
               ),
             ),
           ),
@@ -256,7 +256,7 @@ class _BottomBar extends StatelessWidget {
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
-        border: Border(top: BorderSide(color: Color(0xFFEEEEEE))),
+        border: Border(top: BorderSide(color: Color(0xFFEBEBEB))),
       ),
       padding: EdgeInsets.fromLTRB(16, 10, 16, 10 + bottomInset),
       child: Row(
@@ -275,7 +275,7 @@ class _BottomBar extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: onStartDubbing,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _DubbingWorkDetailPageState._primaryGreen,
+                  backgroundColor: _DubbingWorkDetailPageState._primary,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
                   elevation: 0,

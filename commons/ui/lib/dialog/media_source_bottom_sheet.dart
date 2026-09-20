@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:module_common_ui/theme/vercel_tokens.dart';
 import 'package:module_utils/module_utils.dart';
 
 /// 相册 / 相机来源选择底部弹框。
@@ -16,9 +17,11 @@ class MediaSourceBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tokens = VercelTokens.of(context);
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: tokens.canvas,
         borderRadius: BorderRadius.vertical(top: Radius.circular(12.r)),
       ),
       child: SafeArea(
@@ -31,7 +34,7 @@ class MediaSourceBottomSheet extends StatelessWidget {
               width: 36.w,
               height: 4.h,
               decoration: BoxDecoration(
-                color: const Color(0xFFE0E0E0),
+                color: tokens.hairlineStrong,
                 borderRadius: BorderRadius.circular(2.r),
               ),
             ),
@@ -41,13 +44,13 @@ class MediaSourceBottomSheet extends StatelessWidget {
               label: '相册',
               onTap: () => Get.back(result: MediaPickSource.gallery),
             ),
-            Divider(height: 1.h, indent: 56.w, color: const Color(0xFFF0F0F0)),
+            Divider(height: 1.h, indent: 56.w, color: tokens.hairline),
             _OptionTile(
               icon: Icons.camera_alt_outlined,
               label: '相机',
               onTap: () => Get.back(result: MediaPickSource.camera),
             ),
-            Divider(height: 8.h, color: const Color(0xFFF5F5F5)),
+            Divider(height: 8.h, color: tokens.canvasSoft2),
             _OptionTile(
               label: '取消',
               onTap: () => Get.back<void>(),
@@ -73,6 +76,8 @@ class _OptionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tokens = VercelTokens.of(context);
+
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -80,7 +85,7 @@ class _OptionTile extends StatelessWidget {
         child: Row(
           children: [
             if (icon != null) ...[
-              Icon(icon, size: 22.sp, color: const Color(0xFF333333)),
+              Icon(icon, size: 22.sp, color: tokens.ink),
               SizedBox(width: 16.w),
             ],
             Expanded(
@@ -89,9 +94,7 @@ class _OptionTile extends StatelessWidget {
                 textAlign: icon == null ? TextAlign.center : TextAlign.start,
                 style: TextStyle(
                   fontSize: 16.sp,
-                  color: icon == null
-                      ? const Color(0xFF666666)
-                      : const Color(0xFF1A1A1A),
+                  color: icon == null ? tokens.mute : tokens.ink,
                   fontWeight: icon == null ? FontWeight.w400 : FontWeight.w500,
                 ),
               ),

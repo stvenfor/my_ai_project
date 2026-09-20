@@ -1,62 +1,67 @@
 import 'package:flutter/material.dart';
+import 'package:module_common_ui/module_common_ui.dart';
 
-/// 首页仪表盘视觉令牌（iOS 极简风格）。
+/// Home dashboard visual tokens — Vercel Design Source of Truth values.
+/// Prefer [VercelTokens.of] in new widgets; statics keep existing call sites compiling.
 abstract final class HomeDashboardTheme {
-  static const accent = Color(0xFF007AFF);
-  static const background = Color(0xFFF2F2F7);
+  static VercelTokens tokens(BuildContext context) => VercelTokens.of(context);
+
+  // DESIGN.md / VercelTokens.light (expand; dark via Theme when widgets migrate).
+  static const accent = Color(0xFF0070F3);
+  static const background = Color(0xFFF5F5F5);
   static const surface = Color(0xFFFFFFFF);
-  static const fillSecondary = Color(0xFFE9E9EB);
-  static const labelPrimary = Color(0xFF000000);
-  static const labelSecondary = Color(0x993C3C43);
-  static const labelTertiary = Color(0x4D3C3C43);
-  static const separator = Color(0xFFC6C6C8);
-  static const badgeOrange = Color(0xFFFF9500);
+  static const fillSecondary = Color(0xFFF5F5F5);
+  static const labelPrimary = Color(0xFF171717);
+  static const labelSecondary = Color(0xFF4D4D4D);
+  static const labelTertiary = Color(0xFF888888);
+  static const separator = Color(0xFFEBEBEB);
+  static const badgeOrange = Color(0xFFF5A623);
   static const badgeBlue = accent;
 
-  // 兼容旧命名
   static const primaryBlue = accent;
   static const cardWhite = surface;
   static const titleBlack = labelPrimary;
   static const textGray = labelSecondary;
-  static const textDarkGray = Color(0xFF3C3C43);
+  static const textDarkGray = Color(0xFF4D4D4D);
   static const bannerDark = background;
 
-  static const double radiusMd = 12;
-  static const double radiusLg = 14;
+  static const double radiusMd = 8;
+  static const double radiusLg = 12;
   static const double contentMaxWidth = 720;
 
   static TextStyle get largeTitle => const TextStyle(
+        fontFamily: VercelTypography.fontFamily,
         fontSize: 32,
-        fontWeight: FontWeight.w700,
+        fontWeight: FontWeight.w600,
         color: labelPrimary,
-        height: 1.15,
-        letterSpacing: -0.5,
+        height: 36 / 32,
+        letterSpacing: -1.6,
       );
 
   static TextStyle get sectionTitle => const TextStyle(
-        fontSize: 20,
+        fontFamily: VercelTypography.fontFamily,
+        fontSize: 18,
         fontWeight: FontWeight.w600,
         color: labelPrimary,
-        height: 1.2,
+        height: 24 / 18,
+        letterSpacing: -0.54,
       );
 
   static TextStyle get sectionLabel => const TextStyle(
-        fontSize: 13,
+        fontFamily: VercelTypography.fontFamily,
+        fontSize: 14,
         fontWeight: FontWeight.w400,
         color: labelSecondary,
-        height: 1.35,
+        height: 20 / 14,
+        letterSpacing: -0.28,
       );
 
   static BoxDecoration get groupedCardDecoration => BoxDecoration(
         color: surface,
         borderRadius: BorderRadius.circular(radiusMd),
+        border: Border.all(color: separator),
       );
 
-  static List<BoxShadow> get cardShadow => [
-        BoxShadow(
-          color: const Color(0xFF8E8E93).withValues(alpha: 0.08),
-          blurRadius: 16,
-          offset: const Offset(0, 4),
-        ),
-      ];
+  /// Vercel surfaces are flat — no soft iOS card shadow.
+  static List<BoxShadow> get cardShadow => const [];
 }

@@ -37,7 +37,7 @@ class ShortVideoPublishTile extends StatelessWidget {
                         width: 44.r,
                         height: 44.r,
                         decoration: const BoxDecoration(
-                          color: Color(0xFF1890FF),
+                          color: Color(0xFF0070F3),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(Icons.add, color: Colors.white, size: 28.sp),
@@ -48,7 +48,7 @@ class ShortVideoPublishTile extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 15.sp,
                           fontWeight: FontWeight.w600,
-                          color: const Color(0xFF1890FF),
+                          color: const Color(0xFF0070F3),
                         ),
                       ),
                       SizedBox(height: 8.h),

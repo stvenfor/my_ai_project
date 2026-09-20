@@ -9,7 +9,7 @@ class HomeVideoTabContent extends StatelessWidget {
   const HomeVideoTabContent({super.key});
 
   static const _shortcuts = [
-    _Shortcut('会员专享', CupertinoIcons.play_rectangle, Color(0xFF007AFF)),
+    _Shortcut('会员专享', CupertinoIcons.play_rectangle, Color(0xFF0070F3)),
     _Shortcut('配音专栏', CupertinoIcons.book, Color(0xFFFF9500)),
     _Shortcut('其他课程', CupertinoIcons.folder, Color(0xFF5856D6)),
     _Shortcut('功能教程', CupertinoIcons.pencil, Color(0xFF34C759)),

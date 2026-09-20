@@ -31,4 +31,6 @@ export 'package:module_core/web/web_message.dart';
 export 'package:module_core/web/web_page_config.dart';
 export 'package:module_utils/utils/screen_util_utils.dart';
 export 'theme/app_theme.dart';
+export 'theme/vercel_tokens.dart';
+export 'theme/vercel_typography.dart';
 export 'widgets/ios_tab_bar.dart';

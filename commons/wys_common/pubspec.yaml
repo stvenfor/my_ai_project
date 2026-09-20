@@ -1,5 +1,5 @@
 name: wys_common
-description: 通用 UI/工具（自 tpj-flt 迁入；与 module_common_ui / module_utils 并存）
+description: 通用 UI/工具（与 module_common_ui / module_utils 并存）
 publish_to: 'none'
 version: 1.0.0+1
 

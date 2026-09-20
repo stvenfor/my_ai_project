@@ -31,7 +31,7 @@ class MembershipPaymentMethods extends GetView<MembershipRenewController> {
                 selected: selected == PaymentMethodType.wechat,
                 onTap: () => controller.selectPayment(PaymentMethodType.wechat),
               ),
-              const Divider(height: 1, indent: 56, color: Color(0xFFEEEEEE)),
+              const Divider(height: 1, indent: 56, color: Color(0xFFEBEBEB)),
               _PaymentTile(
                 iconAsset: MembershipAssets.iconAlipay,
                 title: '支付宝支付',

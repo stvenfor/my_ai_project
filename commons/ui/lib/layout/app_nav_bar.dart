@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:module_common_ui/layout/app_nav_bar_style.dart';
 import 'package:module_common_ui/layout/app_safe_insets.dart';
 import 'package:module_common_ui/theme/app_theme.dart';
+import 'package:module_common_ui/theme/vercel_tokens.dart';
 
 /// 自定义导航栏（替代 Material [AppBar]，无业务逻辑）。
 class AppNavBar extends StatelessWidget {
@@ -37,8 +38,9 @@ class AppNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final top = AppSafeInsets.top(context);
     final theme = Theme.of(context);
-    final fg = foregroundColor ?? _defaultForeground(context);
-    final bg = backgroundColor ?? _defaultBackground(context);
+    final tokens = VercelTokens.of(context);
+    final fg = foregroundColor ?? _defaultForeground(tokens);
+    final bg = backgroundColor ?? _defaultBackground(tokens);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: overlayStyle ??
@@ -56,9 +58,7 @@ class AppNavBar extends StatelessWidget {
               ? BoxDecoration(
                   color: bg,
                   border: Border(
-                    bottom: BorderSide(
-                      color: theme.dividerColor.withValues(alpha: 0.08),
-                    ),
+                    bottom: BorderSide(color: tokens.hairline),
                   ),
                 )
               : null,
@@ -101,20 +101,20 @@ class AppNavBar extends StatelessWidget {
     );
   }
 
-  Color _defaultBackground(BuildContext context) {
+  /// [AppNavBarStyle.dark] stays dark chrome (preview/video) regardless of themeMode.
+  Color _defaultBackground(VercelTokens tokens) {
     return switch (style) {
-      AppNavBarStyle.solid => Theme.of(context).cardColor,
+      AppNavBarStyle.solid => tokens.canvas,
       AppNavBarStyle.transparent => Colors.transparent,
-      AppNavBarStyle.dark => Colors.black,
+      AppNavBarStyle.dark => VercelTokens.dark.canvas,
     };
   }
 
-  Color _defaultForeground(BuildContext context) {
-    if (foregroundColor != null) return foregroundColor!;
+  Color _defaultForeground(VercelTokens tokens) {
     return switch (style) {
-      AppNavBarStyle.dark => Colors.white,
-      AppNavBarStyle.transparent => Theme.of(context).colorScheme.onSurface,
-      AppNavBarStyle.solid => Theme.of(context).colorScheme.onSurface,
+      AppNavBarStyle.dark => VercelTokens.dark.ink,
+      AppNavBarStyle.transparent => tokens.ink,
+      AppNavBarStyle.solid => tokens.ink,
     };
   }
 }

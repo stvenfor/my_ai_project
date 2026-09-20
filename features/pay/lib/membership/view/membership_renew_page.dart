@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:module_common_ui/layout/app_page_layout.dart';
 import 'package:module_common_ui/layout/app_page_scaffold.dart';
+import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_pay/membership/controller/membership_renew_controller.dart';
 import 'package:module_pay/membership/theme/membership_theme.dart';
 import 'package:module_pay/membership/widgets/membership_collapsed_nav_bar.dart';
@@ -18,13 +19,14 @@ class MembershipRenewPage extends GetView<MembershipRenewController> {
 
   @override
   Widget build(BuildContext context) {
+    final tokens = VercelTokens.of(context);
     controller.bindNavCollapseThreshold(
       MembershipDimens.navCollapseThreshold(context),
     );
 
     return AppPageScaffold(
       layout: AppPageLayout.fullBleed,
-      backgroundColor: MembershipPalette.pageBackground,
+      backgroundColor: tokens.canvasSoft2,
       body: Stack(
         children: [
           CustomScrollView(
@@ -33,7 +35,7 @@ class MembershipRenewPage extends GetView<MembershipRenewController> {
               const SliverToBoxAdapter(child: MembershipHeader()),
               SliverToBoxAdapter(
                 child: Container(
-                  color: MembershipPalette.cardWhite,
+                  color: tokens.canvas,
                   child: const Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [

@@ -39,7 +39,7 @@ class ShortVideoEmptyState extends StatelessWidget {
             child: FilledButton.icon(
               onPressed: onShootTap,
               style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFF1890FF),
+                backgroundColor: const Color(0xFF0070F3),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(24.r),
                 ),
@@ -58,10 +58,10 @@ class ShortVideoEmptyState extends StatelessWidget {
           SizedBox(height: 16.h),
           TextButton.icon(
             onPressed: onHelpTap,
-            icon: Icon(Icons.help_outline, size: 16.sp, color: const Color(0xFF1890FF)),
+            icon: Icon(Icons.help_outline, size: 16.sp, color: const Color(0xFF0070F3)),
             label: Text(
               '如何拍摄小视频',
-              style: TextStyle(fontSize: 14.sp, color: const Color(0xFF1890FF)),
+              style: TextStyle(fontSize: 14.sp, color: const Color(0xFF0070F3)),
             ),
           ),
         ],

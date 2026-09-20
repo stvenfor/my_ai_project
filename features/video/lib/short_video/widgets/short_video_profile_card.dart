@@ -60,7 +60,7 @@ class _UserInfo extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 18.sp,
                   fontWeight: FontWeight.w700,
-                  color: const Color(0xFF1A1A1A),
+                  color: const Color(0xFF171717),
                 ),
               ),
             ),
@@ -68,7 +68,7 @@ class _UserInfo extends StatelessWidget {
             Container(
               padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
               decoration: BoxDecoration(
-                color: const Color(0xFF1890FF),
+                color: const Color(0xFF0070F3),
                 borderRadius: BorderRadius.circular(4.r),
               ),
               child: Text(
@@ -126,7 +126,7 @@ class _StatsRow extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 20.sp,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF1A1A1A),
+                    color: const Color(0xFF171717),
                   ),
                 ),
                 SizedBox(height: 4.h),

@@ -1,28 +1,28 @@
 import 'package:flutter/material.dart';
 
+/// Dubbing home — Vercel tokens; drop green Category Skin.
 abstract final class DubbingHomeTheme {
-  static const background = Colors.white;
-  static const primaryGreen = Color(0xFF45D1A1);
-  static const titleBlack = Color(0xFF1A1A1A);
-  static const textGray = Color(0xFF666666);
-  static const subtitleGray = Color(0xFF999999);
+  static const background = Color(0xFFFFFFFF);
+  static const primaryGreen = Color(0xFF0070F3); // was brand green → link
+  static const titleBlack = Color(0xFF171717);
+  static const textGray = Color(0xFF4D4D4D);
+  static const subtitleGray = Color(0xFF888888);
   static const searchFieldBackground = Color(0xFFF5F5F5);
-  static const divider = Color(0xFFEEEEEE);
-  static const svipGold = Color(0xFFD4A017);
-  static const cardShadow = Color(0x14000000);
+  static const divider = Color(0xFFEBEBEB);
+  static const svipGold = Color(0xFFF5A623);
+  static const cardShadow = Color(0x00000000);
   static const viewAllBackground = Color(0xFFFAFAFA);
   static const sectionTitleSize = 18.0;
-  static const cardRadius = 12.0;
+  static const cardRadius = 8.0;
   static const thumbRadius = 8.0;
 
-  // 热搜榜详情页
-  static const hotRankHeaderPink = Color(0xFFFFF0F5);
-  static const hotRankSidebarBg = Color(0xFFF7F8FA);
-  static const hotRankSidebarActive = Colors.white;
-  static const hotRankRankGold = Color(0xFFFFC107);
-  static const hotRankRankSilver = Color(0xFFCFD8DC);
-  static const hotRankRankBronze = Color(0xFFFFCCBC);
-  static const hotRankRankDefault = Color(0xFFBDBDBD);
+  static const hotRankHeaderPink = Color(0xFFFAFAFA);
+  static const hotRankSidebarBg = Color(0xFFF5F5F5);
+  static const hotRankSidebarActive = Color(0xFFFFFFFF);
+  static const hotRankRankGold = Color(0xFFF5A623);
+  static const hotRankRankSilver = Color(0xFFA1A1A1);
+  static const hotRankRankBronze = Color(0xFFAB570A);
+  static const hotRankRankDefault = Color(0xFF888888);
   static const hotRankDropdownShadow = Color(0x1A000000);
 }
 

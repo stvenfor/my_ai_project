@@ -7,9 +7,9 @@ import 'package:module_video/dubbing/mock/dubbing_media_mock_data.dart';
 class DubbingVideoListPage extends StatelessWidget {
   const DubbingVideoListPage({super.key});
 
-  static const _primaryGreen = Color(0xFF52C41A);
+  static const _primary = Color(0xFF171717);
   static const _background = Color(0xFFF5F5F5);
-  static const _textGray = Color(0xFF8C8C8C);
+  static const _textGray = Color(0xFF888888);
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +77,7 @@ class _VideoCard extends StatelessWidget {
                 errorBuilder: (_, __, ___) => Container(
                   width: 120,
                   height: 90,
-                  color: const Color(0xFFEEEEEE),
+                  color: const Color(0xFFEBEBEB),
                   child: const Icon(Icons.movie, color: DubbingVideoListPage._textGray),
                 ),
               ),
@@ -95,7 +95,7 @@ class _VideoCard extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF1A1A1A),
+                        color: Color(0xFF171717),
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -107,7 +107,7 @@ class _VideoCard extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
                             color: tag.startsWith('难度') || tag == '合作'
-                                ? DubbingVideoListPage._primaryGreen.withValues(alpha: 0.12)
+                                ? DubbingVideoListPage._primary.withValues(alpha: 0.12)
                                 : const Color(0xFFF5F5F5),
                             borderRadius: BorderRadius.circular(4),
                           ),
@@ -116,7 +116,7 @@ class _VideoCard extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 10,
                               color: tag.startsWith('难度') || tag == '合作'
-                                  ? DubbingVideoListPage._primaryGreen
+                                  ? DubbingVideoListPage._primary
                                   : DubbingVideoListPage._textGray,
                             ),
                           ),
@@ -133,7 +133,7 @@ class _VideoCard extends StatelessWidget {
                           style: const TextStyle(fontSize: 12, color: DubbingVideoListPage._textGray),
                         ),
                         const Spacer(),
-                        const Icon(Icons.chevron_right, size: 18, color: Color(0xFFBFBFBF)),
+                        const Icon(Icons.chevron_right, size: 18, color: Color(0xFFA1A1A1)),
                       ],
                     ),
                   ],

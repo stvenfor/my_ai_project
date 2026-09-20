@@ -25,8 +25,8 @@ _Avoid_: sparkline（在无序列数据时）、迷你折线图
 _Avoid_: 仪表盘首页、总览看板
 
 **Chart Emphasis Zone（图表强调区）**:
-浅色页面上、用强调色与留白突出图表的区域；非整页深色主题。色板沿用并扩展 AnalyticsTheme。
-_Avoid_: 数据舱深色模式、Charles 风格
+用留白与语义强调色突出图表的区域；非整页装饰性深色舱。色板来自 App Visual Design 的 Vercel Token API，不再使用独立 AnalyticsTheme 品牌色。
+_Avoid_: 数据舱深色模式、Charles 风格、模块私有强调蓝
 
 **Anomaly Cue（异常提示）**:
 `flagAnomaly` 时的强提示：列表卡片左边色条，详情图表区顶部红色 Banner。

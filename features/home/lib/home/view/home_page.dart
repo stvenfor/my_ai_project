@@ -26,7 +26,6 @@ class HomePage extends GetView<HomeController> {
   Widget build(BuildContext context) {
     return AppPageScaffold(
       layout: AppPageLayout.mainTabRoot,
-      backgroundColor: HomeDashboardTheme.background,
       body: Obx(() {
         final data = controller.dashboard.value;
         final error = controller.errorMessage.value;

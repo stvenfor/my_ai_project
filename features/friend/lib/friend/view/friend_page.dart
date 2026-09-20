@@ -6,9 +6,20 @@ class FriendPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tokens = VercelTokens.of(context);
+    final textTheme = Theme.of(context).textTheme;
+
     return AppPageScaffold(
       navBar: const AppNavBar(title: '好友'),
-      body: const Center(child: Text('Friend 模块')),
+      body: Center(
+        child: Text(
+          'Friend 模块',
+          style: textTheme.bodyLarge?.copyWith(
+            color: tokens.ink,
+            fontFamily: VercelTypography.fontFamily,
+          ),
+        ),
+      ),
     );
   }
 }

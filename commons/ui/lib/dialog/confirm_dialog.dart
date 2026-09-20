@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:module_common_ui/theme/vercel_tokens.dart';
 import 'package:module_utils/utils/screen_util_utils.dart';
 
 /// 双按钮确认弹框。
@@ -26,6 +27,8 @@ class ConfirmDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tokens = VercelTokens.of(context);
+
     return Dialog(
       backgroundColor: Colors.transparent,
       insetPadding: EdgeInsets.symmetric(horizontal: 32.w),
@@ -35,7 +38,7 @@ class ConfirmDialog extends StatelessWidget {
           Container(
             constraints: BoxConstraints(maxHeight: maxContentHeight + 180.h),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: tokens.canvas,
               borderRadius: BorderRadius.circular(12.r),
             ),
             child: Column(
@@ -49,7 +52,7 @@ class ConfirmDialog extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 17.sp,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFF1A1A1A),
+                      color: tokens.ink,
                     ),
                   ),
                 ),
@@ -62,7 +65,7 @@ class ConfirmDialog extends StatelessWidget {
                       child: DefaultTextStyle(
                         style: TextStyle(
                           fontSize: 14.sp,
-                          color: const Color(0xFF666666),
+                          color: tokens.body,
                           height: 1.6,
                         ),
                         child: content,
@@ -84,8 +87,8 @@ class ConfirmDialog extends StatelessWidget {
                               onCancel?.call();
                             },
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: const Color(0xFF666666),
-                              side: const BorderSide(color: Color(0xFFE0E0E0)),
+                              foregroundColor: tokens.body,
+                              side: BorderSide(color: tokens.hairline),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8.r),
                               ),
@@ -98,14 +101,14 @@ class ConfirmDialog extends StatelessWidget {
                       Expanded(
                         child: SizedBox(
                           height: 44.h,
-                          child: ElevatedButton(
+                          child: FilledButton(
                             onPressed: () {
                               Navigator.of(context).pop(true);
                               onConfirm?.call();
                             },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF4A90E2),
-                              foregroundColor: Colors.white,
+                            style: FilledButton.styleFrom(
+                              backgroundColor: tokens.primary,
+                              foregroundColor: tokens.onPrimary,
                               elevation: 0,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8.r),

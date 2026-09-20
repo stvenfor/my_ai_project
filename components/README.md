@@ -13,7 +13,7 @@
 | `dokit/` | `dokit` | Vendored DoKit |
 | `dokit_bootstrap/` | `module_dokit_bootstrap` | Debug 壳工程 DoKit 注册 |
 
-## wys_*（自 tpj-flt 迁入）
+## wys_*
 
 | 目录 | package name | 职责 | 与主栈关系 |
 |------|-------------|------|------------|

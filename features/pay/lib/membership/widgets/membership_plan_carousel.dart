@@ -102,7 +102,7 @@ class _PlanCard extends StatelessWidget {
             height: MembershipDimens.planCardHeight,
             decoration: BoxDecoration(
               color: selected
-                  ? const Color(0xFFFFF8ED)
+                  ? const Color(0xFFFAFAFA)
                   : MembershipPalette.cardWhite,
               borderRadius:
                   BorderRadius.circular(MembershipDimens.planCardRadius),

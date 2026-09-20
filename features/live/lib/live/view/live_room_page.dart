@@ -82,6 +82,8 @@ class LiveRoomPage extends StatelessWidget {
       Get.put(LiveRoomController(roomId: roomId), tag: tag);
     }
     final controller = Get.find<LiveRoomController>(tag: tag);
+    final tokens = VercelTokens.of(context);
+    final textTheme = Theme.of(context).textTheme;
 
     return AppPageScaffold(
       navBar: AppNavBar(title: '直播 $roomId', showBackButton: true),
@@ -93,7 +95,10 @@ class LiveRoomPage extends StatelessWidget {
               padding: const EdgeInsets.all(12),
               child: Text(
                 'WS: ${controller.connectionLabel.value} · paused 保持连接',
-                style: TextStyle(color: Colors.grey.shade700),
+                style: textTheme.bodyMedium?.copyWith(
+                  color: tokens.body,
+                  fontFamily: VercelTypography.fontFamily,
+                ),
               ),
             ),
           ),
@@ -104,19 +109,33 @@ class LiveRoomPage extends StatelessWidget {
               child: const Text('发送 join 信令'),
             ),
           ),
-          const Divider(),
+          Divider(height: 1, thickness: 1, color: tokens.hairline),
           Expanded(
             child: Obx(
-              () => ListView.builder(
-                itemCount: controller.signals.length,
-                itemBuilder: (_, i) => ListTile(
-                  dense: true,
-                  title: Text(
-                    controller.signals[i],
-                    style: const TextStyle(fontSize: 12),
+              () {
+                final items = controller.signals.toList();
+                if (items.isEmpty) {
+                  return Center(
+                    child: Text(
+                      '暂无信令',
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: tokens.mute,
+                        fontFamily: VercelTypography.fontFamily,
+                      ),
+                    ),
+                  );
+                }
+                return ListView.builder(
+                  itemCount: items.length,
+                  itemBuilder: (_, i) => ListTile(
+                    dense: true,
+                    title: Text(
+                      items[i],
+                      style: VercelTypography.captionMono(color: tokens.ink),
+                    ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
           ),
         ],

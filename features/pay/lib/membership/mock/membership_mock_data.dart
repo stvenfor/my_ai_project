@@ -90,12 +90,12 @@ abstract final class MembershipMockData {
     MembershipFeatureItem(
       title: '背单词',
       subtitle: '听音辨义 拼写无忧',
-      gradient: [Color(0xFF7ED957), Color(0xFF52C41A)],
+      gradient: [Color(0xFF50E3C2), Color(0xFF0070F3)],
     ),
     MembershipFeatureItem(
       title: '读课文',
       subtitle: '智能打分 纠正发音',
-      gradient: [Color(0xFFFFB347), Color(0xFFFF8A34)],
+      gradient: [Color(0xFFF9CB28), Color(0xFFF5A623)],
     ),
     MembershipFeatureItem(
       title: 'AI私教',

@@ -8,7 +8,7 @@ class DubbingWorkListPage extends StatelessWidget {
   const DubbingWorkListPage({super.key});
 
   static const _background = Color(0xFFF5F5F5);
-  static const _textGray = Color(0xFF8C8C8C);
+  static const _textGray = Color(0xFF888888);
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +82,7 @@ class _WorkCard extends StatelessWidget {
                     fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) => Container(
                       height: 120,
-                      color: const Color(0xFFEEEEEE),
+                      color: const Color(0xFFEBEBEB),
                       child: const Icon(Icons.play_circle_outline, size: 40),
                     ),
                   ),
@@ -133,7 +133,7 @@ class _WorkCard extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF1A1A1A),
+                      color: Color(0xFF171717),
                     ),
                   ),
                   const SizedBox(height: 8),

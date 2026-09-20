@@ -1,5 +1,5 @@
 name: wys_network
-description: 网络请求基础组件（Dio 封装，自 tpj-flt 迁入；与 module_http 并存）
+description: 网络请求基础组件（Dio 封装；与 module_http 并存）
 publish_to: 'none'
 version: 1.0.0
 

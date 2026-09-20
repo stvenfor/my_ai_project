@@ -69,7 +69,7 @@ class _ShortVideoPageState extends State<ShortVideoPage> {
     final profile = _buildProfile();
 
     return AppPageScaffold(
-      backgroundColor: const Color(0xFFF5F6F8),
+      backgroundColor: const Color(0xFFF5F5F5),
       navBar: AppNavBar(
         title: '小视频',
         showBackButton: true,
@@ -89,7 +89,7 @@ class _ShortVideoPageState extends State<ShortVideoPage> {
             : null,
       ),
       body: ColoredBox(
-        color: const Color(0xFFF5F6F8),
+        color: const Color(0xFFF5F5F5),
         child: CustomScrollView(
           slivers: [
             SliverToBoxAdapter(
@@ -98,7 +98,7 @@ class _ShortVideoPageState extends State<ShortVideoPage> {
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [Color(0xFFDCEEF9), Color(0xFFF5F6F8)],
+                    colors: [Color(0xFFDCEEF9), Color(0xFFF5F5F5)],
                   ),
                 ),
                 child: ShortVideoProfileCard(profile: profile),
@@ -162,7 +162,7 @@ class _SectionHeader extends StatelessWidget {
             style: TextStyle(
               fontSize: 16.sp,
               fontWeight: FontWeight.w700,
-              color: const Color(0xFF1A1A1A),
+              color: const Color(0xFF171717),
             ),
           ),
           const Spacer(),
@@ -173,10 +173,10 @@ class _SectionHeader extends StatelessWidget {
               minimumSize: Size.zero,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
-            icon: Icon(Icons.help_outline, size: 14.sp, color: const Color(0xFF1890FF)),
+            icon: Icon(Icons.help_outline, size: 14.sp, color: const Color(0xFF0070F3)),
             label: Text(
               '如何拍摄小视频',
-              style: TextStyle(fontSize: 13.sp, color: const Color(0xFF1890FF)),
+              style: TextStyle(fontSize: 13.sp, color: const Color(0xFF0070F3)),
             ),
           ),
         ],
@@ -198,7 +198,7 @@ class _LoadingFooter extends StatelessWidget {
             height: 16.w,
             child: const CircularProgressIndicator(
               strokeWidth: 2,
-              color: Color(0xFF1890FF),
+              color: Color(0xFF0070F3),
             ),
           ),
           SizedBox(width: 8.w),

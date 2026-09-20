@@ -1,5 +1,5 @@
 name: wys_account
-description: 账号中心 — 各 module 获取登录状态与用户信息（自 tpj-flt 迁入）
+description: 账号中心 — 各 module 获取登录状态与用户信息
 publish_to: 'none'
 version: 1.0.0
 

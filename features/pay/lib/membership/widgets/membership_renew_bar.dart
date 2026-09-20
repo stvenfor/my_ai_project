@@ -25,7 +25,7 @@ class MembershipRenewBar extends GetView<MembershipRenewController> {
           color: MembershipPalette.cardWhite,
           boxShadow: [
             BoxShadow(
-              color: Color(0x14000000),
+              color: Color(0x00000000),
               blurRadius: 12,
               offset: Offset(0, -2),
             ),

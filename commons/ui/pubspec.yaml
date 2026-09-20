@@ -27,3 +27,10 @@ dev_dependencies:
   flutter_lints: ^2.0.0
 
 flutter:
+  fonts:
+    - family: Geist
+      fonts:
+        - asset: assets/fonts/Geist-Variable.ttf
+    - family: GeistMono
+      fonts:
+        - asset: assets/fonts/GeistMono-Variable.ttf

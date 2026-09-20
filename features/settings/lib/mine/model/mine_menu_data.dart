@@ -22,7 +22,7 @@ abstract final class MineQuickServiceData {
       id: 'mall',
       label: '商城',
       icon: CupertinoIcons.bag,
-      iconColor: Color(0xFF007AFF),
+      iconColor: Color(0xFF0070F3),
       badge: 'HOT',
     ),
     MineQuickServiceItem(

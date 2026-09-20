@@ -1,37 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:module_common_ui/module_common_ui.dart';
 
-final ThemeData musicListDarkTheme = ThemeData(
-  brightness: Brightness.dark,
-  scaffoldBackgroundColor: Colors.black,
-  colorScheme: const ColorScheme.dark(
-    primary: Colors.white,
-    onPrimary: Colors.black,
-    surface: Colors.black,
-    onSurface: Colors.white,
-  ),
-  iconTheme: const IconThemeData(color: Colors.white),
-  sliderTheme: const SliderThemeData(
-    thumbColor: Colors.white,
-    activeTrackColor: Colors.tealAccent,
-    inactiveTrackColor: Colors.white24,
-  ),
-);
+/// Prefer app [AppTheme.dark] / [VercelTokens]; these aliases keep call sites compiling.
+final ThemeData musicListDarkTheme = AppTheme.dark;
 
-final ThemeData musicDarkTheme = ThemeData(
-  brightness: Brightness.dark,
-  colorScheme: const ColorScheme.dark(
-    primary: Colors.white,
-    onPrimary: Colors.black,
-    surface: Colors.black,
-    onSurface: Colors.white,
-  ),
-  iconTheme: const IconThemeData(color: Colors.white),
-  sliderTheme: const SliderThemeData(
-    thumbColor: Colors.white,
-    activeTrackColor: Colors.tealAccent,
-    inactiveTrackColor: Colors.white24,
-  ),
-);
+final ThemeData musicDarkTheme = AppTheme.dark;
 
 /// 首页迷你播放条高度（含 padding，不含 Tab 栏占位）。
 const double musicMiniPlayerBarHeight = 72;

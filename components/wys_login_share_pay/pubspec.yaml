@@ -1,5 +1,5 @@
 name: wys_login_share_pay
-description: 统一微信登录分享、微信支付与支付宝支付组件（自 tpj-flt 迁入）
+description: 统一微信登录分享、微信支付与支付宝支付组件
 publish_to: 'none'
 version: 1.0.0
 

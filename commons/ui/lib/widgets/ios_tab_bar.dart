@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:module_common_ui/theme/app_theme.dart';
+import 'package:module_common_ui/theme/vercel_tokens.dart';
 
 class IosTabBarItem {
   const IosTabBarItem({
@@ -15,7 +15,7 @@ class IosTabBarItem {
   final IconData selectedIcon;
 }
 
-/// iOS 风格底部 TabBar：毛玻璃背景 + 系统蓝选中态。
+/// 底部 TabBar：毛玻璃背景 + Token API 选中态（link）。
 class IosTabBar extends StatelessWidget {
   const IosTabBar({
     super.key,
@@ -30,15 +30,17 @@ class IosTabBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tokens = VercelTokens.of(context);
+
     return ClipRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: AppTheme.tabBarBackground,
+            color: tokens.tabBarBackground,
             border: Border(
               top: BorderSide(
-                color: AppTheme.separator.withValues(alpha: 0.6),
+                color: tokens.hairline.withValues(alpha: 0.6),
                 width: 0.5,
               ),
             ),
@@ -84,7 +86,8 @@ class _TabItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected ? AppTheme.accent : AppTheme.labelSecondary;
+    final tokens = VercelTokens.of(context);
+    final color = selected ? tokens.link : tokens.mute;
 
     return Material(
       color: Colors.transparent,
@@ -101,7 +104,7 @@ class _TabItem extends StatelessWidget {
               alignment: Alignment.center,
               decoration: selected
                   ? BoxDecoration(
-                      color: AppTheme.accent.withValues(alpha: 0.12),
+                      color: tokens.link.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(14),
                     )
                   : null,

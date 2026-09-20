@@ -12,9 +12,9 @@ class DubbingVideoDetailPage extends StatefulWidget {
 }
 
 class _DubbingVideoDetailPageState extends State<DubbingVideoDetailPage> {
-  static const _primaryGreen = Color(0xFF52C41A);
-  static const _textGray = Color(0xFF8C8C8C);
-  static const _titleBlack = Color(0xFF1A1A1A);
+  static const _primary = Color(0xFF171717);
+  static const _textGray = Color(0xFF888888);
+  static const _titleBlack = Color(0xFF171717);
 
   var _descExpanded = false;
   var _selectedPartIndex = 0;
@@ -52,9 +52,9 @@ class _DubbingVideoDetailPageState extends State<DubbingVideoDetailPage> {
                     expanded: _descExpanded,
                     onToggle: () => setState(() => _descExpanded = !_descExpanded),
                   ),
-                  const Divider(height: 1, color: Color(0xFFEEEEEE)),
+                  const Divider(height: 1, color: Color(0xFFEBEBEB)),
                   _UploaderSection(name: item.uploaderName),
-                  const Divider(height: 1, color: Color(0xFFEEEEEE)),
+                  const Divider(height: 1, color: Color(0xFFEBEBEB)),
                   _AlbumSection(
                     item: item,
                     selectedIndex: _selectedPartIndex,
@@ -139,7 +139,7 @@ class _TagsSection extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
               color: isGreen
-                  ? _DubbingVideoDetailPageState._primaryGreen.withValues(alpha: 0.12)
+                  ? _DubbingVideoDetailPageState._primary.withValues(alpha: 0.12)
                   : const Color(0xFFF5F5F5),
               borderRadius: BorderRadius.circular(4),
             ),
@@ -148,7 +148,7 @@ class _TagsSection extends StatelessWidget {
               style: TextStyle(
                 fontSize: 11,
                 color: isGreen
-                    ? _DubbingVideoDetailPageState._primaryGreen
+                    ? _DubbingVideoDetailPageState._primary
                     : _DubbingVideoDetailPageState._textGray,
               ),
             ),
@@ -212,8 +212,8 @@ class _UploaderSection extends StatelessWidget {
         children: [
           const CircleAvatar(
             radius: 18,
-            backgroundColor: Color(0xFFE8F8E8),
-            child: Text('趣', style: TextStyle(color: _DubbingVideoDetailPageState._primaryGreen, fontSize: 14)),
+            backgroundColor: Color(0xFFF5F5F5),
+            child: Text('趣', style: TextStyle(color: _DubbingVideoDetailPageState._primary, fontSize: 14)),
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -271,7 +271,7 @@ class _AlbumSection extends StatelessWidget {
               const Spacer(),
               Text(
                 '+ 添加学习计划',
-                style: TextStyle(fontSize: 13, color: _DubbingVideoDetailPageState._primaryGreen),
+                style: TextStyle(fontSize: 13, color: _DubbingVideoDetailPageState._primary),
               ),
             ],
           ),
@@ -295,8 +295,8 @@ class _AlbumSection extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                         color: selected
-                            ? _DubbingVideoDetailPageState._primaryGreen
-                            : const Color(0xFFEEEEEE),
+                            ? _DubbingVideoDetailPageState._primary
+                            : const Color(0xFFEBEBEB),
                         width: selected ? 2 : 1,
                       ),
                     ),
@@ -315,7 +315,7 @@ class _AlbumSection extends StatelessWidget {
                                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                 decoration: BoxDecoration(
                                   color: part.badge == '试听'
-                                      ? _DubbingVideoDetailPageState._primaryGreen.withValues(alpha: 0.12)
+                                      ? _DubbingVideoDetailPageState._primary.withValues(alpha: 0.12)
                                       : const Color(0xFFFFF3E0),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
@@ -324,8 +324,8 @@ class _AlbumSection extends StatelessWidget {
                                   style: TextStyle(
                                     fontSize: 10,
                                     color: part.badge == '试听'
-                                        ? _DubbingVideoDetailPageState._primaryGreen
-                                        : const Color(0xFFFF8A34),
+                                        ? _DubbingVideoDetailPageState._primary
+                                        : const Color(0xFFF5A623),
                                   ),
                                 ),
                               ),
@@ -485,7 +485,7 @@ class _DubbingBottomBar extends StatelessWidget {
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
-        border: Border(top: BorderSide(color: Color(0xFFEEEEEE))),
+        border: Border(top: BorderSide(color: Color(0xFFEBEBEB))),
         boxShadow: [
           BoxShadow(
             color: Color(0x0D000000),
@@ -515,7 +515,7 @@ class _DubbingBottomBar extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: onStartDubbing,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _DubbingVideoDetailPageState._primaryGreen,
+                  backgroundColor: _DubbingVideoDetailPageState._primary,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(22),

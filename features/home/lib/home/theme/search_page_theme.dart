@@ -1,25 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:module_common_ui/module_common_ui.dart';
 
-/// 搜索页视觉令牌（iOS 极简风格）。
+/// Search page tokens — Vercel Design Source of Truth.
 abstract final class SearchPageTheme {
-  static const accent = Color(0xFF007AFF);
-  static const background = Color(0xFFF2F2F7);
+  static const accent = Color(0xFF0070F3);
+  static const background = Color(0xFFF5F5F5);
   static const surface = Color(0xFFFFFFFF);
-  static const fillSecondary = Color(0xFFE9E9EB);
-  static const labelPrimary = Color(0xFF000000);
-  static const labelSecondary = Color(0x993C3C43);
-  static const labelTertiary = Color(0x4D3C3C43);
-  static const separator = Color(0xFFC6C6C8);
+  static const fillSecondary = Color(0xFFF5F5F5);
+  static const labelPrimary = Color(0xFF171717);
+  static const labelSecondary = Color(0xFF4D4D4D);
+  static const labelTertiary = Color(0xFF888888);
+  static const separator = Color(0xFFEBEBEB);
 
-  static const rankGold = Color(0xFFFF9500);
-  static const rankSilver = Color(0xFF8E8E93);
-  static const rankBronze = Color(0xFFCD7F32);
+  static const rankGold = Color(0xFFF5A623);
+  static const rankSilver = Color(0xFF888888);
+  static const rankBronze = Color(0xFFAB570A);
 
-  static const double radiusMd = 12;
+  static const double radiusMd = 8;
   static const double contentMaxWidth = 720;
   static const double searchFieldHeight = 44;
 
-  // 兼容旧命名
   static const primaryGreen = accent;
   static const titleBlack = labelPrimary;
   static const textGray = labelSecondary;
@@ -30,39 +30,37 @@ abstract final class SearchPageTheme {
   static const divider = separator;
 
   static TextStyle get sectionTitle => const TextStyle(
-        fontSize: 17,
+        fontFamily: VercelTypography.fontFamily,
+        fontSize: 16,
         fontWeight: FontWeight.w600,
         color: labelPrimary,
-        height: 1.25,
+        height: 24 / 16,
       );
 
   static TextStyle get body => const TextStyle(
-        fontSize: 15,
+        fontFamily: VercelTypography.fontFamily,
+        fontSize: 16,
         fontWeight: FontWeight.w400,
         color: labelPrimary,
-        height: 1.35,
+        height: 24 / 16,
       );
 
   static TextStyle get caption => const TextStyle(
-        fontSize: 13,
+        fontFamily: VercelTypography.fontFamily,
+        fontSize: 14,
         fontWeight: FontWeight.w400,
         color: labelSecondary,
-        height: 1.35,
+        height: 20 / 14,
+        letterSpacing: -0.28,
       );
 
   static BoxDecoration get groupedCardDecoration => BoxDecoration(
         color: surface,
         borderRadius: BorderRadius.circular(radiusMd),
-        border: Border.all(color: separator, width: 0.5),
+        border: Border.all(color: separator),
       );
 
-  static List<BoxShadow> get cardShadow => [
-        BoxShadow(
-          color: const Color(0xFF8E8E93).withValues(alpha: 0.06),
-          blurRadius: 12,
-          offset: const Offset(0, 4),
-        ),
-      ];
+  static List<BoxShadow> get cardShadow => const [];
 }
 
 abstract final class SearchAssets {
