@@ -4,4 +4,6 @@ library module_auth;
 export 'auth_module.dart';
 export 'navigation/auth_navigation.dart';
 export 'session/auth_session.dart';
+export 'session/user_profile_sync.dart';
+export 'api/user_profile_models.dart';
 export 'user/controller/auth_controller.dart';

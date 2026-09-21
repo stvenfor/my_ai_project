@@ -9,6 +9,7 @@ class User extends Equatable {
     this.refreshToken = '',
     this.sessionId = '',
     this.deviceId = '',
+    this.phoneMasked = '',
   });
 
   final String id;
@@ -19,6 +20,9 @@ class User extends Equatable {
   final String sessionId;
   final String deviceId;
 
+  /// 脱敏手机号（只读展示）；空表示后端未提供。
+  final String phoneMasked;
+
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'] as String? ?? '',
@@ -28,6 +32,7 @@ class User extends Equatable {
       refreshToken: json['refreshToken'] as String? ?? '',
       sessionId: json['sessionId'] as String? ?? '',
       deviceId: json['deviceId'] as String? ?? '',
+      phoneMasked: json['phoneMasked'] as String? ?? '',
     );
   }
 
@@ -39,6 +44,7 @@ class User extends Equatable {
         'refreshToken': refreshToken,
         'sessionId': sessionId,
         'deviceId': deviceId,
+        'phoneMasked': phoneMasked,
       };
 
   User copyWith({
@@ -49,6 +55,7 @@ class User extends Equatable {
     String? refreshToken,
     String? sessionId,
     String? deviceId,
+    String? phoneMasked,
   }) {
     return User(
       id: id ?? this.id,
@@ -58,10 +65,19 @@ class User extends Equatable {
       refreshToken: refreshToken ?? this.refreshToken,
       sessionId: sessionId ?? this.sessionId,
       deviceId: deviceId ?? this.deviceId,
+      phoneMasked: phoneMasked ?? this.phoneMasked,
     );
   }
 
   @override
-  List<Object?> get props =>
-      [id, name, avatar, token, refreshToken, sessionId, deviceId];
+  List<Object?> get props => [
+        id,
+        name,
+        avatar,
+        token,
+        refreshToken,
+        sessionId,
+        deviceId,
+        phoneMasked,
+      ];
 }

@@ -16,6 +16,8 @@ import 'package:module_settings/deal_invoice/view/deal_invoice_upload_page.dart'
 import 'package:module_settings/mine/api/mine_http_config.dart';
 import 'package:module_settings/mine/personalized_settings/personalized_settings_controller.dart';
 import 'package:module_settings/mine/personalized_settings/view/personalized_settings_page.dart';
+import 'package:module_settings/mine/controller/mine_profile_controller.dart';
+import 'package:module_settings/mine/view/mine_profile_page.dart';
 import 'package:module_settings/mine/view/mine_http_test_page.dart';
 import 'package:module_settings/mine/view/mine_page.dart';
 import 'package:module_settings/settings/settings_binding.dart';
@@ -43,6 +45,12 @@ class SettingsModule extends FeatureModule {
   Map<String, WidgetBuilder> routes() => {
         RoutePath.mine: (_) => const MinePage(),
         RoutePath.mineHttpTest: (_) => const MineHttpTestPage(),
+        RoutePath.mineProfile: (_) {
+          if (!Get.isRegistered<MineProfileController>()) {
+            Get.lazyPut(MineProfileController.new, fenix: true);
+          }
+          return const MineProfilePage();
+        },
         RoutePath.personalizedSettings: (_) {
           if (!Get.isRegistered<PersonalizedSettingsController>()) {
             Get.lazyPut(PersonalizedSettingsController.new);

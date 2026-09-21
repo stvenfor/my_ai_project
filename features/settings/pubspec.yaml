@@ -36,6 +36,10 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^2.0.0
 
+# 与根工程一致：消解 module_utils 内 rxdart 冲突，便于包内单测。
+dependency_overrides:
+  rxdart: ^0.27.7
+
 flutter:
   uses-material-design: true
   assets:

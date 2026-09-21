@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:module_auth/session/user_profile_sync.dart';
 import 'package:module_auth/navigation/auth_navigation.dart';
 import 'package:module_auth/session/auth_session_guard_service.dart';
 import 'package:module_auth/session/backend_auth_service.dart';
@@ -101,6 +102,9 @@ class AuthSession {
       }
     } catch (_) {
       // 网络超时 / 后端不可达：不阻塞启动；本地会话可能过期，用户可重新登录。
+    }
+    if (isLoggedIn) {
+      await UserProfileSync.hydrateQuietly();
     }
   }
 

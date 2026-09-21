@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -81,9 +83,9 @@ class _HeaderBody extends StatelessWidget {
                 final loggedIn = Get.find<UserService>().isLoggedIn;
                 return _TopIcon(
                   icon: loggedIn
-                      ? CupertinoIcons.square_arrow_right
+                      ? CupertinoIcons.person_crop_circle
                       : CupertinoIcons.person_crop_circle_badge_plus,
-                  onTap: loggedIn ? controller.logout : controller.goLogin,
+                  onTap: controller.openProfile,
                 );
               }),
             ],
@@ -290,6 +292,17 @@ class _Avatar extends StatelessWidget {
       return _placeholder();
     }
 
+    if (url.startsWith('data:')) {
+      final bytes = _decodeDataUrl(url);
+      if (bytes == null) return _placeholder();
+      return Image.memory(
+        bytes,
+        width: 72,
+        height: 72,
+        fit: BoxFit.cover,
+      );
+    }
+
     if (_isLocalPath(url)) {
       return Image.file(
         File(url.replaceFirst('file:', '')),
@@ -301,6 +314,16 @@ class _Avatar extends StatelessWidget {
     }
 
     return CacheImageUtils.network(url, width: 72, height: 72, fit: BoxFit.cover);
+  }
+
+  Uint8List? _decodeDataUrl(String url) {
+    final comma = url.indexOf(',');
+    if (comma < 0) return null;
+    try {
+      return base64Decode(url.substring(comma + 1));
+    } catch (_) {
+      return null;
+    }
   }
 
   bool _isLocalPath(String url) =>

@@ -4,21 +4,29 @@ import 'package:module_auth/session/auth_session.dart';
 import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_core/core.dart';
 import 'package:wys_router/src/route/route_path.dart';
+import 'package:module_settings/mine/actions/mine_avatar_actions.dart';
 import 'package:module_settings/mine/model/mine_menu_data.dart';
 import 'package:module_settings/mine/model/mine_function_item.dart';
 import 'package:module_settings/mine/model/mine_profile_model.dart';
 import 'package:module_settings/mine/model/mine_store_data.dart';
+import 'package:module_settings/mine/model/mine_stat_model.dart';
 import 'package:module_settings/mine/repository/mine_function_repository.dart';
+import 'package:module_settings/mine/repository/mine_repository.dart';
 import 'package:module_settings/mine/repository/mine_store_repository.dart';
 import 'package:module_settings/mine/widgets/switch_store_dialog.dart';
-import 'package:module_utils/module_utils.dart';
 
 class MineController extends GetxController {
+  MineController({MineRepository? repository})
+      : _repository = repository ?? MineRepository();
+
   final UserService _userService = Get.find<UserService>();
+  final MineRepository _repository;
 
   final profile = Rxn<MineProfileModel>();
   final functions = <MineFunctionItem>[].obs;
   final selectedStoreId = RxString(MineStoreData.defaultStoreId);
+  List<MineStatModel>? _lastStats;
+  String? _lastRoleLabel;
 
   static const _defaultAvatar =
       'https://picsum.photos/seed/mine_profile/200/200';
@@ -45,6 +53,8 @@ class MineController extends GetxController {
 
   void _syncUser(User? user) {
     if (user == null) {
+      _lastStats = null;
+      _lastRoleLabel = null;
       profile.value = const MineProfileModel(
         displayName: '访客',
         avatarUrl: null,
@@ -59,23 +69,54 @@ class MineController extends GetxController {
     profile.value = MineProfileModel(
       displayName: user.name.isNotEmpty ? user.name : '东东枪',
       avatarUrl: user.avatar.isNotEmpty ? user.avatar : _defaultAvatar,
-      roleBadge: '销售经理',
+      roleBadge: _lastRoleLabel ?? '销售顾问',
       storeName: MineStoreRepository.resolveStoreName(selectedStoreId.value),
-      maskedPhone: _maskPhone(user.id),
-      stats: MineProfileModel.demoStats,
+      maskedPhone: user.phoneMasked.isNotEmpty
+          ? user.phoneMasked
+          : _maskPhone(user.id),
+      stats: _lastStats ?? MineProfileModel.guestStats,
     );
+    _refreshStats();
   }
 
-  void _applyStoreToProfile() {
+  Future<void> _refreshStats() async {
+    if (!isLoggedIn) return;
+    final storeId = selectedStoreId.value;
+    try {
+      final store = await _repository.loadStoreStats(storeId: storeId);
+      if (!isLoggedIn || selectedStoreId.value != storeId) return;
+      _lastStats = MineRepository.statsToMineModels(store);
+      _lastRoleLabel = store.roleLabel;
+      if (store.storeId > 0) {
+        selectedStoreId.value = '${store.storeId}';
+      }
+      _applyStats(
+        _lastStats!,
+        roleLabel: _lastRoleLabel,
+        storeName: store.storeName,
+      );
+    } catch (_) {
+      // 保持上次成功值或全 0，不回退 demo。
+    }
+  }
+
+  void _applyStats(
+    List<MineStatModel> stats, {
+    String? roleLabel,
+    String? storeName,
+  }) {
     final current = profile.value;
     if (current == null || !isLoggedIn) return;
+    final name = (storeName != null && storeName.isNotEmpty)
+        ? storeName
+        : current.storeName;
     profile.value = MineProfileModel(
       displayName: current.displayName,
       avatarUrl: current.avatarUrl,
-      roleBadge: current.roleBadge,
-      storeName: MineStoreRepository.resolveStoreName(selectedStoreId.value),
+      roleBadge: roleLabel ?? _lastRoleLabel ?? current.roleBadge,
+      storeName: name,
       maskedPhone: current.maskedPhone,
-      stats: current.stats,
+      stats: stats,
     );
   }
 
@@ -98,6 +139,14 @@ class MineController extends GetxController {
       return;
     }
     await Get.toNamed(RoutePath.shortVideo);
+  }
+
+  Future<void> openProfile() async {
+    if (!isLoggedIn) {
+      await goLogin(redirectRoute: RoutePath.mineProfile);
+      return;
+    }
+    await Get.toNamed(RoutePath.mineProfile);
   }
 
   Future<void> logout() async {
@@ -131,44 +180,38 @@ class MineController extends GetxController {
       selectedId: selectedStoreId.value,
     );
     if (picked == null || picked == selectedStoreId.value) return;
-    selectedStoreId.value = picked;
-    await MineStoreRepository.saveSelectedStoreId(picked);
-    _applyStoreToProfile();
+    final storeId = int.tryParse(picked);
+    if (storeId == null || storeId <= 0) {
+      UiKitInitializer.toast('店铺编号无效');
+      return;
+    }
+    final previous = selectedStoreId.value;
+    try {
+      final store = await _repository.switchStore(storeId: storeId);
+      selectedStoreId.value = '${store.storeId}';
+      await MineStoreRepository.saveSelectedStoreId(selectedStoreId.value);
+      _lastStats = MineRepository.statsToMineModels(store);
+      _lastRoleLabel = store.roleLabel;
+      _applyStats(
+        _lastStats!,
+        roleLabel: store.roleLabel,
+        storeName: store.storeName,
+      );
+    } catch (error) {
+      selectedStoreId.value = previous;
+      UiKitInitializer.toast('切换店铺失败');
+    }
   }
 
   void onElectronicCardTap() => UiKitInitializer.toast('电子名片');
 
   Future<void> onAvatarTap() async {
     if (!isLoggedIn) {
-      UiKitInitializer.toast('请先登录');
+      await goLogin();
       return;
     }
-
-    final source = await MediaSourceBottomSheet.show();
-    if (source == null) return;
-
-    try {
-      if (source == MediaPickSource.camera) {
-        final granted = await ImagePickerUtils.ensureCameraPermission();
-        if (!granted) {
-          UiKitInitializer.toastError('需要相机权限才能拍摄');
-          return;
-        }
-      }
-
-      final path = await ImagePickerUtils.pickImage(source, maxWidth: 800);
-      if (path == null) return;
-      await _updateAvatar(path);
-    } catch (_) {
-      UiKitInitializer.toastError('选择图片失败');
-    }
-  }
-
-  Future<void> _updateAvatar(String path) async {
-    final user = _userService.currentUser.value;
-    if (user == null) return;
-    await _userService.setUser(user.copyWith(avatar: path));
-    UiKitInitializer.toast('头像已更新');
+    // 选图并 PATCH 后 UserService.setUser → ever → 我的页头像刷新
+    await MineAvatarActions.pickAndUpload();
   }
 
   void onQuickServiceTap(MineQuickServiceItem item) {

@@ -35,6 +35,7 @@ class RoutePath{
   static const String mine = '/mine';
   static const String mineHttpTest = '/mine/http_test';
   static const String personalizedSettings = '/mine/personalized_settings';
+  static const String mineProfile = '/mine/profile';
   static const String settings = '/settings';
   static const String dialogDemo = '/settings/dialog_demo';
   static const String linkingDebug = '/settings/linking_debug';

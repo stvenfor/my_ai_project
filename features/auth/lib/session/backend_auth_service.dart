@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:get/get.dart';
 import 'package:module_auth/api/user_auth_api.dart';
 import 'package:module_auth/session/device_auth_context.dart';
+import 'package:module_auth/session/user_profile_sync.dart';
 import 'package:module_core/core.dart';
 import 'package:module_utils/module_utils.dart';
 
@@ -194,6 +195,7 @@ class BackendAuthService extends AuthService implements SessionRefreshable {
       ),
     );
     _emit(AuthSessionState.signedIn);
+    unawaited(UserProfileSync.hydrateQuietly(userService: _userService));
   }
 
   String _resolveUsername({

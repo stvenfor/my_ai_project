@@ -333,7 +333,8 @@ if (AuthSession.isLoggedIn) {
 |------|------|------|------|
 | GET | `/api/v1/transactions?limit=&offset=` | Supabase JWT | Flutter 列表（limit/offset） |
 | GET | `/api/v1/transactions/:id` | Supabase JWT | 详情 |
-| GET | `/api/v1/profiles/me` | Supabase JWT | 用户资料 |
+| GET | `/api/v1/profiles/me` | Supabase JWT | 用户资料（`displayName` / `avatarUrl` / `phone`） |
+| PATCH | `/api/v1/profiles/me` | Supabase JWT | 更新资料：`display_name`；头像可用 `avatar_base64` + `avatar_mime`（BFF 存为 data URL 写入 `avatar_url`） |
 
 Go 侧使用 **SupabaseAuth 中间件**校验 token，数据来自 Supabase `transactions` 表（需 RLS，见 [`supabase/migrations/003_transactions_user_id_rls.sql`](../supabase/migrations/003_transactions_user_id_rls.sql)）。
 

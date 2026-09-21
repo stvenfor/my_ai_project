@@ -13,12 +13,16 @@ class WebBridgeActions {
   static const switchEnvironment = 'switchEnvironment';
   static const getUserInfo = 'getUserInfo';
 
+  /// 相册或拍照。payload.source 为 `gallery` / `camera`，成功时返回 `mime` + `base64`。
+  static const pickImage = 'pickImage';
+
   static const Set<String> coreActions = {
     showToast,
     closeWithResult,
     getEnvironment,
     switchEnvironment,
     getUserInfo,
+    pickImage,
   };
 
   // ── Module 扩展（业务模块注册）──────────────────────────────

@@ -1,16 +1,16 @@
 import 'package:module_settings/mine/model/mine_store_model.dart';
 
 abstract final class MineStoreData {
-  static const defaultStoreId = 'ward_longding';
+  static const defaultStoreId = '1';
 
   static const stores = <MineStoreOption>[
     MineStoreOption(
-      id: 'ward_longding',
+      id: '1',
       name: '[4S]北京沃德龙鼎吉利',
     ),
     MineStoreOption(
-      id: 'tengyuan',
-      name: '[4S]北京腾远吉利北京腾远...',
+      id: '2',
+      name: '[4S]北京腾远吉利',
     ),
   ];
 

@@ -425,17 +425,41 @@ class BackendUser {
     required this.id,
     required this.username,
     required this.email,
+    this.userId = '',
+    this.userName = '',
+    this.status = 0,
   });
 
   factory BackendUser.fromJson(Map<String, dynamic> json) {
+    final userId = json['user_id']?.toString() ?? '';
+    final id = json['id']?.toString() ?? '';
+    final canonicalId = userId.isNotEmpty ? userId : id;
+    final userName = json['user_name']?.toString() ?? '';
+    final username = json['username']?.toString() ?? '';
+    final displayName = json['display_name']?.toString() ?? '';
+    final name = userName.isNotEmpty
+        ? userName
+        : (username.isNotEmpty ? username : displayName);
     return BackendUser(
-      id: json['id']?.toString() ?? '',
-      username: json['username']?.toString() ?? '',
+      id: id.isNotEmpty ? id : canonicalId,
+      userId: canonicalId,
+      username: name,
+      userName: userName.isNotEmpty ? userName : name,
       email: json['email']?.toString() ?? '',
+      status: _statusOf(json['status']),
     );
   }
 
   final String id;
+  final String userId;
   final String username;
+  final String userName;
   final String email;
+  final int status;
+
+  static int _statusOf(Object? value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return int.tryParse(value?.toString() ?? '') ?? 0;
+  }
 }

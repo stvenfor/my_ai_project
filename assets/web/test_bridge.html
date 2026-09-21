@@ -48,6 +48,14 @@
     button.danger { background: #dc2626; }
     #log { max-height: 200px; overflow-y: auto; font-size: 11px; color: #444; }
     .waiting { color: #94a3b8; font-style: italic; }
+    #preview {
+      display: none;
+      width: 100%;
+      max-height: 280px;
+      object-fit: contain;
+      border-radius: 8px;
+      background: #f8f9fa;
+    }
   </style>
 </head>
 <body>
@@ -68,7 +76,14 @@
       <button class="secondary" onclick="getEnvironment()">Core：getEnvironment</button>
       <button class="success" onclick="switchEnvironment()">Core：switchEnvironment</button>
       <button class="danger" onclick="closePage()">Core：closeWithResult</button>
+      <button onclick="pickImage('gallery')">Core：相册 pickImage</button>
+      <button onclick="pickImage('camera')">Core：拍照 pickImage</button>
     </div>
+  </section>
+
+  <section>
+    <h2>图片预览</h2>
+    <img id="preview" alt="选图结果" />
   </section>
 
   <section>
@@ -96,7 +111,7 @@
       }
       log('→ Flutter: action=' + action + ' payload=' + JSON.stringify(payload || {}));
       return window.ICSJavascriptBridge.invoke(action, payload || {}).then(function(result) {
-        log('← Flutter: ' + JSON.stringify(result));
+        log('← Flutter: ' + summarize(result));
         return result;
       }).catch(function(err) {
         log('← ERROR: ' + err);
@@ -112,6 +127,24 @@
     // 兜底：部分平台注入略慢
     setTimeout(renderParams, 500);
     setTimeout(renderParams, 1500);
+
+    function summarize(result) {
+      if (!result || typeof result !== 'object') return JSON.stringify(result);
+      var copy = Object.assign({}, result);
+      if (typeof copy.base64 === 'string') {
+        copy.base64 = '[base64 ' + copy.base64.length + ' chars]';
+      }
+      return JSON.stringify(copy);
+    }
+
+    function pickImage(source) {
+      callBridge('pickImage', { source: source }).then(function(res) {
+        if (!res || !res.ok || res.cancelled || !res.base64) return;
+        var img = document.getElementById('preview');
+        img.src = 'data:' + (res.mime || 'image/jpeg') + ';base64,' + res.base64;
+        img.style.display = 'block';
+      });
+    }
 
     function sendToast() {
       callBridge('showToast', { text: 'Hello from H5 @ ' + new Date().toLocaleTimeString() });

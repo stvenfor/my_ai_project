@@ -23,11 +23,4 @@ class MineProfileModel {
     MineStatModel(value: '0', label: '店铺天数'),
     MineStatModel(value: '0', label: '累计客户'),
   ];
-
-  static const demoStats = [
-    MineStatModel(value: '1028', label: '加入天数'),
-    MineStatModel(value: '28', label: '员工数'),
-    MineStatModel(value: '2059', label: '店铺天数'),
-    MineStatModel(value: '9366', label: '累计客户'),
-  ];
 }
