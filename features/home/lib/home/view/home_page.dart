@@ -123,6 +123,7 @@ class HomePage extends GetView<HomeController> {
 
   Widget _buildHomeDashboard(HomeDashboardData data) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const HomeBannerSection(),

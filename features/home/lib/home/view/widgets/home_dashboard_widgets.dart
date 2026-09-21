@@ -66,7 +66,11 @@ class HomeSearchBar extends StatelessWidget {
             ),
             child: InkWell(
               borderRadius: BorderRadius.circular(HomeDashboardTheme.radiusMd),
-              onTap: () {},
+              onTap: () async {
+                final result = await ScanUtils.scanWithCamera(context);
+                if (result == null || result.isEmpty) return;
+                UiKitInitializer.toast(result);
+              },
               child: SizedBox(
                 width: 44.w,
                 height: 44.w,
@@ -193,7 +197,7 @@ class HomeFeatureGrid extends StatelessWidget {
       AnalyticsNavigation.open();
       return;
     }
-    if (item.label == '销售顾问') {
+    if (item.label == 'H5 调试') {
       final dashboard = Get.isRegistered<HomeController>()
           ? Get.find<HomeController>().dashboard.value
           : null;
@@ -201,7 +205,7 @@ class HomeFeatureGrid extends StatelessWidget {
         RoutePath.web,
         arguments: WebPageConfig.asset(
           assetPath: WebBridgeAssets.testBridge,
-          title: 'Web 桥接测试',
+          title: 'H5 调试',
           params: {
             'from': 'home',
             'feature': item.label,
@@ -215,73 +219,103 @@ class HomeFeatureGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const maxItems = 10; // 5 列 × 最多 2 行
+    const crossAxisCount = 5;
+    final iconSize = 44.w;
+    final labelGap = 4.h;
+    final labelStyle = TextStyle(
+      fontSize: 11.sp,
+      height: 1.2,
+      color: HomeDashboardTheme.labelPrimary,
+    );
+    final visible =
+        items.length > maxItems ? items.sublist(0, maxItems) : items;
+    final rows = <List<HomeFeatureItem>>[];
+    for (var i = 0; i < visible.length; i += crossAxisCount) {
+      final end = i + crossAxisCount > visible.length
+          ? visible.length
+          : i + crossAxisCount;
+      rows.add(visible.sublist(i, end));
+    }
+
     return Container(
-      margin: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 0),
-      padding: EdgeInsets.fromLTRB(8.w, 16.h, 8.w, 16.h),
+      margin: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
+      padding: EdgeInsets.fromLTRB(4.w, 8.h, 4.w, 8.h),
       decoration: HomeDashboardTheme.groupedCardDecoration,
-      child: GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 5,
-          mainAxisSpacing: 12.h,
-          childAspectRatio: 0.72,
-        ),
-        itemCount: items.length,
-        itemBuilder: (context, index) {
-          final item = items[index];
-          return GestureDetector(
-            onTap: () => _onFeatureTap(item),
-            child: Column(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (var r = 0; r < rows.length; r++) ...[
+            if (r > 0) SizedBox(height: 8.h),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 48.w,
-                  height: 48.w,
-                  decoration: BoxDecoration(
-                    color: HomeDashboardTheme.fillSecondary,
-                    borderRadius: BorderRadius.circular(12.r),
-                  ),
-                  child: item.imageUrl != null
-                      ? CacheImageUtils.network(
-                          item.imageUrl!,
-                          width: 48.w,
-                          height: 48.w,
-                          fit: BoxFit.cover,
-                          borderRadius: BorderRadius.circular(12.r),
-                          placeholder: (_, __) => Center(
-                            child: SizedBox(
-                              width: 20.w,
-                              height: 20.w,
-                              child: const CircularProgressIndicator(strokeWidth: 2),
+                for (final item in rows[r])
+                  Expanded(
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => _onFeatureTap(item),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: iconSize,
+                            height: iconSize,
+                            decoration: BoxDecoration(
+                              color: HomeDashboardTheme.fillSecondary,
+                              borderRadius: BorderRadius.circular(12.r),
+                            ),
+                            clipBehavior: Clip.antiAlias,
+                            child: item.imageUrl != null
+                                ? CacheImageUtils.network(
+                                    item.imageUrl!,
+                                    width: iconSize,
+                                    height: iconSize,
+                                    fit: BoxFit.cover,
+                                    borderRadius: BorderRadius.circular(12.r),
+                                    placeholder: (_, __) => Center(
+                                      child: SizedBox(
+                                        width: 18.w,
+                                        height: 18.w,
+                                        child: const CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      ),
+                                    ),
+                                    errorWidget: (_, __, ___) => Icon(
+                                      Icons.apps_rounded,
+                                      size: 22.sp,
+                                      color: HomeDashboardTheme.accent,
+                                    ),
+                                  )
+                                : Center(
+                                    child: Text(
+                                      item.emoji ?? '?',
+                                      style: TextStyle(fontSize: 22.sp),
+                                    ),
+                                  ),
+                          ),
+                          SizedBox(height: labelGap),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 2.w),
+                            child: Text(
+                              item.label,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                              style: labelStyle,
                             ),
                           ),
-                          errorWidget: (_, __, ___) => Icon(
-                            Icons.apps_rounded,
-                            size: 24.sp,
-                            color: HomeDashboardTheme.accent,
-                          ),
-                        )
-                      : Center(
-                          child: Text(
-                            item.emoji ?? '?',
-                            style: TextStyle(fontSize: 24.sp),
-                          ),
-                        ),
-                ),
-                SizedBox(height: 6.h),
-                Text(
-                  item.label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 11.sp,
-                    color: HomeDashboardTheme.labelPrimary,
+                        ],
+                      ),
+                    ),
                   ),
-                ),
+                for (var j = rows[r].length; j < crossAxisCount; j++)
+                  const Expanded(child: SizedBox.shrink()),
               ],
             ),
-          );
-        },
+          ],
+        ],
       ),
     );
   }
@@ -347,120 +381,148 @@ class HomeQuickActionGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const crossAxisCount = 2;
+    final rows = <List<HomeQuickAction>>[];
+    for (var i = 0; i < actions.length; i += crossAxisCount) {
+      final end = i + crossAxisCount > actions.length
+          ? actions.length
+          : i + crossAxisCount;
+      rows.add(actions.sublist(i, end));
+    }
+
     return Padding(
-      padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 0),
-      child: GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          mainAxisSpacing: 12.h,
-          crossAxisSpacing: 12.w,
-          childAspectRatio: 1.1,
-        ),
-        itemCount: actions.length,
-        itemBuilder: (context, index) {
-          final action = actions[index];
-          return Container(
-            padding: EdgeInsets.all(14.w),
-            decoration: BoxDecoration(
-              color: HomeDashboardTheme.surface,
-              borderRadius: BorderRadius.circular(HomeDashboardTheme.radiusMd),
-              border: Border.all(
-                color: HomeDashboardTheme.separator,
-                width: 0.5,
-              ),
-            ),
-            child: Column(
+      padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (var r = 0; r < rows.length; r++) ...[
+            if (r > 0) SizedBox(height: 12.h),
+            Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 40.w,
-                      height: 40.w,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10.r),
-                        color: HomeDashboardTheme.background,
-                      ),
-                      child: action.imageUrl != null
-                          ? CacheImageUtils.network(
-                              action.imageUrl!,
-                              width: 40.w,
-                              height: 40.w,
-                              fit: BoxFit.cover,
-                              borderRadius: BorderRadius.circular(10.r),
-                              placeholder: (_, __) => Center(
-                                child: SizedBox(
-                                  width: 16.w,
-                                  height: 16.w,
-                                  child: const CircularProgressIndicator(strokeWidth: 1.5),
-                                ),
-                              ),
-                              errorWidget: (_, __, ___) => Icon(
-                                Icons.image_outlined,
-                                size: 20.sp,
-                                color: HomeDashboardTheme.textGray,
-                              ),
-                            )
-                          : Center(
-                              child: Text(action.emoji ?? '?', style: TextStyle(fontSize: 20.sp)),
-                            ),
-                    ),
-                    SizedBox(width: 10.w),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            action.title,
-                            style: TextStyle(
-                              fontSize: 13.sp,
-                              fontWeight: FontWeight.w600,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          SizedBox(height: 2.h),
-                          Text(
-                            action.subtitle,
-                            style: TextStyle(
-                              fontSize: 11.sp,
-                              color: HomeDashboardTheme.textGray,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                Spacer(),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 5.h),
-                      decoration: BoxDecoration(
-                        color: HomeDashboardTheme.primaryBlue.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                      child: Text(
-                        action.actionLabel,
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          color: HomeDashboardTheme.primaryBlue,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                for (var c = 0; c < rows[r].length; c++) ...[
+                  if (c > 0) SizedBox(width: 12.w),
+                  Expanded(child: _HomeQuickActionCard(action: rows[r][c])),
+                ],
+                for (var c = rows[r].length; c < crossAxisCount; c++) ...[
+                  SizedBox(width: 12.w),
+                  const Expanded(child: SizedBox.shrink()),
+                ],
               ],
             ),
-          );
-        },
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _HomeQuickActionCard extends StatelessWidget {
+  const _HomeQuickActionCard({required this.action});
+
+  final HomeQuickAction action;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(14.w),
+      decoration: BoxDecoration(
+        color: HomeDashboardTheme.surface,
+        borderRadius: BorderRadius.circular(HomeDashboardTheme.radiusMd),
+        border: Border.all(
+          color: HomeDashboardTheme.separator,
+          width: 0.5,
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 40.w,
+                height: 40.w,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10.r),
+                  color: HomeDashboardTheme.background,
+                ),
+                child: action.imageUrl != null
+                    ? CacheImageUtils.network(
+                        action.imageUrl!,
+                        width: 40.w,
+                        height: 40.w,
+                        fit: BoxFit.cover,
+                        borderRadius: BorderRadius.circular(10.r),
+                        placeholder: (_, __) => Center(
+                          child: SizedBox(
+                            width: 16.w,
+                            height: 16.w,
+                            child: const CircularProgressIndicator(strokeWidth: 1.5),
+                          ),
+                        ),
+                        errorWidget: (_, __, ___) => Icon(
+                          Icons.image_outlined,
+                          size: 20.sp,
+                          color: HomeDashboardTheme.textGray,
+                        ),
+                      )
+                    : Center(
+                        child: Text(
+                          action.emoji ?? '?',
+                          style: TextStyle(fontSize: 20.sp),
+                        ),
+                      ),
+              ),
+              SizedBox(width: 10.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      action.title,
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: 2.h),
+                    Text(
+                      action.subtitle,
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        color: HomeDashboardTheme.textGray,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 10.h),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 5.h),
+              decoration: BoxDecoration(
+                color: HomeDashboardTheme.primaryBlue.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+              child: Text(
+                action.actionLabel,
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: HomeDashboardTheme.primaryBlue,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

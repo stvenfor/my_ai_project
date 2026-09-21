@@ -8,7 +8,7 @@ class HomeRepository {
     return const HomeDashboardData(
       storeName: '[4S]北京沃德龙鼎吉利',
       features: [
-        HomeFeatureItem(label: '销售顾问', imageUrl: 'https://picsum.photos/seed/sales/200/200'),
+        HomeFeatureItem(label: 'H5 调试', imageUrl: 'https://picsum.photos/seed/sales/200/200'),
         HomeFeatureItem(label: '生活服务', imageUrl: 'https://picsum.photos/seed/life/200/200'),
         HomeFeatureItem(label: '二手车', imageUrl: 'https://picsum.photos/seed/usedcar/200/200'),
         HomeFeatureItem(label: '新车关注', imageUrl: 'https://picsum.photos/seed/newcar/200/200'),
