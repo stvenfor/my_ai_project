@@ -54,7 +54,8 @@ class RealtimeInitializer {
       };
     }
 
-    await tryConnectIfReady(trigger: 'app_startup');
+    // 换票/WS 失败时会重连循环；不得阻塞 runApp（真机会一直停在原生启动图）。
+    unawaited(tryConnectIfReady(trigger: 'app_startup'));
   }
 
   static Future<void> Function()? _chainPrivacyGranted(
@@ -62,7 +63,7 @@ class RealtimeInitializer {
   ) {
     return () async {
       await previous?.call();
-      await tryConnectIfReady(trigger: 'privacy_granted');
+      unawaited(tryConnectIfReady(trigger: 'privacy_granted'));
     };
   }
 
@@ -71,7 +72,7 @@ class RealtimeInitializer {
   ) {
     return () async {
       await previous?.call();
-      await tryConnectIfReady(trigger: 'after_login');
+      unawaited(tryConnectIfReady(trigger: 'after_login'));
     };
   }
 
@@ -121,7 +122,11 @@ class RealtimeInitializer {
     }
 
     LogUtils.i('[Realtime] connecting... trigger=$trigger mock=${RealtimeConfig.useMockGateway}');
-    await c.connect();
+    try {
+      await c.connect().timeout(const Duration(seconds: 12));
+    } on TimeoutException {
+      LogUtils.w('[Realtime] connect timed out trigger=$trigger');
+    }
     await c.subscribeTopics([RealtimeTopics.sysNotify, RealtimeTopics.presenceBulk]);
 
     final connected = await _waitUntilConnected(

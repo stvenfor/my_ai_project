@@ -49,6 +49,60 @@ class UserProfile {
   }
 }
 
+/// GET `/api/v1/me/stores` 的 data。
+class UserStoreListResult {
+  const UserStoreListResult({
+    required this.list,
+    this.currentStoreId = 0,
+  });
+
+  final List<UserStoreListItem> list;
+  final int currentStoreId;
+
+  factory UserStoreListResult.fromJson(Map<String, dynamic> json) {
+    final raw = json['list'];
+    final list = raw is List
+        ? raw
+            .whereType<Map>()
+            .map((e) => UserStoreListItem.fromJson(Map<String, dynamic>.from(e)))
+            .toList()
+        : <UserStoreListItem>[];
+    return UserStoreListResult(
+      list: list,
+      currentStoreId: UserStoreStats._intOf(json['current_store_id'] ?? json['currentStoreId']),
+    );
+  }
+}
+
+/// 可切换经销商一项。
+class UserStoreListItem {
+  const UserStoreListItem({
+    required this.storeId,
+    required this.storeName,
+    this.role = 0,
+    this.roleLabel = '',
+    this.isCurrent = false,
+  });
+
+  final int storeId;
+  final String storeName;
+  final int role;
+  final String roleLabel;
+  final bool isCurrent;
+
+  factory UserStoreListItem.fromJson(Map<String, dynamic> json) {
+    final role = UserStoreStats._intOf(json['role']);
+    final label = UserStoreStats._stringOf(json['role_label'] ?? json['roleLabel']);
+    return UserStoreListItem(
+      storeId: UserStoreStats._intOf(json['store_id'] ?? json['storeId']),
+      storeName: UserStoreStats._stringOf(json['store_name'] ?? json['storeName']),
+      role: role,
+      roleLabel: label.isNotEmpty ? label : UserStoreStats.labelOfRole(role),
+      isCurrent: json['is_current'] == true || json['isCurrent'] == true,
+    );
+  }
+}
+
 /// Mine 四项统计（对齐 Go `stats` snake_case）。
 /// role: 0=销售顾问 1=销售经理 2=总经理
 class UserStoreStats {
@@ -128,11 +182,8 @@ class UpdateUserProfileRequest {
   final String? avatarBase64;
   final String? avatarMime;
 
-  Map<String, dynamic> toJson({String? userId}) {
+  Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
-    if (userId != null && userId.isNotEmpty) {
-      map['user_id'] = userId;
-    }
     if (displayName != null) {
       // Go ResolvedUserName：user_name 优先，display_name 兼容
       map['user_name'] = displayName;

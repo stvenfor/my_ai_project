@@ -46,15 +46,24 @@ class TransactionRepository {
 /// 把底层异常翻译成用户可读中文（401 → 重新登录）。
 String formatTransactionLoadError(Object error) {
   if (error is HttpRequestException) {
-    if (error.statusCode == 401 ||
-        error.message.contains('未授权') ||
-        error.message.contains('Unauthorized') ||
-        error.message.contains('其他设备登录') ||
-        error.message.contains('会话无效')) {
-      return error.message.contains('其他设备登录')
-          ? '账号已在其他设备登录，请重新登录'
-          : '登录已过期，请重新登录';
+    final code = int.tryParse(error.code ?? '');
+    if (AuthBizCode.isSessionReplaced(code)) {
+      return error.message.isNotEmpty
+          ? error.message
+          : '账号已在其他设备登录，请重新登录';
     }
+    if (AuthBizCode.isForceLogout(code) ||
+        error.statusCode == 401 ||
+        error.message.contains('未授权') ||
+        error.message.contains('Unauthorized')) {
+      return '登录已过期，请重新登录';
+    }
+    return error.message;
+  }
+  if (error is SessionReplacedFailure) {
+    return error.message;
+  }
+  if (error is SessionInvalidFailure) {
     return error.message;
   }
   if (error is AuthFailure) {

@@ -104,7 +104,12 @@ class AuthSession {
       // 网络超时 / 后端不可达：不阻塞启动；本地会话可能过期，用户可重新登录。
     }
     if (isLoggedIn) {
-      await UserProfileSync.hydrateQuietly();
+      try {
+        await UserProfileSync.hydrateQuietly()
+            .timeout(const Duration(seconds: 8));
+      } catch (_) {
+        // 资料拉取失败不阻塞启动。
+      }
     }
   }
 

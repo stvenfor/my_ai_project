@@ -250,12 +250,22 @@ class UserAuthApi {
 
   AuthFailure _mapFailure(int? code, String? message) {
     final text = message?.trim() ?? '';
-    if (code == 10003 ||
+    if (code == AuthBizCode.sessionReplaced) {
+      return text.isNotEmpty
+          ? SessionReplacedFailure(text)
+          : const SessionReplacedFailure();
+    }
+    if (code == AuthBizCode.sessionInvalid) {
+      return text.isNotEmpty
+          ? SessionInvalidFailure(text)
+          : const SessionInvalidFailure();
+    }
+    if (code == AuthBizCode.accountNotRegistered ||
         text.contains('账号未注册') ||
         text.contains('请先注册')) {
       return const AccountNotRegisteredFailure();
     }
-    if (code == 10002 ||
+    if (code == AuthBizCode.unauthorized ||
         text.contains('密码错误') ||
         text.contains('用户名或密码错误') ||
         text.contains('Unauthorized')) {
@@ -287,7 +297,7 @@ class UserAuthApi {
         '认证服务暂时不可用，请检查 Go 后端 Supabase 配置（$baseUrl）',
       );
     }
-    if (code == 50000 || text.contains('服务器内部错误')) {
+    if (code == AuthBizCode.internalError || text.contains('服务器内部错误')) {
       return UnknownAuthFailure(
         text.isNotEmpty ? text : '服务端异常，请稍后重试',
       );

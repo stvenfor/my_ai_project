@@ -65,6 +65,16 @@ class ImagePickerUtils {
     );
   }
 
+  /// 选视频；相机源需先有相机权限。麦克风由系统在拍摄时再请求。
+  static Future<String?> pickVideo(MediaPickSource source) async {
+    if (source == MediaPickSource.camera) {
+      final granted = await ensureCameraPermission();
+      if (!granted) return null;
+    }
+    final file = await _picker.pickVideo(source: _toImageSource(source));
+    return file?.path;
+  }
+
   static ImageSource _toImageSource(MediaPickSource source) {
     switch (source) {
       case MediaPickSource.gallery:

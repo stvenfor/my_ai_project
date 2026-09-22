@@ -27,8 +27,6 @@ class MallDetailController extends GetxController {
   final receiverPhone = ''.obs;
   final receiverAddress = ''.obs;
 
-  static const _payAlipay = 1;
-
   bool get hasAddress =>
       receiverName.value.trim().isNotEmpty &&
       receiverPhone.value.trim().isNotEmpty &&
@@ -130,21 +128,19 @@ class MallDetailController extends GetxController {
     if (submitting.value) return;
     submitting.value = true;
     try {
-      final orderNo = await _repository.buy(
+      final orderId = await _repository.createOrder(
         skuId: sku.skuId,
         qty: qty.value,
-        paymentChannel: _payAlipay,
         receiverName: d.isVirtual ? '' : receiverName.value,
         receiverPhone: d.isVirtual ? '' : receiverPhone.value,
         receiverAddress: d.isVirtual ? '' : receiverAddress.value,
       );
-      UiKitInitializer.toast(
-        orderNo.isEmpty ? '支付成功' : '支付成功 · $orderNo',
-      );
+      UiKitInitializer.toast('订单已创建，请在 15 分钟内支付');
+      await Get.toNamed(RoutePath.mallOrderDetail, arguments: orderId);
     } on HttpRequestException catch (e) {
-      UiKitInitializer.toast(e.message.isEmpty ? '购买失败' : e.message);
+      UiKitInitializer.toast(e.message.isEmpty ? '下单失败' : e.message);
     } catch (_) {
-      UiKitInitializer.toast('购买失败');
+      UiKitInitializer.toast('下单失败');
     } finally {
       submitting.value = false;
     }

@@ -7,6 +7,7 @@ export 'dev/mock_user_service.dart';
 export 'env/app_env.dart';
 export 'env/env_config.dart';
 export 'env/app_auth_config.dart';
+export 'model/auth/auth_biz_code.dart';
 export 'model/auth/auth_credential_mode.dart';
 export 'model/auth/auth_failure.dart';
 export 'model/auth/auth_session_state.dart';

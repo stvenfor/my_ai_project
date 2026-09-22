@@ -21,6 +21,8 @@ class MineRepository {
     return profile.stats;
   }
 
+  Future<UserStoreListResult> listMyStores() => _profileApi.listMyStores();
+
   Future<UserStoreStats> switchStore({required int storeId}) =>
       _profileApi.switchStore(storeId);
 

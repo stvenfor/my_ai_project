@@ -165,9 +165,11 @@ Go 管理端接口（如登录、register、manage 列表）返回：
 |------|------|------|----------------|
 | 0 | 200 | 成功 | — |
 | 10001 | 400 | 参数错误 | `WeakPasswordFailure` 等 |
-| 10002 | 401 | 密码错误 | `InvalidCredentialsFailure` |
+| 10002 | 401 | 密码错误 / 未授权 | `InvalidCredentialsFailure` |
 | 10003 | 404 | 账号未注册 | `AccountNotRegisteredFailure` |
 | 10004 | 404 | 资源不存在 | — |
+| 10021 | 401 | 单设备：其他设备登录 | `SessionReplacedFailure` → 确认框回登录 |
+| 10022 | 401 | 单设备：会话无效 | `SessionInvalidFailure` → 清会话回登录 |
 | 50000 | 500 | 服务器内部错误 | `UnknownAuthFailure` |
 
 ### 3.4 HTTP 层解析要点

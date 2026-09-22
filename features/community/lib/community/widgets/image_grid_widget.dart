@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:module_community/community/view/image_preview_page.dart';
 import 'package:module_utils/module_utils.dart';
 
+/// 图片动态九宫格：最多 9 张、3 列；不足时用 seed 随机图补齐。
 class ImageGridWidget extends StatelessWidget {
   const ImageGridWidget({
     super.key,
@@ -13,99 +14,37 @@ class ImageGridWidget extends StatelessWidget {
   final List<String> images;
   final String postId;
 
-  @override
-  Widget build(BuildContext context) {
-    if (images.isEmpty) return const SizedBox.shrink();
-    final count = images.length;
+  static const maxCount = 9;
 
-    if (count == 1) {
-      return _SingleImage(url: images.first, images: images, index: 0);
+  /// 列表展示用：取已有 URL，不足 9 张用 picsum 按 postId 补齐（确定性「随机」）。
+  static List<String> nineGridUrls({
+    required String postId,
+    required List<String> images,
+  }) {
+    final out = <String>[];
+    for (final u in images) {
+      if (u.isEmpty) continue;
+      out.add(u);
+      if (out.length >= maxCount) return out;
     }
-    if (count <= 3) {
-      return _RowImages(urls: images);
+    var i = out.length;
+    while (out.length < maxCount) {
+      out.add('https://picsum.photos/seed/${postId}_$i/400/400');
+      i++;
     }
-    if (count == 4) {
-      return _GridImages(urls: images, crossAxisCount: 2);
-    }
-    return _GridImages(urls: images, crossAxisCount: 3);
+    return out;
   }
-}
-
-class _SingleImage extends StatelessWidget {
-  const _SingleImage({
-    required this.url,
-    required this.images,
-    required this.index,
-  });
-
-  final String url;
-  final List<String> images;
-  final int index;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => _openPreview(index),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(6),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxWidth: MediaQuery.sizeOf(context).width * 0.62,
-            maxHeight: 240,
-          ),
-          child: CacheImageUtils.network(url, fit: BoxFit.cover),
-        ),
-      ),
-    );
-  }
+    final urls = nineGridUrls(postId: postId, images: images);
+    if (urls.isEmpty) return const SizedBox.shrink();
 
-  void _openPreview(int i) {
-    Get.to<void>(
-      () => ImagePreviewPage(images: images, initialIndex: i),
-      transition: Transition.fadeIn,
-    );
-  }
-}
-
-class _RowImages extends StatelessWidget {
-  const _RowImages({required this.urls});
-
-  final List<String> urls;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        for (var i = 0; i < urls.length; i++) ...[
-          if (i > 0) const SizedBox(width: 4),
-          Expanded(
-            child: AspectRatio(
-              aspectRatio: 1,
-              child: _Thumb(url: urls[i], images: urls, index: i),
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-}
-
-class _GridImages extends StatelessWidget {
-  const _GridImages({
-    required this.urls,
-    required this.crossAxisCount,
-  });
-
-  final List<String> urls;
-  final int crossAxisCount;
-
-  @override
-  Widget build(BuildContext context) {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: crossAxisCount,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
         crossAxisSpacing: 4,
         mainAxisSpacing: 4,
       ),

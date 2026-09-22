@@ -1,5 +1,6 @@
 import 'package:module_http/module_http.dart';
 import 'package:module_mall/mall/api/mall_api.dart';
+import 'package:module_mall/mall/model/mall_order.dart';
 import 'package:module_mall/mall/model/mall_product_detail.dart';
 import 'package:module_mall/mall/model/mall_product_model.dart';
 
@@ -48,5 +49,46 @@ class MallRepository {
       receiverPhone: receiverPhone,
       receiverAddress: receiverAddress,
     );
+  }
+
+  Future<int> createOrder({
+    required int skuId,
+    required int qty,
+    int storeId = defaultStoreId,
+    String receiverName = '',
+    String receiverPhone = '',
+    String receiverAddress = '',
+  }) {
+    return _api.createOrder(
+      storeId: storeId,
+      skuId: skuId,
+      qty: qty,
+      receiverName: receiverName,
+      receiverPhone: receiverPhone,
+      receiverAddress: receiverAddress,
+    );
+  }
+
+  Future<PageResult<MallOrderListRow>> fetchOrders({
+    required int page,
+    int size = MallApi.pageSize,
+    String? status,
+  }) {
+    return _api.fetchOrders(page: page, size: size, status: status);
+  }
+
+  Future<MallOrderDetail> fetchOrderDetail(int orderId) {
+    return _api.fetchOrderDetail(orderId);
+  }
+
+  Future<MallOrderDetail> payOrder({
+    required int orderId,
+    required int paymentChannel,
+  }) {
+    return _api.payOrder(orderId: orderId, paymentChannel: paymentChannel);
+  }
+
+  Future<void> cancelOrder(int orderId) {
+    return _api.cancelOrder(orderId);
   }
 }

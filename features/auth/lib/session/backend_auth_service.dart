@@ -148,8 +148,10 @@ class BackendAuthService extends AuthService implements SessionRefreshable {
         }
       }
       _emit(AuthSessionState.signedIn);
-    } catch (_) {
-      // Cold Start Keep: refresh failure must not clear local Auth Session.
+    } catch (error) {
+      // 互踢/会话已失效：向上抛出，避免 SessionRecovery 误判成功。
+      if (isLogoutSessionGone(error)) rethrow;
+      // Cold Start Keep: 网络等失败不得清掉本地 Auth Session。
     }
   }
 
@@ -220,6 +222,9 @@ class BackendAuthService extends AuthService implements SessionRefreshable {
 /// Used by Server-Confirmed Logout so Gone clears local Auth Session while
 /// network and other failures keep it.
 bool isLogoutSessionGone(Object error) {
+  if (error is SessionReplacedFailure || error is SessionInvalidFailure) {
+    return true;
+  }
   if (error is InvalidCredentialsFailure) return true;
   if (error is! AuthFailure) return false;
   final text = error.message;

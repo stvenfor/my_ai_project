@@ -52,4 +52,30 @@ void main() {
     expect(stats.storeDays, 0);
     expect(stats.totalCustomers, 0);
   });
+
+  test('parses dealer store list envelope', () {
+    final result = UserStoreListResult.fromJson({
+      'current_store_id': 2,
+      'list': [
+        {
+          'store_id': 1,
+          'store_name': '[4S]北京沃德龙鼎吉利',
+          'role': 0,
+          'role_label': '销售顾问',
+          'is_current': false,
+        },
+        {
+          'store_id': 2,
+          'store_name': '[4S]北京腾远吉利',
+          'role': 1,
+          'role_label': '销售经理',
+          'is_current': true,
+        },
+      ],
+    });
+    expect(result.currentStoreId, 2);
+    expect(result.list.length, 2);
+    expect(result.list[1].isCurrent, isTrue);
+    expect(result.list[1].storeName, '[4S]北京腾远吉利');
+  });
 }

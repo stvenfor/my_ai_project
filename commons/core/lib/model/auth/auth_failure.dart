@@ -69,3 +69,15 @@ typedef SupabaseConfigFailure = BackendServiceFailure;
 class UnknownAuthFailure extends AuthFailure {
   const UnknownAuthFailure([super.message = '登录失败，请稍后重试']);
 }
+
+/// 单设备互踢（Go code=10021）。
+class SessionReplacedFailure extends AuthFailure {
+  const SessionReplacedFailure([
+    super.message = '账号已在其他设备登录，请重新登录',
+  ]);
+}
+
+/// 会话无效（Go code=10022）。
+class SessionInvalidFailure extends AuthFailure {
+  const SessionInvalidFailure([super.message = '会话无效，请重新登录']);
+}

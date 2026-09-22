@@ -98,6 +98,7 @@ ResultModel<T> expectBackendResult<T>(
       final message = raw['message']?.toString();
       throw HttpRequestException(
         message: message?.isNotEmpty == true ? message! : '业务请求失败',
+        code: code?.toString(),
         statusCode: response.statusCode,
         data: raw,
         origin: response,

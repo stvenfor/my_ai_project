@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import 'package:module_auth/api/user_auth_api.dart';
 import 'package:module_auth/session/device_auth_context.dart';
 import 'package:module_auth/session/session_guard.dart';
-import 'package:module_auth/session/session_recovery.dart';
 import 'package:module_core/core.dart';
 import 'package:module_http/http/http.dart';
 import 'package:module_utils/module_utils.dart';
@@ -42,23 +41,13 @@ class AuthTokenRefreshInterceptor extends QueuedInterceptor {
     }
 
     final message = SessionGuardHook.extractMessage(err.response?.data);
-    if (SessionGuardHook.shouldForceLogout(message)) {
-      final recovered = await SessionRecovery.tryRecover();
-      if (recovered) {
-        try {
-          final response =
-              await HttpManager.instance.dio.fetch(err.requestOptions);
-          handler.resolve(response);
-          return;
-        } catch (_) {
-          handler.next(err);
-          return;
-        }
-      }
+    final code = SessionGuardHook.extractCode(err.response?.data);
+    if (SessionGuardHook.shouldForceLogout(code: code, message: message)) {
+      // 互踢/会话无效交给 SessionGuardHook 弹确认框并 Force Reset Login。
       handler.next(err);
       return;
     }
-    if (!SessionGuardHook.shouldTryTokenRefresh(message)) {
+    if (!SessionGuardHook.shouldTryTokenRefresh(code: code, message: message)) {
       handler.next(err);
       return;
     }

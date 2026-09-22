@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:get/get.dart';
 import 'package:module_linking/analytics/linking_analytics.dart';
 import 'package:module_linking/config/linking_config.dart';
@@ -42,7 +44,8 @@ class LinkingInitializer {
     }
 
     if (PrivacyConsentService().isGranted) {
-      await onPrivacyGranted();
+      // 推送初始化可能触网；不阻塞 runApp。
+      unawaited(onPrivacyGranted());
     } else {
       LogUtils.i('[Linking] privacy not granted, skip JPush init');
     }

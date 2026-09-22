@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:module_settings/mine/model/mine_store_data.dart';
 import 'package:module_settings/mine/model/mine_store_model.dart';
 import 'package:module_utils/module_utils.dart';
 
@@ -8,13 +7,18 @@ class SwitchStoreDialog extends StatelessWidget {
   const SwitchStoreDialog({
     super.key,
     required this.selectedId,
+    required this.stores,
   });
 
   final String selectedId;
+  final List<MineStoreOption> stores;
 
-  static Future<String?> show({required String selectedId}) {
+  static Future<String?> show({
+    required String selectedId,
+    required List<MineStoreOption> stores,
+  }) {
     return Get.dialog<String>(
-      SwitchStoreDialog(selectedId: selectedId),
+      SwitchStoreDialog(selectedId: selectedId, stores: stores),
       barrierDismissible: true,
       barrierColor: Colors.black.withValues(alpha: 0.55),
     );
@@ -48,20 +52,22 @@ class SwitchStoreDialog extends StatelessWidget {
                 ),
                 SizedBox(height: 8.h),
                 Text(
-                  '可切换多个店铺查看数据',
+                  stores.isEmpty ? '暂无可切换的店铺' : '可切换多个店铺查看数据',
                   style: TextStyle(
                     fontSize: 13.sp,
                     color: const Color(0xFF999999),
                   ),
                 ),
-                SizedBox(height: 20.h),
-                for (final store in MineStoreData.stores) ...[
-                  _StoreOptionTile(
-                    store: store,
-                    selected: store.id == selectedId,
-                    onTap: () => Get.back<String>(result: store.id),
-                  ),
-                  if (store != MineStoreData.stores.last) SizedBox(height: 12.h),
+                if (stores.isNotEmpty) ...[
+                  SizedBox(height: 20.h),
+                  for (final store in stores) ...[
+                    _StoreOptionTile(
+                      store: store,
+                      selected: store.id == selectedId,
+                      onTap: () => Get.back<String>(result: store.id),
+                    ),
+                    if (store != stores.last) SizedBox(height: 12.h),
+                  ],
                 ],
               ],
             ),

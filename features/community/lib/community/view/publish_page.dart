@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:module_common_ui/module_common_ui.dart';
@@ -109,19 +111,79 @@ class _PublishPageState extends State<PublishPage> {
                 _MediaChip(
                   label: '无媒体',
                   selected: mt == 'none',
-                  onTap: () => _vm.setMediaType('none'),
+                  onTap: _vm.clearMedia,
                 ),
                 _MediaChip(
                   label: '图片',
                   selected: mt == 'image',
-                  onTap: () => _vm.setMediaType('image'),
+                  onTap: _vm.pickImageMedia,
                 ),
                 _MediaChip(
                   label: '视频',
                   selected: mt == 'video',
-                  onTap: () => _vm.setMediaType('video'),
+                  onTap: _vm.pickVideoMedia,
                 ),
               ],
+            );
+          }),
+          Obx(() {
+            final mt = _vm.mediaType.value;
+            final path = _vm.localPreviewPath.value;
+            if (mt == 'none' || path == null || path.isEmpty) {
+              return const SizedBox.shrink();
+            }
+            return Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Stack(
+                    children: [
+                      if (mt == 'image')
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.file(
+                            File(path),
+                            width: 120,
+                            height: 120,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => _videoPlaceholder(),
+                          ),
+                        )
+                      else
+                        _videoPlaceholder(),
+                      Positioned(
+                        top: 4,
+                        right: 4,
+                        child: Material(
+                          color: Colors.black54,
+                          shape: const CircleBorder(),
+                          child: InkWell(
+                            customBorder: const CircleBorder(),
+                            onTap: _vm.clearMedia,
+                            child: const Padding(
+                              padding: EdgeInsets.all(4),
+                              child: Icon(
+                                Icons.close,
+                                size: 16,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '发布后将使用默认示例媒体（不上传所选文件）',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ],
+              ),
             );
           }),
           const SizedBox(height: 16),
@@ -138,6 +200,25 @@ class _PublishPageState extends State<PublishPage> {
               onTap: _pickTopic,
             );
           }),
+        ],
+      ),
+    );
+  }
+
+  Widget _videoPlaceholder() {
+    return Container(
+      width: 120,
+      height: 120,
+      decoration: BoxDecoration(
+        color: Colors.grey.shade200,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: const Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.videocam, size: 36, color: Colors.grey),
+          SizedBox(height: 4),
+          Text('已选视频', style: TextStyle(fontSize: 12, color: Colors.grey)),
         ],
       ),
     );

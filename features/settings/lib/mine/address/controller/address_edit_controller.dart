@@ -4,6 +4,7 @@ import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_http/module_http.dart';
 import 'package:module_settings/mine/address/api/address_api.dart';
 import 'package:module_settings/mine/address/model/address_model.dart';
+import 'package:module_settings/mine/address/widgets/china_region_picker.dart';
 
 class AddressEditController extends GetxController {
   AddressEditController({this.addressId, AddressApi? api})
@@ -22,6 +23,7 @@ class AddressEditController extends GetxController {
   final isDefault = false.obs;
   final loading = false.obs;
   final saving = false.obs;
+  final regionLabel = ''.obs;
 
   bool get isEdit => addressId != null && addressId! > 0;
 
@@ -43,6 +45,27 @@ class AddressEditController extends GetxController {
     detailCtrl.dispose();
     labelCtrl.dispose();
     super.onClose();
+  }
+
+  void _syncRegionLabel() {
+    final p = provinceCtrl.text.trim();
+    final c = cityCtrl.text.trim();
+    final d = districtCtrl.text.trim();
+    regionLabel.value = [p, c, d].where((e) => e.isNotEmpty).join(' ');
+  }
+
+  Future<void> pickRegion(BuildContext context) async {
+    final sel = await showChinaRegionPicker(
+      context,
+      initialProvince: provinceCtrl.text.trim(),
+      initialCity: cityCtrl.text.trim(),
+      initialDistrict: districtCtrl.text.trim(),
+    );
+    if (sel == null) return;
+    provinceCtrl.text = sel.province;
+    cityCtrl.text = sel.city;
+    districtCtrl.text = sel.district;
+    _syncRegionLabel();
   }
 
   Future<void> _load() async {
@@ -69,6 +92,7 @@ class AddressEditController extends GetxController {
       detailCtrl.text = hit.detailAddress;
       labelCtrl.text = hit.label;
       isDefault.value = hit.isDefault;
+      _syncRegionLabel();
     } on HttpRequestException catch (e) {
       UiKitInitializer.toast(e.message.isEmpty ? '加载失败' : e.message);
       Get.back();
@@ -82,17 +106,24 @@ class AddressEditController extends GetxController {
     final name = nameCtrl.text.trim();
     final phone = phoneCtrl.text.trim();
     final detail = detailCtrl.text.trim();
+    final province = provinceCtrl.text.trim();
+    final city = cityCtrl.text.trim();
+    final district = districtCtrl.text.trim();
     if (name.isEmpty || detail.isEmpty || phone.length < 6) {
       UiKitInitializer.toast('请填写姓名、手机和详细地址');
+      return;
+    }
+    if (province.isEmpty || city.isEmpty || district.isEmpty) {
+      UiKitInitializer.toast('请选择省市区');
       return;
     }
     saving.value = true;
     final body = {
       'receiver_name': name,
       'receiver_phone': phone,
-      'province': provinceCtrl.text.trim(),
-      'city': cityCtrl.text.trim(),
-      'district': districtCtrl.text.trim(),
+      'province': province,
+      'city': city,
+      'district': district,
       'detail_address': detail,
       'postal_code': '',
       'is_default': isDefault.value,

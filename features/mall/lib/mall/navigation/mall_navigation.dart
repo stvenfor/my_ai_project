@@ -12,4 +12,12 @@ abstract final class MallNavigation {
     }
     await Get.toNamed(RoutePath.mall);
   }
+
+  static Future<void> openOrders() async {
+    if (!AuthSession.isLoggedIn) {
+      await AuthNavigation.openLogin(redirectRoute: RoutePath.mallOrders);
+      return;
+    }
+    await Get.toNamed(RoutePath.mallOrders);
+  }
 }

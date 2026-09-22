@@ -33,6 +33,8 @@ void main() {
         isLogoutSessionGone(const UnknownAuthFailure('会话不存在')),
         isTrue,
       );
+      expect(isLogoutSessionGone(const SessionReplacedFailure()), isTrue);
+      expect(isLogoutSessionGone(const SessionInvalidFailure()), isTrue);
       expect(
         isLogoutSessionGone(const NetworkAuthFailure()),
         isFalse,

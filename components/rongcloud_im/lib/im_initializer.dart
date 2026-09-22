@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:get/get.dart';
 import 'package:module_core/core.dart';
 import 'package:module_core/service/im_backup_service.dart';
@@ -39,20 +41,21 @@ class ImInitializer {
       };
     }
 
-    await tryConnectIfReady();
+    // 不得阻塞 AppInitializer / Splash（后端不可达时会卡住启动页）。
+    unawaited(tryConnectIfReady());
   }
 
   static Future<void> Function()? _chainPrivacy(Future<void> Function()? prev) {
     return () async {
       await prev?.call();
-      await tryConnectIfReady();
+      unawaited(tryConnectIfReady());
     };
   }
 
   static Future<void> Function()? _chainAfterLogin(Future<void> Function()? prev) {
     return () async {
       await prev?.call();
-      await tryConnectIfReady();
+      unawaited(tryConnectIfReady());
     };
   }
 
@@ -85,7 +88,15 @@ class ImInitializer {
     if (session == null) return;
     if (session.currentState == ImConnectionState.connected) return;
 
-    await session.connect(bizUserId: user.id);
+    try {
+      await session
+          .connect(bizUserId: user.id)
+          .timeout(const Duration(seconds: 12));
+    } on TimeoutException {
+      LogUtils.w('[ImInitializer] connect timed out');
+    } catch (e, st) {
+      LogUtils.e('[ImInitializer] connect failed', e, st);
+    }
   }
 
   static Future<void> dispose() async {

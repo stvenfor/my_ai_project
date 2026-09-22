@@ -60,10 +60,7 @@ class _PostCardWidgetState extends State<PostCardWidget>
             ),
             const SizedBox(height: 10),
             ExpandTextWidget(post: post),
-            if (post.hasImages) ...[
-              const SizedBox(height: 12),
-              ImageGridWidget(images: post.images, postId: post.id),
-            ],
+            // 图 / 视频互斥：视频只展示一个；图片走随机九宫格。
             if (post.hasVideo) ...[
               const SizedBox(height: 12),
               ClipRRect(
@@ -73,6 +70,9 @@ class _PostCardWidgetState extends State<PostCardWidget>
                   coverUrl: post.videoCoverUrl,
                 ),
               ),
+            ] else if (post.hasImages || post.mediaType == 'image') ...[
+              const SizedBox(height: 12),
+              ImageGridWidget(images: post.images, postId: post.id),
             ],
             LikeBarWidget(post: post),
             CommentPreviewWidget(post: post),

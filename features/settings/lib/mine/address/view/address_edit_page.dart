@@ -28,9 +28,27 @@ class AddressEditPage extends GetView<AddressEditController> {
             _card([
               _field('收货人', controller.nameCtrl),
               _field('手机号', controller.phoneCtrl, keyboard: TextInputType.phone),
-              _field('省', controller.provinceCtrl),
-              _field('市', controller.cityCtrl),
-              _field('区', controller.districtCtrl),
+              Obx(() {
+                final label = controller.regionLabel.value;
+                return ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text('省市区', style: MineTheme.caption),
+                  subtitle: Text(
+                    label.isEmpty ? '请选择省 / 市 / 区' : label,
+                    style: MineTheme.body.copyWith(
+                      color: label.isEmpty
+                          ? MineTheme.labelTertiary
+                          : MineTheme.labelPrimary,
+                    ),
+                  ),
+                  trailing: Icon(
+                    Icons.chevron_right,
+                    color: MineTheme.labelTertiary,
+                    size: 20.w,
+                  ),
+                  onTap: () => controller.pickRegion(context),
+                );
+              }),
               _field('详细地址', controller.detailCtrl, maxLines: 2),
               _field('标签（可选）', controller.labelCtrl),
             ]),

@@ -43,6 +43,8 @@ class RoutePath{
   /// 门店商城（瀑布流商品列表）
   static const String mall = '/mall';
   static const String mallDetail = '/mall/detail';
+  static const String mallOrders = '/mall/orders';
+  static const String mallOrderDetail = '/mall/orders/detail';
   static const String dialogDemo = '/settings/dialog_demo';
   static const String linkingDebug = '/settings/linking_debug';
   static const String realtimeDebug = '/settings/realtime_debug';

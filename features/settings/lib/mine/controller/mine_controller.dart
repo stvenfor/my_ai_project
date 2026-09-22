@@ -9,6 +9,7 @@ import 'package:module_settings/mine/model/mine_menu_data.dart';
 import 'package:module_settings/mine/model/mine_function_item.dart';
 import 'package:module_settings/mine/model/mine_profile_model.dart';
 import 'package:module_settings/mine/model/mine_store_data.dart';
+import 'package:module_settings/mine/model/mine_store_model.dart';
 import 'package:module_settings/mine/model/mine_stat_model.dart';
 import 'package:module_settings/mine/repository/mine_function_repository.dart';
 import 'package:module_settings/mine/repository/mine_repository.dart';
@@ -24,6 +25,7 @@ class MineController extends GetxController {
 
   final profile = Rxn<MineProfileModel>();
   final functions = <MineFunctionItem>[].obs;
+  final stores = <MineStoreOption>[].obs;
   final selectedStoreId = RxString(MineStoreData.defaultStoreId);
   List<MineStatModel>? _lastStats;
   String? _lastRoleLabel;
@@ -55,6 +57,7 @@ class MineController extends GetxController {
     if (user == null) {
       _lastStats = null;
       _lastRoleLabel = null;
+      stores.clear();
       profile.value = const MineProfileModel(
         displayName: '访客',
         avatarUrl: null,
@@ -70,13 +73,49 @@ class MineController extends GetxController {
       displayName: user.name.isNotEmpty ? user.name : '东东枪',
       avatarUrl: user.avatar.isNotEmpty ? user.avatar : _defaultAvatar,
       roleBadge: _lastRoleLabel ?? '销售顾问',
-      storeName: MineStoreRepository.resolveStoreName(selectedStoreId.value),
+      storeName: _resolveStoreName(selectedStoreId.value),
       maskedPhone: user.phoneMasked.isNotEmpty
           ? user.phoneMasked
           : _maskPhone(user.id),
       stats: _lastStats ?? MineProfileModel.guestStats,
     );
-    _refreshStats();
+    _loadStoresThenStats();
+  }
+
+  String _resolveStoreName(String id) {
+    for (final store in stores) {
+      if (store.id == id) return store.name;
+    }
+    return MineStoreRepository.resolveStoreName(id);
+  }
+
+  Future<void> _loadStoresThenStats() async {
+    if (!isLoggedIn) return;
+    try {
+      final result = await _repository.listMyStores();
+      if (!isLoggedIn) return;
+      stores.assignAll([
+        for (final item in result.list)
+          if (item.storeId > 0)
+            MineStoreOption(
+              id: '${item.storeId}',
+              name: item.storeName.isNotEmpty
+                  ? item.storeName
+                  : '店铺 ${item.storeId}',
+            ),
+      ]);
+      if (result.currentStoreId > 0) {
+        selectedStoreId.value = '${result.currentStoreId}';
+        await MineStoreRepository.saveSelectedStoreId(selectedStoreId.value);
+      } else if (stores.isNotEmpty &&
+          !stores.any((s) => s.id == selectedStoreId.value)) {
+        selectedStoreId.value = stores.first.id;
+        await MineStoreRepository.saveSelectedStoreId(selectedStoreId.value);
+      }
+    } catch (_) {
+      // 列表失败时仍尝试拉当前店统计；对话框可为空。
+    }
+    await _refreshStats();
   }
 
   Future<void> _refreshStats() async {
@@ -182,9 +221,18 @@ class MineController extends GetxController {
       UiKitInitializer.toast('请先登录');
       return;
     }
+    if (stores.isEmpty) {
+      await _loadStoresThenStats();
+    }
+    if (stores.isEmpty) {
+      UiKitInitializer.toast('暂无可切换店铺');
+      return;
+    }
     final picked = await SwitchStoreDialog.show(
       selectedId: selectedStoreId.value,
+      stores: stores.toList(),
     );
+    // 取消或选同一家：不请求切换
     if (picked == null || picked == selectedStoreId.value) return;
     final storeId = int.tryParse(picked);
     if (storeId == null || storeId <= 0) {
@@ -196,6 +244,17 @@ class MineController extends GetxController {
       final store = await _repository.switchStore(storeId: storeId);
       selectedStoreId.value = '${store.storeId}';
       await MineStoreRepository.saveSelectedStoreId(selectedStoreId.value);
+      for (var i = 0; i < stores.length; i++) {
+        // 列表里已有店名优先用接口返回的 store_name 刷新选中项
+        if (stores[i].id == selectedStoreId.value &&
+            store.storeName.isNotEmpty) {
+          stores[i] = MineStoreOption(
+            id: stores[i].id,
+            name: store.storeName,
+          );
+          break;
+        }
+      }
       _lastStats = MineRepository.statsToMineModels(store);
       _lastRoleLabel = store.roleLabel;
       _applyStats(
@@ -228,8 +287,13 @@ class MineController extends GetxController {
         } else {
           AuthNavigation.openLogin(redirectRoute: RoutePath.mall);
         }
-      case 'wallet':
       case 'order':
+        if (isLoggedIn) {
+          Get.toNamed(RoutePath.mallOrders);
+        } else {
+          AuthNavigation.openLogin(redirectRoute: RoutePath.mallOrders);
+        }
+      case 'wallet':
         UiKitInitializer.toast('${item.label} 开发中');
       default:
         UiKitInitializer.toast('${item.label} 开发中');

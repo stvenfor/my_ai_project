@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:module_global_cache/prefs/sp_keys.dart';
 import 'package:module_global_cache/prefs/sp_manager.dart';
 import 'package:module_utils/module_utils.dart';
@@ -14,7 +16,11 @@ class PrivacyConsentService {
   Future<void> grant() async {
     await SpManager.instance.setBool(SpKeys.privacyConsentGranted, true);
     LogUtils.i('[Privacy] user granted privacy consent');
-    await onGranted?.call();
+    // Push / Realtime / IM 初始化走后台，避免 Splash 一直转圈。
+    final cb = onGranted;
+    if (cb != null) {
+      unawaited(cb());
+    }
   }
 
   Future<void> revokeForDebug() async {

@@ -22,7 +22,7 @@ class WsTicketApi {
     }
     final result = await HttpManager.instance.post<WsTicketResult>(
       RealtimeConfig.ticketPath,
-      data: const {
+      data: {
         'platform': 'mobile',
       },
       converter: (json) => WsTicketResult.fromJson(
