@@ -611,6 +611,53 @@ class _HomeTodoCardView extends StatelessWidget {
   }
 }
 
+/// 统一白底+描边+轻阴影，避免 Material/透明 Container 叠在白底上「看不见卡面」。
+class _TodoCardShell extends StatelessWidget {
+  const _TodoCardShell({
+    required this.onTap,
+    required this.child,
+    this.padding,
+  });
+
+  final VoidCallback onTap;
+  final Widget child;
+  final EdgeInsetsGeometry? padding;
+
+  @override
+  Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(HomeDashboardTheme.radiusMd);
+    return Material(
+      color: Colors.transparent,
+      borderRadius: radius,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: radius,
+        child: Ink(
+          decoration: BoxDecoration(
+            color: HomeDashboardTheme.surface,
+            borderRadius: radius,
+            border: Border.all(
+              color: HomeDashboardTheme.separator,
+              width: 0.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: padding ?? EdgeInsets.all(14.w),
+            child: child,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// 原小卡视觉：图标+标题副文案，右下 CTA。
 class _SmallTodoCard extends StatelessWidget {
   const _SmallTodoCard({
@@ -625,65 +672,53 @@ class _SmallTodoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: HomeDashboardTheme.surface,
-      borderRadius: BorderRadius.circular(HomeDashboardTheme.radiusMd),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(HomeDashboardTheme.radiusMd),
-        child: Container(
-          padding: EdgeInsets.all(14.w),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(HomeDashboardTheme.radiusMd),
-            border: Border.all(
-              color: HomeDashboardTheme.separator,
-              width: 0.5,
-            ),
-          ),
-          child: Column(
-            mainAxisSize: expandFill ? MainAxisSize.max : MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return _TodoCardShell(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: expandFill ? MainAxisSize.max : MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              Row(
-                children: [
-                  _TodoThumb(imageUrl: card.imageUrl, size: 40.w),
-                  SizedBox(width: 10.w),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          card.title,
-                          style: TextStyle(
-                            fontSize: 13.sp,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        SizedBox(height: 2.h),
-                        Text(
-                          card.subtitle,
-                          style: TextStyle(
-                            fontSize: 11.sp,
-                            color: HomeDashboardTheme.textGray,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
+              _TodoThumb(imageUrl: card.imageUrl, size: 40.w),
+              SizedBox(width: 10.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      card.title,
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w600,
+                        color: HomeDashboardTheme.labelPrimary,
+                        height: 1.25,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                ],
-              ),
-              if (expandFill) const Spacer() else SizedBox(height: 10.h),
-              Align(
-                alignment: Alignment.centerRight,
-                child: _TodoActionChip(label: card.actionLabel),
+                    SizedBox(height: 2.h),
+                    Text(
+                      card.subtitle,
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        color: HomeDashboardTheme.textGray,
+                        height: 1.3,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
-        ),
+          if (expandFill) const Spacer() else SizedBox(height: 10.h),
+          Align(
+            alignment: Alignment.centerRight,
+            child: _TodoActionChip(label: card.actionLabel),
+          ),
+        ],
       ),
     );
   }
@@ -698,64 +733,52 @@ class _MediumTodoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: HomeDashboardTheme.surface,
-      borderRadius: BorderRadius.circular(HomeDashboardTheme.radiusMd),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(HomeDashboardTheme.radiusMd),
-        child: Container(
-          width: double.infinity,
-          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(HomeDashboardTheme.radiusMd),
-            border: Border.all(
-              color: HomeDashboardTheme.separator,
-              width: 0.5,
+    return _TodoCardShell(
+      onTap: onTap,
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
+      child: Row(
+        children: [
+          _TodoThumb(imageUrl: card.imageUrl, size: 48.w),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  card.title,
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                    color: HomeDashboardTheme.labelPrimary,
+                    height: 1.25,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                SizedBox(height: 4.h),
+                Text(
+                  card.subtitle,
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    color: HomeDashboardTheme.textGray,
+                    height: 1.35,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
           ),
-          child: Row(
-            children: [
-              _TodoThumb(imageUrl: card.imageUrl, size: 48.w),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      card.title,
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(height: 4.h),
-                    Text(
-                      card.subtitle,
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        color: HomeDashboardTheme.textGray,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(width: 12.w),
-              _TodoActionChip(label: card.actionLabel),
-            ],
-          ),
-        ),
+          SizedBox(width: 12.w),
+          _TodoActionChip(label: card.actionLabel),
+        ],
       ),
     );
   }
 }
 
-/// 大卡：占满一页，放大图标与字号，保留小卡的表面/描边/CTA 语言。
+/// 大卡：字号/行高/计数层级拉开，仍用同一套白底描边 CTA。
 class _LargeTodoCard extends StatelessWidget {
   const _LargeTodoCard({required this.card, required this.onTap});
 
@@ -764,67 +787,86 @@ class _LargeTodoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: HomeDashboardTheme.surface,
-      borderRadius: BorderRadius.circular(HomeDashboardTheme.radiusMd),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(HomeDashboardTheme.radiusMd),
-        child: Container(
-          width: double.infinity,
-          padding: EdgeInsets.all(16.w),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(HomeDashboardTheme.radiusMd),
-            border: Border.all(
-              color: HomeDashboardTheme.separator,
-              width: 0.5,
-            ),
-          ),
-          child: Column(
+    return _TodoCardShell(
+      onTap: onTap,
+      padding: EdgeInsets.fromLTRB(18.w, 18.h, 18.w, 16.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _TodoThumb(imageUrl: card.imageUrl, size: 56.w),
-                  SizedBox(width: 14.w),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          card.title,
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+              _TodoThumb(imageUrl: card.imageUrl, size: 64.w),
+              SizedBox(width: 14.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (card.count > 0) ...[
+                      Text(
+                        '${card.count}',
+                        style: TextStyle(
+                          fontSize: 28.sp,
+                          fontWeight: FontWeight.w700,
+                          color: HomeDashboardTheme.primaryBlue,
+                          height: 1.05,
+                          letterSpacing: -0.8,
                         ),
-                        SizedBox(height: 6.h),
-                        Text(
-                          card.subtitle,
-                          style: TextStyle(
-                            fontSize: 13.sp,
-                            height: 1.35,
-                            color: HomeDashboardTheme.textGray,
-                          ),
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
+                      ),
+                      SizedBox(height: 6.h),
+                    ],
+                    Text(
+                      card.title,
+                      style: TextStyle(
+                        fontSize: 17.sp,
+                        fontWeight: FontWeight.w600,
+                        color: HomeDashboardTheme.labelPrimary,
+                        height: 1.25,
+                        letterSpacing: -0.2,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                ],
-              ),
-              const Spacer(),
-              Align(
-                alignment: Alignment.centerRight,
-                child: _TodoActionChip(label: card.actionLabel, large: true),
+                    SizedBox(height: 8.h),
+                    Text(
+                      card.subtitle,
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        height: 1.45,
+                        color: HomeDashboardTheme.labelSecondary,
+                      ),
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
-        ),
+          const Spacer(),
+          Row(
+            children: [
+              if (card.count > 0)
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+                  decoration: BoxDecoration(
+                    color: HomeDashboardTheme.background,
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                  child: Text(
+                    '待处理 ${card.count}',
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w500,
+                      color: HomeDashboardTheme.labelSecondary,
+                    ),
+                  ),
+                ),
+              const Spacer(),
+              _TodoActionChip(label: card.actionLabel, large: true),
+            ],
+          ),
+        ],
       ),
     );
   }
