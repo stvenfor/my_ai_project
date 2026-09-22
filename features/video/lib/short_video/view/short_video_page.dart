@@ -133,7 +133,6 @@ class _ShortVideoPageState extends State<ShortVideoPage> {
                     ),
                     child: ShortVideoProfileCard(
                       profile: profile,
-                      onAvatarTap: _c.changeAvatar,
                     ),
                   ),
                 ),

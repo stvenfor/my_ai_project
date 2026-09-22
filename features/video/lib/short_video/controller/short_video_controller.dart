@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -34,7 +32,7 @@ class ShortVideoController extends GetxController {
   final UserProfileApi _profileApi;
 
   static const pageSize = 5;
-  /// 与 MineController 同一占位图，避免两页默认头像不一致。
+  /// 与 MineController 同一占位图。
   static const _defaultAvatar =
       'https://picsum.photos/seed/mine_profile/200/200';
 
@@ -45,19 +43,20 @@ class ShortVideoController extends GetxController {
   final loadingMore = false.obs;
   final hasMore = true.obs;
 
-  /// 本人职务 / 门店（来自 `/profiles/me`，与「我的」一致）。
+  /// 本人职务 / 门店 / 头像（来自 `/profiles/me`，与「我的」一致）。
   final roleBadge = '销售顾问'.obs;
   final storeName = ''.obs;
+  final identityAvatar = ''.obs;
+  final identityName = ''.obs;
 
   int _page = 0;
 
-  /// 网格数据：发布瓷砖 + 服务端列表。
   List<ShortVideoItemModel> get gridItems => [
         ShortVideoItemModel.publishTile,
         ...items,
       ];
 
-  /// 本人身份对齐「我的」：UserService 昵称/头像 + profiles/me 职务/门店。
+  /// 本人身份对齐「我的」。
   ShortVideoProfileModel get displayProfile {
     final p = profile.value;
     final user = Get.find<UserService>().currentUser.value;
@@ -77,18 +76,24 @@ class ShortVideoController extends GetxController {
       );
     }
 
-    // 与 MineController._syncUser 相同优先级
-    final displayName = (user?.name.isNotEmpty == true)
-        ? user!.name
-        : (p != null && p.displayName.isNotEmpty ? p.displayName : '东东枪');
-    final avatarUrl = (user?.avatar.isNotEmpty == true)
-        ? user!.avatar
-        : (p?.avatarUrl?.isNotEmpty == true ? p!.avatarUrl! : _defaultAvatar);
+    // 优先级与 Mine 一致：UserService → profiles/me 缓存 → 默认
+    final name = _firstNonEmpty([
+      user?.name,
+      identityName.value,
+      p?.displayName,
+      '东东枪',
+    ]);
+    final avatar = _firstNonEmpty([
+      user?.avatar,
+      identityAvatar.value,
+      p?.avatarUrl,
+      _defaultAvatar,
+    ]);
 
     return ShortVideoProfileModel(
       userId: p?.userId ?? user?.id,
-      displayName: displayName,
-      avatarUrl: avatarUrl,
+      displayName: name,
+      avatarUrl: avatar,
       roleBadge: roleBadge.value.isNotEmpty ? roleBadge.value : '销售顾问',
       storeName: storeName.value.isNotEmpty
           ? storeName.value
@@ -98,6 +103,13 @@ class ShortVideoController extends GetxController {
     );
   }
 
+  static String _firstNonEmpty(List<String?> candidates) {
+    for (final c in candidates) {
+      if (c != null && c.trim().isNotEmpty) return c.trim();
+    }
+    return '';
+  }
+
   @override
   void onInit() {
     super.onInit();
@@ -105,7 +117,6 @@ class ShortVideoController extends GetxController {
     load();
   }
 
-  /// TopicSelectPage 依赖 PostRepository。
   static void ensureCommunityTopicsRepo() {
     if (!Get.isRegistered<PostRepository>()) {
       Get.put<PostRepository>(HttpPostRepository());
@@ -145,36 +156,39 @@ class ShortVideoController extends GetxController {
 
   Future<void> _loadProfile() async {
     try {
-      // 视频统计 + 与「我的」同源的身份资料并行拉取
-      final videoFuture = _repo.fetchProfile();
-      final meFuture = _profileApi.fetchMe();
-      // 静默刷新 UserService，保证昵称/头像与 Mine 同一会话态
-      unawaited(UserProfileSync.hydrateQuietly());
+      // 先 hydrate，保证 UserService 头像与「我的」一致（含 data: URL）
+      await UserProfileSync.hydrateQuietly();
 
-      final video = await videoFuture;
-      profile.value = video;
-
-      try {
-        final me = await meFuture;
-        _applyMineIdentity(me);
-      } catch (_) {
-        // 身份失败时保留上次职务/门店；视频统计仍可用
-      }
+      final results = await Future.wait([
+        _repo.fetchProfile(),
+        _profileApi.fetchMe(),
+      ]);
+      profile.value = results[0] as ShortVideoProfileModel;
+      _applyMineIdentity(results[1] as UserProfile);
     } catch (e) {
-      _toastErr(e, '加载资料失败');
+      // 视频 profile 失败再尝试只拉身份
+      try {
+        await UserProfileSync.hydrateQuietly();
+        final me = await _profileApi.fetchMe();
+        _applyMineIdentity(me);
+      } catch (_) {}
+      if (profile.value == null) {
+        _toastErr(e, '加载资料失败');
+      }
     }
   }
 
   void _applyMineIdentity(UserProfile me) {
     final name = me.displayName.isNotEmpty ? me.displayName : me.userName;
-    final avatar = me.avatarUrl;
+    final avatar = me.avatarUrl.trim();
     final label = me.stats.roleLabel.trim();
     final store = me.stats.storeName.trim();
 
+    if (name.isNotEmpty) identityName.value = name;
+    if (avatar.isNotEmpty) identityAvatar.value = avatar;
     if (label.isNotEmpty) roleBadge.value = label;
     if (store.isNotEmpty) storeName.value = store;
 
-    // 若 UserService 尚未有名/头像，用 profile 补齐到展示层（不强制写会话）
     final p = profile.value;
     if (p != null && p.isMe) {
       profile.value = ShortVideoProfileModel(
@@ -208,7 +222,6 @@ class ShortVideoController extends GetxController {
     }
   }
 
-  /// 弹出相册/拍摄 → 选本地视频 → 进发布页（不上传，服务端用默认片源）。
   Future<void> startPublishFlow() async {
     final source = await MediaSourceBottomSheet.show();
     if (source == null) return;
@@ -230,47 +243,6 @@ class ShortVideoController extends GetxController {
       UiKitInitializer.toastError('无法选择视频，请检查相册或相机权限');
     } catch (_) {
       UiKitInitializer.toastError('选择视频失败');
-    }
-  }
-
-  /// 点击头像：与「我的」同源更换头像，写回 UserService。
-  Future<void> changeAvatar() async {
-    if (!Get.isRegistered<UserService>() ||
-        Get.find<UserService>().currentUser.value == null) {
-      UiKitInitializer.toastError('请先登录');
-      return;
-    }
-    final source = await MediaSourceBottomSheet.show();
-    if (source == null) return;
-    try {
-      if (source == MediaPickSource.camera) {
-        final ok = await ShortVideoCapturePermission.ensureForCameraCapture(
-          withMicrophone: false,
-        );
-        if (!ok) return;
-      }
-      final path = await ImagePickerUtils.pickImage(source, maxWidth: 800);
-      if (path == null || path.isEmpty) return;
-
-      final bytes = await File(path).readAsBytes();
-      final lower = path.toLowerCase();
-      final mime = lower.endsWith('.png')
-          ? 'image/png'
-          : lower.endsWith('.webp')
-              ? 'image/webp'
-              : 'image/jpeg';
-      await UserProfileSync.updateAndPersist(
-        UpdateUserProfileRequest(
-          avatarBase64: base64Encode(bytes),
-          avatarMime: mime,
-        ),
-      );
-      await _loadProfile();
-      UiKitInitializer.toast('头像已更新');
-    } on AuthFailure catch (e) {
-      UiKitInitializer.toastError(e.message);
-    } catch (_) {
-      UiKitInitializer.toastError('更换头像失败');
     }
   }
 

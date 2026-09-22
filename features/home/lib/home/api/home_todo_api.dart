@@ -59,25 +59,43 @@ class HomeTodoApi {
     _ensureOk(result.data, '拒绝失败');
   }
 
-  Future<List<Map<String, dynamic>>> fetchFollowUpCustomers() =>
-      _fetchMaps(followUpPath, '加载待跟进客户失败');
-
-  Future<List<Map<String, dynamic>>> fetchAppointments() =>
-      _fetchMaps(appointmentsPath, '加载售后预约失败');
-
-  Future<List<Map<String, dynamic>>> fetchReviewOrders() =>
-      _fetchMaps(reviewOrdersPath, '加载店务审核单失败');
-
-  Future<List<Map<String, dynamic>>> _fetchMaps(String path, String err) async {
+  Future<List<HomeTodoFollowUpCustomer>> fetchFollowUpCustomers() async {
     AuthHttpConfig.ensureInitialized();
-    final result = await HttpManager.instance.get<ResultModel<List<Map<String, dynamic>>>>(
-      path,
+    final result = await HttpManager.instance
+        .get<ResultModel<List<HomeTodoFollowUpCustomer>>>(
+      followUpPath,
       converter: (json) => ResultModel.fromJson(
         json as Map<String, dynamic>,
-        (data) => _parseItems(data, (m) => m),
+        (data) => _parseItems(data, HomeTodoFollowUpCustomer.fromJson),
       ),
     );
-    return _data(result.data, err);
+    return _data(result.data, '加载待跟进客户失败');
+  }
+
+  Future<List<HomeTodoAppointment>> fetchAppointments() async {
+    AuthHttpConfig.ensureInitialized();
+    final result =
+        await HttpManager.instance.get<ResultModel<List<HomeTodoAppointment>>>(
+      appointmentsPath,
+      converter: (json) => ResultModel.fromJson(
+        json as Map<String, dynamic>,
+        (data) => _parseItems(data, HomeTodoAppointment.fromJson),
+      ),
+    );
+    return _data(result.data, '加载售后预约失败');
+  }
+
+  Future<List<HomeTodoReviewOrder>> fetchReviewOrders() async {
+    AuthHttpConfig.ensureInitialized();
+    final result =
+        await HttpManager.instance.get<ResultModel<List<HomeTodoReviewOrder>>>(
+      reviewOrdersPath,
+      converter: (json) => ResultModel.fromJson(
+        json as Map<String, dynamic>,
+        (data) => _parseItems(data, HomeTodoReviewOrder.fromJson),
+      ),
+    );
+    return _data(result.data, '加载店务审核单失败');
   }
 
   List<T> _parseItems<T>(

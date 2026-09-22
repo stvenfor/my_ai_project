@@ -1,3 +1,7 @@
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:module_utils/module_utils.dart';
 import 'package:module_video/short_video/model/short_video_models.dart';
@@ -6,11 +10,9 @@ class ShortVideoProfileCard extends StatelessWidget {
   const ShortVideoProfileCard({
     super.key,
     required this.profile,
-    this.onAvatarTap,
   });
 
   final ShortVideoProfileModel profile;
-  final VoidCallback? onAvatarTap;
 
   @override
   Widget build(BuildContext context) {
@@ -34,29 +36,8 @@ class ShortVideoProfileCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(child: _UserInfo(profile: profile)),
-              GestureDetector(
-                onTap: profile.isMe ? onAvatarTap : null,
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    CacheImageUtils.circle(profile.avatarUrl ?? '', size: 48.r),
-                    if (profile.isMe && onAvatarTap != null)
-                      Positioned(
-                        right: -2,
-                        bottom: -2,
-                        child: Container(
-                          padding: EdgeInsets.all(2.w),
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF0070F3),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(Icons.camera_alt,
-                              size: 12.sp, color: Colors.white),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
+              // 与「我的」同源：支持 data: / 本地路径 / 网络图；无点击
+              _Avatar(url: profile.avatarUrl, size: 48.r),
             ],
           ),
           SizedBox(height: 16.h),
@@ -65,6 +46,81 @@ class ShortVideoProfileCard extends StatelessWidget {
       ),
     );
   }
+}
+
+/// 对齐 MineHeaderWidget 头像解析（data URL / file / network）。
+class _Avatar extends StatelessWidget {
+  const _Avatar({required this.url, required this.size});
+
+  final String? url;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: ClipOval(child: _buildImage()),
+    );
+  }
+
+  Widget _buildImage() {
+    final raw = url?.trim() ?? '';
+    if (raw.isEmpty) return _placeholder();
+
+    if (raw.startsWith('data:')) {
+      final bytes = _decodeDataUrl(raw);
+      if (bytes == null) return _placeholder();
+      return Image.memory(
+        bytes,
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+      );
+    }
+
+    if (_isLocalPath(raw)) {
+      return Image.file(
+        File(raw.replaceFirst('file://', '').replaceFirst('file:', '')),
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _placeholder(),
+      );
+    }
+
+    return CacheImageUtils.network(
+      raw,
+      width: size,
+      height: size,
+      fit: BoxFit.cover,
+    );
+  }
+
+  Widget _placeholder() {
+    return Container(
+      width: size,
+      height: size,
+      color: const Color(0xFFE0E0E0),
+      alignment: Alignment.center,
+      child: Icon(Icons.person, size: size * 0.45, color: Colors.grey),
+    );
+  }
+
+  static Uint8List? _decodeDataUrl(String url) {
+    final comma = url.indexOf(',');
+    if (comma < 0) return null;
+    try {
+      return base64Decode(url.substring(comma + 1));
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static bool _isLocalPath(String url) =>
+      url.startsWith('/') ||
+      url.startsWith('file:') ||
+      url.startsWith('file://');
 }
 
 class _UserInfo extends StatelessWidget {

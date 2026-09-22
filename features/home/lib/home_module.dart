@@ -18,7 +18,6 @@ import 'package:module_home/home/binding/used_car_binding.dart';
 import 'package:module_home/home/view/analytics_detail_page.dart';
 import 'package:module_home/home/view/analytics_list_page.dart';
 import 'package:module_home/home/view/home_todo_pages.dart';
-import 'package:module_home/home/api/home_todo_api.dart';
 import 'package:module_home/home/view/used_car_detail_page.dart';
 import 'package:module_home/home/view/used_car_list_page.dart';
 import 'package:module_home/home/web/home_web_handlers.dart';
@@ -84,26 +83,9 @@ class HomeModule extends FeatureModule {
           return const AnalyticsDetailPage();
         },
         RoutePath.homeTodoPartnerPending: (_) => const PartnerPendingPage(),
-        RoutePath.homeTodoFollowUp: (_) => HomeTodoListPage(
-              title: '待跟进客户',
-              loader: () => HomeTodoApi().fetchFollowUpCustomers(),
-              itemTitle: (m) => m['display_name']?.toString() ?? '客户',
-              itemSubtitle: (m) =>
-                  '跟进截止：${m['next_follow_up_at'] ?? '-'}',
-            ),
-        RoutePath.homeTodoAfterSales: (_) => HomeTodoListPage(
-              title: '售后预约',
-              loader: () => HomeTodoApi().fetchAppointments(),
-              itemTitle: (m) => m['customer_name']?.toString() ?? '预约',
-              itemSubtitle: (m) =>
-                  '预约日：${m['appointment_date'] ?? '-'}',
-            ),
-        RoutePath.homeTodoOrderReview: (_) => HomeTodoListPage(
-              title: '订单待审核',
-              loader: () => HomeTodoApi().fetchReviewOrders(),
-              itemTitle: (m) => m['title']?.toString() ?? '审核单',
-              itemSubtitle: (m) => '单号 #${m['order_id'] ?? '-'}',
-            ),
+        RoutePath.homeTodoFollowUp: (_) => const FollowUpCustomersPage(),
+        RoutePath.homeTodoAfterSales: (_) => const AfterSalesAppointmentsPage(),
+        RoutePath.homeTodoOrderReview: (_) => const StoreReviewOrdersPage(),
       };
 
   @override
