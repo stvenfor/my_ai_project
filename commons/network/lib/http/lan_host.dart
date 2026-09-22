@@ -7,7 +7,7 @@
 class LanHost {
   LanHost._();
 
-  static const fallback = '192.168.0.102';
+  static const fallback = '172.16.0.43';
 
   /// 旧名兼容（避免外部引用断裂）。
   static const debugFallback = fallback;

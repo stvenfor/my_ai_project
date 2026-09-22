@@ -36,7 +36,13 @@ class RoutePath{
   static const String mineHttpTest = '/mine/http_test';
   static const String personalizedSettings = '/mine/personalized_settings';
   static const String mineProfile = '/mine/profile';
+  static const String mineAddresses = '/mine/addresses';
+  static const String mineAddressEdit = '/mine/addresses/edit';
   static const String settings = '/settings';
+
+  /// 门店商城（瀑布流商品列表）
+  static const String mall = '/mall';
+  static const String mallDetail = '/mall/detail';
   static const String dialogDemo = '/settings/dialog_demo';
   static const String linkingDebug = '/settings/linking_debug';
   static const String realtimeDebug = '/settings/realtime_debug';

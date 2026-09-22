@@ -13,6 +13,10 @@ import 'package:module_linking/debug/linking_debug_page.dart';
 import 'package:module_settings/deal_invoice/deal_invoice_demo_binding.dart';
 import 'package:module_settings/deal_invoice/view/deal_invoice_demo_page.dart';
 import 'package:module_settings/deal_invoice/view/deal_invoice_upload_page.dart';
+import 'package:module_settings/mine/address/controller/address_edit_controller.dart';
+import 'package:module_settings/mine/address/controller/address_list_controller.dart';
+import 'package:module_settings/mine/address/view/address_edit_page.dart';
+import 'package:module_settings/mine/address/view/address_list_page.dart';
 import 'package:module_settings/mine/api/mine_http_config.dart';
 import 'package:module_settings/mine/personalized_settings/personalized_settings_controller.dart';
 import 'package:module_settings/mine/personalized_settings/view/personalized_settings_page.dart';
@@ -50,6 +54,27 @@ class SettingsModule extends FeatureModule {
             Get.lazyPut(MineProfileController.new, fenix: true);
           }
           return const MineProfilePage();
+        },
+        RoutePath.mineAddresses: (_) {
+          final choose = Get.arguments == true ||
+              (Get.arguments is Map &&
+                  (Get.arguments as Map)['choose'] == true);
+          if (Get.isRegistered<AddressListController>()) {
+            Get.delete<AddressListController>(force: true);
+          }
+          Get.put(AddressListController(chooseMode: choose));
+          return const AddressListPage();
+        },
+        RoutePath.mineAddressEdit: (_) {
+          final raw = Get.arguments;
+          final id = raw is int
+              ? raw
+              : int.tryParse(raw?.toString() ?? '');
+          if (Get.isRegistered<AddressEditController>()) {
+            Get.delete<AddressEditController>(force: true);
+          }
+          Get.put(AddressEditController(addressId: id));
+          return const AddressEditPage();
         },
         RoutePath.personalizedSettings: (_) {
           if (!Get.isRegistered<PersonalizedSettingsController>()) {

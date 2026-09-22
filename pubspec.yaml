@@ -43,6 +43,8 @@ dependencies:
     path: ./commons/network
   module_live:
     path: ./features/live
+  module_mall:
+    path: ./features/mall
   module_pay:
     path: ./features/pay
   wys_router:

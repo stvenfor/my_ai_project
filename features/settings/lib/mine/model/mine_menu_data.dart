@@ -32,12 +32,6 @@ abstract final class MineQuickServiceData {
       iconColor: Color(0xFF5856D6),
     ),
     MineQuickServiceItem(
-      id: 'course',
-      label: '我的课程',
-      icon: CupertinoIcons.play_rectangle,
-      iconColor: Color(0xFFFF9500),
-    ),
-    MineQuickServiceItem(
       id: 'order',
       label: '我的订单',
       icon: CupertinoIcons.doc_text,
@@ -64,6 +58,11 @@ class MineMenuItem {
 
 abstract final class MineMenuData {
   static const items = [
+    MineMenuItem(
+      id: 'address',
+      label: '收货地址',
+      icon: CupertinoIcons.location,
+    ),
     MineMenuItem(
       id: 'cooperation',
       label: '商务合作',

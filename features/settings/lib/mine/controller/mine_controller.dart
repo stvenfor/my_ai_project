@@ -215,11 +215,29 @@ class MineController extends GetxController {
   }
 
   void onQuickServiceTap(MineQuickServiceItem item) {
-    UiKitInitializer.toast('${item.label} 开发中');
+    switch (item.id) {
+      case 'mall':
+        if (isLoggedIn) {
+          Get.toNamed(RoutePath.mall);
+        } else {
+          AuthNavigation.openLogin(redirectRoute: RoutePath.mall);
+        }
+      case 'wallet':
+      case 'order':
+        UiKitInitializer.toast('${item.label} 开发中');
+      default:
+        UiKitInitializer.toast('${item.label} 开发中');
+    }
   }
 
   void onMenuTap(MineMenuItem item) {
     switch (item.id) {
+      case 'address':
+        if (isLoggedIn) {
+          Get.toNamed(RoutePath.mineAddresses);
+        } else {
+          AuthNavigation.openLogin(redirectRoute: RoutePath.mineAddresses);
+        }
       case 'settings':
         openSettings();
       case 'feedback':

@@ -1,5 +1,5 @@
-name: module_settings
-description: Settings module for flutter_module_sample.
+name: module_mall
+description: 门店商城 — 商品瀑布流与下单入口。
 publish_to: 'none'
 version: 0.0.1
 
@@ -10,26 +10,19 @@ dependencies:
   flutter:
     sdk: flutter
   get: ^4.7.3
+  flutter_staggered_grid_view: ^0.7.0
   module_common_ui:
     path: ../../commons/ui
   module_core:
     path: ../../commons/core
   module_http:
     path: ../../commons/network
+  module_utils:
+    path: ../../commons/toolkit
   wys_router:
     path: ../../commons/wys_router
   module_auth:
     path: ../auth
-  module_utils:
-    path: ../../commons/toolkit
-  module_linking:
-    path: ../../components/linking
-  module_realtime:
-    path: ../../components/realtime
-  module_rongcloud_im:
-    path: ../../components/rongcloud_im
-  module_bluetooth:
-    path: ../../components/bluetooth
   wys_common:
     path: ../../commons/wys_common
 
@@ -38,11 +31,8 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^2.0.0
 
-# 与根工程一致：消解 module_utils 内 rxdart 冲突，便于包内单测。
 dependency_overrides:
   rxdart: ^0.27.7
 
 flutter:
   uses-material-design: true
-  assets:
-    - assets/personalized_settings/

@@ -10,6 +10,7 @@ import 'package:module_community/community_module.dart';
 import 'package:module_friend/friend_module.dart';
 import 'package:module_home/home_module.dart';
 import 'package:module_live/live_module.dart';
+import 'package:module_mall/mall_module.dart';
 import 'package:module_music/music_module.dart';
 import 'package:module_pay/pay_module.dart';
 import 'package:wys_router/src/module/feature_module.dart';
@@ -28,6 +29,7 @@ List<FeatureModule> buildEnabledModules() {
     AiModule(),
     FriendModule(),
     LiveModule(),
+    MallModule(),
     PayModule(),
     VideoModule(),
     BfuiModule(),
