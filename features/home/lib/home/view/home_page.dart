@@ -4,13 +4,14 @@ import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_home/home/controller/home_controller.dart';
 import 'package:module_home/home/model/home_dashboard_model.dart';
 import 'package:module_home/home/theme/home_dashboard_theme.dart';
+import 'package:module_home/home/view/daily_check_in_dialog.dart';
 import 'package:module_home/home/view/widgets/home_club_tab_content.dart';
 import 'package:module_home/home/view/widgets/home_dashboard_widgets.dart';
 import 'package:module_home/home/view/widgets/home_top_tab_bar.dart';
 import 'package:module_home/home/view/widgets/home_video_tab_content.dart';
 import 'package:module_music/controller/music_playback_controller.dart';
 import 'package:module_music/widgets/music_mini_player_bar.dart';
-import 'package:wys_router/src/route/route_path.dart';
+import 'package:wys_router/wys_router.dart';
 
 class HomeBinding extends Bindings {
   @override
@@ -19,8 +20,26 @@ class HomeBinding extends Bindings {
   }
 }
 
-class HomePage extends GetView<HomeController> {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  HomeController get controller => Get.find<HomeController>();
+  var _checkInDialogRequested = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _checkInDialogRequested) return;
+      _checkInDialogRequested = true;
+      DailyCheckInDialog.maybeShow(context);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -208,7 +227,7 @@ class _StrategyEntry extends StatelessWidget {
                     ],
                   ),
                 ),
-                Icon(
+                const Icon(
                   Icons.chevron_right_rounded,
                   color: HomeDashboardTheme.labelTertiary,
                 ),
@@ -276,7 +295,7 @@ class _LearningReportEntry extends StatelessWidget {
                     ],
                   ),
                 ),
-                Icon(
+                const Icon(
                   Icons.chevron_right_rounded,
                   color: HomeDashboardTheme.labelTertiary,
                 ),

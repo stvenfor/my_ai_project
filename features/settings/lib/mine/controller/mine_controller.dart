@@ -169,7 +169,13 @@ class MineController extends GetxController {
 
   void onInfoTap() => Get.toNamed(RoutePath.personalizedSettings);
 
-  void onCalendarTap() => UiKitInitializer.toast('签到日历');
+  void onCalendarTap() {
+    if (!isLoggedIn) {
+      AuthNavigation.openLogin(redirectRoute: RoutePath.homeCheckInMall);
+      return;
+    }
+    Get.toNamed(RoutePath.homeCheckInMall);
+  }
 
   Future<void> onStoreTap() async {
     if (!isLoggedIn) {

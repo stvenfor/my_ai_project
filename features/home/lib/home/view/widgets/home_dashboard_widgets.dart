@@ -182,7 +182,7 @@ class HomeFeatureGrid extends StatelessWidget {
       return;
     }
     if (item.label == '生活服务') {
-      Get.toNamed(RoutePath.homeCheckInMall);
+      UiKitInitializer.toast('生活服务即将上线');
       return;
     }
     if (item.label == '二手车') {

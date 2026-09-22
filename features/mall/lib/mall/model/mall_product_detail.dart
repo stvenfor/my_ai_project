@@ -40,6 +40,7 @@ class MallSkuOffer {
     required this.skuId,
     required this.title,
     required this.price,
+    required this.pricePoints,
     required this.stockQty,
     required this.specs,
     this.deliverType,
@@ -51,6 +52,7 @@ class MallSkuOffer {
       skuId: (json['sku_id'] as num?)?.toInt() ?? 0,
       title: json['title']?.toString() ?? '',
       price: json['price']?.toString() ?? '0.00',
+      pricePoints: (json['price_points'] as num?)?.toInt() ?? 0,
       stockQty: (json['stock_qty'] as num?)?.toInt() ?? 0,
       specs: specs is Map<String, dynamic> ? specs : const {},
       deliverType: (json['deliver_type'] as num?)?.toInt(),
@@ -60,9 +62,17 @@ class MallSkuOffer {
   final int skuId;
   final String title;
   final String price;
+  final int pricePoints;
   final int stockQty;
   final Map<String, dynamic> specs;
   final int? deliverType;
+
+  String get priceLabel {
+    final cny = double.tryParse(price) ?? 0;
+    if (pricePoints > 0 && cny > 0) return '$pricePoints积分+$price元';
+    if (pricePoints > 0) return '$pricePoints积分';
+    return '$price元';
+  }
 
   String get label {
     if (specs.isEmpty) {

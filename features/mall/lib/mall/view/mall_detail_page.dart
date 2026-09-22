@@ -60,10 +60,10 @@ class MallDetailPage extends GetView<MallDetailController> {
                           SizedBox(height: 8.h),
                           Obx(() {
                             final price =
-                                controller.selectedSku.value?.price ??
-                                (d.skus.isEmpty ? '—' : d.skus.first.price);
+                                controller.selectedSku.value?.priceLabel ??
+                                (d.skus.isEmpty ? '—' : d.skus.first.priceLabel);
                             return Text(
-                              '¥$price',
+                              price,
                               style: MallTheme.priceText.copyWith(fontSize: 22),
                             );
                           }),

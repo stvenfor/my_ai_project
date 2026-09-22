@@ -20,10 +20,9 @@ class MallProductCardModel {
     final aspect = (json['cover_aspect'] as num?)?.toDouble() ?? 1.0;
     final price = json['price']?.toString() ?? '0.00';
     final kind = (json['kind'] as num?)?.toInt() ?? 0;
+    final points = (json['price_points'] as num?)?.toInt() ?? 0;
     final seed = idStr.hashCode.abs();
 
-    // 参考图：积分+现金 / 纯现金；接口暂无积分字段时按商品推导展示。
-    final points = 10 + (seed % 620);
     final soldRaw = 20 + (seed % 9990);
     final soldLabel = soldRaw >= 10000
         ? '已兑${(soldRaw / 10000).toStringAsFixed(1)}万'
@@ -32,14 +31,11 @@ class MallProductCardModel {
     final badges = <String>[];
     if (kind == 1) {
       badges.add('虚拟发放');
-    } else if (seed % 3 == 0) {
-      badges.add('限时8折');
     }
-    if (seed % 5 == 0) {
-      badges.add('钻铂专享');
-    }
-    if (seed % 4 == 1) {
-      badges.add('上新');
+    if (points > 0 && (double.tryParse(price) ?? 0) > 0) {
+      badges.add('积分+现金');
+    } else if (points > 0) {
+      badges.add('积分兑换');
     }
 
     return MallProductCardModel(
@@ -51,7 +47,7 @@ class MallProductCardModel {
       imageAspectRatio: aspect < 0.5 ? 1.0 : aspect,
       kind: kind,
       subtitle: json['subtitle']?.toString(),
-      points: points,
+      points: points > 0 ? points : null,
       soldLabel: soldLabel,
       badges: badges,
     );
@@ -71,13 +67,14 @@ class MallProductCardModel {
 
   bool get isVirtual => kind == 1;
 
-  /// 参考图价格文案：积分+元 或 纯元。
+  /// 价格文案：积分 / 积分+元 / 纯元。
   String get priceLabel {
     final p = points;
-    if (p != null && p > 0 && !isVirtual) {
+    final cny = double.tryParse(price) ?? 0;
+    if (p != null && p > 0 && cny > 0) {
       return '$p积分+$price元';
     }
-    if (p != null && p > 0 && isVirtual) {
+    if (p != null && p > 0) {
       return '$p积分';
     }
     return '$price元';
