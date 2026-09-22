@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
@@ -21,6 +23,39 @@ class AppVideoPlayer {
     controller.setLooping(looping);
     if (autoPlay) await controller.play();
     return controller;
+  }
+
+  static Future<VideoPlayerController> createFileController(
+    String path, {
+    bool autoPlay = false,
+    bool looping = false,
+  }) async {
+    final controller = VideoPlayerController.file(
+      File(path),
+      videoPlayerOptions: _defaultOptions,
+    );
+    await controller.initialize();
+    controller.setLooping(looping);
+    if (autoPlay) await controller.play();
+    return controller;
+  }
+
+  /// 网络 URL 或本地文件路径。
+  static Future<VideoPlayerController> createController(
+    String source, {
+    bool autoPlay = false,
+    bool looping = false,
+  }) {
+    final isNet =
+        source.startsWith('http://') || source.startsWith('https://');
+    if (isNet) {
+      return createNetworkController(
+        source,
+        autoPlay: autoPlay,
+        looping: looping,
+      );
+    }
+    return createFileController(source, autoPlay: autoPlay, looping: looping);
   }
 
   /// 带 BoxFit 的视频画面（竖屏 cover / 横屏 contain 共用）。

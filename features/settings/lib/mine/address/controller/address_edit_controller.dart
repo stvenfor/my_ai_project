@@ -5,6 +5,7 @@ import 'package:module_http/module_http.dart';
 import 'package:module_settings/mine/address/api/address_api.dart';
 import 'package:module_settings/mine/address/model/address_model.dart';
 import 'package:module_settings/mine/address/widgets/china_region_picker.dart';
+import 'package:wys_common/wys_common.dart';
 
 class AddressEditController extends GetxController {
   AddressEditController({this.addressId, AddressApi? api})
@@ -104,13 +105,25 @@ class AddressEditController extends GetxController {
   Future<void> save() async {
     if (saving.value) return;
     final name = nameCtrl.text.trim();
-    final phone = phoneCtrl.text.trim();
+    final phone = WysContactValidators.digitsOnly(phoneCtrl.text);
     final detail = detailCtrl.text.trim();
     final province = provinceCtrl.text.trim();
     final city = cityCtrl.text.trim();
     final district = districtCtrl.text.trim();
-    if (name.isEmpty || detail.isEmpty || phone.length < 6) {
-      UiKitInitializer.toast('请填写姓名、手机和详细地址');
+    if (!WysContactValidators.isNameValid(name)) {
+      UiKitInitializer.toast(
+        name.isEmpty
+            ? '请填写收货人'
+            : '收货人不超过 ${WysContactValidators.maxNameLength} 个字',
+      );
+      return;
+    }
+    if (!WysContactValidators.isCnMobile(phone)) {
+      UiKitInitializer.toast('请输入以 1 开头的 11 位手机号');
+      return;
+    }
+    if (detail.isEmpty) {
+      UiKitInitializer.toast('请填写详细地址');
       return;
     }
     if (province.isEmpty || city.isEmpty || district.isEmpty) {

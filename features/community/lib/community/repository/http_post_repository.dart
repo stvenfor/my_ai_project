@@ -13,6 +13,7 @@ class HttpPostRepository implements PostRepository {
   Future<List<PostModel>> fetchPosts({
     required int page,
     int pageSize = 10,
+    String tab = 'latest',
   }) async {
     AuthHttpConfig.ensureInitialized();
     final result =
@@ -21,6 +22,7 @@ class HttpPostRepository implements PostRepository {
       queryParameters: {
         'page': page + 1,
         'size': pageSize,
+        'tab': tab,
       },
       converter: (json) => ResultModel.listPage(
         json as Map<String, dynamic>,
@@ -208,5 +210,33 @@ class HttpPostRepository implements PostRepository {
         code: model?.code.toString(),
       );
     }
+  }
+
+  @override
+  Future<void> followUser(String userId) async {
+    AuthHttpConfig.ensureInitialized();
+    final result =
+        await HttpManager.instance.post<ResultModel<Map<String, dynamic>>>(
+      '$_prefix/users/$userId/follow',
+      converter: (json) => ResultModel.object(
+        json as Map<String, dynamic>,
+        (data) => Map<String, dynamic>.from(data),
+      ),
+    );
+    _dataAllowEmpty(result.data, '关注失败');
+  }
+
+  @override
+  Future<void> unfollowUser(String userId) async {
+    AuthHttpConfig.ensureInitialized();
+    final result =
+        await HttpManager.instance.delete<ResultModel<Map<String, dynamic>>>(
+      '$_prefix/users/$userId/follow',
+      converter: (json) => ResultModel.object(
+        json as Map<String, dynamic>,
+        (data) => Map<String, dynamic>.from(data),
+      ),
+    );
+    _dataAllowEmpty(result.data, '取消关注失败');
   }
 }

@@ -11,6 +11,7 @@ export 'src/scan/wys_scan_page.dart';
 export 'src/wys_debounce.dart';
 export 'src/wys_prefs.dart';
 export 'src/utils/wys_phone_account_utils.dart';
+export 'src/utils/wys_contact_validators.dart';
 export 'src/utils/app_screen.dart';
 export 'src/wys_performance.dart';
 export 'src/wys_privacy_consent.dart';

@@ -5,6 +5,18 @@ import 'package:permission_handler/permission_handler.dart';
 
 enum MediaPickSource { gallery, camera }
 
+/// 权限申请结果。
+enum MediaPermissionResult {
+  /// 已授权（含 Limited）。
+  granted,
+
+  /// 本次系统弹窗被拒绝（仍可再次申请）。
+  denied,
+
+  /// 永久拒绝 / 受限：系统不再弹窗，需去设置开启。
+  permanentlyDenied,
+}
+
 class ImagePickerUtils {
   ImagePickerUtils._();
 
@@ -14,19 +26,61 @@ class ImagePickerUtils {
   static bool get _isOhosPlatform =>
       Platform.operatingSystem.toLowerCase() == 'ohos';
 
-  static Future<bool> ensureCameraPermission() async {
-    if (!Platform.isAndroid && !Platform.isIOS && !_isOhosPlatform) {
-      return true;
+  static bool get _needsRuntimePermission =>
+      Platform.isAndroid || Platform.isIOS || _isOhosPlatform;
+
+  /// 申请相机权限；拍视频时传 [withMicrophone] 一并申请麦克风。
+  ///
+  /// 未授权时会主动弹出系统权限框；仅在永久拒绝时无法弹框。
+  static Future<MediaPermissionResult> requestCameraAccess({
+    bool withMicrophone = false,
+  }) async {
+    if (!_needsRuntimePermission) {
+      return MediaPermissionResult.granted;
     }
 
-    final status = await Permission.camera.status;
-    if (status.isGranted || status.isLimited) {
-      return true;
-    }
+    final permissions = <Permission>[
+      Permission.camera,
+      if (withMicrophone) Permission.microphone,
+    ];
 
-    final result = await Permission.camera.request();
-    return result.isGranted || result.isLimited;
+    // 先读状态：永久拒绝则不再无效 request。
+    var anyPermanent = false;
+    var allOk = true;
+    for (final p in permissions) {
+      final s = await p.status;
+      if (s.isGranted || s.isLimited) continue;
+      allOk = false;
+      if (s.isPermanentlyDenied || s.isRestricted) {
+        anyPermanent = true;
+      }
+    }
+    if (allOk) return MediaPermissionResult.granted;
+    if (anyPermanent) return MediaPermissionResult.permanentlyDenied;
+
+    final results = await permissions.request();
+    allOk = true;
+    anyPermanent = false;
+    for (final s in results.values) {
+      if (s.isGranted || s.isLimited) continue;
+      allOk = false;
+      if (s.isPermanentlyDenied || s.isRestricted) {
+        anyPermanent = true;
+      }
+    }
+    if (allOk) return MediaPermissionResult.granted;
+    if (anyPermanent) return MediaPermissionResult.permanentlyDenied;
+    return MediaPermissionResult.denied;
   }
+
+  /// 兼容旧调用：仅相机，返回是否已授权（内部会主动 request）。
+  static Future<bool> ensureCameraPermission() async {
+    final r = await requestCameraAccess();
+    return r == MediaPermissionResult.granted;
+  }
+
+  /// 打开系统设置页（永久拒绝后引导用户手动开启）。
+  static Future<bool> openPermissionSettings() => openAppSettings();
 
   static Future<String?> pickImage(
     MediaPickSource source, {
@@ -56,8 +110,8 @@ class ImagePickerUtils {
     double? maxWidth = 1200,
     int imageQuality = 85,
   }) async {
-    final granted = await ensureCameraPermission();
-    if (!granted) return null;
+    final r = await requestCameraAccess();
+    if (r != MediaPermissionResult.granted) return null;
     return pickImage(
       MediaPickSource.camera,
       maxWidth: maxWidth,
@@ -65,11 +119,31 @@ class ImagePickerUtils {
     );
   }
 
-  /// 选视频；相机源需先有相机权限。麦克风由系统在拍摄时再请求。
-  static Future<String?> pickVideo(MediaPickSource source) async {
-    if (source == MediaPickSource.camera) {
-      final granted = await ensureCameraPermission();
-      if (!granted) return null;
+  /// 相册多选；返回本地路径列表（可能为空）。
+  static Future<List<String>> pickMultiImages({
+    double? maxWidth = 1200,
+    int imageQuality = 85,
+    int? limit,
+  }) async {
+    final files = await _picker.pickMultiImage(
+      maxWidth: maxWidth,
+      imageQuality: imageQuality,
+      limit: limit,
+    );
+    return files
+        .map((f) => f.path)
+        .where((p) => p.isNotEmpty)
+        .toList(growable: false);
+  }
+
+  /// 选视频。相机源会主动申请相机+麦克风；[skipPermissionCheck] 为 true 时跳过（调用方已申请）。
+  static Future<String?> pickVideo(
+    MediaPickSource source, {
+    bool skipPermissionCheck = false,
+  }) async {
+    if (source == MediaPickSource.camera && !skipPermissionCheck) {
+      final r = await requestCameraAccess(withMicrophone: true);
+      if (r != MediaPermissionResult.granted) return null;
     }
     final file = await _picker.pickVideo(source: _toImageSource(source));
     return file?.path;

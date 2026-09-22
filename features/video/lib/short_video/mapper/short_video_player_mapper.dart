@@ -12,7 +12,7 @@ class ShortVideoPlayerMapper {
         .where(
           (item) =>
               !item.isPublish &&
-              item.status == ShortVideoStatus.normal &&
+              item.status != ShortVideoStatus.uploading &&
               (item.videoUrl?.isNotEmpty ?? false),
         )
         .toList();

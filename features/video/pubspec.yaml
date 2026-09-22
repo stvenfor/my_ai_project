@@ -15,14 +15,25 @@ dependencies:
     path: ../../commons/ui
   module_core:
     path: ../../commons/core
+  module_http:
+    path: ../../commons/network
+  module_auth:
+    path: ../auth
+  module_community:
+    path: ../community
   wys_router:
     path: ../../commons/wys_router
   module_utils:
     path: ../../commons/toolkit
 
+  video_player: ^2.9.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.0
+
+dependency_overrides:
+  rxdart: ^0.27.7
 
 flutter:

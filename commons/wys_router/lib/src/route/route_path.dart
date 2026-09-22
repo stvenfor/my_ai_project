@@ -62,6 +62,8 @@ class RoutePath{
   static const String video = '/video';
   static const String shortVideo = '/video/short';
   static const String shortVideoPlay = '/video/short/play';
+  static const String shortVideoPublish = '/video/short/publish';
+  static const String shortVideoHelp = '/video/short/help';
 
   /// 通用 Web 容器页（[AppWebViewPage]），通过 Get.arguments 传入 [WebPageConfig]。
   static const String web = '/web';

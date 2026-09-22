@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_settings/mine/address/controller/address_edit_controller.dart';
 import 'package:module_settings/mine/theme/mine_theme.dart';
+import 'package:wys_common/wys_common.dart';
 
 class AddressEditPage extends GetView<AddressEditController> {
   const AddressEditPage({super.key});
@@ -26,8 +28,18 @@ class AddressEditPage extends GetView<AddressEditController> {
           padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 24.h),
           children: [
             _card([
-              _field('收货人', controller.nameCtrl),
-              _field('手机号', controller.phoneCtrl, keyboard: TextInputType.phone),
+              _field(
+                '收货人',
+                controller.nameCtrl,
+                maxLength: WysContactValidators.maxNameLength,
+              ),
+              _field(
+                '手机号',
+                controller.phoneCtrl,
+                keyboard: TextInputType.phone,
+                maxLength: WysContactValidators.maxCnMobileLength,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              ),
               Obx(() {
                 final label = controller.regionLabel.value;
                 return ListTile(
@@ -98,13 +110,26 @@ class AddressEditPage extends GetView<AddressEditController> {
     TextEditingController ctrl, {
     TextInputType? keyboard,
     int maxLines = 1,
+    int? maxLength,
+    List<TextInputFormatter>? inputFormatters,
   }) {
     return TextField(
       controller: ctrl,
       keyboardType: keyboard,
       maxLines: maxLines,
+      maxLength: maxLength,
+      inputFormatters: inputFormatters,
       style: MineTheme.body,
       cursorColor: MineTheme.accent,
+      buildCounter: maxLength == null
+          ? null
+          : (
+              _, {
+              required currentLength,
+              required isFocused,
+              required maxLength,
+            }) =>
+              null,
       decoration: InputDecoration(
         labelText: label,
         labelStyle: MineTheme.caption,

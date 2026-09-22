@@ -24,6 +24,7 @@ dependencies:
     path: ../../commons/wys_router
   module_utils:
     path: ../../commons/toolkit
+  video_player: ^2.9.2
 
 dev_dependencies:
   flutter_test:

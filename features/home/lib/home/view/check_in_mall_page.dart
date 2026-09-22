@@ -262,11 +262,12 @@ class _CheckInMallPageState extends State<CheckInMallPage> {
           Icon(Icons.volume_up, color: Colors.white, size: 16.sp),
           SizedBox(width: 8.w),
           Expanded(
-            child: Text(
-              '温馨提示：本页面只保留近3个月内的积分记录',
+            child: _NoticeMarquee(
+              text: '温馨提示：本页面只保留近3个月内的积分记录',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 12.sp,
+                height: 1.2,
               ),
             ),
           ),
@@ -439,9 +440,9 @@ class _CheckInMallPageState extends State<CheckInMallPage> {
           SizedBox(height: 16.h),
           if (calendar.isNotEmpty)
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                for (final day in calendar) _buildDayItem(day),
+                for (final day in calendar)
+                  Expanded(child: _buildDayItem(day)),
               ],
             ),
           SizedBox(height: 12.h),
@@ -493,6 +494,7 @@ class _CheckInMallPageState extends State<CheckInMallPage> {
     final Color bgColor;
     final Color textColor;
     final String label;
+    final dayNum = day.day.length >= 10 ? day.day.substring(8) : day.day;
 
     if (day.signed) {
       bgColor = CheckInMallTheme.primaryBlue;
@@ -501,52 +503,61 @@ class _CheckInMallPageState extends State<CheckInMallPage> {
     } else if (day.isToday) {
       bgColor = CheckInMallTheme.coinGold;
       textColor = Colors.white;
-      label = day.day.isEmpty ? '今天' : day.day;
+      label = '今天';
     } else {
       bgColor = const Color(0xFFF5F6F8);
       textColor = CheckInMallTheme.textSecondary;
-      label = day.day.isEmpty ? '-' : day.day;
+      label = dayNum.isEmpty ? '-' : dayNum;
     }
 
-    return Column(
-      children: [
-        Container(
-          width: 40.w,
-          height: 40.w,
-          decoration: BoxDecoration(
-            color: bgColor,
-            borderRadius: BorderRadius.circular(8.r),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                '+${day.reward}',
-                style: TextStyle(
-                  color: textColor,
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w600,
-                ),
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 2.w),
+      child: Column(
+        children: [
+          AspectRatio(
+            aspectRatio: 1,
+            child: Container(
+              decoration: BoxDecoration(
+                color: bgColor,
+                borderRadius: BorderRadius.circular(8.r),
               ),
-              Icon(
-                Icons.arrow_forward,
-                color: textColor.withValues(alpha: 0.8),
-                size: 10.sp,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    '+${day.reward}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 11.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Icon(
+                    Icons.arrow_forward,
+                    color: textColor.withValues(alpha: 0.8),
+                    size: 10.sp,
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-        SizedBox(height: 4.h),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 11.sp,
-            color: day.signed
-                ? CheckInMallTheme.primaryBlue
-                : CheckInMallTheme.textSecondary,
+          SizedBox(height: 4.h),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 11.sp,
+              color: day.signed
+                  ? CheckInMallTheme.primaryBlue
+                  : CheckInMallTheme.textSecondary,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -818,6 +829,120 @@ class _CheckInMallPageState extends State<CheckInMallPage> {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// 温馨提示跑马灯：文字横向滚动，外层喇叭图标保持固定。
+class _NoticeMarquee extends StatefulWidget {
+  const _NoticeMarquee({
+    required this.text,
+    required this.style,
+  });
+
+  final String text;
+  final TextStyle style;
+
+  @override
+  State<_NoticeMarquee> createState() => _NoticeMarqueeState();
+}
+
+class _NoticeMarqueeState extends State<_NoticeMarquee>
+    with SingleTickerProviderStateMixin {
+  static const _gap = 48.0;
+  static const _pixelsPerSecond = 36.0;
+
+  late final AnimationController _controller;
+  double _textWidth = 0;
+  double _viewportWidth = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this);
+  }
+
+  @override
+  void didUpdateWidget(covariant _NoticeMarquee oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.text != widget.text || oldWidget.style != widget.style) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _restartIfNeeded());
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _restartIfNeeded() {
+    if (!mounted || _viewportWidth <= 0) return;
+    final painter = TextPainter(
+      text: TextSpan(text: widget.text, style: widget.style),
+      textDirection: TextDirection.ltr,
+      maxLines: 1,
+    )..layout();
+    _textWidth = painter.width;
+    if (_textWidth <= 0) return;
+
+    // 公告条始终横向滚动（文案短时也播），喇叭固定在左侧。
+    final distance = _textWidth + _gap;
+    final seconds = distance / _pixelsPerSecond;
+    if (!_controller.isAnimating ||
+        _controller.duration?.inMilliseconds != (seconds * 1000).round()) {
+      _controller
+        ..duration = Duration(milliseconds: (seconds * 1000).round().clamp(1, 60000))
+        ..repeat();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        if (width != _viewportWidth) {
+          _viewportWidth = width;
+          WidgetsBinding.instance.addPostFrameCallback((_) => _restartIfNeeded());
+        }
+
+        return ClipRect(
+          child: SizedBox(
+            height: (widget.style.fontSize ?? 12) * (widget.style.height ?? 1.2),
+            width: width,
+            child: AnimatedBuilder(
+              animation: _controller,
+              builder: (context, _) {
+                final cycle = (_textWidth > 0 ? _textWidth : width) + _gap;
+                final dx = -_controller.value * cycle;
+                return Stack(
+                  clipBehavior: Clip.hardEdge,
+                  children: [
+                    Transform.translate(
+                      offset: Offset(dx, 0),
+                      child: _label(),
+                    ),
+                    Transform.translate(
+                      offset: Offset(dx + cycle, 0),
+                      child: _label(),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _label() {
+    return Text(
+      widget.text,
+      maxLines: 1,
+      softWrap: false,
+      style: widget.style,
     );
   }
 }

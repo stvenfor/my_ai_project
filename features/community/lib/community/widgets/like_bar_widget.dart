@@ -44,52 +44,50 @@ class _LikeBarWidgetState extends State<LikeBarWidget>
   Widget build(BuildContext context) {
     final vm = Get.find<CommunityViewModel>();
     final post = widget.post;
-    final defaultColor = CommunityTheme.labelSecondary;
+    const defaultColor = CommunityTheme.labelSecondary;
 
-    return Padding(
-      padding: const EdgeInsets.only(top: 12),
-      child: Row(
-        children: [
-          _ActionButton(
-            icon: ScaleTransition(
-              scale: _scaleAnim,
-              child: Icon(
-                post.isLiked ? CupertinoIcons.heart_fill : CupertinoIcons.heart,
-                size: 20,
-                color: post.isLiked ? CommunityTheme.likeRed : defaultColor,
-              ),
-            ),
-            label: post.likeCount > 0 ? '${post.likeCount}' : '赞',
-            color: post.isLiked ? CommunityTheme.likeRed : defaultColor,
-            onTap: () async {
-              _heartController.forward(from: 0);
-              await vm.toggleLike(post.id);
-            },
-          ),
-          const SizedBox(width: 24),
-          _ActionButton(
-            icon: Icon(
-              CupertinoIcons.chat_bubble,
+    // 与媒体/正文的间距由 PostCard 统一控制（12），此处不再额外 top padding。
+    return Row(
+      children: [
+        _ActionButton(
+          icon: ScaleTransition(
+            scale: _scaleAnim,
+            child: Icon(
+              post.isLiked ? CupertinoIcons.heart_fill : CupertinoIcons.heart,
               size: 20,
-              color: defaultColor,
+              color: post.isLiked ? CommunityTheme.likeRed : defaultColor,
             ),
-            label: post.commentCount > 0 ? '${post.commentCount}' : '评论',
-            color: defaultColor,
-            onTap: () => vm.showCommentSheet(post),
           ),
-          const SizedBox(width: 24),
-          _ActionButton(
-            icon: Icon(
-              CupertinoIcons.arrowshape_turn_up_right,
-              size: 20,
-              color: defaultColor,
-            ),
-            label: '分享',
+          label: post.likeCount > 0 ? '${post.likeCount}' : '赞',
+          color: post.isLiked ? CommunityTheme.likeRed : defaultColor,
+          onTap: () async {
+            _heartController.forward(from: 0);
+            await vm.toggleLike(post.id);
+          },
+        ),
+        const SizedBox(width: 24),
+        _ActionButton(
+          icon: Icon(
+            CupertinoIcons.chat_bubble,
+            size: 20,
             color: defaultColor,
-            onTap: () {},
           ),
-        ],
-      ),
+          label: post.commentCount > 0 ? '${post.commentCount}' : '评论',
+          color: defaultColor,
+          onTap: () => vm.showCommentSheet(post),
+        ),
+        const SizedBox(width: 24),
+        _ActionButton(
+          icon: Icon(
+            CupertinoIcons.arrowshape_turn_up_right,
+            size: 20,
+            color: defaultColor,
+          ),
+          label: '分享',
+          color: defaultColor,
+          onTap: () {},
+        ),
+      ],
     );
   }
 }
@@ -115,7 +113,7 @@ class _ActionButton extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(8),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [

@@ -187,57 +187,56 @@ class _CommunityHeader extends StatelessWidget {
   }
 }
 
-class _FilterTabs extends StatefulWidget {
+class _FilterTabs extends StatelessWidget {
   const _FilterTabs();
 
-  @override
-  State<_FilterTabs> createState() => _FilterTabsState();
-}
-
-class _FilterTabsState extends State<_FilterTabs> {
-  int _selected = 0;
-  static const _tabs = ['最新', '热门', '关注'];
+  static const _labels = ['最新', '热门', '关注'];
 
   @override
   Widget build(BuildContext context) {
+    final vm = Get.find<CommunityViewModel>();
     return SizedBox(
       height: 36,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: _tabs.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 24),
-        itemBuilder: (context, index) {
-          final active = index == _selected;
-          return GestureDetector(
-            onTap: () => setState(() => _selected = index),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  _tabs[index],
-                  style: CommunityTheme.headline.copyWith(
-                    fontSize: 15,
-                    fontWeight: active ? FontWeight.w600 : FontWeight.w400,
-                    color: active
-                        ? CommunityTheme.labelPrimary
-                        : CommunityTheme.labelSecondary,
+      child: Obx(() {
+        final selected = CommunityViewModel.tabKeys.indexOf(vm.feedTab.value);
+        final activeIndex = selected < 0 ? 0 : selected;
+        return ListView.separated(
+          scrollDirection: Axis.horizontal,
+          itemCount: _labels.length,
+          separatorBuilder: (_, __) => const SizedBox(width: 24),
+          itemBuilder: (context, index) {
+            final active = index == activeIndex;
+            return GestureDetector(
+              onTap: () => vm.selectFeedTab(CommunityViewModel.tabKeys[index]),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    _labels[index],
+                    style: CommunityTheme.headline.copyWith(
+                      fontSize: 15,
+                      fontWeight: active ? FontWeight.w600 : FontWeight.w400,
+                      color: active
+                          ? CommunityTheme.labelPrimary
+                          : CommunityTheme.labelSecondary,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 6),
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  width: active ? 20 : 0,
-                  height: 2,
-                  decoration: BoxDecoration(
-                    color: CommunityTheme.accent,
-                    borderRadius: BorderRadius.circular(1),
+                  const SizedBox(height: 6),
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    width: active ? 20 : 0,
+                    height: 2,
+                    decoration: BoxDecoration(
+                      color: CommunityTheme.accent,
+                      borderRadius: BorderRadius.circular(1),
+                    ),
                   ),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
+                ],
+              ),
+            );
+          },
+        );
+      }),
     );
   }
 }

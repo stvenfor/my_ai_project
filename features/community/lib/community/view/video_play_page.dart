@@ -25,7 +25,7 @@ class _VideoPlayPageState extends State<VideoPlayPage> {
 
   Future<void> _init() async {
     try {
-      final c = await AppVideoPlayer.createNetworkController(
+      final c = await AppVideoPlayer.createController(
         widget.videoUrl,
         autoPlay: true,
       );

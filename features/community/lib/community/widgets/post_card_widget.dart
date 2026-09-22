@@ -35,7 +35,8 @@ class _PostCardWidgetState extends State<PostCardWidget>
     return DecoratedBox(
       decoration: CommunityTheme.groupedCardDecoration,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
+        // 卡片内边距：底边与内容间距统一为 12。
+        padding: const EdgeInsets.fromLTRB(16, 14, 12, 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -60,7 +61,7 @@ class _PostCardWidgetState extends State<PostCardWidget>
             ),
             const SizedBox(height: 10),
             ExpandTextWidget(post: post),
-            // 图 / 视频互斥：视频只展示一个；图片走随机九宫格。
+            // 图 / 视频互斥：正文 ↔ 媒体 ↔ 操作栏间距均为 12。
             if (post.hasVideo) ...[
               const SizedBox(height: 12),
               ClipRRect(
@@ -74,6 +75,7 @@ class _PostCardWidgetState extends State<PostCardWidget>
               const SizedBox(height: 12),
               ImageGridWidget(images: post.images, postId: post.id),
             ],
+            const SizedBox(height: 12),
             LikeBarWidget(post: post),
             CommentPreviewWidget(post: post),
           ],

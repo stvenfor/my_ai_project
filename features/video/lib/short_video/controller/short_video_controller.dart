@@ -1,0 +1,321 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+import 'package:module_auth/api/user_profile_api.dart';
+import 'package:module_auth/api/user_profile_models.dart';
+import 'package:module_auth/session/user_profile_sync.dart';
+import 'package:module_common_ui/module_common_ui.dart';
+import 'package:module_community/community/repository/http_post_repository.dart';
+import 'package:module_community/community/repository/post_repository.dart';
+import 'package:module_core/core.dart';
+import 'package:module_http/module_http.dart';
+import 'package:module_utils/module_utils.dart';
+import 'package:module_video/short_video/model/short_video_models.dart';
+import 'package:module_video/short_video/repository/http_short_video_repository.dart';
+import 'package:module_video/short_video/repository/short_video_repository.dart';
+import 'package:module_video/short_video/utils/short_video_capture_permission.dart';
+import 'package:wys_router/src/route/route_path.dart';
+
+/// 小视频列表 / 资料 / 删除 / 分页。
+///
+/// 顶栏身份（昵称/头像/职务/门店）与「我的」同源：`UserService` + `GET /profiles/me`；
+/// 视频统计仍来自 `GET /short-videos/profile`。
+class ShortVideoController extends GetxController {
+  ShortVideoController({
+    ShortVideoRepository? repository,
+    UserProfileApi? profileApi,
+  })  : _repo = repository ?? HttpShortVideoRepository(),
+        _profileApi = profileApi ?? UserProfileApi();
+
+  final ShortVideoRepository _repo;
+  final UserProfileApi _profileApi;
+
+  static const pageSize = 5;
+  /// 与 MineController 同一占位图，避免两页默认头像不一致。
+  static const _defaultAvatar =
+      'https://picsum.photos/seed/mine_profile/200/200';
+
+  final profile = Rxn<ShortVideoProfileModel>();
+  final items = <ShortVideoItemModel>[].obs;
+  final loading = false.obs;
+  final refreshing = false.obs;
+  final loadingMore = false.obs;
+  final hasMore = true.obs;
+
+  /// 本人职务 / 门店（来自 `/profiles/me`，与「我的」一致）。
+  final roleBadge = '销售顾问'.obs;
+  final storeName = ''.obs;
+
+  int _page = 0;
+
+  /// 网格数据：发布瓷砖 + 服务端列表。
+  List<ShortVideoItemModel> get gridItems => [
+        ShortVideoItemModel.publishTile,
+        ...items,
+      ];
+
+  /// 本人身份对齐「我的」：UserService 昵称/头像 + profiles/me 职务/门店。
+  ShortVideoProfileModel get displayProfile {
+    final p = profile.value;
+    final user = Get.find<UserService>().currentUser.value;
+    final stats = p?.stats ?? ShortVideoStatsModel.empty;
+    final isMe = p?.isMe ?? true;
+
+    if (!isMe && p != null) {
+      return ShortVideoProfileModel(
+        userId: p.userId,
+        displayName: p.displayName.isNotEmpty ? p.displayName : '用户',
+        avatarUrl:
+            p.avatarUrl?.isNotEmpty == true ? p.avatarUrl : _defaultAvatar,
+        roleBadge: p.roleBadge.isNotEmpty ? p.roleBadge : '',
+        storeName: p.storeName,
+        isMe: false,
+        stats: stats,
+      );
+    }
+
+    // 与 MineController._syncUser 相同优先级
+    final displayName = (user?.name.isNotEmpty == true)
+        ? user!.name
+        : (p != null && p.displayName.isNotEmpty ? p.displayName : '东东枪');
+    final avatarUrl = (user?.avatar.isNotEmpty == true)
+        ? user!.avatar
+        : (p?.avatarUrl?.isNotEmpty == true ? p!.avatarUrl! : _defaultAvatar);
+
+    return ShortVideoProfileModel(
+      userId: p?.userId ?? user?.id,
+      displayName: displayName,
+      avatarUrl: avatarUrl,
+      roleBadge: roleBadge.value.isNotEmpty ? roleBadge.value : '销售顾问',
+      storeName: storeName.value.isNotEmpty
+          ? storeName.value
+          : '[4S]北京沃德龙鼎吉利',
+      isMe: true,
+      stats: stats,
+    );
+  }
+
+  @override
+  void onInit() {
+    super.onInit();
+    ensureCommunityTopicsRepo();
+    load();
+  }
+
+  /// TopicSelectPage 依赖 PostRepository。
+  static void ensureCommunityTopicsRepo() {
+    if (!Get.isRegistered<PostRepository>()) {
+      Get.put<PostRepository>(HttpPostRepository());
+    }
+  }
+
+  Future<void> load() async {
+    loading.value = true;
+    _page = 0;
+    try {
+      await Future.wait([_loadProfile(), _loadList(reset: true)]);
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  Future<void> refreshAll() async {
+    refreshing.value = true;
+    _page = 0;
+    try {
+      await Future.wait([_loadProfile(), _loadList(reset: true)]);
+    } finally {
+      refreshing.value = false;
+    }
+  }
+
+  Future<void> loadMore() async {
+    if (!hasMore.value || loadingMore.value || loading.value) return;
+    loadingMore.value = true;
+    try {
+      _page += 1;
+      await _loadList(reset: false);
+    } finally {
+      loadingMore.value = false;
+    }
+  }
+
+  Future<void> _loadProfile() async {
+    try {
+      // 视频统计 + 与「我的」同源的身份资料并行拉取
+      final videoFuture = _repo.fetchProfile();
+      final meFuture = _profileApi.fetchMe();
+      // 静默刷新 UserService，保证昵称/头像与 Mine 同一会话态
+      unawaited(UserProfileSync.hydrateQuietly());
+
+      final video = await videoFuture;
+      profile.value = video;
+
+      try {
+        final me = await meFuture;
+        _applyMineIdentity(me);
+      } catch (_) {
+        // 身份失败时保留上次职务/门店；视频统计仍可用
+      }
+    } catch (e) {
+      _toastErr(e, '加载资料失败');
+    }
+  }
+
+  void _applyMineIdentity(UserProfile me) {
+    final name = me.displayName.isNotEmpty ? me.displayName : me.userName;
+    final avatar = me.avatarUrl;
+    final label = me.stats.roleLabel.trim();
+    final store = me.stats.storeName.trim();
+
+    if (label.isNotEmpty) roleBadge.value = label;
+    if (store.isNotEmpty) storeName.value = store;
+
+    // 若 UserService 尚未有名/头像，用 profile 补齐到展示层（不强制写会话）
+    final p = profile.value;
+    if (p != null && p.isMe) {
+      profile.value = ShortVideoProfileModel(
+        userId: p.userId,
+        displayName: name.isNotEmpty ? name : p.displayName,
+        avatarUrl: avatar.isNotEmpty ? avatar : p.avatarUrl,
+        roleBadge: roleBadge.value,
+        storeName: storeName.value,
+        isMe: true,
+        stats: p.stats,
+      );
+    }
+  }
+
+  Future<void> _loadList({required bool reset}) async {
+    try {
+      final page = await _repo.fetchList(
+        scope: 'user',
+        page: _page,
+        pageSize: pageSize,
+      );
+      if (reset) {
+        items.assignAll(page.list);
+      } else {
+        items.addAll(page.list);
+      }
+      hasMore.value = page.hasMore;
+    } catch (e) {
+      if (!reset) _page = (_page - 1).clamp(0, 1 << 30);
+      _toastErr(e, '加载小视频失败');
+    }
+  }
+
+  /// 弹出相册/拍摄 → 选本地视频 → 进发布页（不上传，服务端用默认片源）。
+  Future<void> startPublishFlow() async {
+    final source = await MediaSourceBottomSheet.show();
+    if (source == null) return;
+    try {
+      if (source == MediaPickSource.camera) {
+        final ok = await ShortVideoCapturePermission.ensureForCameraCapture();
+        if (!ok) return;
+      }
+      final path = await ImagePickerUtils.pickVideo(
+        source,
+        skipPermissionCheck: source == MediaPickSource.camera,
+      );
+      if (path == null || path.isEmpty) return;
+      await Get.toNamed(
+        RoutePath.shortVideoPublish,
+        arguments: {'local_video_path': path},
+      );
+    } on PlatformException catch (_) {
+      UiKitInitializer.toastError('无法选择视频，请检查相册或相机权限');
+    } catch (_) {
+      UiKitInitializer.toastError('选择视频失败');
+    }
+  }
+
+  /// 点击头像：与「我的」同源更换头像，写回 UserService。
+  Future<void> changeAvatar() async {
+    if (!Get.isRegistered<UserService>() ||
+        Get.find<UserService>().currentUser.value == null) {
+      UiKitInitializer.toastError('请先登录');
+      return;
+    }
+    final source = await MediaSourceBottomSheet.show();
+    if (source == null) return;
+    try {
+      if (source == MediaPickSource.camera) {
+        final ok = await ShortVideoCapturePermission.ensureForCameraCapture(
+          withMicrophone: false,
+        );
+        if (!ok) return;
+      }
+      final path = await ImagePickerUtils.pickImage(source, maxWidth: 800);
+      if (path == null || path.isEmpty) return;
+
+      final bytes = await File(path).readAsBytes();
+      final lower = path.toLowerCase();
+      final mime = lower.endsWith('.png')
+          ? 'image/png'
+          : lower.endsWith('.webp')
+              ? 'image/webp'
+              : 'image/jpeg';
+      await UserProfileSync.updateAndPersist(
+        UpdateUserProfileRequest(
+          avatarBase64: base64Encode(bytes),
+          avatarMime: mime,
+        ),
+      );
+      await _loadProfile();
+      UiKitInitializer.toast('头像已更新');
+    } on AuthFailure catch (e) {
+      UiKitInitializer.toastError(e.message);
+    } catch (_) {
+      UiKitInitializer.toastError('更换头像失败');
+    }
+  }
+
+  Future<bool> deleteVideo(String id) async {
+    try {
+      await _repo.delete(id);
+      items.removeWhere((e) => e.id == id);
+      await _loadProfile();
+      return true;
+    } catch (e) {
+      _toastErr(e, '删除失败');
+      return false;
+    }
+  }
+
+  Future<void> toggleLike(String id, bool liked) async {
+    try {
+      final frag = await _repo.toggleLike(id, liked);
+      final i = items.indexWhere((e) => e.id == id);
+      if (i >= 0) {
+        items[i] = items[i].copyWith(
+          likeCount: frag.likeCount,
+          isLiked: frag.isLiked,
+        );
+      }
+      await _loadProfile();
+    } catch (e) {
+      _toastErr(e, '操作失败');
+    }
+  }
+
+  Future<void> reportView(String id) async {
+    try {
+      final n = await _repo.reportView(id);
+      final i = items.indexWhere((e) => e.id == id);
+      if (i >= 0) {
+        items[i] = items[i].copyWith(viewCount: n);
+      }
+    } catch (_) {}
+  }
+
+  void _toastErr(Object e, String fallback) {
+    final msg = e is HttpRequestException
+        ? (e.message.isNotEmpty ? e.message : fallback)
+        : fallback;
+    UiKitInitializer.toast(msg);
+  }
+}

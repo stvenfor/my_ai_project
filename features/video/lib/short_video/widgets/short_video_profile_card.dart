@@ -3,9 +3,14 @@ import 'package:module_utils/module_utils.dart';
 import 'package:module_video/short_video/model/short_video_models.dart';
 
 class ShortVideoProfileCard extends StatelessWidget {
-  const ShortVideoProfileCard({super.key, required this.profile});
+  const ShortVideoProfileCard({
+    super.key,
+    required this.profile,
+    this.onAvatarTap,
+  });
 
   final ShortVideoProfileModel profile;
+  final VoidCallback? onAvatarTap;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +34,29 @@ class ShortVideoProfileCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(child: _UserInfo(profile: profile)),
-              CacheImageUtils.circle(profile.avatarUrl ?? '', size: 48.r),
+              GestureDetector(
+                onTap: profile.isMe ? onAvatarTap : null,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    CacheImageUtils.circle(profile.avatarUrl ?? '', size: 48.r),
+                    if (profile.isMe && onAvatarTap != null)
+                      Positioned(
+                        right: -2,
+                        bottom: -2,
+                        child: Container(
+                          padding: EdgeInsets.all(2.w),
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF0070F3),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(Icons.camera_alt,
+                              size: 12.sp, color: Colors.white),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
             ],
           ),
           SizedBox(height: 16.h),
@@ -81,7 +108,8 @@ class _UserInfo extends StatelessWidget {
               ),
             ),
             SizedBox(width: 4.w),
-            Icon(Icons.storefront_outlined, size: 16.sp, color: Colors.grey.shade500),
+            Icon(Icons.storefront_outlined,
+                size: 16.sp, color: Colors.grey.shade500),
           ],
         ),
         SizedBox(height: 6.h),
@@ -132,7 +160,8 @@ class _StatsRow extends StatelessWidget {
                 SizedBox(height: 4.h),
                 Text(
                   items[i].$2,
-                  style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600),
+                  style:
+                      TextStyle(fontSize: 12.sp, color: Colors.grey.shade600),
                 ),
               ],
             ),

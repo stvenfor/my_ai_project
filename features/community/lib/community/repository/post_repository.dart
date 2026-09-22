@@ -4,7 +4,12 @@ import 'package:module_community/community/models/topic_model.dart';
 
 abstract class PostRepository {
   /// [page] 为 Flutter 0-based 页码。
-  Future<List<PostModel>> fetchPosts({required int page, int pageSize = 10});
+  /// [tab]：`latest` | `hot` | `following`（对齐社区顶栏）。
+  Future<List<PostModel>> fetchPosts({
+    required int page,
+    int pageSize = 10,
+    String tab = 'latest',
+  });
 
   Future<List<CommentModel>> fetchComments(String postId);
 
@@ -34,4 +39,8 @@ abstract class PostRepository {
     int page = 0,
     int pageSize = 20,
   });
+
+  /// 关注 / 取消关注作者（关注 Tab 数据源）。
+  Future<void> followUser(String userId);
+  Future<void> unfollowUser(String userId);
 }

@@ -27,15 +27,25 @@ class CommunityViewModel extends GetxController {
   final hasMore = true.obs;
   final errorMessage = RxnString();
 
+  /// 社区顶栏：`latest` | `hot` | `following`
+  final feedTab = 'latest'.obs;
+
   /// 展开状态（UI 态，不进 PostModel）
   final expandedPostIds = <String>{}.obs;
 
   static const pageSize = 10;
+  static const tabKeys = ['latest', 'hot', 'following'];
 
   @override
   void onInit() {
     super.onInit();
     loadPosts();
+  }
+
+  Future<void> selectFeedTab(String tab) async {
+    if (!tabKeys.contains(tab) || feedTab.value == tab) return;
+    feedTab.value = tab;
+    await loadPosts();
   }
 
   PostModel? postById(String id) {
@@ -62,7 +72,11 @@ class CommunityViewModel extends GetxController {
     errorMessage.value = null;
     currentPage.value = 0;
     try {
-      final list = await _repository.fetchPosts(page: 0, pageSize: pageSize);
+      final list = await _repository.fetchPosts(
+        page: 0,
+        pageSize: pageSize,
+        tab: feedTab.value,
+      );
       posts.assignAll(list);
       hasMore.value = list.length >= pageSize;
       currentPage.value = list.isEmpty ? 0 : 1;
@@ -77,7 +91,11 @@ class CommunityViewModel extends GetxController {
     isRefreshing.value = true;
     errorMessage.value = null;
     try {
-      final list = await _repository.fetchPosts(page: 0, pageSize: pageSize);
+      final list = await _repository.fetchPosts(
+        page: 0,
+        pageSize: pageSize,
+        tab: feedTab.value,
+      );
       posts.assignAll(list);
       hasMore.value = list.length >= pageSize;
       currentPage.value = list.isEmpty ? 0 : 1;
@@ -95,7 +113,11 @@ class CommunityViewModel extends GetxController {
     isLoadingMore.value = true;
     try {
       final page = currentPage.value;
-      final list = await _repository.fetchPosts(page: page, pageSize: pageSize);
+      final list = await _repository.fetchPosts(
+        page: page,
+        pageSize: pageSize,
+        tab: feedTab.value,
+      );
       if (list.isEmpty) {
         hasMore.value = false;
       } else {

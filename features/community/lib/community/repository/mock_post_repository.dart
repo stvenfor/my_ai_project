@@ -95,17 +95,37 @@ class MockPostRepository implements PostRepository {
     '张三', '李四', '王五', '赵六', '小明', '小红', '开发者', '产品经理',
   ];
 
+  final Set<String> _followedUserIds = {};
+
   @override
   Future<List<PostModel>> fetchPosts({
     required int page,
     int pageSize = 10,
+    String tab = 'latest',
   }) async {
     _ensureSeed();
     await Future<void>.delayed(Duration(milliseconds: 400 + page * 50));
+    var source = List<PostModel>.from(_allPosts);
+    switch (tab) {
+      case 'hot':
+        source.sort((a, b) {
+          final ha = a.likeCount * 2 + a.commentCount;
+          final hb = b.likeCount * 2 + b.commentCount;
+          final c = hb.compareTo(ha);
+          if (c != 0) return c;
+          return b.publishTime.compareTo(a.publishTime);
+        });
+      case 'following':
+        source = source
+            .where((p) => _followedUserIds.contains(p.userId))
+            .toList();
+      default:
+        source.sort((a, b) => b.publishTime.compareTo(a.publishTime));
+    }
     final start = page * pageSize;
-    if (start >= _allPosts.length) return [];
-    final end = min(start + pageSize, _allPosts.length);
-    return _allPosts.sublist(start, end);
+    if (start >= source.length) return [];
+    final end = min(start + pageSize, source.length);
+    return source.sublist(start, end);
   }
 
   @override
@@ -267,4 +287,14 @@ class MockPostRepository implements PostRepository {
     TopicModel(id: 'topic_2', name: 'Flutter开发', heat: 320000),
     TopicModel(id: 'topic_3', name: '周末打卡', heat: 88000),
   ];
+
+  @override
+  Future<void> followUser(String userId) async {
+    _followedUserIds.add(userId);
+  }
+
+  @override
+  Future<void> unfollowUser(String userId) async {
+    _followedUserIds.remove(userId);
+  }
 }
