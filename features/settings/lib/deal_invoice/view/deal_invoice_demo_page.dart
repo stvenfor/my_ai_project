@@ -31,7 +31,7 @@ class DealInvoiceDemoPage extends GetView<DealInvoiceDemoViewModel> {
                   sliver: SliverToBoxAdapter(
                     child: Obx(
                       () => DealInvoiceProfileHeader(
-                        stats: controller.stats.value,
+                        summary: controller.summary.value,
                       ),
                     ),
                   ),

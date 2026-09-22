@@ -1,20 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:module_common_ui/module_common_ui.dart';
+import 'package:module_http/module_http.dart';
+import 'package:module_settings/deal_invoice/api/deal_invoice_api.dart';
 import 'package:module_settings/deal_invoice/model/deal_invoice_models.dart';
+import 'package:module_utils/module_utils.dart';
 
 class DealInvoiceUploadViewModel extends GetxController {
-  static const invoicePreviewUrl =
-      'https://picsum.photos/seed/deal_invoice_doc/800/520';
+  DealInvoiceUploadViewModel({DealInvoiceApi? api}) : _api = api ?? DealInvoiceApi();
+
+  final DealInvoiceApi _api;
 
   final phase = DealInvoiceUploadPhase.editing.obs;
   final selectedCustomer = Rxn<DealInvoiceCustomer>();
   final hasInvoiceImage = false.obs;
+  final localImagePath = RxnString();
   final auditStatus = DealInvoiceStatus.pendingReview.obs;
   final submittedAt = Rxn<DateTime>();
   final rejectReason = RxnString();
   final ratingStars = RxnInt();
   final imageReplaced = false.obs;
+  final remoteImageUrl = RxnString();
+
+  String? _invoiceId;
+  DealInvoiceUploadScene _scene = DealInvoiceUploadScene.create;
 
   bool get isEditing => phase.value == DealInvoiceUploadPhase.editing;
   bool get isUploading => phase.value == DealInvoiceUploadPhase.uploading;
@@ -67,6 +76,7 @@ class DealInvoiceUploadViewModel extends GetxController {
 
   void _initFromArgs(dynamic args) {
     if (args is! DealInvoiceUploadArgs) return;
+    _scene = args.scene;
 
     switch (args.scene) {
       case DealInvoiceUploadScene.create:
@@ -80,15 +90,17 @@ class DealInvoiceUploadViewModel extends GetxController {
 
   void _loadDetail(DealInvoiceItem? item) {
     if (item == null) return;
+    _invoiceId = item.id;
     phase.value = DealInvoiceUploadPhase.detail;
-    hasInvoiceImage.value =
-        item.status != DealInvoiceStatus.pendingReview;
+    hasInvoiceImage.value = item.status != DealInvoiceStatus.pendingReview;
+    remoteImageUrl.value = item.imageUrl;
     auditStatus.value = item.status;
     submittedAt.value = item.submittedAt;
     rejectReason.value = item.rejectReason;
     ratingStars.value = item.ratingStars;
     imageReplaced.value = false;
     selectedCustomer.value = DealInvoiceCustomer(
+      id: 0,
       phone: item.phone,
       name: item.customerName ?? '',
     );
@@ -96,36 +108,70 @@ class DealInvoiceUploadViewModel extends GetxController {
 
   void _loadReupload(DealInvoiceItem? item) {
     if (item == null) return;
+    _invoiceId = item.id;
     phase.value = DealInvoiceUploadPhase.editing;
     hasInvoiceImage.value = false;
+    localImagePath.value = null;
+    remoteImageUrl.value = item.imageUrl;
     auditStatus.value = DealInvoiceStatus.rejected;
     submittedAt.value = item.submittedAt;
     rejectReason.value = item.rejectReason;
     selectedCustomer.value = DealInvoiceCustomer(
+      id: 0,
       phone: item.phone,
       name: item.customerName ?? '',
     );
   }
 
   Future<void> pickCustomer() async {
-    final picked = await Get.bottomSheet<DealInvoiceCustomer>(
-      const _CustomerPickerSheet(),
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-    );
-    if (picked != null) {
-      selectedCustomer.value = picked;
+    try {
+      final customers = await _api.fetchCustomers();
+      if (customers.isEmpty) {
+        UiKitInitializer.toastError('当前店暂无购车客户');
+        return;
+      }
+      final picked = await Get.bottomSheet<DealInvoiceCustomer>(
+        _CustomerPickerSheet(customers: customers),
+        backgroundColor: Colors.white,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        ),
+      );
+      if (picked != null) {
+        selectedCustomer.value = picked;
+      }
+    } on HttpRequestException catch (e) {
+      UiKitInitializer.toastError(e.message);
+    } catch (_) {
+      UiKitInitializer.toastError('加载客户失败');
     }
   }
 
   Future<void> pickInvoiceImage() async {
     if (isUploading) return;
-    await Future<void>.delayed(const Duration(milliseconds: 300));
-    hasInvoiceImage.value = true;
-    if (isDetail && auditStatus.value == DealInvoiceStatus.rejected) {
-      imageReplaced.value = true;
+    final source = await MediaSourceBottomSheet.show();
+    if (source == null) return;
+    try {
+      if (source == MediaPickSource.camera) {
+        final granted = await ImagePickerUtils.ensureCameraPermission();
+        if (!granted) {
+          UiKitInitializer.toastError('需要相机权限才能拍摄');
+          return;
+        }
+      }
+      final path = await ImagePickerUtils.pickImage(source, maxWidth: 1600);
+      if (path == null || path.isEmpty) return;
+      localImagePath.value = path;
+      hasInvoiceImage.value = true;
+      if (isDetail && auditStatus.value == DealInvoiceStatus.rejected) {
+        imageReplaced.value = true;
+      }
+      if (_scene == DealInvoiceUploadScene.reupload ||
+          (isDetail && auditStatus.value == DealInvoiceStatus.rejected)) {
+        imageReplaced.value = true;
+      }
+    } catch (_) {
+      UiKitInitializer.toastError('选择图片失败');
     }
   }
 
@@ -133,15 +179,38 @@ class DealInvoiceUploadViewModel extends GetxController {
     if (!canSubmit) return;
 
     phase.value = DealInvoiceUploadPhase.uploading;
-    await Future<void>.delayed(const Duration(milliseconds: 900));
+    try {
+      final DealInvoiceItem item;
+      if (_invoiceId != null &&
+          (auditStatus.value == DealInvoiceStatus.rejected ||
+              _scene == DealInvoiceUploadScene.reupload)) {
+        item = await _api.resubmit(invoiceId: _invoiceId!);
+      } else {
+        final customer = selectedCustomer.value;
+        if (customer == null || customer.id <= 0) {
+          UiKitInitializer.toastError('请选择购车客户');
+          phase.value = DealInvoiceUploadPhase.editing;
+          return;
+        }
+        item = await _api.create(customerId: customer.id);
+      }
 
-    phase.value = DealInvoiceUploadPhase.detail;
-    auditStatus.value = DealInvoiceStatus.pendingReview;
-    submittedAt.value = DateTime.now();
-    rejectReason.value = null;
-    ratingStars.value = null;
-
-    UiKitInitializer.toast('已提交审核');
+      _invoiceId = item.id;
+      phase.value = DealInvoiceUploadPhase.detail;
+      auditStatus.value = item.status;
+      submittedAt.value = item.submittedAt;
+      rejectReason.value = item.rejectReason;
+      ratingStars.value = item.ratingStars;
+      remoteImageUrl.value = item.imageUrl;
+      imageReplaced.value = false;
+      UiKitInitializer.toast('已提交审核');
+    } on HttpRequestException catch (e) {
+      phase.value = DealInvoiceUploadPhase.editing;
+      UiKitInitializer.toastError(e.message);
+    } catch (_) {
+      phase.value = DealInvoiceUploadPhase.editing;
+      UiKitInitializer.toastError('提交失败');
+    }
   }
 
   String formatDateTime(DateTime? time) {
@@ -157,7 +226,9 @@ class DealInvoiceUploadViewModel extends GetxController {
 }
 
 class _CustomerPickerSheet extends StatelessWidget {
-  const _CustomerPickerSheet();
+  const _CustomerPickerSheet({required this.customers});
+
+  final List<DealInvoiceCustomer> customers;
 
   @override
   Widget build(BuildContext context) {
@@ -172,11 +243,22 @@ class _CustomerPickerSheet extends StatelessWidget {
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ),
-          for (final customer in DealInvoiceCustomer.mockList)
-            ListTile(
-              title: Text(customer.display),
-              onTap: () => Get.back(result: customer),
+          ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.sizeOf(context).height * 0.5,
             ),
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: customers.length,
+              itemBuilder: (context, index) {
+                final customer = customers[index];
+                return ListTile(
+                  title: Text(customer.display),
+                  onTap: () => Get.back(result: customer),
+                );
+              },
+            ),
+          ),
           const SizedBox(height: 8),
         ],
       ),

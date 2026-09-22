@@ -20,25 +20,43 @@ enum DealInvoiceStatus {
         DealInvoiceStatus.rated => const Color(0xFF52C41A),
         DealInvoiceStatus.rejected => const Color(0xFFE53935),
       };
+
+  static DealInvoiceStatus fromApi(String? raw) {
+    return switch (raw) {
+      'approved_pending_rating' => DealInvoiceStatus.approvedPendingRating,
+      'rated' => DealInvoiceStatus.rated,
+      'rejected' => DealInvoiceStatus.rejected,
+      _ => DealInvoiceStatus.pendingReview,
+    };
+  }
 }
 
 /// 购车客户。
 class DealInvoiceCustomer {
   const DealInvoiceCustomer({
+    required this.id,
     required this.phone,
     required this.name,
   });
 
+  final int id;
   final String phone;
   final String name;
 
   String get display => '$phone $name';
 
-  static const mockList = [
-    DealInvoiceCustomer(phone: '13812345678', name: '小张女士'),
-    DealInvoiceCustomer(phone: '13612345678', name: '王先生'),
-    DealInvoiceCustomer(phone: '13987654321', name: '李女士'),
-  ];
+  factory DealInvoiceCustomer.fromJson(Map<String, dynamic> json) {
+    return DealInvoiceCustomer(
+      id: _intOf(json['customer_id'] ?? json['id']),
+      phone: '${json['phone'] ?? ''}',
+      name: '${json['display_name'] ?? json['name'] ?? ''}',
+    );
+  }
+
+  static int _intOf(dynamic v) {
+    if (v is int) return v;
+    return int.tryParse('$v') ?? 0;
+  }
 }
 
 /// 上传页场景。
@@ -68,13 +86,14 @@ enum DealInvoiceUploadPhase {
 
 /// Tab 筛选类型。
 enum DealInvoiceTab {
-  all('全部发票'),
-  pendingReview('待审核'),
-  approved('已通过'),
-  rejected('未通过');
+  all('全部发票', 'all'),
+  pendingReview('待审核', 'pending_review'),
+  approved('已通过', 'approved'),
+  rejected('未通过', 'rejected');
 
-  const DealInvoiceTab(this.label);
+  const DealInvoiceTab(this.label, this.apiStatus);
   final String label;
+  final String apiStatus;
 }
 
 /// 顶部统计。
@@ -91,12 +110,54 @@ class DealInvoiceStats {
   final int approved;
   final int rejected;
 
-  static const demo = DealInvoiceStats(
-    uploaded: 5,
-    pendingReview: 2,
-    approved: 2,
-    rejected: 1,
-  );
+  factory DealInvoiceStats.fromJson(Map<String, dynamic> json) {
+    return DealInvoiceStats(
+      uploaded: _intOf(json['uploaded']),
+      pendingReview: _intOf(json['pending_review']),
+      approved: _intOf(json['approved']),
+      rejected: _intOf(json['rejected']),
+    );
+  }
+
+  static int _intOf(dynamic v) {
+    if (v is int) return v;
+    return int.tryParse('$v') ?? 0;
+  }
+}
+
+/// 列表顶栏摘要。
+class DealInvoiceSummary {
+  const DealInvoiceSummary({
+    required this.displayName,
+    required this.avatarUrl,
+    required this.positionLabel,
+    required this.storeName,
+    required this.stats,
+  });
+
+  final String displayName;
+  final String avatarUrl;
+  final String positionLabel;
+  final String storeName;
+  final DealInvoiceStats stats;
+
+  factory DealInvoiceSummary.fromJson(Map<String, dynamic> json) {
+    final statsRaw = json['stats'];
+    return DealInvoiceSummary(
+      displayName: '${json['display_name'] ?? ''}',
+      avatarUrl: '${json['avatar_url'] ?? ''}',
+      positionLabel: '${json['position_label'] ?? ''}',
+      storeName: '${json['store_name'] ?? ''}',
+      stats: statsRaw is Map<String, dynamic>
+          ? DealInvoiceStats.fromJson(statsRaw)
+          : const DealInvoiceStats(
+              uploaded: 0,
+              pendingReview: 0,
+              approved: 0,
+              rejected: 0,
+            ),
+    );
+  }
 }
 
 /// 列表项。
@@ -109,6 +170,7 @@ class DealInvoiceItem {
     this.customerName,
     this.rejectReason,
     this.ratingStars,
+    this.imageUrl,
   });
 
   final String id;
@@ -118,12 +180,29 @@ class DealInvoiceItem {
   final DateTime submittedAt;
   final String? rejectReason;
   final int? ratingStars;
+  final String? imageUrl;
 
   String get customerDisplay {
     if (customerName != null && customerName!.isNotEmpty) {
       return '$phone $customerName';
     }
     return phone;
+  }
+
+  factory DealInvoiceItem.fromJson(Map<String, dynamic> json) {
+    return DealInvoiceItem(
+      id: '${json['invoice_id'] ?? json['id'] ?? ''}',
+      phone: '${json['phone'] ?? ''}',
+      customerName: json['customer_name']?.toString(),
+      status: DealInvoiceStatus.fromApi(json['status']?.toString()),
+      submittedAt: DateTime.tryParse('${json['submitted_at'] ?? ''}') ??
+          DateTime.fromMillisecondsSinceEpoch(0),
+      rejectReason: json['reject_reason']?.toString(),
+      ratingStars: json['rating_stars'] is int
+          ? json['rating_stars'] as int
+          : int.tryParse('${json['rating_stars'] ?? ''}'),
+      imageUrl: json['image_url']?.toString(),
+    );
   }
 
   bool matchesTab(DealInvoiceTab tab) {

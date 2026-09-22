@@ -1,10 +1,12 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_core/core.dart';
-import 'package:wys_router/src/route/route_path.dart';
+import 'package:module_settings/mine/theme/mine_theme.dart';
 import 'package:module_settings/settings/viewmodel/settings_viewmodel.dart';
+import 'package:wys_router/src/route/route_path.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -27,84 +29,95 @@ class _SettingsPageState extends State<SettingsPage> {
     final envService = _vm.envService;
 
     return AppPageScaffold(
+      backgroundColor: MineTheme.background,
       navBar: const AppNavBar(title: '设置', showBackButton: true),
       body: config == null
-          ? const Center(child: Text('应用配置未初始化'))
+          ? Center(
+              child: Text(
+                '应用配置未初始化',
+                style: MineTheme.caption,
+              ),
+            )
           : ListView(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
               children: [
-                if (envService != null)
-                  Obx(
-                    () => ListTile(
-                      title: const Text('运行环境'),
-                      subtitle: Text(
-                        '${envService.config.label} · ${envService.backendBaseUrl}',
+                const _SectionHeader('通用'),
+                _SettingsCard(
+                  children: [
+                    if (envService != null) ...[
+                      Obx(
+                        () => _NavTile(
+                          icon: CupertinoIcons.cloud,
+                          title: '运行环境',
+                          value:
+                              '${envService.config.label} · ${envService.backendBaseUrl}',
+                          onTap: () => _showEnvironmentPicker(
+                            envService.currentEnv.value,
+                          ),
+                        ),
                       ),
-                      trailing: const Icon(Icons.chevron_right_rounded),
-                      onTap: () => _showEnvironmentPicker(
-                        envService.currentEnv.value,
-                      ),
+                      const _RowDivider(),
+                    ],
+                    _SwitchTile(
+                      icon: CupertinoIcons.moon_stars,
+                      title: '深色模式',
+                      subtitle: '切换浅色 / 深色主题',
+                      value: config.themeMode == ThemeMode.dark,
+                      onChanged: (_) => _refreshAfter(_vm.toggleTheme),
                     ),
-                  ),
-                SwitchListTile(
-                  title: const Text('深色模式'),
-                  subtitle: const Text('切换浅色 / 深色主题'),
-                  value: config.themeMode == ThemeMode.dark,
-                  onChanged: (_) => _refreshAfter(_vm.toggleTheme),
+                    const _RowDivider(),
+                    _NavTile(
+                      icon: CupertinoIcons.globe,
+                      title: '语言',
+                      value: _localeLabel(config.locale),
+                      onTap: () =>
+                          _showLanguagePicker(config.locale.languageCode),
+                    ),
+                  ],
                 ),
-                ListTile(
-                  title: const Text('语言'),
-                  subtitle: Text(_localeLabel(config.locale)),
-                  trailing: const Icon(Icons.chevron_right_rounded),
-                  onTap: () => _showLanguagePicker(config.locale.languageCode),
-                ),
-                ListTile(
-                  title: const Text('蓝牙连接示例'),
-                  subtitle: const Text('BLE 扫描、连接、服务发现'),
-                  trailing: const Icon(Icons.chevron_right_rounded),
-                  onTap: () => Get.toNamed(RoutePath.bluetoothDemo),
-                ),
-                ListTile(
-                  title: const Text('新车成交示例'),
-                  subtitle: const Text('悬浮 Tab、下拉刷新、上拉加载更多'),
-                  trailing: const Icon(Icons.chevron_right_rounded),
-                  onTap: () => Get.toNamed(RoutePath.dealInvoiceDemo),
+                const _SectionHeader('示例'),
+                _SettingsCard(
+                  children: [
+                    _NavTile(
+                      icon: CupertinoIcons.bluetooth,
+                      title: '蓝牙连接示例',
+                      subtitle: 'BLE 扫描、连接、服务发现',
+                      onTap: () => Get.toNamed(RoutePath.bluetoothDemo),
+                    ),
+                  ],
                 ),
                 if (kDebugMode) ...[
-                  const Divider(height: 24),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-                    child: Text(
-                      '开发调试',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey.shade600,
-                        fontWeight: FontWeight.w600,
+                  const _SectionHeader('开发调试'),
+                  _SettingsCard(
+                    children: [
+                      _NavTile(
+                        icon: CupertinoIcons.square_stack_3d_up,
+                        title: '弹框调度示例',
+                        subtitle: '样式、优先级队列、清空/取消待展示',
+                        onTap: () => Get.toNamed(RoutePath.dialogDemo),
                       ),
-                    ),
-                  ),
-                  ListTile(
-                    title: const Text('弹框调度示例'),
-                    subtitle: const Text('样式、优先级队列、清空/取消待展示'),
-                    trailing: const Icon(Icons.chevron_right_rounded),
-                    onTap: () => Get.toNamed(RoutePath.dialogDemo),
-                  ),
-                  ListTile(
-                    title: const Text('链接与推送调试'),
-                    subtitle: const Text('Mock Deeplink / 前台 Push Banner'),
-                    trailing: const Icon(Icons.chevron_right_rounded),
-                    onTap: () => Get.toNamed(RoutePath.linkingDebug),
-                  ),
-                  ListTile(
-                    title: const Text('Realtime / WebSocket 调试'),
-                    subtitle: const Text('连接状态、Mock 信令、离线队列'),
-                    trailing: const Icon(Icons.chevron_right_rounded),
-                    onTap: () => Get.toNamed(RoutePath.realtimeDebug),
-                  ),
-                  ListTile(
-                    title: const Text('融云 IM 调试'),
-                    subtitle: const Text('imUserId、连接态、备份队列'),
-                    trailing: const Icon(Icons.chevron_right_rounded),
-                    onTap: () => Get.toNamed(RoutePath.imDebug),
+                      const _RowDivider(),
+                      _NavTile(
+                        icon: CupertinoIcons.link,
+                        title: '链接与推送调试',
+                        subtitle: 'Mock Deeplink / 前台 Push Banner',
+                        onTap: () => Get.toNamed(RoutePath.linkingDebug),
+                      ),
+                      const _RowDivider(),
+                      _NavTile(
+                        icon: CupertinoIcons.antenna_radiowaves_left_right,
+                        title: 'Realtime / WebSocket 调试',
+                        subtitle: '连接状态、Mock 信令、离线队列',
+                        onTap: () => Get.toNamed(RoutePath.realtimeDebug),
+                      ),
+                      const _RowDivider(),
+                      _NavTile(
+                        icon: CupertinoIcons.chat_bubble_2,
+                        title: '融云 IM 调试',
+                        subtitle: 'imUserId、连接态、备份队列',
+                        onTap: () => Get.toNamed(RoutePath.imDebug),
+                      ),
+                    ],
                   ),
                 ],
               ],
@@ -122,23 +135,38 @@ class _SettingsPageState extends State<SettingsPage> {
   void _showEnvironmentPicker(AppEnv current) {
     showModalBottomSheet<void>(
       context: context,
+      backgroundColor: MineTheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
       builder: (context) {
         return SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                child: Text('选择运行环境', style: MineTheme.headline),
+              ),
               for (final env in AppEnv.values)
                 ListTile(
-                  title: Text(env.label),
-                  subtitle: Text(EnvConfig.of(env).backendBaseUrl),
+                  title: Text(env.label, style: MineTheme.body),
+                  subtitle: Text(
+                    EnvConfig.of(env).backendBaseUrl,
+                    style: MineTheme.caption,
+                  ),
                   trailing: current == env
-                      ? const Icon(Icons.check_rounded, color: Colors.blue)
+                      ? const Icon(
+                          CupertinoIcons.checkmark_alt,
+                          color: MineTheme.accent,
+                        )
                       : null,
                   onTap: () {
                     _refreshAfter(() => _vm.setEnvironment(env));
                     Navigator.pop(context);
                   },
                 ),
+              const SizedBox(height: 8),
             ],
           ),
         );
@@ -149,33 +177,224 @@ class _SettingsPageState extends State<SettingsPage> {
   void _showLanguagePicker(String currentCode) {
     showModalBottomSheet<void>(
       context: context,
+      backgroundColor: MineTheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
       builder: (context) {
         return SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                child: Text('选择语言', style: MineTheme.headline),
+              ),
               ListTile(
-                title: const Text('简体中文'),
+                title: Text('简体中文', style: MineTheme.body),
+                trailing: currentCode == 'zh'
+                    ? const Icon(
+                        CupertinoIcons.checkmark_alt,
+                        color: MineTheme.accent,
+                      )
+                    : null,
                 onTap: () {
-                  _refreshAfter(
-                    () => _vm.setLocale(const Locale('zh')),
-                  );
+                  _refreshAfter(() => _vm.setLocale(const Locale('zh')));
                   Navigator.pop(context);
                 },
               ),
               ListTile(
-                title: const Text('English'),
+                title: Text('English', style: MineTheme.body),
+                trailing: currentCode == 'en'
+                    ? const Icon(
+                        CupertinoIcons.checkmark_alt,
+                        color: MineTheme.accent,
+                      )
+                    : null,
                 onTap: () {
-                  _refreshAfter(
-                    () => _vm.setLocale(const Locale('en')),
-                  );
+                  _refreshAfter(() => _vm.setLocale(const Locale('en')));
                   Navigator.pop(context);
                 },
               ),
+              const SizedBox(height: 8),
             ],
           ),
         );
       },
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader(this.label);
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 16, 4, 8),
+      child: Text(
+        label,
+        style: MineTheme.caption.copyWith(
+          color: MineTheme.labelTertiary,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+}
+
+class _SettingsCard extends StatelessWidget {
+  const _SettingsCard({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: MineTheme.groupedCardDecoration,
+      child: Column(mainAxisSize: MainAxisSize.min, children: children),
+    );
+  }
+}
+
+class _RowDivider extends StatelessWidget {
+  const _RowDivider();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Divider(
+      height: 0.5,
+      thickness: 0.5,
+      indent: 52,
+      color: MineTheme.separator,
+    );
+  }
+}
+
+class _NavTile extends StatelessWidget {
+  const _NavTile({
+    required this.icon,
+    required this.title,
+    this.subtitle,
+    this.value,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final String? value;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 52),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                Icon(icon, size: 22, color: MineTheme.accent),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(title, style: MineTheme.body),
+                      if (subtitle != null) ...[
+                        const SizedBox(height: 2),
+                        Text(subtitle!, style: MineTheme.caption),
+                      ],
+                      if (value != null && subtitle == null) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          value!,
+                          style: MineTheme.caption,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                if (value != null && subtitle != null) ...[
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      value!,
+                      style: MineTheme.caption,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.end,
+                    ),
+                  ),
+                ],
+                const SizedBox(width: 4),
+                const Icon(
+                  CupertinoIcons.chevron_right,
+                  size: 16,
+                  color: MineTheme.labelTertiary,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SwitchTile extends StatelessWidget {
+  const _SwitchTile({
+    required this.icon,
+    required this.title,
+    this.subtitle,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 52),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 10, 12, 10),
+        child: Row(
+          children: [
+            Icon(icon, size: 22, color: MineTheme.accent),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: MineTheme.body),
+                  if (subtitle != null) ...[
+                    const SizedBox(height: 2),
+                    Text(subtitle!, style: MineTheme.caption),
+                  ],
+                ],
+              ),
+            ),
+            CupertinoSwitch(
+              value: value,
+              onChanged: onChanged,
+              activeTrackColor: MineTheme.accent,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

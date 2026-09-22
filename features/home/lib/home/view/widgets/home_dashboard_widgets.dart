@@ -8,6 +8,7 @@ import 'package:module_home/home/model/home_todo_packer.dart';
 import 'package:module_home/home/theme/home_dashboard_theme.dart';
 import 'package:module_home/home/navigation/ai_stone_navigation.dart';
 import 'package:module_home/home/navigation/analytics_navigation.dart';
+import 'package:module_home/home/navigation/deal_invoice_navigation.dart';
 import 'package:module_home/home/navigation/used_car_navigation.dart';
 import 'package:wys_router/src/route/route_path.dart';
 import 'package:module_utils/module_utils.dart';
@@ -197,6 +198,10 @@ class HomeFeatureGrid extends StatelessWidget {
     }
     if (item.label == '二手车') {
       UsedCarNavigation.open();
+      return;
+    }
+    if (item.label == '新车成交') {
+      DealInvoiceNavigation.open();
       return;
     }
     if (item.label == 'AI小石头') {
@@ -545,24 +550,34 @@ class _TodoPageGrid extends StatelessWidget {
       rows.add(row);
     }
 
-    // 大卡独占整页高度；两行均分。
-    final expandRows = page.any((c) => c.size == HomeTodoSize.large) || rows.length > 1;
+    final hasLarge = page.any((c) => c.size == HomeTodoSize.large);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        for (var r = 0; r < rows.length; r++) ...[
-          if (r > 0) SizedBox(height: 12.h),
-          if (expandRows)
-            Expanded(child: _buildRow(rows[r], expandFill: true))
-          else
-            _buildRow(rows[r], expandFill: false),
-        ],
-      ],
+    // PageView 给了固定高：行必须有明确高度，小卡才能铺满壳层（白底/描边/阴影）。
+    // 仅一行且非大卡时，行高按 2×2 的一格算，避免最后一屏小卡被压成「无壳」内容条。
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final gap = 12.h;
+        final rowCount = hasLarge ? 1 : 2;
+        final rowHeight =
+            (constraints.maxHeight - gap * (rowCount - 1)) / rowCount;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (var r = 0; r < rows.length; r++) ...[
+              if (r > 0) SizedBox(height: gap),
+              SizedBox(
+                height: rowHeight,
+                child: _buildRow(rows[r]),
+              ),
+            ],
+          ],
+        );
+      },
     );
   }
 
-  Widget _buildRow(List<HomeTodoCard> row, {required bool expandFill}) {
+  Widget _buildRow(List<HomeTodoCard> row) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -573,7 +588,7 @@ class _TodoPageGrid extends StatelessWidget {
             child: _HomeTodoCardView(
               card: row[c],
               onTap: () => onOpen(row[c]),
-              expandFill: expandFill,
+              expandFill: true,
             ),
           ),
         ],
@@ -611,7 +626,7 @@ class _HomeTodoCardView extends StatelessWidget {
   }
 }
 
-/// 统一白底+描边+轻阴影，避免 Material/透明 Container 叠在白底上「看不见卡面」。
+/// 统一白底+描边+轻阴影。装饰放 DecoratedBox（Ink 上的 shadow/border 常不画）。
 class _TodoCardShell extends StatelessWidget {
   const _TodoCardShell({
     required this.onTap,
@@ -626,28 +641,28 @@ class _TodoCardShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final radius = BorderRadius.circular(HomeDashboardTheme.radiusMd);
-    return Material(
-      color: Colors.transparent,
-      borderRadius: radius,
-      child: InkWell(
-        onTap: onTap,
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: HomeDashboardTheme.surface,
         borderRadius: radius,
-        child: Ink(
-          decoration: BoxDecoration(
-            color: HomeDashboardTheme.surface,
-            borderRadius: radius,
-            border: Border.all(
-              color: HomeDashboardTheme.separator,
-              width: 0.5,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
+        border: Border.all(
+          color: HomeDashboardTheme.separator,
+          width: 0.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: radius,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: radius,
           child: Padding(
             padding: padding ?? EdgeInsets.all(14.w),
             child: child,

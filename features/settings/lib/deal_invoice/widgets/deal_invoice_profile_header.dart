@@ -6,16 +6,27 @@ import 'package:module_utils/module_utils.dart';
 class DealInvoiceProfileHeader extends StatelessWidget {
   const DealInvoiceProfileHeader({
     super.key,
-    required this.stats,
+    this.summary,
   });
 
-  final DealInvoiceStats stats;
-
-  static const _avatarUrl =
-      'https://picsum.photos/seed/deal_invoice_profile/200/200';
+  final DealInvoiceSummary? summary;
 
   @override
   Widget build(BuildContext context) {
+    final displayName =
+        (summary?.displayName.isNotEmpty ?? false) ? summary!.displayName : '—';
+    final position = summary?.positionLabel ?? '';
+    final storeName =
+        (summary?.storeName.isNotEmpty ?? false) ? summary!.storeName : '—';
+    final avatarUrl = summary?.avatarUrl ?? '';
+    final stats = summary?.stats ??
+        const DealInvoiceStats(
+          uploaded: 0,
+          pendingReview: 0,
+          approved: 0,
+          rejected: 0,
+        );
+
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
@@ -41,42 +52,44 @@ class DealInvoiceProfileHeader extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        const Flexible(
+                        Flexible(
                           child: Text(
-                            '东东枪',
+                            displayName,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w700,
                               color: Color(0xFF1A1A1A),
                             ),
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 3,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF3B8CFF),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: const Text(
-                            '销售经理',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
+                        if (position.isNotEmpty) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF3B8CFF),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              position,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
-                        ),
+                        ],
                       ],
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      '[4S] 北京沃德龙鼎吉利',
+                      storeName,
                       style: TextStyle(
                         fontSize: 13,
                         color: Colors.grey.shade700,
@@ -87,12 +100,27 @@ class DealInvoiceProfileHeader extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               ClipOval(
-                child: CacheImageUtils.network(
-                  _avatarUrl,
-                  width: 56,
-                  height: 56,
-                  fit: BoxFit.cover,
-                ),
+                child: avatarUrl.isNotEmpty
+                    ? CacheImageUtils.network(
+                        avatarUrl,
+                        width: 56,
+                        height: 56,
+                        fit: BoxFit.cover,
+                      )
+                    : Container(
+                        width: 56,
+                        height: 56,
+                        color: const Color(0xFFE8EEF8),
+                        alignment: Alignment.center,
+                        child: Text(
+                          displayName.isNotEmpty ? displayName[0] : '?',
+                          style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF3B8CFF),
+                          ),
+                        ),
+                      ),
               ),
             ],
           ),

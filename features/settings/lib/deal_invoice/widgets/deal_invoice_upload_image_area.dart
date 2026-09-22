@@ -1,9 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:module_settings/deal_invoice/viewmodel/deal_invoice_upload_viewmodel.dart';
 import 'package:module_utils/module_utils.dart';
 
-/// 发票图片区：新建虚线框 / 预览 / 审核通过戳 / 重新上传遮罩。
+/// 发票图片区：新建虚线框 / 本地或远程预览 / 审核通过戳 / 重新上传遮罩。
 class DealInvoiceUploadImageArea extends StatelessWidget {
   const DealInvoiceUploadImageArea({super.key, required this.controller});
 
@@ -18,6 +20,8 @@ class DealInvoiceUploadImageArea extends StatelessWidget {
       final showReupload = controller.showReuploadOverlay;
       final showPending = controller.showPendingPlaceholder;
       final isEditing = controller.isEditing;
+      final localPath = controller.localImagePath.value;
+      final remoteUrl = controller.remoteImageUrl.value;
 
       if (!hasImage && isEditing) {
         return _DashedUploadBox(
@@ -54,10 +58,7 @@ class DealInvoiceUploadImageArea extends StatelessWidget {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                CacheImageUtils.network(
-                  DealInvoiceUploadViewModel.invoicePreviewUrl,
-                  fit: BoxFit.cover,
-                ),
+                _PreviewImage(localPath: localPath, remoteUrl: remoteUrl),
                 if (uploading)
                   Container(
                     color: Colors.black38,
@@ -74,7 +75,10 @@ class DealInvoiceUploadImageArea extends StatelessWidget {
                       color: Colors.black54,
                       borderRadius: BorderRadius.circular(16),
                       child: InkWell(
-                        onTap: () => controller.hasInvoiceImage.value = false,
+                        onTap: () {
+                          controller.hasInvoiceImage.value = false;
+                          controller.localImagePath.value = null;
+                        },
                         borderRadius: BorderRadius.circular(16),
                         child: const Padding(
                           padding: EdgeInsets.all(6),
@@ -89,6 +93,27 @@ class DealInvoiceUploadImageArea extends StatelessWidget {
         ),
       );
     });
+  }
+}
+
+class _PreviewImage extends StatelessWidget {
+  const _PreviewImage({this.localPath, this.remoteUrl});
+
+  final String? localPath;
+  final String? remoteUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    if (localPath != null && localPath!.isNotEmpty) {
+      return Image.file(File(localPath!), fit: BoxFit.cover);
+    }
+    if (remoteUrl != null && remoteUrl!.isNotEmpty) {
+      return CacheImageUtils.network(remoteUrl!, fit: BoxFit.cover);
+    }
+    return ColoredBox(
+      color: const Color(0xFFF0F0F0),
+      child: Icon(Icons.image_outlined, size: 56, color: Colors.grey.shade400),
+    );
   }
 }
 

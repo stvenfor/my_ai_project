@@ -1,22 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:wys_router/src/route/route_path.dart';
-import 'package:module_settings/deal_invoice/mock/deal_invoice_mock_repository.dart';
+import 'package:module_common_ui/module_common_ui.dart';
+import 'package:module_http/module_http.dart';
+import 'package:module_settings/deal_invoice/api/deal_invoice_api.dart';
 import 'package:module_settings/deal_invoice/model/deal_invoice_models.dart';
+import 'package:wys_router/src/route/route_path.dart';
 
 class DealInvoiceTabState {
   final items = <DealInvoiceItem>[].obs;
   final isRefreshing = false.obs;
   final isLoadingMore = false.obs;
   final hasMore = true.obs;
-  int page = 0;
+  int page = 1;
 }
 
 class DealInvoiceDemoViewModel extends GetxController
     with GetSingleTickerProviderStateMixin {
+  DealInvoiceDemoViewModel({DealInvoiceApi? api}) : _api = api ?? DealInvoiceApi();
+
+  final DealInvoiceApi _api;
   late final TabController tabController;
 
-  final stats = DealInvoiceStats.demo.obs;
+  final summary = Rxn<DealInvoiceSummary>();
   final tabStates = List.generate(
     DealInvoiceTab.values.length,
     (_) => DealInvoiceTabState(),
@@ -29,6 +34,7 @@ class DealInvoiceDemoViewModel extends GetxController
       length: DealInvoiceTab.values.length,
       vsync: this,
     );
+    refreshSummary();
     for (var i = 0; i < DealInvoiceTab.values.length; i++) {
       loadInitial(i);
     }
@@ -42,9 +48,19 @@ class DealInvoiceDemoViewModel extends GetxController
 
   DealInvoiceTab tabAt(int index) => DealInvoiceTab.values[index];
 
+  Future<void> refreshSummary() async {
+    try {
+      summary.value = await _api.fetchSummary();
+    } on HttpRequestException catch (e) {
+      UiKitInitializer.toastError(e.message);
+    } catch (_) {
+      UiKitInitializer.toastError('加载摘要失败');
+    }
+  }
+
   Future<void> loadInitial(int tabIndex) {
     final state = tabStates[tabIndex];
-    state.page = 0;
+    state.page = 1;
     state.hasMore.value = true;
     return _load(tabIndex, reset: true);
   }
@@ -53,10 +69,13 @@ class DealInvoiceDemoViewModel extends GetxController
     final state = tabStates[tabIndex];
     if (state.isRefreshing.value) return;
     state.isRefreshing.value = true;
-    state.page = 0;
+    state.page = 1;
     state.hasMore.value = true;
     try {
-      await _load(tabIndex, reset: true);
+      await Future.wait([
+        refreshSummary(),
+        _load(tabIndex, reset: true),
+      ]);
     } finally {
       state.isRefreshing.value = false;
     }
@@ -77,52 +96,58 @@ class DealInvoiceDemoViewModel extends GetxController
   Future<void> _load(int tabIndex, {required bool reset}) async {
     final state = tabStates[tabIndex];
     final tab = tabAt(tabIndex);
-    final batch = await DealInvoiceMockRepository.fetch(
-      tab: tab,
-      page: state.page,
-    );
-
-    if (reset) {
-      state.items.assignAll(batch);
-    } else {
-      state.items.addAll(batch);
-    }
-
-    if (batch.isEmpty) {
+    try {
+      final result = await _api.fetchList(tab: tab, page: state.page);
+      if (reset) {
+        state.items.assignAll(result.list);
+      } else {
+        state.items.addAll(result.list);
+      }
+      state.hasMore.value = result.hasMore;
+    } on HttpRequestException catch (e) {
+      if (reset) state.items.clear();
       state.hasMore.value = false;
-    } else if (state.page >= DealInvoiceMockRepository.maxPages - 1) {
+      UiKitInitializer.toastError(e.message);
+    } catch (_) {
+      if (reset) state.items.clear();
       state.hasMore.value = false;
-    } else {
-      state.hasMore.value = true;
+      UiKitInitializer.toastError('加载列表失败');
     }
   }
 
-  void onUploadTap() {
-    Get.toNamed(
-      RoutePath.dealInvoiceUpload,
-      arguments: const DealInvoiceUploadArgs(
-        scene: DealInvoiceUploadScene.create,
-      ),
-    );
+  Future<void> onUploadTap() async {
+    await Get.toNamed(RoutePath.dealInvoiceUpload, arguments: const DealInvoiceUploadArgs(
+      scene: DealInvoiceUploadScene.create,
+    ));
+    await _reloadAll();
   }
 
-  void onItemTap(DealInvoiceItem item) {
-    Get.toNamed(
+  Future<void> onItemTap(DealInvoiceItem item) async {
+    await Get.toNamed(
       RoutePath.dealInvoiceUpload,
       arguments: DealInvoiceUploadArgs(
         scene: DealInvoiceUploadScene.detail,
         item: item,
       ),
     );
+    await _reloadAll();
   }
 
-  void onProcessTap(DealInvoiceItem item) {
-    Get.toNamed(
+  Future<void> onProcessTap(DealInvoiceItem item) async {
+    await Get.toNamed(
       RoutePath.dealInvoiceUpload,
       arguments: DealInvoiceUploadArgs(
         scene: DealInvoiceUploadScene.reupload,
         item: item,
       ),
     );
+    await _reloadAll();
+  }
+
+  Future<void> _reloadAll() async {
+    await refreshSummary();
+    for (var i = 0; i < DealInvoiceTab.values.length; i++) {
+      await loadInitial(i);
+    }
   }
 }
