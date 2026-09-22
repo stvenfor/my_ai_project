@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:module_common_ui/module_common_ui.dart';
+import 'package:module_core/core.dart';
 import 'package:module_http/module_http.dart';
 import 'package:module_settings/deal_invoice/api/deal_invoice_api.dart';
 import 'package:module_settings/deal_invoice/model/deal_invoice_models.dart';
@@ -18,14 +19,38 @@ class DealInvoiceDemoViewModel extends GetxController
     with GetSingleTickerProviderStateMixin {
   DealInvoiceDemoViewModel({DealInvoiceApi? api}) : _api = api ?? DealInvoiceApi();
 
+  /// 与 MineController 同一占位图，避免两页默认头像不一致。
+  static const _defaultAvatar =
+      'https://picsum.photos/seed/mine_profile/200/200';
+
   final DealInvoiceApi _api;
   late final TabController tabController;
 
+  /// 接口摘要（职务/店名/统计）；身份字段再经 [displaySummary] 与 UserService 对齐。
   final summary = Rxn<DealInvoiceSummary>();
   final tabStates = List.generate(
     DealInvoiceTab.values.length,
     (_) => DealInvoiceTabState(),
   );
+
+  Worker? _userWorker;
+
+  /// 顶栏展示：昵称/头像优先 UserService（与「我的」一致）。
+  DealInvoiceSummary? get displaySummary {
+    final s = summary.value;
+    if (s == null) return null;
+    final user = _currentUser;
+    final name = (user?.name.isNotEmpty == true) ? user!.name : s.displayName;
+    final avatar = (user?.avatar.isNotEmpty == true)
+        ? user!.avatar
+        : (s.avatarUrl.isNotEmpty ? s.avatarUrl : _defaultAvatar);
+    return s.copyWith(displayName: name, avatarUrl: avatar);
+  }
+
+  User? get _currentUser {
+    if (!Get.isRegistered<UserService>()) return null;
+    return Get.find<UserService>().currentUser.value;
+  }
 
   @override
   void onInit() {
@@ -34,6 +59,12 @@ class DealInvoiceDemoViewModel extends GetxController
       length: DealInvoiceTab.values.length,
       vsync: this,
     );
+    if (Get.isRegistered<UserService>()) {
+      _userWorker = ever(Get.find<UserService>().currentUser, (_) {
+        // 触发 Obx 重建：summary 引用不变时仍刷新身份
+        summary.refresh();
+      });
+    }
     refreshSummary();
     for (var i = 0; i < DealInvoiceTab.values.length; i++) {
       loadInitial(i);
@@ -42,6 +73,7 @@ class DealInvoiceDemoViewModel extends GetxController
 
   @override
   void onClose() {
+    _userWorker?.dispose();
     tabController.dispose();
     super.onClose();
   }
@@ -116,9 +148,12 @@ class DealInvoiceDemoViewModel extends GetxController
   }
 
   Future<void> onUploadTap() async {
-    await Get.toNamed(RoutePath.dealInvoiceUpload, arguments: const DealInvoiceUploadArgs(
-      scene: DealInvoiceUploadScene.create,
-    ));
+    await Get.toNamed(
+      RoutePath.dealInvoiceUpload,
+      arguments: const DealInvoiceUploadArgs(
+        scene: DealInvoiceUploadScene.create,
+      ),
+    );
     await _reloadAll();
   }
 

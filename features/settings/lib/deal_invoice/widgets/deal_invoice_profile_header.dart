@@ -1,3 +1,7 @@
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:module_settings/deal_invoice/model/deal_invoice_models.dart';
 import 'package:module_utils/module_utils.dart';
@@ -100,27 +104,11 @@ class DealInvoiceProfileHeader extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               ClipOval(
-                child: avatarUrl.isNotEmpty
-                    ? CacheImageUtils.network(
-                        avatarUrl,
-                        width: 56,
-                        height: 56,
-                        fit: BoxFit.cover,
-                      )
-                    : Container(
-                        width: 56,
-                        height: 56,
-                        color: const Color(0xFFE8EEF8),
-                        alignment: Alignment.center,
-                        child: Text(
-                          displayName.isNotEmpty ? displayName[0] : '?',
-                          style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFF3B8CFF),
-                          ),
-                        ),
-                      ),
+                child: SizedBox(
+                  width: 56,
+                  height: 56,
+                  child: _AvatarImage(url: avatarUrl, fallbackName: displayName),
+                ),
               ),
             ],
           ),
@@ -134,6 +122,60 @@ class DealInvoiceProfileHeader extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// 与「我的」头像同源：支持 data URL / 本地路径 / 网络图。
+class _AvatarImage extends StatelessWidget {
+  const _AvatarImage({required this.url, required this.fallbackName});
+
+  final String url;
+  final String fallbackName;
+
+  @override
+  Widget build(BuildContext context) {
+    if (url.isEmpty) return _letterPlaceholder();
+
+    if (url.startsWith('data:')) {
+      final bytes = _decodeDataUrl(url);
+      if (bytes == null) return _letterPlaceholder();
+      return Image.memory(bytes, fit: BoxFit.cover);
+    }
+
+    if (url.startsWith('/') || url.startsWith('file:')) {
+      return Image.file(
+        File(url.replaceFirst('file:', '')),
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _letterPlaceholder(),
+      );
+    }
+
+    return CacheImageUtils.network(url, width: 56, height: 56, fit: BoxFit.cover);
+  }
+
+  Uint8List? _decodeDataUrl(String dataUrl) {
+    final comma = dataUrl.indexOf(',');
+    if (comma < 0) return null;
+    try {
+      return base64Decode(dataUrl.substring(comma + 1));
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Widget _letterPlaceholder() {
+    return Container(
+      color: const Color(0xFFE8EEF8),
+      alignment: Alignment.center,
+      child: Text(
+        fallbackName.isNotEmpty ? fallbackName[0] : '?',
+        style: const TextStyle(
+          fontSize: 22,
+          fontWeight: FontWeight.w700,
+          color: Color(0xFF3B8CFF),
+        ),
       ),
     );
   }

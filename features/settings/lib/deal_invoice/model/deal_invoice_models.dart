@@ -158,6 +158,22 @@ class DealInvoiceSummary {
             ),
     );
   }
+
+  DealInvoiceSummary copyWith({
+    String? displayName,
+    String? avatarUrl,
+    String? positionLabel,
+    String? storeName,
+    DealInvoiceStats? stats,
+  }) {
+    return DealInvoiceSummary(
+      displayName: displayName ?? this.displayName,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
+      positionLabel: positionLabel ?? this.positionLabel,
+      storeName: storeName ?? this.storeName,
+      stats: stats ?? this.stats,
+    );
+  }
 }
 
 /// 列表项。
