@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:module_community/community/models/comment_model.dart';
 import 'package:module_community/community/models/community_avatar_urls.dart';
 import 'package:module_community/community/models/post_model.dart';
+import 'package:module_community/community/models/topic_model.dart';
 import 'package:module_community/community/repository/post_repository.dart';
 
 class MockPostRepository implements PostRepository {
@@ -167,4 +168,103 @@ class MockPostRepository implements PostRepository {
     _allPosts.removeWhere((p) => p.id == postId);
     _commentsByPost.remove(postId);
   }
+
+  @override
+  Future<PostModel> createPost({
+    required String content,
+    String mediaType = 'none',
+    String? topicId,
+    bool isAskEveryone = false,
+    String source = '来自 iPhone',
+  }) async {
+    _ensureSeed();
+    await Future<void>.delayed(const Duration(milliseconds: 300));
+
+    TopicModel? topic;
+    if (topicId != null) {
+      final topics = await fetchTopics();
+      try {
+        topic = topics.firstWhere((t) => t.id == topicId);
+      } catch (_) {
+        topic = null;
+      }
+    }
+
+    var body = content.trim();
+    if (topic != null && !body.contains('#${topic.name}')) {
+      body = body.isEmpty ? '#${topic.name}' : '$body\n#${topic.name}';
+    }
+
+    final ask = isAskEveryone || (topic?.isAskEveryone ?? false);
+    final isImage = mediaType == 'image';
+    final isVideo = mediaType == 'video';
+    final id = 'post_new_${DateTime.now().microsecondsSinceEpoch}';
+
+    final post = PostModel(
+      id: id,
+      userId: 'me',
+      nickname: '我',
+      avatar: CommunityAvatarUrls.user(12),
+      content: body,
+      publishTime: DateTime.now(),
+      source: source,
+      images: isImage
+          ? [
+              'https://picsum.photos/seed/wys_post_1/400/400',
+              'https://picsum.photos/seed/wys_post_2/400/400',
+              'https://picsum.photos/seed/wys_post_3/400/400',
+            ]
+          : const [],
+      videoUrl: isVideo
+          ? 'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4'
+          : null,
+      videoCoverUrl: isVideo
+          ? 'https://picsum.photos/seed/wys_post_video/640/360'
+          : null,
+      isMine: true,
+      mediaType: mediaType,
+      isAskEveryone: ask,
+      topic: topic,
+    );
+    _allPosts.insert(0, post);
+    _commentsByPost[id] = [];
+    return post;
+  }
+
+  @override
+  Future<List<TopicModel>> fetchTopics({
+    int page = 0,
+    int pageSize = 20,
+  }) async {
+    await Future<void>.delayed(const Duration(milliseconds: 200));
+    final all = _mockTopics;
+    final start = page * pageSize;
+    if (start >= all.length) return [];
+    final end = min(start + pageSize, all.length);
+    return all.sublist(start, end);
+  }
+
+  @override
+  Future<List<TopicModel>> searchTopics(
+    String query, {
+    int page = 0,
+    int pageSize = 20,
+  }) async {
+    await Future<void>.delayed(const Duration(milliseconds: 200));
+    final q = query.trim();
+    final filtered = q.isEmpty
+        ? _mockTopics
+        : _mockTopics.where((t) => t.name.contains(q)).toList();
+    final start = page * pageSize;
+    if (start >= filtered.length) return [];
+    final end = min(start + pageSize, filtered.length);
+    return filtered.sublist(start, end);
+  }
+
+  static final _mockTopics = [
+    TopicModel(id: 'topic_ask', name: '问大家', isAskEveryone: true),
+    TopicModel(id: 'topic_1', name: '纳指大涨超2%再创新高', heat: 1015000),
+    TopicModel(id: 'topic_2', name: 'Flutter开发', heat: 320000),
+    TopicModel(id: 'topic_3', name: '周末打卡', heat: 88000),
+  ];
 }

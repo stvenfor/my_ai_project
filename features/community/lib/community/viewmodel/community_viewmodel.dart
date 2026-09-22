@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:module_community/community/models/comment_model.dart';
 import 'package:module_community/community/models/post_model.dart';
+import 'package:module_community/community/repository/http_post_repository.dart';
 import 'package:module_community/community/repository/mock_post_repository.dart';
 import 'package:module_community/community/repository/post_repository.dart';
 import 'package:module_community/community/widgets/comment_bottom_sheet.dart';
@@ -9,9 +10,14 @@ import 'package:module_common_ui/module_common_ui.dart';
 
 class CommunityViewModel extends GetxController {
   CommunityViewModel({PostRepository? repository})
-      : _repository = repository ?? MockPostRepository.instance;
+      : _repository = repository ??
+            (Get.isRegistered<PostRepository>()
+                ? Get.find<PostRepository>()
+                : MockPostRepository.instance);
 
   final PostRepository _repository;
+
+  PostRepository get repository => _repository;
 
   final posts = <PostModel>[].obs;
   final isLoading = false.obs;
@@ -111,7 +117,13 @@ class CommunityViewModel extends GetxController {
     try {
       final updated = await _repository.toggleLike(postId, target);
       final index = posts.indexWhere((p) => p.id == postId);
-      if (index >= 0) posts[index] = updated;
+      if (index >= 0) {
+        // HTTP 点赞仅返回片段字段，合并进现有帖。
+        posts[index] = posts[index].copyWith(
+          isLiked: updated.isLiked,
+          likeCount: updated.likeCount,
+        );
+      }
       update([postId]);
     } catch (_) {
       UiKitInitializer.toastError('操作失败');
@@ -182,8 +194,11 @@ class CommunityViewModel extends GetxController {
 
 class CommunityBinding extends Bindings {
   @override
-  void dependencies() => Get.lazyPut<CommunityViewModel>(
-        CommunityViewModel.new,
-        fenix: true,
-      );
+  void dependencies() {
+    Get.put<PostRepository>(HttpPostRepository());
+    Get.lazyPut<CommunityViewModel>(
+      () => CommunityViewModel(repository: Get.find<PostRepository>()),
+      fenix: true,
+    );
+  }
 }

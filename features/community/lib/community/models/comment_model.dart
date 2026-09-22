@@ -9,6 +9,19 @@ class CommentModel {
     this.replyToNickname,
   });
 
+  factory CommentModel.fromJson(Map<String, dynamic> json) {
+    return CommentModel(
+      id: json['id']?.toString() ?? '',
+      postId: json['post_id']?.toString() ?? '',
+      nickname: json['nickname']?.toString() ?? '',
+      avatar: json['avatar']?.toString() ?? '',
+      content: json['content']?.toString() ?? '',
+      createTime: DateTime.tryParse(json['create_time']?.toString() ?? '') ??
+          DateTime.now(),
+      replyToNickname: json['reply_to_nickname']?.toString(),
+    );
+  }
+
   final String id;
   final String postId;
   final String nickname;

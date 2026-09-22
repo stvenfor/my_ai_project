@@ -11,10 +11,15 @@ dependencies:
     sdk: flutter
   get: ^4.7.3
   photo_view: ^0.15.0
+  shared_preferences: ^2.2.2
   module_common_ui:
     path: ../../commons/ui
   module_core:
     path: ../../commons/core
+  module_http:
+    path: ../../commons/network
+  module_auth:
+    path: ../auth
   wys_router:
     path: ../../commons/wys_router
   module_utils:
@@ -24,6 +29,9 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.0
+
+dependency_overrides:
+  rxdart: ^0.27.7
 
 flutter:
   uses-material-design: true
