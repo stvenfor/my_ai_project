@@ -1,21 +1,24 @@
 import 'package:get/get.dart';
 import 'package:module_auth/session/auth_session.dart';
-import 'package:module_home/home/repository/transaction_repository.dart';
-import 'package:module_home/home/model/transaction_model.dart';
 import 'package:module_common_ui/module_common_ui.dart';
+import 'package:module_home/home/model/used_car_order_models.dart';
+import 'package:module_home/home/repository/used_car_order_repository.dart';
 
 class UsedCarListController extends GetxController {
-  UsedCarListController({TransactionRepository? repository})
-      : _repository = repository ?? Get.find<TransactionRepository>();
+  UsedCarListController({UsedCarOrderRepository? repository})
+      : _repository = repository ?? Get.find<UsedCarOrderRepository>();
 
-  final TransactionRepository _repository;
+  final UsedCarOrderRepository _repository;
 
-  final items = <TransactionModel>[].obs;
+  final summary = Rxn<UsedCarOrderSummary>();
+  final items = <UsedCarOrderItem>[].obs;
   final isLoading = false.obs;
   final isLoadingMore = false.obs;
   final hasMore = true.obs;
   final errorMessage = RxnString();
-  final currentPage = 0.obs;
+  final currentPage = 1.obs;
+  final statusTab = UsedCarStatusTab.all.obs;
+  final kindFilter = UsedCarKindFilter.all.obs;
 
   @override
   void onInit() {
@@ -26,29 +29,40 @@ class UsedCarListController extends GetxController {
   Future<void> loadInitial() async {
     isLoading.value = true;
     errorMessage.value = null;
-    currentPage.value = 0;
+    currentPage.value = 1;
     try {
-      final result = await _repository.fetchPage(page: 0);
+      await _loadSummary();
+      final result = await _repository.fetchPage(
+        statusTab: statusTab.value,
+        kindFilter: kindFilter.value,
+        page: 1,
+      );
       items.assignAll(result.list);
       hasMore.value = result.hasMore;
-      currentPage.value = result.list.isEmpty ? 0 : 1;
+      currentPage.value = result.list.isEmpty ? 1 : 2;
     } catch (error) {
-      errorMessage.value = formatTransactionLoadError(error);
+      errorMessage.value = formatUsedCarLoadError(error);
     } finally {
       isLoading.value = false;
     }
   }
 
+  @override
   Future<void> refresh() async {
     if (!AuthSession.isLoggedIn) return;
     errorMessage.value = null;
     try {
-      final result = await _repository.fetchPage(page: 0);
+      await _loadSummary();
+      final result = await _repository.fetchPage(
+        statusTab: statusTab.value,
+        kindFilter: kindFilter.value,
+        page: 1,
+      );
       items.assignAll(result.list);
       hasMore.value = result.hasMore;
-      currentPage.value = result.list.isEmpty ? 0 : 1;
+      currentPage.value = result.list.isEmpty ? 1 : 2;
     } catch (error) {
-      errorMessage.value = formatTransactionLoadError(error);
+      errorMessage.value = formatUsedCarLoadError(error);
       UiKitInitializer.toastError('刷新失败');
     }
   }
@@ -60,7 +74,11 @@ class UsedCarListController extends GetxController {
     isLoadingMore.value = true;
     try {
       final page = currentPage.value;
-      final result = await _repository.fetchPage(page: page);
+      final result = await _repository.fetchPage(
+        statusTab: statusTab.value,
+        kindFilter: kindFilter.value,
+        page: page,
+      );
       if (result.list.isEmpty) {
         hasMore.value = false;
       } else {
@@ -68,10 +86,30 @@ class UsedCarListController extends GetxController {
         currentPage.value = page + 1;
         hasMore.value = result.hasMore;
       }
-    } catch (error) {
+    } catch (_) {
       UiKitInitializer.toastError('加载更多失败');
     } finally {
       isLoadingMore.value = false;
+    }
+  }
+
+  Future<void> setStatusTab(UsedCarStatusTab tab) async {
+    if (statusTab.value == tab) return;
+    statusTab.value = tab;
+    await loadInitial();
+  }
+
+  Future<void> setKindFilter(UsedCarKindFilter kind) async {
+    if (kindFilter.value == kind) return;
+    kindFilter.value = kind;
+    await loadInitial();
+  }
+
+  Future<void> _loadSummary() async {
+    try {
+      summary.value = await _repository.fetchSummary();
+    } catch (_) {
+      // 列表仍可用
     }
   }
 }

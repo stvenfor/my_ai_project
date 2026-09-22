@@ -3,7 +3,7 @@ import 'package:module_home/home/model/transaction_model.dart';
 import 'package:module_http/module_http.dart';
 
 /// =============================================================================
-/// TransactionApi — 二手车/收支列表 HTTP 层
+/// TransactionApi — 个人收支列表 HTTP 层（入口「收支」，不再挂二手车）
 ///
 /// GET /api/v1/transactions?limit=&offset=
 /// 需已登录：HttpManager 自动带 Authorization: Bearer <Supabase token>

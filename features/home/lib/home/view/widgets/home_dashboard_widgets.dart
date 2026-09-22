@@ -405,6 +405,8 @@ class HomeTodoCardStrip extends StatefulWidget {
         return RoutePath.homeTodoAfterSales;
       case 'order_pending_review':
         return RoutePath.homeTodoOrderReview;
+      case 'used_car_pending_review':
+        return RoutePath.homeUsedCarList;
       default:
         return RoutePath.home;
     }

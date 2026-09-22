@@ -346,6 +346,14 @@ class MineController extends GetxController {
       }
       return;
     }
+    if (item.id == 'ledger') {
+      if (isLoggedIn) {
+        Get.toNamed(RoutePath.homeLedgerList);
+      } else {
+        AuthNavigation.openLogin(redirectRoute: RoutePath.homeLedgerList);
+      }
+      return;
+    }
     UiKitInitializer.toast('${item.title} 开发中');
   }
 }

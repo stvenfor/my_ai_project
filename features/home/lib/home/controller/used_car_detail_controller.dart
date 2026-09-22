@@ -1,44 +1,42 @@
 import 'package:get/get.dart';
-import 'package:module_home/home/repository/transaction_repository.dart';
-import 'package:module_home/home/model/transaction_model.dart';
+import 'package:module_home/home/model/used_car_order_models.dart';
+import 'package:module_home/home/repository/used_car_order_repository.dart';
 
 class UsedCarDetailController extends GetxController {
-  UsedCarDetailController({TransactionRepository? repository})
-      : _repository = repository ?? Get.find<TransactionRepository>();
+  UsedCarDetailController({UsedCarOrderRepository? repository})
+      : _repository = repository ?? Get.find<UsedCarOrderRepository>();
 
-  final TransactionRepository _repository;
+  final UsedCarOrderRepository _repository;
 
-  final transaction = Rxn<TransactionModel>();
+  final order = Rxn<UsedCarOrderItem>();
   final isLoading = false.obs;
   final errorMessage = RxnString();
 
-  late final int transactionId;
+  late final String orderId;
 
   @override
   void onInit() {
     super.onInit();
     final args = Get.arguments;
-    if (args is int) {
-      transactionId = args;
-    } else if (args is String) {
-      transactionId = int.tryParse(args) ?? 0;
-    } else {
-      transactionId = 0;
-    }
+    orderId = args is String
+        ? args
+        : args is int
+            ? '$args'
+            : '';
     loadDetail();
   }
 
   Future<void> loadDetail() async {
-    if (transactionId <= 0) {
-      errorMessage.value = '无效的记录 ID';
+    if (orderId.isEmpty) {
+      errorMessage.value = '无效的业务单 ID';
       return;
     }
     isLoading.value = true;
     errorMessage.value = null;
     try {
-      transaction.value = await _repository.fetchById(transactionId);
+      order.value = await _repository.fetchById(orderId);
     } catch (error) {
-      errorMessage.value = formatTransactionLoadError(error);
+      errorMessage.value = formatUsedCarLoadError(error);
     } finally {
       isLoading.value = false;
     }

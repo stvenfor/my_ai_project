@@ -22,10 +22,18 @@ abstract final class MineFunctionData {
     MineFunctionItem(
       id: 'used_car',
       title: '二手车',
-      subtitle: '置换/专卖/估价',
+      subtitle: '置换/专卖/收车',
       accentColor: Color(0x140070F3),
       iconColor: Color(0xFF0070F3),
       icon: Icons.directions_car_outlined,
+    ),
+    MineFunctionItem(
+      id: 'ledger',
+      title: '收支',
+      subtitle: '个人收支记录',
+      accentColor: Color(0x141C7C54),
+      iconColor: Color(0xFF1C7C54),
+      icon: Icons.account_balance_wallet_outlined,
     ),
     MineFunctionItem(
       id: 'short_video',
@@ -73,6 +81,7 @@ abstract final class MineFunctionData {
     'sms',
     'calculator',
     'used_car',
+    'ledger',
     'short_video',
     'after_sales',
     'qr_pay',

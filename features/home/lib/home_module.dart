@@ -18,6 +18,9 @@ import 'package:module_home/home/binding/used_car_binding.dart';
 import 'package:module_home/home/view/analytics_detail_page.dart';
 import 'package:module_home/home/view/analytics_list_page.dart';
 import 'package:module_home/home/view/home_todo_pages.dart';
+import 'package:module_home/home/view/ledger_detail_page.dart';
+import 'package:module_home/home/view/ledger_list_page.dart';
+import 'package:module_home/home/view/used_car_create_page.dart';
 import 'package:module_home/home/view/used_car_detail_page.dart';
 import 'package:module_home/home/view/used_car_list_page.dart';
 import 'package:module_home/home/web/home_web_handlers.dart';
@@ -73,6 +76,18 @@ class HomeModule extends FeatureModule {
         RoutePath.homeUsedCarDetail: (_) {
           UsedCarDetailBinding().dependencies();
           return const UsedCarDetailPage();
+        },
+        RoutePath.homeUsedCarCreate: (_) {
+          UsedCarCreateBinding().dependencies();
+          return const UsedCarCreatePage();
+        },
+        RoutePath.homeLedgerList: (_) {
+          LedgerListBinding().dependencies();
+          return const LedgerListPage();
+        },
+        RoutePath.homeLedgerDetail: (_) {
+          LedgerDetailBinding().dependencies();
+          return const LedgerDetailPage();
         },
         RoutePath.homeDataAnalyticsList: (_) {
           AnalyticsListBinding().dependencies();
