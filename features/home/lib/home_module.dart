@@ -5,15 +5,20 @@ import 'package:module_home/home/api/home_http_config.dart';
 import 'package:module_home/home/view/all_services_page.dart';
 import 'package:module_home/home/view/check_in_mall_page.dart';
 import 'package:module_home/home/view/dubbing_home_page.dart';
+import 'package:module_home/home/view/home_feature_content_page.dart';
 import 'package:module_home/home/view/home_learning_report_page.dart';
 import 'package:module_home/home/view/home_page.dart';
 import 'package:module_home/home/view/strategy_page.dart';
 import 'package:module_home/home/view/hot_rank_detail_page.dart';
 import 'package:module_home/home/view/search_page.dart';
+import 'package:module_home/home/view/widgets/home_club_tab_content.dart';
+import 'package:module_home/home/view/widgets/home_video_tab_content.dart';
 import 'package:module_home/home/binding/analytics_binding.dart';
 import 'package:module_home/home/binding/used_car_binding.dart';
 import 'package:module_home/home/view/analytics_detail_page.dart';
 import 'package:module_home/home/view/analytics_list_page.dart';
+import 'package:module_home/home/view/home_todo_pages.dart';
+import 'package:module_home/home/api/home_todo_api.dart';
 import 'package:module_home/home/view/used_car_detail_page.dart';
 import 'package:module_home/home/view/used_car_list_page.dart';
 import 'package:module_home/home/web/home_web_handlers.dart';
@@ -50,6 +55,18 @@ class HomeModule extends FeatureModule {
         RoutePath.homeStrategy: (_) => const StrategyPage(),
         RoutePath.homeDubbingFeed: (_) => const DubbingHomePage(),
         RoutePath.homeHotRankDetail: (_) => const HotRankDetailPage(),
+        RoutePath.homeLifeService: (_) => const HomeFeatureContentPage(
+              title: '生活服务',
+              child: HomeVideoTabContent(),
+            ),
+        RoutePath.homeLiveCommerce: (_) => const HomeFeatureContentPage(
+              title: '直播带货',
+              child: HomeClubTabContent(),
+            ),
+        RoutePath.homeClub: (_) => const HomeFeatureContentPage(
+              title: 'Club',
+              child: HomeClubTabContent(),
+            ),
         RoutePath.homeUsedCarList: (_) {
           UsedCarListBinding().dependencies();
           return const UsedCarListPage();
@@ -66,6 +83,27 @@ class HomeModule extends FeatureModule {
           AnalyticsDetailBinding().dependencies();
           return const AnalyticsDetailPage();
         },
+        RoutePath.homeTodoPartnerPending: (_) => const PartnerPendingPage(),
+        RoutePath.homeTodoFollowUp: (_) => HomeTodoListPage(
+              title: '待跟进客户',
+              loader: () => HomeTodoApi().fetchFollowUpCustomers(),
+              itemTitle: (m) => m['display_name']?.toString() ?? '客户',
+              itemSubtitle: (m) =>
+                  '跟进截止：${m['next_follow_up_at'] ?? '-'}',
+            ),
+        RoutePath.homeTodoAfterSales: (_) => HomeTodoListPage(
+              title: '售后预约',
+              loader: () => HomeTodoApi().fetchAppointments(),
+              itemTitle: (m) => m['customer_name']?.toString() ?? '预约',
+              itemSubtitle: (m) =>
+                  '预约日：${m['appointment_date'] ?? '-'}',
+            ),
+        RoutePath.homeTodoOrderReview: (_) => HomeTodoListPage(
+              title: '订单待审核',
+              loader: () => HomeTodoApi().fetchReviewOrders(),
+              itemTitle: (m) => m['title']?.toString() ?? '审核单',
+              itemSubtitle: (m) => '单号 #${m['order_id'] ?? '-'}',
+            ),
       };
 
   @override

@@ -1,3 +1,5 @@
+import 'package:module_home/home/model/home_todo_models.dart';
+
 class HomeFeatureItem {
   const HomeFeatureItem({required this.label, this.emoji, this.imageUrl});
 
@@ -21,6 +23,8 @@ class HomeQuickAction {
   final String? emoji;
   final String? imageUrl;
 }
+
+// HomeQuickAction 保留供其它引用；首页待办区改用 HomeTodoCard。
 
 class HomeMetric {
   const HomeMetric({required this.value, required this.label});
@@ -91,7 +95,7 @@ class HomeNewsItem {
 class HomeDashboardData {
   const HomeDashboardData({
     required this.features,
-    required this.quickActions,
+    required this.todoCards,
     required this.metricsToday,
     required this.metricsYesterday,
     required this.metricsMonth,
@@ -103,7 +107,7 @@ class HomeDashboardData {
   });
 
   final List<HomeFeatureItem> features;
-  final List<HomeQuickAction> quickActions;
+  final List<HomeTodoCard> todoCards;
   final List<HomeMetric> metricsToday;
   final List<HomeMetric> metricsYesterday;
   final List<HomeMetric> metricsMonth;

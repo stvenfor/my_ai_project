@@ -14,6 +14,13 @@ class RoutePath{
   static const String homeUsedCarDetail = '/home/used_car/detail';
   static const String homeDataAnalyticsList = '/home/data_analytics';
   static const String homeDataAnalyticsDetail = '/home/data_analytics/detail';
+  static const String homeLifeService = '/home/life_service';
+  static const String homeLiveCommerce = '/home/live_commerce';
+  static const String homeClub = '/home/club';
+  static const String homeTodoPartnerPending = '/home/todo/partner-pending';
+  static const String homeTodoFollowUp = '/home/todo/follow-up-customers';
+  static const String homeTodoAfterSales = '/home/todo/after-sales-appointments';
+  static const String homeTodoOrderReview = '/home/todo/order-pending-review';
 
   /// AI 小石头助手页（SSE 气泡对话）
   static const String aiStream = '/ai/stream';

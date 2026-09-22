@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_home/home/controller/home_controller.dart';
 import 'package:module_home/home/model/home_dashboard_model.dart';
+import 'package:module_home/home/model/home_todo_models.dart';
+import 'package:module_home/home/model/home_todo_packer.dart';
 import 'package:module_home/home/theme/home_dashboard_theme.dart';
 import 'package:module_home/home/navigation/ai_stone_navigation.dart';
 import 'package:module_home/home/navigation/analytics_navigation.dart';
@@ -182,7 +184,15 @@ class HomeFeatureGrid extends StatelessWidget {
       return;
     }
     if (item.label == '生活服务') {
-      UiKitInitializer.toast('生活服务即将上线');
+      Get.toNamed(RoutePath.homeLifeService);
+      return;
+    }
+    if (item.label == '直播带货') {
+      Get.toNamed(RoutePath.homeLiveCommerce);
+      return;
+    }
+    if (item.label == 'Club') {
+      Get.toNamed(RoutePath.homeClub);
       return;
     }
     if (item.label == '二手车') {
@@ -374,155 +384,248 @@ class HomeGreetingSection extends StatelessWidget {
   }
 }
 
-class HomeQuickActionGrid extends StatelessWidget {
-  const HomeQuickActionGrid({super.key, required this.actions});
+class HomeTodoCardStrip extends StatelessWidget {
+  const HomeTodoCardStrip({super.key, required this.cards});
 
-  final List<HomeQuickAction> actions;
+  final List<HomeTodoCard> cards;
+
+  static String resolveRoute(HomeTodoCard card) {
+    if (card.actionRoute.isNotEmpty) return card.actionRoute;
+    switch (card.type) {
+      case 'partner_pending':
+        return RoutePath.homeTodoPartnerPending;
+      case 'follow_up_customer':
+        return RoutePath.homeTodoFollowUp;
+      case 'after_sales_appointment':
+        return RoutePath.homeTodoAfterSales;
+      case 'order_pending_review':
+        return RoutePath.homeTodoOrderReview;
+      default:
+        return RoutePath.home;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    const crossAxisCount = 2;
-    final rows = <List<HomeQuickAction>>[];
-    for (var i = 0; i < actions.length; i += crossAxisCount) {
-      final end = i + crossAxisCount > actions.length
-          ? actions.length
-          : i + crossAxisCount;
-      rows.add(actions.sublist(i, end));
+    if (cards.isEmpty) return const SizedBox.shrink();
+
+    void open(HomeTodoCard card) {
+      Get.toNamed<void>(resolveRoute(card));
     }
 
+    if (HomeTodoPacker.shouldWrapOnly(cards)) {
+      return Padding(
+        padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (var i = 0; i < cards.length; i++) ...[
+              if (i > 0) SizedBox(width: 12.w),
+              Expanded(
+                child: _HomeTodoCardView(card: cards[i], onTap: () => open(cards[i])),
+              ),
+            ],
+            for (var i = cards.length; i < 2; i++) ...[
+              SizedBox(width: 12.w),
+              const Expanded(child: SizedBox.shrink()),
+            ],
+          ],
+        ),
+      );
+    }
+
+    final pages = HomeTodoPacker.packPages(cards);
+    final height = 132.h;
     return Padding(
       padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          for (var r = 0; r < rows.length; r++) ...[
-            if (r > 0) SizedBox(height: 12.h),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                for (var c = 0; c < rows[r].length; c++) ...[
-                  if (c > 0) SizedBox(width: 12.w),
-                  Expanded(child: _HomeQuickActionCard(action: rows[r][c])),
-                ],
-                for (var c = rows[r].length; c < crossAxisCount; c++) ...[
-                  SizedBox(width: 12.w),
-                  const Expanded(child: SizedBox.shrink()),
-                ],
-              ],
-            ),
-          ],
-        ],
+      child: SizedBox(
+        height: height,
+        child: PageView.builder(
+          itemCount: pages.length,
+          itemBuilder: (context, index) {
+            return _TodoPageGrid(page: pages[index], onOpen: open);
+          },
+        ),
       ),
     );
   }
 }
 
-class _HomeQuickActionCard extends StatelessWidget {
-  const _HomeQuickActionCard({required this.action});
+class _TodoPageGrid extends StatelessWidget {
+  const _TodoPageGrid({required this.page, required this.onOpen});
 
-  final HomeQuickAction action;
+  final List<HomeTodoCard> page;
+  final void Function(HomeTodoCard) onOpen;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(14.w),
-      decoration: BoxDecoration(
-        color: HomeDashboardTheme.surface,
+    // 按行布局：中/大卡整行；小卡两列。
+    final rows = <List<HomeTodoCard>>[];
+    var i = 0;
+    while (i < page.length) {
+      final card = page[i];
+      if (card.size == HomeTodoSize.large || card.size == HomeTodoSize.medium) {
+        rows.add([card]);
+        i++;
+        continue;
+      }
+      final row = <HomeTodoCard>[card];
+      i++;
+      if (i < page.length && page[i].size == HomeTodoSize.small) {
+        row.add(page[i]);
+        i++;
+      }
+      rows.add(row);
+    }
+
+    return Column(
+      children: [
+        for (var r = 0; r < rows.length; r++) ...[
+          if (r > 0) SizedBox(height: 12.h),
+          Expanded(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (var c = 0; c < rows[r].length; c++) ...[
+                  if (c > 0) SizedBox(width: 12.w),
+                  Expanded(
+                    flex: rows[r][c].size == HomeTodoSize.small && rows[r].length == 1
+                        ? 1
+                        : (rows[r][c].size == HomeTodoSize.small ? 1 : 2),
+                    child: _HomeTodoCardView(
+                      card: rows[r][c],
+                      onTap: () => onOpen(rows[r][c]),
+                    ),
+                  ),
+                ],
+                if (rows[r].length == 1 && rows[r].first.size == HomeTodoSize.small) ...[
+                  SizedBox(width: 12.w),
+                  const Expanded(child: SizedBox.shrink()),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _HomeTodoCardView extends StatelessWidget {
+  const _HomeTodoCardView({required this.card, required this.onTap});
+
+  final HomeTodoCard card;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: HomeDashboardTheme.surface,
+      borderRadius: BorderRadius.circular(HomeDashboardTheme.radiusMd),
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(HomeDashboardTheme.radiusMd),
-        border: Border.all(
-          color: HomeDashboardTheme.separator,
-          width: 0.5,
-        ),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+        child: Container(
+          padding: EdgeInsets.all(14.w),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(HomeDashboardTheme.radiusMd),
+            border: Border.all(
+              color: HomeDashboardTheme.separator,
+              width: 0.5,
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 40.w,
-                height: 40.w,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10.r),
-                  color: HomeDashboardTheme.background,
-                ),
-                child: action.imageUrl != null
-                    ? CacheImageUtils.network(
-                        action.imageUrl!,
-                        width: 40.w,
-                        height: 40.w,
-                        fit: BoxFit.cover,
-                        borderRadius: BorderRadius.circular(10.r),
-                        placeholder: (_, __) => Center(
-                          child: SizedBox(
-                            width: 16.w,
-                            height: 16.w,
-                            child: const CircularProgressIndicator(strokeWidth: 1.5),
+              Row(
+                children: [
+                  Container(
+                    width: 40.w,
+                    height: 40.w,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10.r),
+                      color: HomeDashboardTheme.background,
+                    ),
+                    child: card.imageUrl != null
+                        ? CacheImageUtils.network(
+                            card.imageUrl!,
+                            width: 40.w,
+                            height: 40.w,
+                            fit: BoxFit.cover,
+                            borderRadius: BorderRadius.circular(10.r),
+                            placeholder: (_, __) => Center(
+                              child: SizedBox(
+                                width: 16.w,
+                                height: 16.w,
+                                child: const CircularProgressIndicator(strokeWidth: 1.5),
+                              ),
+                            ),
+                            errorWidget: (_, __, ___) => Icon(
+                              Icons.image_outlined,
+                              size: 20.sp,
+                              color: HomeDashboardTheme.textGray,
+                            ),
+                          )
+                        : Center(
+                            child: Icon(
+                              Icons.assignment_outlined,
+                              size: 20.sp,
+                              color: HomeDashboardTheme.textGray,
+                            ),
                           ),
+                  ),
+                  SizedBox(width: 10.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          card.title,
+                          style: TextStyle(
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        errorWidget: (_, __, ___) => Icon(
-                          Icons.image_outlined,
-                          size: 20.sp,
-                          color: HomeDashboardTheme.textGray,
+                        SizedBox(height: 2.h),
+                        Text(
+                          card.subtitle,
+                          style: TextStyle(
+                            fontSize: 11.sp,
+                            color: HomeDashboardTheme.textGray,
+                          ),
+                          maxLines: card.size == HomeTodoSize.large ? 2 : 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      )
-                    : Center(
-                        child: Text(
-                          action.emoji ?? '?',
-                          style: TextStyle(fontSize: 20.sp),
-                        ),
-                      ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-              SizedBox(width: 10.w),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      action.title,
-                      style: TextStyle(
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+              SizedBox(height: 10.h),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 5.h),
+                  decoration: BoxDecoration(
+                    color: HomeDashboardTheme.primaryBlue.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  child: Text(
+                    card.actionLabel,
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      color: HomeDashboardTheme.primaryBlue,
+                      fontWeight: FontWeight.w500,
                     ),
-                    SizedBox(height: 2.h),
-                    Text(
-                      action.subtitle,
-                      style: TextStyle(
-                        fontSize: 11.sp,
-                        color: HomeDashboardTheme.textGray,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ],
           ),
-          SizedBox(height: 10.h),
-          Align(
-            alignment: Alignment.centerRight,
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 5.h),
-              decoration: BoxDecoration(
-                color: HomeDashboardTheme.primaryBlue.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(12.r),
-              ),
-              child: Text(
-                action.actionLabel,
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  color: HomeDashboardTheme.primaryBlue,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

@@ -5,10 +5,7 @@ import 'package:module_home/home/controller/home_controller.dart';
 import 'package:module_home/home/model/home_dashboard_model.dart';
 import 'package:module_home/home/theme/home_dashboard_theme.dart';
 import 'package:module_home/home/view/daily_check_in_dialog.dart';
-import 'package:module_home/home/view/widgets/home_club_tab_content.dart';
 import 'package:module_home/home/view/widgets/home_dashboard_widgets.dart';
-import 'package:module_home/home/view/widgets/home_top_tab_bar.dart';
-import 'package:module_home/home/view/widgets/home_video_tab_content.dart';
 import 'package:module_music/controller/music_playback_controller.dart';
 import 'package:module_music/widgets/music_mini_player_bar.dart';
 import 'package:wys_router/wys_router.dart';
@@ -49,7 +46,6 @@ class _HomePageState extends State<HomePage> {
         final data = controller.dashboard.value;
         final error = controller.errorMessage.value;
         controller.userGreeting.value;
-        controller.selectedTopTab.value;
         controller.selectedMetricTab.value;
         final bottomInset = _musicBottomInset(context);
 
@@ -81,11 +77,7 @@ class _HomePageState extends State<HomePage> {
                           greeting: controller.userGreeting.value,
                         ),
                         const HomeSearchBar(),
-                        HomeTopTabBar(
-                          selectedIndex: controller.selectedTopTab.value,
-                          onSelected: controller.selectTopTab,
-                        ),
-                        _buildTopTabBody(data),
+                        _buildHomeDashboard(data),
                       ],
                     ),
                   ),
@@ -132,14 +124,6 @@ class _HomePageState extends State<HomePage> {
     return const Center(child: CircularProgressIndicator());
   }
 
-  Widget _buildTopTabBody(HomeDashboardData data) {
-    return switch (controller.selectedTopTab.value) {
-      1 => const HomeVideoTabContent(),
-      2 => const HomeClubTabContent(),
-      _ => _buildHomeDashboard(data),
-    };
-  }
-
   Widget _buildHomeDashboard(HomeDashboardData data) {
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -147,7 +131,7 @@ class _HomePageState extends State<HomePage> {
       children: [
         const HomeBannerSection(),
         HomeFeatureGrid(items: data.features),
-        HomeQuickActionGrid(actions: data.quickActions),
+        HomeTodoCardStrip(cards: data.todoCards),
         HomeStoreMetricsCard(
           storeName: data.storeName,
           selectedTab: controller.selectedMetricTab.value,
