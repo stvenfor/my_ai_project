@@ -384,7 +384,7 @@ class HomeGreetingSection extends StatelessWidget {
   }
 }
 
-class HomeTodoCardStrip extends StatelessWidget {
+class HomeTodoCardStrip extends StatefulWidget {
   const HomeTodoCardStrip({super.key, required this.cards});
 
   final List<HomeTodoCard> cards;
@@ -406,12 +406,33 @@ class HomeTodoCardStrip extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    if (cards.isEmpty) return const SizedBox.shrink();
+  State<HomeTodoCardStrip> createState() => _HomeTodoCardStripState();
+}
 
-    void open(HomeTodoCard card) {
-      Get.toNamed<void>(resolveRoute(card));
-    }
+class _HomeTodoCardStripState extends State<HomeTodoCardStrip> {
+  late final PageController _pageController;
+  int _pageIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _open(HomeTodoCard card) {
+    Get.toNamed<void>(HomeTodoCardStrip.resolveRoute(card));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cards = widget.cards;
+    if (cards.isEmpty) return const SizedBox.shrink();
 
     if (HomeTodoPacker.shouldWrapOnly(cards)) {
       return Padding(
@@ -422,7 +443,7 @@ class HomeTodoCardStrip extends StatelessWidget {
             for (var i = 0; i < cards.length; i++) ...[
               if (i > 0) SizedBox(width: 12.w),
               Expanded(
-                child: _HomeTodoCardView(card: cards[i], onTap: () => open(cards[i])),
+                child: _HomeTodoCardView(card: cards[i], onTap: () => _open(cards[i])),
               ),
             ],
             for (var i = cards.length; i < 2; i++) ...[
@@ -435,18 +456,65 @@ class HomeTodoCardStrip extends StatelessWidget {
     }
 
     final pages = HomeTodoPacker.packPages(cards);
-    final height = 132.h;
+    final showIndicator = pages.length > 1;
+    // 两行小卡 / 两大中卡 / 一大卡 的内容高度，避免 Expanded 把卡片拉扁。
+    final pageHeight = 200.h;
+
     return Padding(
       padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
-      child: SizedBox(
-        height: height,
-        child: PageView.builder(
-          itemCount: pages.length,
-          itemBuilder: (context, index) {
-            return _TodoPageGrid(page: pages[index], onOpen: open);
-          },
-        ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            height: pageHeight,
+            child: PageView.builder(
+              controller: _pageController,
+              itemCount: pages.length,
+              onPageChanged: (i) => setState(() => _pageIndex = i),
+              itemBuilder: (context, index) {
+                return _TodoPageGrid(page: pages[index], onOpen: _open);
+              },
+            ),
+          ),
+          if (showIndicator) ...[
+            SizedBox(height: 10.h),
+            _TodoPageDots(
+              count: pages.length,
+              index: _pageIndex,
+            ),
+          ],
+        ],
       ),
+    );
+  }
+}
+
+class _TodoPageDots extends StatelessWidget {
+  const _TodoPageDots({required this.count, required this.index});
+
+  final int count;
+  final int index;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        for (var i = 0; i < count; i++) ...[
+          if (i > 0) SizedBox(width: 6.w),
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: i == index ? 14.w : 6.w,
+            height: 6.w,
+            decoration: BoxDecoration(
+              color: i == index
+                  ? HomeDashboardTheme.primaryBlue
+                  : HomeDashboardTheme.separator,
+              borderRadius: BorderRadius.circular(3.r),
+            ),
+          ),
+        ],
+      ],
     );
   }
 }
@@ -459,7 +527,6 @@ class _TodoPageGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 按行布局：中/大卡整行；小卡两列。
     final rows = <List<HomeTodoCard>>[];
     var i = 0;
     while (i < page.length) {
@@ -478,33 +545,41 @@ class _TodoPageGrid extends StatelessWidget {
       rows.add(row);
     }
 
+    // 大卡独占整页高度；两行均分。
+    final expandRows = page.any((c) => c.size == HomeTodoSize.large) || rows.length > 1;
+
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         for (var r = 0; r < rows.length; r++) ...[
           if (r > 0) SizedBox(height: 12.h),
+          if (expandRows)
+            Expanded(child: _buildRow(rows[r], expandFill: true))
+          else
+            _buildRow(rows[r], expandFill: false),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildRow(List<HomeTodoCard> row, {required bool expandFill}) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (var c = 0; c < row.length; c++) ...[
+          if (c > 0) SizedBox(width: 12.w),
           Expanded(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                for (var c = 0; c < rows[r].length; c++) ...[
-                  if (c > 0) SizedBox(width: 12.w),
-                  Expanded(
-                    flex: rows[r][c].size == HomeTodoSize.small && rows[r].length == 1
-                        ? 1
-                        : (rows[r][c].size == HomeTodoSize.small ? 1 : 2),
-                    child: _HomeTodoCardView(
-                      card: rows[r][c],
-                      onTap: () => onOpen(rows[r][c]),
-                    ),
-                  ),
-                ],
-                if (rows[r].length == 1 && rows[r].first.size == HomeTodoSize.small) ...[
-                  SizedBox(width: 12.w),
-                  const Expanded(child: SizedBox.shrink()),
-                ],
-              ],
+            flex: row[c].size == HomeTodoSize.small ? 1 : 2,
+            child: _HomeTodoCardView(
+              card: row[c],
+              onTap: () => onOpen(row[c]),
+              expandFill: expandFill,
             ),
           ),
+        ],
+        if (row.length == 1 && row.first.size == HomeTodoSize.small) ...[
+          SizedBox(width: 12.w),
+          const Expanded(child: SizedBox.shrink()),
         ],
       ],
     );
@@ -512,10 +587,41 @@ class _TodoPageGrid extends StatelessWidget {
 }
 
 class _HomeTodoCardView extends StatelessWidget {
-  const _HomeTodoCardView({required this.card, required this.onTap});
+  const _HomeTodoCardView({
+    required this.card,
+    required this.onTap,
+    this.expandFill = false,
+  });
 
   final HomeTodoCard card;
   final VoidCallback onTap;
+  final bool expandFill;
+
+  @override
+  Widget build(BuildContext context) {
+    return switch (card.size) {
+      HomeTodoSize.large => _LargeTodoCard(card: card, onTap: onTap),
+      HomeTodoSize.medium => _MediumTodoCard(card: card, onTap: onTap),
+      HomeTodoSize.small => _SmallTodoCard(
+          card: card,
+          onTap: onTap,
+          expandFill: expandFill,
+        ),
+    };
+  }
+}
+
+/// 原小卡视觉：图标+标题副文案，右下 CTA。
+class _SmallTodoCard extends StatelessWidget {
+  const _SmallTodoCard({
+    required this.card,
+    required this.onTap,
+    this.expandFill = false,
+  });
+
+  final HomeTodoCard card;
+  final VoidCallback onTap;
+  final bool expandFill;
 
   @override
   Widget build(BuildContext context) {
@@ -535,46 +641,12 @@ class _HomeTodoCardView extends StatelessWidget {
             ),
           ),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisSize: expandFill ? MainAxisSize.max : MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  Container(
-                    width: 40.w,
-                    height: 40.w,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10.r),
-                      color: HomeDashboardTheme.background,
-                    ),
-                    child: card.imageUrl != null
-                        ? CacheImageUtils.network(
-                            card.imageUrl!,
-                            width: 40.w,
-                            height: 40.w,
-                            fit: BoxFit.cover,
-                            borderRadius: BorderRadius.circular(10.r),
-                            placeholder: (_, __) => Center(
-                              child: SizedBox(
-                                width: 16.w,
-                                height: 16.w,
-                                child: const CircularProgressIndicator(strokeWidth: 1.5),
-                              ),
-                            ),
-                            errorWidget: (_, __, ___) => Icon(
-                              Icons.image_outlined,
-                              size: 20.sp,
-                              color: HomeDashboardTheme.textGray,
-                            ),
-                          )
-                        : Center(
-                            child: Icon(
-                              Icons.assignment_outlined,
-                              size: 20.sp,
-                              color: HomeDashboardTheme.textGray,
-                            ),
-                          ),
-                  ),
+                  _TodoThumb(imageUrl: card.imageUrl, size: 40.w),
                   SizedBox(width: 10.w),
                   Expanded(
                     child: Column(
@@ -596,7 +668,7 @@ class _HomeTodoCardView extends StatelessWidget {
                             fontSize: 11.sp,
                             color: HomeDashboardTheme.textGray,
                           ),
-                          maxLines: card.size == HomeTodoSize.large ? 2 : 1,
+                          maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ],
@@ -604,27 +676,229 @@ class _HomeTodoCardView extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 10.h),
+              if (expandFill) const Spacer() else SizedBox(height: 10.h),
               Align(
                 alignment: Alignment.centerRight,
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 5.h),
-                  decoration: BoxDecoration(
-                    color: HomeDashboardTheme.primaryBlue.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(12.r),
-                  ),
-                  child: Text(
-                    card.actionLabel,
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      color: HomeDashboardTheme.primaryBlue,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
+                child: _TodoActionChip(label: card.actionLabel),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 中卡：整行，左侧图标+文案，右侧 CTA（由小卡横向扩展）。
+class _MediumTodoCard extends StatelessWidget {
+  const _MediumTodoCard({required this.card, required this.onTap});
+
+  final HomeTodoCard card;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: HomeDashboardTheme.surface,
+      borderRadius: BorderRadius.circular(HomeDashboardTheme.radiusMd),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(HomeDashboardTheme.radiusMd),
+        child: Container(
+          width: double.infinity,
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(HomeDashboardTheme.radiusMd),
+            border: Border.all(
+              color: HomeDashboardTheme.separator,
+              width: 0.5,
+            ),
+          ),
+          child: Row(
+            children: [
+              _TodoThumb(imageUrl: card.imageUrl, size: 48.w),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      card.title,
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: 4.h),
+                    Text(
+                      card.subtitle,
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        color: HomeDashboardTheme.textGray,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(width: 12.w),
+              _TodoActionChip(label: card.actionLabel),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 大卡：占满一页，放大图标与字号，保留小卡的表面/描边/CTA 语言。
+class _LargeTodoCard extends StatelessWidget {
+  const _LargeTodoCard({required this.card, required this.onTap});
+
+  final HomeTodoCard card;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: HomeDashboardTheme.surface,
+      borderRadius: BorderRadius.circular(HomeDashboardTheme.radiusMd),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(HomeDashboardTheme.radiusMd),
+        child: Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(16.w),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(HomeDashboardTheme.radiusMd),
+            border: Border.all(
+              color: HomeDashboardTheme.separator,
+              width: 0.5,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _TodoThumb(imageUrl: card.imageUrl, size: 56.w),
+                  SizedBox(width: 14.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          card.title,
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        SizedBox(height: 6.h),
+                        Text(
+                          card.subtitle,
+                          style: TextStyle(
+                            fontSize: 13.sp,
+                            height: 1.35,
+                            color: HomeDashboardTheme.textGray,
+                          ),
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const Spacer(),
+              Align(
+                alignment: Alignment.centerRight,
+                child: _TodoActionChip(label: card.actionLabel, large: true),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TodoThumb extends StatelessWidget {
+  const _TodoThumb({required this.imageUrl, required this.size});
+
+  final String? imageUrl;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10.r),
+        color: HomeDashboardTheme.background,
+      ),
+      child: imageUrl != null
+          ? CacheImageUtils.network(
+              imageUrl!,
+              width: size,
+              height: size,
+              fit: BoxFit.cover,
+              borderRadius: BorderRadius.circular(10.r),
+              placeholder: (_, __) => Center(
+                child: SizedBox(
+                  width: 16.w,
+                  height: 16.w,
+                  child: const CircularProgressIndicator(strokeWidth: 1.5),
+                ),
+              ),
+              errorWidget: (_, __, ___) => Icon(
+                Icons.image_outlined,
+                size: size * 0.45,
+                color: HomeDashboardTheme.textGray,
+              ),
+            )
+          : Center(
+              child: Icon(
+                Icons.assignment_outlined,
+                size: size * 0.45,
+                color: HomeDashboardTheme.textGray,
+              ),
+            ),
+    );
+  }
+}
+
+class _TodoActionChip extends StatelessWidget {
+  const _TodoActionChip({required this.label, this.large = false});
+
+  final String label;
+  final bool large;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: large ? 16.w : 12.w,
+        vertical: large ? 8.h : 5.h,
+      ),
+      decoration: BoxDecoration(
+        color: HomeDashboardTheme.primaryBlue.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12.r),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: large ? 13.sp : 12.sp,
+          color: HomeDashboardTheme.primaryBlue,
+          fontWeight: FontWeight.w500,
         ),
       ),
     );
