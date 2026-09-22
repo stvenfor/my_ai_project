@@ -326,6 +326,10 @@ class MineController extends GetxController {
   }
 
   void onFunctionTap(MineFunctionItem item) {
+    if (item.id == 'calculator') {
+      Get.toNamed(RoutePath.purchaseCalculator);
+      return;
+    }
     if (item.id == 'qa') {
       Get.toNamed(RoutePath.mineHttpTest);
       return;

@@ -24,6 +24,8 @@ import 'package:module_settings/mine/controller/mine_profile_controller.dart';
 import 'package:module_settings/mine/view/mine_profile_page.dart';
 import 'package:module_settings/mine/view/mine_http_test_page.dart';
 import 'package:module_settings/mine/view/mine_page.dart';
+import 'package:module_settings/purchase_calculator/controller/purchase_calculator_controller.dart';
+import 'package:module_settings/purchase_calculator/view/purchase_calculator_page.dart';
 import 'package:module_settings/settings/settings_binding.dart';
 import 'package:module_settings/settings/view/dialog_demo_page.dart';
 import 'package:module_settings/settings/view/settings_page.dart';
@@ -95,6 +97,13 @@ class SettingsModule extends FeatureModule {
         RoutePath.dealInvoiceUpload: (_) {
           DealInvoiceUploadBinding().dependencies();
           return const DealInvoiceUploadPage();
+        },
+        RoutePath.purchaseCalculator: (_) {
+          if (Get.isRegistered<PurchaseCalculatorController>()) {
+            Get.delete<PurchaseCalculatorController>(force: true);
+          }
+          Get.put(PurchaseCalculatorController());
+          return const PurchaseCalculatorPage();
         },
       };
 
