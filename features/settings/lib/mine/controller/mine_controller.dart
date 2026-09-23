@@ -358,6 +358,14 @@ class MineController extends GetxController {
       }
       return;
     }
+    if (item.id == 'after_sales') {
+      if (isLoggedIn) {
+        Get.toNamed(RoutePath.homeAfterSalesList);
+      } else {
+        AuthNavigation.openLogin(redirectRoute: RoutePath.homeAfterSalesList);
+      }
+      return;
+    }
     UiKitInitializer.toast('${item.title} 开发中');
   }
 }

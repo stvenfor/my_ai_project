@@ -23,6 +23,10 @@ import 'package:module_home/home/view/ledger_list_page.dart';
 import 'package:module_home/home/view/used_car_create_page.dart';
 import 'package:module_home/home/view/used_car_detail_page.dart';
 import 'package:module_home/home/view/used_car_list_page.dart';
+import 'package:module_home/after_sales/after_sales_binding.dart';
+import 'package:module_home/after_sales/view/after_sales_create_page.dart';
+import 'package:module_home/after_sales/view/after_sales_detail_page.dart';
+import 'package:module_home/after_sales/view/after_sales_list_page.dart';
 import 'package:module_home/home/web/home_web_handlers.dart';
 import 'package:module_core/core.dart';
 import 'package:wys_router/src/module/feature_module.dart';
@@ -101,6 +105,12 @@ class HomeModule extends FeatureModule {
         RoutePath.homeTodoFollowUp: (_) => const FollowUpCustomersPage(),
         RoutePath.homeTodoAfterSales: (_) => const AfterSalesAppointmentsPage(),
         RoutePath.homeTodoOrderReview: (_) => const StoreReviewOrdersPage(),
+        RoutePath.homeAfterSalesList: (_) {
+          AfterSalesListBinding().dependencies();
+          return const AfterSalesListPage();
+        },
+        RoutePath.homeAfterSalesCreate: (_) => const AfterSalesCreatePage(),
+        RoutePath.homeAfterSalesDetail: (_) => const AfterSalesDetailPage(),
       };
 
   @override

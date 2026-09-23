@@ -24,6 +24,9 @@ class RoutePath{
   static const String homeTodoFollowUp = '/home/todo/follow-up-customers';
   static const String homeTodoAfterSales = '/home/todo/after-sales-appointments';
   static const String homeTodoOrderReview = '/home/todo/order-pending-review';
+  static const String homeAfterSalesList = '/home/after_sales';
+  static const String homeAfterSalesCreate = '/home/after_sales/create';
+  static const String homeAfterSalesDetail = '/home/after_sales/detail';
 
   /// AI 小石头助手页（SSE 气泡对话）
   static const String aiStream = '/ai/stream';
