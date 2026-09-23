@@ -19,6 +19,12 @@ migrate_working_dir/
 .env.local
 .env.*.local
 .env.lan
+.env.bak
+.env.bak.*
+*.bak
+
+# 各 package / feature 本地 SDK 路径（勿入库）
+**/local.properties
 
 # IntelliJ related
 *.iml
@@ -42,6 +48,16 @@ ios/build/
 .pub-cache/
 .pub/
 /build/
+**/build/
+
+# 各 package 下 Flutter 工具生成（ephemeral / 导出环境），勿入库
+**/linux/flutter/ephemeral/
+**/macos/Flutter/ephemeral/
+**/windows/flutter/ephemeral/
+**/ios/Flutter/ephemeral/
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/Flutter/flutter_lldb*
 
 # Symbolication related
 app.*.symbols
