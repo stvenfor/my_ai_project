@@ -108,6 +108,52 @@ class NewCarFollowApi {
     return _data(result.data, '更新失败');
   }
 
+  Future<({List<NewCarFollowLog> list, bool hasMore})> fetchLogs({
+    required String fileId,
+    int page = 1,
+    int size = 20,
+  }) async {
+    AuthHttpConfig.ensureInitialized();
+    final result = await HttpManager.instance
+        .get<ResultModel<ListData<NewCarFollowLog>>>(
+      '$_base/$fileId/logs',
+      queryParameters: {'page': page, 'size': size},
+      converter: (json) => ResultModel.listPage(
+        json as Map<String, dynamic>,
+        NewCarFollowLog.fromJson,
+      ),
+    );
+    final listData = _data(result.data, '加载流水失败');
+    final total = listData.pagination?.total ?? listData.list.length;
+    final hasMore = page * size < total;
+    return (list: listData.list, hasMore: hasMore);
+  }
+
+  Future<NewCarFollowLog> createLog({
+    required String fileId,
+    required String body,
+    String? followLevel,
+    String? nextFollowUpAt,
+  }) async {
+    AuthHttpConfig.ensureInitialized();
+    final data = <String, dynamic>{'body': body};
+    if (followLevel != null && followLevel.isNotEmpty) {
+      data['follow_level'] = followLevel;
+    }
+    if (nextFollowUpAt != null) {
+      data['next_follow_up_at'] = nextFollowUpAt;
+    }
+    final result = await HttpManager.instance.post<ResultModel<NewCarFollowLog>>(
+      '$_base/$fileId/logs',
+      data: data,
+      converter: (json) => ResultModel.fromJson(
+        json as Map<String, dynamic>,
+        (data) => NewCarFollowLog.fromJson(data as Map<String, dynamic>),
+      ),
+    );
+    return _data(result.data, '写流水失败');
+  }
+
   T _data<T>(ResultModel<T>? result, String fallback) {
     if (result == null || !result.isSuccess || result.data == null) {
       throw Exception(result?.message ?? fallback);

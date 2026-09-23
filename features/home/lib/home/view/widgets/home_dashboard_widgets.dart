@@ -7,7 +7,6 @@ import 'package:module_home/home/model/home_todo_models.dart';
 import 'package:module_home/home/model/home_todo_packer.dart';
 import 'package:module_home/home/theme/home_dashboard_theme.dart';
 import 'package:module_home/home/navigation/ai_stone_navigation.dart';
-import 'package:module_home/home/navigation/analytics_navigation.dart';
 import 'package:module_home/home/navigation/deal_invoice_navigation.dart';
 import 'package:module_home/home/navigation/new_car_follow_navigation.dart';
 import 'package:module_home/home/navigation/used_car_navigation.dart';
@@ -249,10 +248,6 @@ class HomeFeatureGrid extends StatelessWidget {
       AiStoneNavigation.open();
       return;
     }
-    if (item.label == '数据分析') {
-      AnalyticsNavigation.open();
-      return;
-    }
     if (item.label == 'H5 调试') {
       final dashboard = Get.isRegistered<HomeController>()
           ? Get.find<HomeController>().dashboard.value
@@ -275,7 +270,8 @@ class HomeFeatureGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const maxItems = 10; // 5 列 × 最多 2 行
+    // 产品：最多 9 格，末位固定「更多」（≠ 5×2 布局算术）
+    const maxItems = 9;
     const crossAxisCount = 5;
     final iconSize = 44.w;
     final labelGap = 4.h;
@@ -284,8 +280,13 @@ class HomeFeatureGrid extends StatelessWidget {
       height: 1.2,
       color: HomeDashboardTheme.labelPrimary,
     );
+    final more = items.where((e) => e.label == '更多').toList();
+    final head = items
+        .where((e) => e.label != '更多')
+        .take(more.isEmpty ? maxItems : maxItems - 1)
+        .toList();
     final visible =
-        items.length > maxItems ? items.sublist(0, maxItems) : items;
+        more.isEmpty ? head : [...head, more.last];
     final rows = <List<HomeFeatureItem>>[];
     for (var i = 0; i < visible.length; i += crossAxisCount) {
       final end = i + crossAxisCount > visible.length
@@ -730,48 +731,58 @@ class _SmallTodoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final header = Row(
+      children: [
+        _TodoThumb(imageUrl: card.imageUrl, size: 40.w),
+        SizedBox(width: 10.w),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                card.title,
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w600,
+                  color: HomeDashboardTheme.labelPrimary,
+                  height: 1.25,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              SizedBox(height: 2.h),
+              Text(
+                card.subtitle,
+                style: TextStyle(
+                  fontSize: 11.sp,
+                  color: HomeDashboardTheme.textGray,
+                  height: 1.3,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+
     return _TodoCardShell(
       onTap: onTap,
       child: Column(
         mainAxisSize: expandFill ? MainAxisSize.max : MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              _TodoThumb(imageUrl: card.imageUrl, size: 40.w),
-              SizedBox(width: 10.w),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      card.title,
-                      style: TextStyle(
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.w600,
-                        color: HomeDashboardTheme.labelPrimary,
-                        height: 1.25,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(height: 2.h),
-                    Text(
-                      card.subtitle,
-                      style: TextStyle(
-                        fontSize: 11.sp,
-                        color: HomeDashboardTheme.textGray,
-                        height: 1.3,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          if (expandFill) const Spacer() else SizedBox(height: 10.h),
+          // expandFill：行高扣掉 padding/chip 后可能差 1～2px；用 Expanded
+          // 吃约束，避免 Spacer 压不住固定子件导致 RenderFlex overflow。
+          if (expandFill)
+            Expanded(
+              child: Align(alignment: Alignment.topLeft, child: header),
+            )
+          else ...[
+            header,
+            SizedBox(height: 10.h),
+          ],
           Align(
             alignment: Alignment.centerRight,
             child: _TodoActionChip(label: card.actionLabel),

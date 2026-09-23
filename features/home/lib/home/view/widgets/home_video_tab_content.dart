@@ -282,7 +282,9 @@ class _HotCourseCard extends StatelessWidget {
                     course.title,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: HomeDashboardTheme.sectionTitle.copyWith(fontSize: 14),
+                    // 勿继承 sectionTitle 的 24/18，否则 fontSize:14 时两行多出约 4px
+                    style: HomeDashboardTheme.sectionTitle
+                        .copyWith(fontSize: 14, height: 1.2),
                   ),
                   const SizedBox(height: 6),
                   Text(course.author, style: HomeDashboardTheme.sectionLabel),

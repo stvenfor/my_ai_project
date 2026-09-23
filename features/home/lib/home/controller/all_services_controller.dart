@@ -2,7 +2,9 @@ import 'package:get/get.dart';
 import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_home/home/model/all_services_data.dart';
 import 'package:module_home/home/model/all_services_model.dart';
+import 'package:module_home/home/navigation/analytics_navigation.dart';
 import 'package:module_home/home/repository/all_services_repository.dart';
+import 'package:wys_router/src/route/route_path.dart';
 
 class AllServicesController extends GetxController {
   final isEditing = false.obs;
@@ -59,6 +61,10 @@ class AllServicesController extends GetxController {
 
   void onServiceTap(AllServiceItem item) {
     if (isEditing.value) return;
+    if (item.routePath == RoutePath.homeDataAnalyticsList) {
+      AnalyticsNavigation.open();
+      return;
+    }
     Get.toNamed<void>(item.routePath);
   }
 }

@@ -87,6 +87,8 @@ class NewCarFollowFile {
     required this.stage,
     required this.vehicleInterest,
     this.nextFollowUpAt,
+    this.ownerUserId = '',
+    this.ownerDisplayName = '',
   });
 
   final String fileId;
@@ -98,6 +100,8 @@ class NewCarFollowFile {
   final String stage;
   final String vehicleInterest;
   final String? nextFollowUpAt;
+  final String ownerUserId;
+  final String ownerDisplayName;
 
   factory NewCarFollowFile.fromJson(Map<String, dynamic> json) {
     return NewCarFollowFile(
@@ -110,8 +114,76 @@ class NewCarFollowFile {
       stage: (json['stage'] as String?) ?? '',
       vehicleInterest: (json['vehicle_interest'] as String?) ?? '',
       nextFollowUpAt: json['next_follow_up_at'] as String?,
+      ownerUserId: (json['owner_user_id'] as String?) ?? '',
+      ownerDisplayName: (json['owner_display_name'] as String?) ?? '',
     );
   }
+}
+
+class NewCarFollowLog {
+  const NewCarFollowLog({
+    required this.logId,
+    required this.fileId,
+    required this.authorUserId,
+    required this.body,
+    required this.createdAt,
+    this.authorDisplayName = '',
+    this.followLevel = '',
+    this.intentBand = '',
+    this.nextFollowUpAt,
+  });
+
+  final String logId;
+  final String fileId;
+  final String authorUserId;
+  final String authorDisplayName;
+  final String body;
+  final String followLevel;
+  final String intentBand;
+  final String? nextFollowUpAt;
+  final String createdAt;
+
+  factory NewCarFollowLog.fromJson(Map<String, dynamic> json) {
+    return NewCarFollowLog(
+      logId: '${json['log_id'] ?? ''}',
+      fileId: '${json['file_id'] ?? ''}',
+      authorUserId: (json['author_user_id'] as String?) ?? '',
+      authorDisplayName: (json['author_display_name'] as String?) ?? '',
+      body: (json['body'] as String?) ?? '',
+      followLevel: (json['follow_level'] as String?) ?? '',
+      intentBand: (json['intent_band'] as String?) ?? '',
+      nextFollowUpAt: json['next_follow_up_at'] as String?,
+      createdAt: '${json['created_at'] ?? ''}',
+    );
+  }
+}
+
+/// UI 文案（阶段 / 级别）。
+abstract final class NewCarFollowLabels {
+  static String stage(String raw) => switch (raw) {
+        'new' => '新建',
+        'following' => '跟进中',
+        'test_drive' => '试驾',
+        'quoted' => '已报价',
+        'won' => '成交',
+        'lost' => '战败',
+        _ => raw.isEmpty ? '—' : raw,
+      };
+
+  static String level(String lv) => switch (lv) {
+        'H' => 'H · 高意向（急）',
+        'A' => 'A · 高意向',
+        'B' => 'B · 中意向',
+        'E' => 'E · 低意向',
+        _ => lv,
+      };
+
+  static const levelChoices = <(String, String)>[
+    ('H', 'H · 高意向（急）'),
+    ('A', 'A · 高意向'),
+    ('B', 'B · 中意向'),
+    ('E', 'E · 低意向'),
+  ];
 }
 
 int _int(dynamic v) {

@@ -116,6 +116,12 @@ abstract final class AllServicesData {
     assetName: 'marketing.png',
     routePath: RoutePath.payMembership,
   );
+  static const _dataAnalytics = AllServiceItem(
+    label: '数据分析',
+    assetName: 'smart_number.png',
+    routePath: RoutePath.homeDataAnalyticsList,
+    id: 'data_analytics',
+  );
 
   static const defaultFavoriteItems = <AllServiceItem>[
     _introductionAnimation,
@@ -169,6 +175,7 @@ abstract final class AllServicesData {
     AllServiceSection(
       title: '其他服务',
       items: [
+        _dataAnalytics,
         _membershipRenew,
         _help,
         _feedback,

@@ -354,10 +354,13 @@ class _TodoListBody<T> extends StatelessWidget {
       );
     }
     if (snap.hasError) {
+      if (_isForbiddenError(snap.error)) {
+        return _TodoForbiddenPane(onBack: () => Get.back<void>());
+      }
       return _TodoStatePane(
-        icon: Icons.error_outline_rounded,
-        title: '加载失败',
-        subtitle: _errMsg(snap.error, '请稍后重试'),
+        icon: Icons.wifi_tethering_error_rounded,
+        title: '暂时加载不出来',
+        subtitle: _errMsg(snap.error, '网络异常，请稍后重试'),
         actionLabel: '重试',
         onAction: onRetry,
       );
@@ -588,43 +591,173 @@ class _TodoStatePane extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 32.w),
+        padding: EdgeInsets.symmetric(horizontal: 28.w),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 40.sp, color: HomeDashboardTheme.labelTertiary),
-            SizedBox(height: 12.h),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w600,
-                color: HomeDashboardTheme.labelPrimary,
+            Container(
+              width: 72.w,
+              height: 72.w,
+              decoration: BoxDecoration(
+                color: HomeDashboardTheme.fillSecondary,
+                borderRadius: BorderRadius.circular(20.r),
+                border: Border.all(color: HomeDashboardTheme.separator),
+              ),
+              child: Icon(
+                icon,
+                size: 32.sp,
+                color: HomeDashboardTheme.labelTertiary,
               ),
             ),
-            SizedBox(height: 6.h),
+            SizedBox(height: 18.h),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 17.sp,
+                fontWeight: FontWeight.w600,
+                color: HomeDashboardTheme.labelPrimary,
+                height: 1.3,
+              ),
+            ),
+            SizedBox(height: 8.h),
             Text(
               subtitle,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13.sp,
                 color: HomeDashboardTheme.labelSecondary,
-                height: 1.4,
+                height: 1.45,
               ),
             ),
-            SizedBox(height: 16.h),
-            FilledButton(
-              onPressed: () => onAction(),
-              style: FilledButton.styleFrom(
-                backgroundColor: HomeDashboardTheme.accent,
+            SizedBox(height: 20.h),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: () => onAction(),
+                style: FilledButton.styleFrom(
+                  backgroundColor: HomeDashboardTheme.accent,
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(vertical: 12.h),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(
+                      HomeDashboardTheme.radiusMd,
+                    ),
+                  ),
+                ),
+                child: Text(actionLabel),
               ),
-              child: Text(actionLabel),
             ),
           ],
         ),
       ),
     );
   }
+}
+
+/// 403 / 业务无权限：不展示原始「无权限」硬文案，给可理解说明与返回。
+class _TodoForbiddenPane extends StatelessWidget {
+  const _TodoForbiddenPane({required this.onBack});
+
+  final VoidCallback onBack;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 24.w),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 360),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: HomeDashboardTheme.surface,
+              borderRadius: BorderRadius.circular(HomeDashboardTheme.radiusLg),
+              border: Border.all(color: HomeDashboardTheme.separator),
+            ),
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(22.w, 28.h, 22.w, 22.h),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 64.w,
+                    height: 64.w,
+                    decoration: BoxDecoration(
+                      color: HomeDashboardTheme.accent.withValues(alpha: 0.08),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.lock_outline_rounded,
+                      size: 28.sp,
+                      color: HomeDashboardTheme.accent,
+                    ),
+                  ),
+                  SizedBox(height: 18.h),
+                  Text(
+                    '暂无查看权限',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w600,
+                      color: HomeDashboardTheme.labelPrimary,
+                      height: 1.25,
+                    ),
+                  ),
+                  SizedBox(height: 10.h),
+                  Text(
+                    '该待办仅门店管理员可查看。\n如需处理，请联系店管开通权限，或切换有权限的账号。',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      color: HomeDashboardTheme.labelSecondary,
+                      height: 1.5,
+                    ),
+                  ),
+                  SizedBox(height: 22.h),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton(
+                      onPressed: onBack,
+                      style: FilledButton.styleFrom(
+                        backgroundColor: HomeDashboardTheme.accent,
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(vertical: 12.h),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            HomeDashboardTheme.radiusMd,
+                          ),
+                        ),
+                      ),
+                      child: const Text('返回'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+bool _isForbiddenError(Object? e) {
+  if (e is HttpRequestException) {
+    if (e.statusCode == 403) return true;
+    if (e.code == '10003') return true;
+    final m = e.message;
+    if (m.contains('无权限') ||
+        m.contains('没有权限') ||
+        m.contains('无权') ||
+        m.contains('仅门店管理员')) {
+      return true;
+    }
+  }
+  final s = e?.toString() ?? '';
+  return s.contains('无权限') ||
+      s.contains('没有权限') ||
+      s.contains('无权') ||
+      s.contains('仅门店管理员');
 }
 
 String _errMsg(Object? e, String fallback) {
