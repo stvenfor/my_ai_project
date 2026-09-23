@@ -37,8 +37,9 @@ class CommunityViewModel extends GetxController {
   static const tabKeys = ['latest', 'hot', 'following'];
 
   @override
-  void onInit() {
-    super.onInit();
+  void onReady() {
+    super.onReady();
+    // onInit 若在 build 里 Get.find 触发，同步改 Rx 会让兄弟 Obx markNeedsBuild 红屏。
     loadPosts();
   }
 
