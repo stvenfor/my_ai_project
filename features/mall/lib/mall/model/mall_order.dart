@@ -110,6 +110,7 @@ class MallOrderDetail {
     this.paymentChannel,
     this.paidAt = '',
     this.payDeadlineAt = '',
+    this.totalPoints = 0,
   });
 
   factory MallOrderDetail.fromJson(Map<String, dynamic> json) {
@@ -143,6 +144,7 @@ class MallOrderDetail {
       paymentChannel: (orderMap['payment_channel'] as num?)?.toInt(),
       paidAt: orderMap['paid_at']?.toString() ?? '',
       payDeadlineAt: json['pay_deadline_at']?.toString() ?? '',
+      totalPoints: (orderMap['total_points'] as num?)?.toInt() ?? 0,
       items: items,
     );
   }
@@ -159,6 +161,7 @@ class MallOrderDetail {
   final int? paymentChannel;
   final String paidAt;
   final String payDeadlineAt;
+  final int totalPoints;
   final List<MallOrderItem> items;
 
   String get statusLabel => mallOrderStatusLabel(status);

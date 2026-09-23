@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:module_auth/api/auth_http_config.dart';
 import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_http/module_http.dart';
 import 'package:module_mall/mall/model/mall_order.dart';
@@ -19,13 +20,27 @@ class MallOrderDetailController extends GetxController {
   final acting = false.obs;
   final errorMessage = ''.obs;
 
-  static const _payAlipay = 1;
+  /// 1 支付宝 2 微信 6 余额；纯积分单用 5。
+  final selectedChannel = 1.obs;
+  final walletBalance = '0.00'.obs;
+
+  static const payAlipay = 1;
+  static const payWeChat = 2;
+  static const payPoints = 5;
+  static const payBalance = 6;
 
   @override
   void onInit() {
     super.onInit();
     load();
   }
+
+  bool get needsCny {
+    final a = detail.value?.amount ?? '0.00';
+    return a.trim().isNotEmpty && a != '0' && a != '0.00' && a != '0.0';
+  }
+
+  bool get needsPoints => (detail.value?.totalPoints ?? 0) > 0;
 
   Future<void> load() async {
     if (orderId <= 0) {
@@ -37,6 +52,12 @@ class MallOrderDetailController extends GetxController {
     errorMessage.value = '';
     try {
       detail.value = await _repository.fetchOrderDetail(orderId);
+      if (needsCny) {
+        selectedChannel.value = payAlipay;
+        await _loadWalletBalance();
+      } else if (needsPoints) {
+        selectedChannel.value = payPoints;
+      }
     } on HttpRequestException catch (e) {
       errorMessage.value = e.message.isEmpty ? '加载订单失败' : e.message;
       detail.value = null;
@@ -45,6 +66,25 @@ class MallOrderDetailController extends GetxController {
       detail.value = null;
     } finally {
       loading.value = false;
+    }
+  }
+
+  Future<void> _loadWalletBalance() async {
+    try {
+      AuthHttpConfig.ensureInitialized();
+      final result = await HttpManager.instance.get<ResultModel<Map<String, dynamic>>>(
+        '/api/v1/wallet',
+        converter: (json) => ResultModel.object(
+          json as Map<String, dynamic>,
+          (m) => m,
+        ),
+      );
+      final data = result.data?.data;
+      if (data != null) {
+        walletBalance.value = data['balance']?.toString() ?? '0.00';
+      }
+    } catch (_) {
+      // 余额展示失败不挡支付
     }
   }
 
@@ -63,11 +103,13 @@ class MallOrderDetailController extends GetxController {
     if (acting.value) return;
     acting.value = true;
     try {
+      final channel = needsCny ? selectedChannel.value : payPoints;
       detail.value = await _repository.payOrder(
         orderId: orderId,
-        paymentChannel: _payAlipay,
+        paymentChannel: channel,
       );
       UiKitInitializer.toast('支付成功');
+      await _loadWalletBalance();
     } on HttpRequestException catch (e) {
       UiKitInitializer.toast(e.message.isEmpty ? '支付失败' : e.message);
       await load();
@@ -86,6 +128,7 @@ class MallOrderDetailController extends GetxController {
       await _repository.cancelOrder(orderId);
       UiKitInitializer.toast('已取消');
       await load();
+      await _loadWalletBalance();
     } on HttpRequestException catch (e) {
       UiKitInitializer.toast(e.message.isEmpty ? '取消失败' : e.message);
     } catch (_) {

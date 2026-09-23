@@ -13,6 +13,7 @@ import 'package:module_live/live_module.dart';
 import 'package:module_mall/mall_module.dart';
 import 'package:module_music/music_module.dart';
 import 'package:module_pay/pay_module.dart';
+import 'package:module_wallet/wallet_module.dart';
 import 'package:wys_router/src/module/feature_module.dart';
 import 'package:module_settings/settings_module.dart';
 import 'package:module_video/video_module.dart';
@@ -31,6 +32,7 @@ List<FeatureModule> buildEnabledModules() {
     LiveModule(),
     MallModule(),
     PayModule(),
+    WalletModule(),
     VideoModule(),
     BfuiModule(),
     MusicModule(),

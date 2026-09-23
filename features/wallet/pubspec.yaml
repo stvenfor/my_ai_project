@@ -1,0 +1,31 @@
+name: module_wallet
+description: 人民币钱包 — 余额、银行卡、充值。
+publish_to: 'none'
+version: 0.0.1
+
+environment:
+  sdk: '>=3.0.3 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  get: ^4.7.3
+  module_common_ui:
+    path: ../../commons/ui
+  module_http:
+    path: ../../commons/network
+  module_auth:
+    path: ../auth
+  wys_router:
+    path: ../../commons/wys_router
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+dependency_overrides:
+  rxdart: ^0.27.7
+
+flutter:
+  uses-material-design: true

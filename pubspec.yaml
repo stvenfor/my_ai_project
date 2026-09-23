@@ -47,6 +47,8 @@ dependencies:
     path: ./features/mall
   module_pay:
     path: ./features/pay
+  module_wallet:
+    path: ./features/wallet
   wys_router:
     path: ./commons/wys_router
   module_settings:

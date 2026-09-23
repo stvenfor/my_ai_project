@@ -42,6 +42,7 @@ class RoutePath{
   static const String liveRoom = '/live/room';
   static const String pay = '/pay';
   static const String payMembership = '/pay/membership';
+  static const String wallet = '/wallet';
   static const String mine = '/mine';
   static const String mineHttpTest = '/mine/http_test';
   static const String personalizedSettings = '/mine/personalized_settings';

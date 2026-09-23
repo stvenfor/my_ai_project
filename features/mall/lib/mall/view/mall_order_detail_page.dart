@@ -13,7 +13,7 @@ class MallOrderDetailPage extends GetView<MallOrderDetailController> {
     return AppPageScaffold(
       layout: AppPageLayout.standard,
       backgroundColor: MallTheme.background,
-      navBar: const AppNavBar(
+      navBar: AppNavBar(
         title: '订单详情',
         showBackButton: true,
         backgroundColor: MallTheme.surface,
@@ -138,6 +138,48 @@ class MallOrderDetailPage extends GetView<MallOrderDetailController> {
                       ],
                     ),
                   ),
+                  if (d.isUnpaid &&
+                      d.amount.trim().isNotEmpty &&
+                      d.amount != '0' &&
+                      d.amount != '0.00' &&
+                      d.amount != '0.0') ...[
+                    SizedBox(height: 10.h),
+                    _Section(
+                      child: Obx(() {
+                        final ch = controller.selectedChannel.value;
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('支付方式', style: MallTheme.cardTitle),
+                            SizedBox(height: 8.h),
+                            Wrap(
+                              spacing: 8.w,
+                              children: [
+                                ChoiceChip(
+                                  label: const Text('支付宝'),
+                                  selected: ch == MallOrderDetailController.payAlipay,
+                                  onSelected: (_) => controller.selectedChannel.value =
+                                      MallOrderDetailController.payAlipay,
+                                ),
+                                ChoiceChip(
+                                  label: const Text('微信'),
+                                  selected: ch == MallOrderDetailController.payWeChat,
+                                  onSelected: (_) => controller.selectedChannel.value =
+                                      MallOrderDetailController.payWeChat,
+                                ),
+                                ChoiceChip(
+                                  label: Text('余额 ¥${controller.walletBalance.value}'),
+                                  selected: ch == MallOrderDetailController.payBalance,
+                                  onSelected: (_) => controller.selectedChannel.value =
+                                      MallOrderDetailController.payBalance,
+                                ),
+                              ],
+                            ),
+                          ],
+                        );
+                      }),
+                    ),
+                  ],
                 ],
               ),
             ),

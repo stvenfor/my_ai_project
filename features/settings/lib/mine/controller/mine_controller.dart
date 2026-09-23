@@ -294,7 +294,11 @@ class MineController extends GetxController {
           AuthNavigation.openLogin(redirectRoute: RoutePath.mallOrders);
         }
       case 'wallet':
-        UiKitInitializer.toast('${item.label} 开发中');
+        if (isLoggedIn) {
+          Get.toNamed(RoutePath.wallet);
+        } else {
+          AuthNavigation.openLogin(redirectRoute: RoutePath.wallet);
+        }
       default:
         UiKitInitializer.toast('${item.label} 开发中');
     }
