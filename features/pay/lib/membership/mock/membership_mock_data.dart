@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:module_pay/membership/model/membership_models.dart';
 
 abstract final class MembershipMockData {
@@ -101,6 +102,29 @@ abstract final class MembershipMockData {
     subtitle: '加赠 AI 音色试用包',
     countdownLabel: promoCountdown,
   );
+
+  static const aiFeatures = <MembershipFeatureItem>[
+    MembershipFeatureItem(
+      title: '背单词',
+      subtitle: '听音辨义 拼写无忧',
+      gradient: [Color(0xFF50E3C2), Color(0xFF0070F3)],
+    ),
+    MembershipFeatureItem(
+      title: '读课文',
+      subtitle: '智能打分 纠正发音',
+      gradient: [Color(0xFFF9CB28), Color(0xFFF5A623)],
+    ),
+    MembershipFeatureItem(
+      title: 'AI私教',
+      subtitle: '告别死记 活学活用',
+      gradient: [Color(0xFF6CB6FF), Color(0xFF3D8BFF)],
+    ),
+    MembershipFeatureItem(
+      title: '刷真题',
+      subtitle: '考点精粹 高效提分',
+      gradient: [Color(0xFFFF7B7B), Color(0xFFFF4D4F)],
+    ),
+  ];
 
   static List<MembershipPlan> plansFor(MembershipTier tier) =>
       tier == MembershipTier.svip ? svipPlans : aiSvipPlans;

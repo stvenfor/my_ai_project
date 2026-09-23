@@ -27,6 +27,9 @@ class RoutePath{
   static const String homeAfterSalesList = '/home/after_sales';
   static const String homeAfterSalesCreate = '/home/after_sales/create';
   static const String homeAfterSalesDetail = '/home/after_sales/detail';
+  static const String homeNewCarFollow = '/home/new_car_follow';
+  static const String homeNewCarFollowCreate = '/home/new_car_follow/create';
+  static const String homeNewCarFollowDetail = '/home/new_car_follow/detail';
 
   /// AI 小石头助手页（SSE 气泡对话）
   static const String aiStream = '/ai/stream';
@@ -40,6 +43,7 @@ class RoutePath{
   static const String chatDetail = '/chat/detail';
   static const String community = '/community';
   static const String communityPublish = '/community/publish';
+  static const String communityConvention = '/community/convention';
   static const String communitySearch = '/community/search';
   static const String friend = '/friend';
   static const String live = '/live';

@@ -28,6 +28,10 @@ import 'package:module_home/after_sales/view/after_sales_create_page.dart';
 import 'package:module_home/after_sales/view/after_sales_detail_page.dart';
 import 'package:module_home/after_sales/view/after_sales_list_page.dart';
 import 'package:module_home/home/web/home_web_handlers.dart';
+import 'package:module_home/new_car_follow/new_car_follow_binding.dart';
+import 'package:module_home/new_car_follow/view/new_car_follow_create_page.dart';
+import 'package:module_home/new_car_follow/view/new_car_follow_detail_page.dart';
+import 'package:module_home/new_car_follow/view/new_car_follow_list_page.dart';
 import 'package:module_core/core.dart';
 import 'package:wys_router/src/module/feature_module.dart';
 import 'package:wys_router/src/module/module_host_context.dart';
@@ -111,6 +115,14 @@ class HomeModule extends FeatureModule {
         },
         RoutePath.homeAfterSalesCreate: (_) => const AfterSalesCreatePage(),
         RoutePath.homeAfterSalesDetail: (_) => const AfterSalesDetailPage(),
+        RoutePath.homeNewCarFollow: (_) {
+          NewCarFollowListBinding().dependencies();
+          return const NewCarFollowListPage();
+        },
+        RoutePath.homeNewCarFollowCreate: (_) =>
+            const NewCarFollowCreatePage(),
+        RoutePath.homeNewCarFollowDetail: (_) =>
+            const NewCarFollowDetailPage(),
       };
 
   @override
