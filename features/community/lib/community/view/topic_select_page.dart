@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:module_common_ui/module_common_ui.dart';
@@ -19,6 +21,7 @@ class _TopicSelectPageState extends State<TopicSelectPage> {
   final _query = TextEditingController();
   List<TopicModel> _topics = [];
   bool _loading = true;
+  Timer? _debounce;
 
   @override
   void initState() {
@@ -28,8 +31,19 @@ class _TopicSelectPageState extends State<TopicSelectPage> {
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _query.dispose();
     super.dispose();
+  }
+
+  void _onQueryChanged(String _) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), _load);
+  }
+
+  void _onQuerySubmitted(String _) {
+    _debounce?.cancel();
+    _load();
   }
 
   Future<void> _load() async {
@@ -78,12 +92,12 @@ class _TopicSelectPageState extends State<TopicSelectPage> {
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
             child: TextField(
               controller: _query,
-              onSubmitted: (_) => _load(),
-              onChanged: (_) => _load(),
+              onSubmitted: _onQuerySubmitted,
+              onChanged: _onQueryChanged,
               decoration: InputDecoration(
                 hintText: '搜索话题',
-                hintStyle: const TextStyle(color: CommunityTheme.labelTertiary),
-                prefixIcon: const Icon(
+                hintStyle: TextStyle(color: CommunityTheme.labelTertiary),
+                prefixIcon: Icon(
                   Icons.search,
                   color: CommunityTheme.labelTertiary,
                 ),
@@ -135,7 +149,7 @@ class _TopicSelectPageState extends State<TopicSelectPage> {
                                 ),
                                 Text(
                                   t.heatLabel,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 13,
                                     color: CommunityTheme.labelTertiary,
                                   ),
@@ -211,7 +225,7 @@ class _AskEveryoneCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    const Text(
+                    Text(
                       '关联后将主动邀请相关持仓盘友回答问题',
                       style: TextStyle(
                         fontSize: 13,

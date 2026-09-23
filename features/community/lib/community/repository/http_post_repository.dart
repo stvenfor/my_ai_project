@@ -1,5 +1,6 @@
 import 'package:module_auth/api/auth_http_config.dart';
 import 'package:module_community/community/models/comment_model.dart';
+import 'package:module_community/community/models/community_search_models.dart';
 import 'package:module_community/community/models/post_model.dart';
 import 'package:module_community/community/models/topic_model.dart';
 import 'package:module_community/community/repository/post_repository.dart';
@@ -238,5 +239,117 @@ class HttpPostRepository implements PostRepository {
       ),
     );
     _dataAllowEmpty(result.data, '取消关注失败');
+  }
+
+  @override
+  Future<CommunitySearchAllResult> searchAll({
+    required String q,
+    int page = 0,
+    int pageSize = 5,
+  }) async {
+    AuthHttpConfig.ensureInitialized();
+    final result =
+        await HttpManager.instance.get<ResultModel<CommunitySearchAllResult>>(
+      '$_prefix/search',
+      queryParameters: {
+        'q': q,
+        'type': 'all',
+        'page': page + 1,
+        'size': pageSize,
+      },
+      converter: (json) => ResultModel.object(
+        json as Map<String, dynamic>,
+        CommunitySearchAllResult.fromJson,
+      ),
+    );
+    return _data(result.data, '搜索失败');
+  }
+
+  @override
+  Future<PageResult<PostModel>> searchPosts({
+    required String q,
+    int page = 0,
+    int pageSize = 10,
+  }) {
+    return _searchPage(
+      q: q,
+      type: 'post',
+      page: page,
+      pageSize: pageSize,
+      fromJson: PostModel.fromJson,
+      fallback: '搜索动态失败',
+    );
+  }
+
+  @override
+  Future<PageResult<TopicModel>> searchTopicsPage({
+    required String q,
+    int page = 0,
+    int pageSize = 10,
+  }) {
+    return _searchPage(
+      q: q,
+      type: 'topic',
+      page: page,
+      pageSize: pageSize,
+      fromJson: TopicModel.fromJson,
+      fallback: '搜索话题失败',
+    );
+  }
+
+  @override
+  Future<PageResult<CommunityUserHit>> searchUsers({
+    required String q,
+    int page = 0,
+    int pageSize = 10,
+  }) {
+    return _searchPage(
+      q: q,
+      type: 'user',
+      page: page,
+      pageSize: pageSize,
+      fromJson: CommunityUserHit.fromJson,
+      fallback: '搜索用户失败',
+    );
+  }
+
+  Future<PageResult<T>> _searchPage<T>({
+    required String q,
+    required String type,
+    required int page,
+    required int pageSize,
+    required T Function(Map<String, dynamic> json) fromJson,
+    required String fallback,
+  }) async {
+    AuthHttpConfig.ensureInitialized();
+    final result =
+        await HttpManager.instance.get<ResultModel<ListData<T>>>(
+      '$_prefix/search',
+      queryParameters: {
+        'q': q,
+        'type': type,
+        'page': page + 1,
+        'size': pageSize,
+      },
+      converter: (json) => ResultModel.listPage(
+        json as Map<String, dynamic>,
+        fromJson,
+      ),
+    );
+    final data = _listData(result.data, fallback);
+    return PageResult.fromListData(data, pageSize: pageSize);
+  }
+
+  static ListData<T> _listData<T>(
+    ResultModel<ListData<T>>? model,
+    String fallback,
+  ) {
+    if (model == null || !model.isSuccess || model.data == null) {
+      throw HttpRequestException(
+        message: (model?.message.isNotEmpty ?? false) ? model!.message : fallback,
+        code: model?.code.toString(),
+      );
+    }
+    return model.data!;
   }
 }

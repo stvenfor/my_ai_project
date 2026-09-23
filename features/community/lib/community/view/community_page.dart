@@ -154,7 +154,7 @@ class _CommunityHeader extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           GestureDetector(
-            onTap: () {},
+            onTap: () => Get.toNamed(RoutePath.communitySearch),
             child: Container(
               height: 44,
               padding: const EdgeInsets.symmetric(horizontal: 14),

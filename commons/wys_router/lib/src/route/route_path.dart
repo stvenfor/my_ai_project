@@ -37,6 +37,7 @@ class RoutePath{
   static const String chatDetail = '/chat/detail';
   static const String community = '/community';
   static const String communityPublish = '/community/publish';
+  static const String communitySearch = '/community/search';
   static const String friend = '/friend';
   static const String live = '/live';
   static const String liveRoom = '/live/room';

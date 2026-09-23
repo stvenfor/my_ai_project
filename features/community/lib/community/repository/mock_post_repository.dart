@@ -2,8 +2,10 @@ import 'dart:math';
 
 import 'package:module_community/community/models/comment_model.dart';
 import 'package:module_community/community/models/community_avatar_urls.dart';
+import 'package:module_community/community/models/community_search_models.dart';
 import 'package:module_community/community/models/post_model.dart';
 import 'package:module_community/community/models/topic_model.dart';
+import 'package:module_http/module_http.dart';
 import 'package:module_community/community/repository/post_repository.dart';
 
 class MockPostRepository implements PostRepository {
@@ -296,5 +298,134 @@ class MockPostRepository implements PostRepository {
   @override
   Future<void> unfollowUser(String userId) async {
     _followedUserIds.remove(userId);
+  }
+
+  List<CommunityUserHit> _allUsers() {
+    _ensureSeed();
+    final map = <String, CommunityUserHit>{};
+    for (final p in _allPosts) {
+      map.putIfAbsent(
+        p.userId,
+        () => CommunityUserHit(
+          userId: p.userId,
+          nickname: p.nickname,
+          avatar: p.avatar,
+          isFollowed: _followedUserIds.contains(p.userId),
+        ),
+      );
+    }
+    return map.values.toList();
+  }
+
+  Future<void> _searchDelay() =>
+      Future<void>.delayed(const Duration(milliseconds: 250));
+
+  PageResult<T> _pageSlice<T>(
+    List<T> source,
+    int page,
+    int pageSize,
+  ) {
+    final start = page * pageSize;
+    if (start >= source.length) {
+      return const PageResult(list: [], hasMore: false);
+    }
+    final end = min(start + pageSize, source.length);
+    return PageResult(
+      list: source.sublist(start, end),
+      hasMore: end < source.length,
+    );
+  }
+
+  bool _matches(String haystack, String q) =>
+      haystack.toLowerCase().contains(q.toLowerCase());
+
+  @override
+  Future<CommunitySearchAllResult> searchAll({
+    required String q,
+    int page = 0,
+    int pageSize = 5,
+  }) async {
+    await _searchDelay();
+    final query = q.trim();
+    final posts = query.isEmpty
+        ? List<PostModel>.from(_allPosts)
+        : _allPosts.where((p) => _matches(p.content, query)).toList();
+    final topics = query.isEmpty
+        ? List<TopicModel>.from(_mockTopics)
+        : _mockTopics.where((t) => _matches(t.name, query)).toList();
+    final users = query.isEmpty
+        ? _allUsers()
+        : _allUsers().where((u) => _matches(u.nickname, query)).toList();
+
+    return CommunitySearchAllResult(
+      q: query,
+      posts: ListData(
+        list: _pageSlice(posts, page, pageSize).list,
+        pagination: PaginationModel(
+          page: page + 1,
+          size: pageSize,
+          total: posts.length,
+        ),
+      ),
+      topics: ListData(
+        list: _pageSlice(topics, page, pageSize).list,
+        pagination: PaginationModel(
+          page: page + 1,
+          size: pageSize,
+          total: topics.length,
+        ),
+      ),
+      users: ListData(
+        list: _pageSlice(users, page, pageSize).list,
+        pagination: PaginationModel(
+          page: page + 1,
+          size: pageSize,
+          total: users.length,
+        ),
+      ),
+    );
+  }
+
+  @override
+  Future<PageResult<PostModel>> searchPosts({
+    required String q,
+    int page = 0,
+    int pageSize = 10,
+  }) async {
+    await _searchDelay();
+    _ensureSeed();
+    final query = q.trim();
+    final filtered = query.isEmpty
+        ? List<PostModel>.from(_allPosts)
+        : _allPosts.where((p) => _matches(p.content, query)).toList();
+    return _pageSlice(filtered, page, pageSize);
+  }
+
+  @override
+  Future<PageResult<TopicModel>> searchTopicsPage({
+    required String q,
+    int page = 0,
+    int pageSize = 10,
+  }) async {
+    await _searchDelay();
+    final query = q.trim();
+    final filtered = query.isEmpty
+        ? List<TopicModel>.from(_mockTopics)
+        : _mockTopics.where((t) => _matches(t.name, query)).toList();
+    return _pageSlice(filtered, page, pageSize);
+  }
+
+  @override
+  Future<PageResult<CommunityUserHit>> searchUsers({
+    required String q,
+    int page = 0,
+    int pageSize = 10,
+  }) async {
+    await _searchDelay();
+    final query = q.trim();
+    final filtered = query.isEmpty
+        ? _allUsers()
+        : _allUsers().where((u) => _matches(u.nickname, query)).toList();
+    return _pageSlice(filtered, page, pageSize);
   }
 }
