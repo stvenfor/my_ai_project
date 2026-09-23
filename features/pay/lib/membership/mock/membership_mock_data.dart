@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:module_pay/membership/model/membership_models.dart';
 
 abstract final class MembershipMockData {
@@ -9,66 +8,83 @@ abstract final class MembershipMockData {
     avatarUrl: 'https://picsum.photos/seed/membership_child/120/120',
   );
 
-  static const deductionAmount = 188.0;
-  static const beanBalance = 88.88;
+  static const deductionAmount = 0.0;
+  static const beanBalance = 0.0;
   static const promoCountdown = '2天 22:59:59';
   static const redPacketCountdown = '02:32:59';
 
+  /// 与 Go `entity.MembershipCatalog` 占位价对齐（元）。
   static const svipPlans = <MembershipPlan>[
+    MembershipPlan(
+      id: 'svip_1m',
+      tier: MembershipTier.svip,
+      title: '1个月',
+      price: 30,
+      originalPrice: 48,
+      months: 1,
+      huaweiProductId: 'wys_svip_1m',
+      appleProductId: 'wys_svip_1m',
+      badge: '开通尝鲜',
+    ),
+    MembershipPlan(
+      id: 'svip_6m',
+      tier: MembershipTier.svip,
+      title: '6个月',
+      price: 150,
+      originalPrice: 288,
+      months: 6,
+      huaweiProductId: 'wys_svip_6m',
+      appleProductId: 'wys_svip_6m',
+      dailyHint: '每日仅需0.83元',
+    ),
     MembershipPlan(
       id: 'svip_12m',
       tier: MembershipTier.svip,
-      title: '12个月',
-      price: 380,
+      title: '1年',
+      price: 280,
       originalPrice: 488,
-      badge: '开学尝鲜价',
+      months: 12,
+      huaweiProductId: 'wys_svip_12m',
+      appleProductId: 'wys_svip_12m',
+      badge: '最划算',
       showRedPacket: true,
-    ),
-    MembershipPlan(
-      id: 'svip_24m',
-      tier: MembershipTier.svip,
-      title: '24个月',
-      price: 488,
-      originalPrice: 888,
-      badge: '活动利益点',
-      dailyHint: '每日仅需0.66元',
-    ),
-    MembershipPlan(
-      id: 'svip_year_auto',
-      tier: MembershipTier.svip,
-      title: '连续包年',
-      price: 288,
-      originalPrice: 488,
-      dailyHint: '每日仅需0.78元',
     ),
   ];
 
   static const aiSvipPlans = <MembershipPlan>[
     MembershipPlan(
-      id: 'ai_12m',
+      id: 'ai_svip_1m',
       tier: MembershipTier.aiSvip,
-      title: '12个月',
-      price: 488,
-      originalPrice: 688,
-      badge: '开学尝鲜价',
-      showRedPacket: true,
+      title: '1个月',
+      price: 48,
+      originalPrice: 68,
+      months: 1,
+      huaweiProductId: 'wys_ai_svip_1m',
+      appleProductId: 'wys_ai_svip_1m',
+      badge: '开通尝鲜',
     ),
     MembershipPlan(
-      id: 'ai_24m',
+      id: 'ai_svip_6m',
       tier: MembershipTier.aiSvip,
-      title: '24个月',
-      price: 688,
-      originalPrice: 1288,
-      badge: '活动利益点',
-      dailyHint: '每日仅需0.94元',
+      title: '6个月',
+      price: 240,
+      originalPrice: 408,
+      months: 6,
+      huaweiProductId: 'wys_ai_svip_6m',
+      appleProductId: 'wys_ai_svip_6m',
+      dailyHint: '每日仅需1.33元',
     ),
     MembershipPlan(
-      id: 'ai_year_auto',
+      id: 'ai_svip_12m',
       tier: MembershipTier.aiSvip,
-      title: '连续包年',
+      title: '1年',
       price: 398,
       originalPrice: 688,
-      dailyHint: '每日仅需1.09元',
+      months: 12,
+      huaweiProductId: 'wys_ai_svip_12m',
+      appleProductId: 'wys_ai_svip_12m',
+      badge: '最划算',
+      showRedPacket: true,
     ),
   ];
 
@@ -81,45 +97,14 @@ abstract final class MembershipMockData {
 
   static const aiSvipPromo = MembershipPromoBanner(
     tier: MembershipTier.aiSvip,
-    title: '寒假趣超车',
-    subtitle: '赠新春礼包',
+    title: 'AI 创作季',
+    subtitle: '加赠 AI 音色试用包',
     countdownLabel: promoCountdown,
   );
 
-  static const aiFeatures = <MembershipFeatureItem>[
-    MembershipFeatureItem(
-      title: '背单词',
-      subtitle: '听音辨义 拼写无忧',
-      gradient: [Color(0xFF50E3C2), Color(0xFF0070F3)],
-    ),
-    MembershipFeatureItem(
-      title: '读课文',
-      subtitle: '智能打分 纠正发音',
-      gradient: [Color(0xFFF9CB28), Color(0xFFF5A623)],
-    ),
-    MembershipFeatureItem(
-      title: 'AI私教',
-      subtitle: '告别死记 活学活用',
-      gradient: [Color(0xFF6CB6FF), Color(0xFF3D8BFF)],
-    ),
-    MembershipFeatureItem(
-      title: '刷真题',
-      subtitle: '考点精粹 高效提分',
-      gradient: [Color(0xFFFF7B7B), Color(0xFFFF4D4F)],
-    ),
-  ];
+  static List<MembershipPlan> plansFor(MembershipTier tier) =>
+      tier == MembershipTier.svip ? svipPlans : aiSvipPlans;
 
-  static List<MembershipPlan> plansFor(MembershipTier tier) {
-    return switch (tier) {
-      MembershipTier.svip => svipPlans,
-      MembershipTier.aiSvip => aiSvipPlans,
-    };
-  }
-
-  static MembershipPromoBanner promoFor(MembershipTier tier) {
-    return switch (tier) {
-      MembershipTier.svip => svipPromo,
-      MembershipTier.aiSvip => aiSvipPromo,
-    };
-  }
+  static MembershipPromoBanner promoFor(MembershipTier tier) =>
+      tier == MembershipTier.svip ? svipPromo : aiSvipPromo;
 }

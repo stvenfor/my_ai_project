@@ -38,7 +38,7 @@ class MembershipPromoBanner extends GetView<MembershipRenewController> {
                     const SizedBox(height: 4),
                     Text(
                       promo.subtitle,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
                         color: MembershipPalette.textGray,
                       ),
@@ -49,7 +49,7 @@ class MembershipPromoBanner extends GetView<MembershipRenewController> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  const Text(
+                  Text(
                     '距结束还剩',
                     style: TextStyle(
                       fontSize: 11,

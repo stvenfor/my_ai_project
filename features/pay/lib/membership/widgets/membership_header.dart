@@ -108,7 +108,7 @@ class MembershipHeader extends GetView<MembershipRenewController> {
                                         children: [
                                           Text(
                                             profile.displayName,
-                                            style: const TextStyle(
+                                            style: TextStyle(
                                               fontSize: 18,
                                               fontWeight: FontWeight.w600,
                                               height: 1.1,
@@ -143,7 +143,7 @@ class MembershipHeader extends GetView<MembershipRenewController> {
                                       const SizedBox(height: 2),
                                       Text(
                                         profile.statusText,
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontSize: 13,
                                           height: 1.1,
                                           color: MembershipPalette.textGray,

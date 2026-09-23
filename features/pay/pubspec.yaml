@@ -16,6 +16,10 @@ dependencies:
     path: ../../commons/wys_router
   module_utils:
     path: ../../commons/toolkit
+  module_http:
+    path: ../../commons/network
+  wys_login_share_pay:
+    path: ../../components/wys_login_share_pay
 
 dev_dependencies:
   flutter_test:

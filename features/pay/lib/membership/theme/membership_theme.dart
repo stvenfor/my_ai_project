@@ -69,43 +69,44 @@ abstract final class MembershipDimens {
   static const double ctaRadius = 100;
 }
 
-/// Pay / membership visual tokens — Vercel Design Source of Truth.
-/// Prefer [VercelTokens.of] in widgets; statics mirror light for const call sites.
+/// Pay / membership visual tokens — resolves from [VercelTokens.current].
 abstract final class MembershipTheme {
   static VercelTokens tokens(BuildContext context) => VercelTokens.of(context);
 
-  static const Color ink = Color(0xFF171717);
-  static const Color body = Color(0xFF4D4D4D);
-  static const Color mute = Color(0xFF888888);
-  static const Color hairline = Color(0xFFEBEBEB);
-  static const Color hairlineStrong = Color(0xFFA1A1A1);
-  static const Color canvas = Color(0xFFFFFFFF);
-  static const Color canvasSoft = Color(0xFFFAFAFA);
-  static const Color canvasSoft2 = Color(0xFFF5F5F5);
-  static const Color link = Color(0xFF0070F3);
-  static const Color linkBgSoft = Color(0xFFD3E5FF);
-  static const Color warning = Color(0xFFF5A623);
-  static const Color warningSoft = Color(0xFFFFEFCF);
-  static const Color warningDeep = Color(0xFFAB570A);
-  static const Color onPrimary = Color(0xFFFFFFFF);
+  static VercelTokens get _t => VercelTokens.current();
+
+  static Color get ink => _t.ink;
+  static Color get body => _t.body;
+  static Color get mute => _t.mute;
+  static Color get hairline => _t.hairline;
+  static Color get hairlineStrong => _t.hairlineStrong;
+  static Color get canvas => _t.canvas;
+  static Color get canvasSoft => _t.canvasSoft;
+  static Color get canvasSoft2 => _t.canvasSoft2;
+  static Color get link => _t.link;
+  static Color get linkBgSoft => _t.linkBgSoft;
+  static Color get warning => _t.warning;
+  static Color get warningSoft => _t.warningSoft;
+  static Color get warningDeep => _t.warningDeep;
+  static Color get onPrimary => _t.onPrimary;
 
   // Legacy aliases used across membership widgets.
-  static const Color titleBlack = ink;
-  static const Color textGray = mute;
-  static const Color textGrayLight = hairlineStrong;
-  static const Color pageBackground = canvasSoft2;
-  static const Color cardWhite = canvas;
-  static const Color priceBlack = ink;
-  static const Color originalPriceGray = hairlineStrong;
-  static const Color deductionOrange = warning;
-  static const Color beanOrange = warning;
-  static const Color planBadgePromoBg = warningSoft;
-  static const Color planFooterPeach = warningSoft;
-  static const Color planBorderUnselected = hairline;
+  static Color get titleBlack => ink;
+  static Color get textGray => mute;
+  static Color get textGrayLight => hairlineStrong;
+  static Color get pageBackground => canvasSoft2;
+  static Color get cardWhite => canvas;
+  static Color get priceBlack => ink;
+  static Color get originalPriceGray => hairlineStrong;
+  static Color get deductionOrange => warning;
+  static Color get beanOrange => warning;
+  static Color get planBadgePromoBg => warningSoft;
+  static Color get planFooterPeach => warningSoft;
+  static Color get planBorderUnselected => hairline;
 
   static const double radiusMd = MembershipDimens.cardRadius;
 
-  static TextStyle get displaySm => const TextStyle(
+  static TextStyle get displaySm => TextStyle(
         fontFamily: VercelTypography.fontFamily,
         fontSize: 18,
         fontWeight: FontWeight.w600,
@@ -114,7 +115,7 @@ abstract final class MembershipTheme {
         letterSpacing: -0.54,
       );
 
-  static TextStyle get sectionTitle => const TextStyle(
+  static TextStyle get sectionTitle => TextStyle(
         fontFamily: VercelTypography.fontFamily,
         fontSize: 22,
         fontWeight: FontWeight.w600,
@@ -123,7 +124,7 @@ abstract final class MembershipTheme {
         letterSpacing: -0.88,
       );
 
-  static TextStyle get bodyMd => const TextStyle(
+  static TextStyle get bodyMd => TextStyle(
         fontFamily: VercelTypography.fontFamily,
         fontSize: 16,
         fontWeight: FontWeight.w400,
@@ -131,7 +132,7 @@ abstract final class MembershipTheme {
         height: 24 / 16,
       );
 
-  static TextStyle get bodySm => const TextStyle(
+  static TextStyle get bodySm => TextStyle(
         fontFamily: VercelTypography.fontFamily,
         fontSize: 14,
         fontWeight: FontWeight.w400,
@@ -140,7 +141,7 @@ abstract final class MembershipTheme {
         letterSpacing: -0.28,
       );
 
-  static TextStyle get caption => const TextStyle(
+  static TextStyle get caption => TextStyle(
         fontFamily: VercelTypography.fontFamily,
         fontSize: 12,
         fontWeight: FontWeight.w400,
@@ -148,7 +149,7 @@ abstract final class MembershipTheme {
         height: 16 / 12,
       );
 
-  static TextStyle get captionStrong => const TextStyle(
+  static TextStyle get captionStrong => TextStyle(
         fontFamily: VercelTypography.fontFamily,
         fontSize: 12,
         fontWeight: FontWeight.w600,
@@ -156,7 +157,7 @@ abstract final class MembershipTheme {
         height: 16 / 12,
       );
 
-  static TextStyle get buttonLg => const TextStyle(
+  static TextStyle get buttonLg => TextStyle(
         fontFamily: VercelTypography.fontFamily,
         fontSize: 16,
         fontWeight: FontWeight.w500,
@@ -164,7 +165,7 @@ abstract final class MembershipTheme {
         height: 24 / 16,
       );
 
-  static TextStyle get priceDisplay => const TextStyle(
+  static TextStyle get priceDisplay => TextStyle(
         fontFamily: VercelTypography.fontFamily,
         fontSize: 26,
         fontWeight: FontWeight.w600,
@@ -222,22 +223,22 @@ class MembershipPalette {
   final String radioSelected;
   final String radioUnselected;
 
-  static const Color titleBlack = MembershipTheme.titleBlack;
-  static const Color textGray = MembershipTheme.textGray;
-  static const Color textGrayLight = MembershipTheme.textGrayLight;
-  static const Color pageBackground = MembershipTheme.pageBackground;
-  static const Color cardWhite = MembershipTheme.cardWhite;
-  static const Color priceBlack = MembershipTheme.priceBlack;
-  static const Color originalPriceGray = MembershipTheme.originalPriceGray;
-  static const Color deductionOrange = MembershipTheme.deductionOrange;
-  static const Color beanOrange = MembershipTheme.beanOrange;
-  static const Color planBadgePromoBg = MembershipTheme.planBadgePromoBg;
-  static const Color planFooterPeach = MembershipTheme.planFooterPeach;
-  static const Color planBorderUnselected = MembershipTheme.planBorderUnselected;
+  static Color get titleBlack => MembershipTheme.titleBlack;
+  static Color get textGray => MembershipTheme.textGray;
+  static Color get textGrayLight => MembershipTheme.textGrayLight;
+  static Color get pageBackground => MembershipTheme.pageBackground;
+  static Color get cardWhite => MembershipTheme.cardWhite;
+  static Color get priceBlack => MembershipTheme.priceBlack;
+  static Color get originalPriceGray => MembershipTheme.originalPriceGray;
+  static Color get deductionOrange => MembershipTheme.deductionOrange;
+  static Color get beanOrange => MembershipTheme.beanOrange;
+  static Color get planBadgePromoBg => MembershipTheme.planBadgePromoBg;
+  static Color get planFooterPeach => MembershipTheme.planFooterPeach;
+  static Color get planBorderUnselected => MembershipTheme.planBorderUnselected;
 
   static MembershipPalette of(MembershipTier tier) {
     return switch (tier) {
-      MembershipTier.svip => const MembershipPalette(
+      MembershipTier.svip => MembershipPalette(
           headerGradient: [
             MembershipTheme.canvasSoft,
             MembershipTheme.canvas,
@@ -258,7 +259,7 @@ class MembershipPalette {
           radioSelected: 'assets/membership/icon_radio_selected_svip.png',
           radioUnselected: 'assets/membership/icon_radio_unselected_svip.png',
         ),
-      MembershipTier.aiSvip => const MembershipPalette(
+      MembershipTier.aiSvip => MembershipPalette(
           headerGradient: [
             MembershipTheme.canvasSoft,
             MembershipTheme.canvas,

@@ -32,6 +32,9 @@ class WysWechatService {
   }
 
   Future<bool> _initialize() async {
+    if (!WysWechatConfig.isConfigured) {
+      return false;
+    }
     try {
       final registered = await _fluwx.registerApi(
         appId: WysWechatConfig.appId,

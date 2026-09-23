@@ -61,7 +61,7 @@ class MembershipCollapsedNavBar extends GetView<MembershipRenewController> {
                                   profile.displayName,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
                                     color: MembershipPalette.titleBlack,

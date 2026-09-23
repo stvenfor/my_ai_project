@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:module_pay/membership/controller/membership_renew_controller.dart';
 import 'package:module_pay/membership/membership_assets.dart';
-import 'package:module_pay/membership/mock/membership_mock_data.dart';
 import 'package:module_pay/membership/model/membership_models.dart';
 import 'package:module_pay/membership/theme/membership_theme.dart';
 
@@ -13,7 +12,8 @@ class MembershipPaymentMethods extends GetView<MembershipRenewController> {
   Widget build(BuildContext context) {
     return Obx(() {
       final selected = controller.paymentMethod.value;
-      final bean = MembershipMockData.beanBalance.toStringAsFixed(2);
+      final methods = controller.availablePaymentMethods;
+      final balance = controller.walletBalance.value;
 
       return Padding(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
@@ -24,25 +24,65 @@ class MembershipPaymentMethods extends GetView<MembershipRenewController> {
           ),
           child: Column(
             children: [
-              _PaymentTile(
-                iconAsset: MembershipAssets.iconWechat,
-                title: '微信支付',
-                subtitle: '（趣豆余额抵扣 $bean 元）',
-                selected: selected == PaymentMethodType.wechat,
-                onTap: () => controller.selectPayment(PaymentMethodType.wechat),
-              ),
-              const Divider(height: 1, indent: 56, color: Color(0xFFEBEBEB)),
-              _PaymentTile(
-                iconAsset: MembershipAssets.iconAlipay,
-                title: '支付宝支付',
-                selected: selected == PaymentMethodType.alipay,
-                onTap: () => controller.selectPayment(PaymentMethodType.alipay),
-              ),
+              for (var i = 0; i < methods.length; i++) ...[
+                if (i > 0)
+                  const Divider(height: 1, indent: 56, color: Color(0xFFEBEBEB)),
+                _tileFor(methods[i], selected, balance),
+              ],
             ],
           ),
         ),
       );
     });
+  }
+
+  Widget _tileFor(
+    PaymentMethodType method,
+    PaymentMethodType selected,
+    String balance,
+  ) {
+    switch (method) {
+      case PaymentMethodType.wechat:
+        return _PaymentTile(
+          iconAsset: MembershipAssets.iconWechat,
+          title: '微信支付',
+          subtitle: '（时长买断）',
+          selected: selected == method,
+          onTap: () => controller.selectPayment(method),
+        );
+      case PaymentMethodType.alipay:
+        return _PaymentTile(
+          iconAsset: MembershipAssets.iconAlipay,
+          title: '支付宝支付',
+          subtitle: '（时长买断）',
+          selected: selected == method,
+          onTap: () => controller.selectPayment(method),
+        );
+      case PaymentMethodType.balance:
+        return _PaymentTile(
+          iconAsset: MembershipAssets.iconAlipay,
+          title: '余额支付',
+          subtitle: '（可用 ¥$balance）',
+          selected: selected == method,
+          onTap: () => controller.selectPayment(method),
+        );
+      case PaymentMethodType.huawei:
+        return _PaymentTile(
+          iconAsset: MembershipAssets.iconWechat,
+          title: '华为内购',
+          subtitle: '（自动续费订阅）',
+          selected: selected == method,
+          onTap: () => controller.selectPayment(method),
+        );
+      case PaymentMethodType.apple:
+        return _PaymentTile(
+          iconAsset: MembershipAssets.iconAlipay,
+          title: '苹果内购',
+          subtitle: '（自动续费订阅）',
+          selected: selected == method,
+          onTap: () => controller.selectPayment(method),
+        );
+    }
   }
 }
 
@@ -83,7 +123,7 @@ class _PaymentTile extends StatelessWidget {
                 Expanded(
                   child: RichText(
                     text: TextSpan(
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 15,
                         color: MembershipPalette.titleBlack,
                       ),
@@ -92,7 +132,7 @@ class _PaymentTile extends StatelessWidget {
                         if (subtitle != null)
                           TextSpan(
                             text: subtitle,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12,
                               color: MembershipPalette.beanOrange,
                             ),

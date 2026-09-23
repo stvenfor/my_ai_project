@@ -37,7 +37,7 @@ class _SvipFeatureSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             '畅享6W+会员内容 系统进阶',
             style: TextStyle(
               fontSize: 20,
@@ -46,7 +46,7 @@ class _SvipFeatureSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
+          Text(
             '精选全球IP 孩子主动要学',
             style: TextStyle(
               fontSize: 14,
@@ -85,7 +85,7 @@ class _AiFeatureSection extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Text(
                   'AI同步练 校内好提分',
                   style: TextStyle(

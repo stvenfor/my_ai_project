@@ -21,7 +21,7 @@ class MembershipRenewBar extends GetView<MembershipRenewController> {
 
       return Container(
         padding: EdgeInsets.fromLTRB(16, 12, 16, bottom + 12),
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: MembershipPalette.cardWhite,
           boxShadow: [
             BoxShadow(
@@ -48,7 +48,7 @@ class MembershipRenewBar extends GetView<MembershipRenewController> {
                       height: 18,
                     ),
                     const SizedBox(width: 8),
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         '已阅读并同意《趣配音会员协议》《趣配音自动续费协议》',
                         style: TextStyle(
@@ -76,14 +76,20 @@ class MembershipRenewBar extends GetView<MembershipRenewController> {
                     onTap: controller.renewNow,
                     borderRadius: BorderRadius.circular(24),
                     child: Center(
-                      child: Text(
-                        '¥${price.toStringAsFixed(2)} 立即续费',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 17,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
+                      child: Obx(() {
+                        final cta = controller.ctaLabel.value;
+                        final busy = controller.paying.value;
+                        return Text(
+                          busy
+                              ? '处理中…'
+                              : '¥${price.toStringAsFixed(2)} 立即$cta',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 17,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        );
+                      }),
                     ),
                   ),
                 ),
@@ -91,7 +97,7 @@ class MembershipRenewBar extends GetView<MembershipRenewController> {
             ),
             if (!showCheckbox) ...[
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 '趣配音会员协议',
                 style: TextStyle(
                   fontSize: 11,

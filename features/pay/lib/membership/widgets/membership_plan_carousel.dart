@@ -252,7 +252,7 @@ class _PlanCardContent extends StatelessWidget {
           Text(
             plan.title,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               color: MembershipPalette.titleBlack,
               height: 1.2,
@@ -264,7 +264,7 @@ class _PlanCardContent extends StatelessWidget {
           Text(
             '¥${plan.originalPrice.toStringAsFixed(0)}',
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11,
               color: MembershipPalette.originalPriceGray,
               decoration: TextDecoration.lineThrough,
@@ -289,7 +289,7 @@ class _PlanPriceRow extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.baseline,
       textBaseline: TextBaseline.alphabetic,
       children: [
-        const Text(
+        Text(
           '¥',
           style: TextStyle(
             fontSize: 14,
@@ -300,7 +300,7 @@ class _PlanPriceRow extends StatelessWidget {
         ),
         Text(
           price.toStringAsFixed(0),
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 26,
             fontWeight: FontWeight.w700,
             color: MembershipPalette.priceBlack,
@@ -370,7 +370,7 @@ class _DailyHintFooter extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 6),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: MembershipPalette.planFooterPeach,
         borderRadius: BorderRadius.vertical(
           bottom: Radius.circular(MembershipDimens.planCardRadius - 1),

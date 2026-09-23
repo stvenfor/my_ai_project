@@ -41,7 +41,7 @@ class MembershipDeductionRow extends GetView<MembershipRenewController> {
                       children: [
                         RichText(
                           text: TextSpan(
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 14,
                               color: MembershipPalette.titleBlack,
                               height: 1.4,
@@ -59,7 +59,7 @@ class MembershipDeductionRow extends GetView<MembershipRenewController> {
                           ),
                         ),
                         const SizedBox(height: 4),
-                        const Text(
+                        Text(
                           'SVIP抵扣0.7元/天，VIP抵扣0.3元/天',
                           style: TextStyle(
                             fontSize: 11,
