@@ -3,9 +3,21 @@
 本文档供 AI Agent 与协作者查阅：**四层目录边界**、模块化约定、常见陷阱、正确写法，以及 **Flutter ↔ Go BFF ↔ Supabase** 约束。
 
 > **工作区总览**（Flutter + Go 双仓库）：[my_go_study/AGENTS.md](../my_code_study/my_go_study/AGENTS.md) §一  
+> **双仓编码 Playbook**：[docs/coding-playbook-dual-repo.md](docs/coding-playbook-dual-repo.md)（一键提示词；全文真相源在 Go 仓）  
 > **分层架构详解**：[docs/architecture.md](docs/architecture.md)  
 > **模块化开发指南**：[docs/MODULE_ARCHITECTURE.md](docs/MODULE_ARCHITECTURE.md)  
 > **后端交互完整说明**：[docs/BACKEND_INTEGRATION.md](docs/BACKEND_INTEGRATION.md)
+
+### 开新模块一键提示词
+
+```text
+# 规划（先不写码）
+结合双仓设计 <模块>：术语 Avoid → Go API/权限 → Flutter 对标页与四层边界 → Slice backlog；等我批 Brief。
+见 docs/coding-playbook-dual-repo.md
+
+# 执行（Brief 已批）
+只改白名单；dart analyze 触及包；UI 对标 Brief；acceptance Partial 可；commit/push 等我指令。
+```
 
 ---
 
