@@ -26,7 +26,7 @@ class WysPushCoordinator {
     PushRouteScheduler? routeScheduler,
   }) : _dispatcher = dispatcher ?? PushEventDispatcher(),
        _deepLinkChannel =
-           deepLinkChannel ?? const MethodChannel('com.tf.flutter/deeplink'),
+           deepLinkChannel ?? const MethodChannel('com.xiaomao.flutter/deeplink'),
        _routeScheduler = routeScheduler ?? _scheduleAfterNavigation;
 
   static final WysPushCoordinator instance = WysPushCoordinator();

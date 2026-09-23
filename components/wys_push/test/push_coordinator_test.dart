@@ -7,7 +7,7 @@ import 'package:wys_push/wys_push.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  const channel = MethodChannel('com.tf.flutter/deeplink.test');
+  const channel = MethodChannel('com.xiaomao.flutter/deeplink.test');
   late WysPushCoordinator coordinator;
 
   tearDown(() async {

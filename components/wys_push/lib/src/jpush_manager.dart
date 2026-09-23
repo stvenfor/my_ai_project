@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -6,12 +7,15 @@ import 'package:jpush_flutter/jpush_flutter.dart';
 import 'package:jpush_flutter/jpush_interface.dart';
 import 'package:wys_push/wys_push.dart';
 
-/// 极光推送真实实现，基于 `jpush_flutter` 插件。
+/// 极光推送真实实现，基于 `jpush_flutter`（iOS / Android / HarmonyOS）。
 ///
-/// 在 `main.dart` 中通过 `PushManager.instance = JPushManager()` 注入，
-/// 替换默认的 [StubPushManager]。
+/// 在应用启动时注入：`PushManager.instance = JPushManager()`；
+/// 隐私同意后再 [reInit]/[init]，避免权限弹窗盖住隐私协议。
+///
+/// Android 13+ `POST_NOTIFICATIONS` 由 `module_linking` 的 `JPushPushService` 申请。
 class JPushManager extends PushManager {
-  JPushManager() : super.protected() {
+  JPushManager({JPushFlutterInterface? jpush}) : super.protected() {
+    _jpush = jpush ?? JPush.newJPush();
     _eventController = StreamController<PushEvent>.broadcast(
       onListen: _flushPendingEvents,
     );
@@ -24,7 +28,7 @@ class JPushManager extends PushManager {
     Duration(seconds: 60),
   ];
 
-  final JPushFlutterInterface _jpush = JPush.newJPush();
+  late final JPushFlutterInterface _jpush;
 
   bool _initialized = false;
   bool _callbackRegistered = false;
@@ -54,15 +58,53 @@ class JPushManager extends PushManager {
   void _registerCallbackOnce() {
     if (_callbackRegistered) return;
 
-    // README 要求在 setup 之前设置鸿蒙回调。
-    _jpush.setCallBackHarmony((eventName, data) {
-      debugPrint('[JPush] event: $eventName, data: $data');
-      _handleEvent(eventName, data);
-    });
+    if (!kIsWeb && Platform.operatingSystem == 'ohos') {
+      _jpush.setCallBackHarmony((eventName, data) {
+        debugPrint('[JPush] event: $eventName, data: $data');
+        _handleEvent(eventName, data);
+      });
+    } else if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+      // 参数集对齐当前 CPF jpush_flutter（无 onNotifyButtonClick / onVoipMessage）。
+      _jpush.addEventHandler(
+        onReceiveNotification: (data) =>
+            _handlePlatformEvent('onReceiveNotification', data),
+        onOpenNotification: (data) =>
+            _handlePlatformEvent('onOpenNotification', data),
+        onReceiveMessage: (data) =>
+            _handlePlatformEvent('onReceiveMessage', data),
+        onReceiveNotificationAuthorization: (data) =>
+            _handlePlatformEvent('onReceiveNotificationAuthorization', data),
+        onNotifyMessageUnShow: (data) =>
+            _handlePlatformEvent('onNotifyMessageUnShow', data),
+        onConnected: (data) => _handlePlatformEvent('onConnected', data),
+        onInAppMessageClick: (data) =>
+            _handlePlatformEvent('onInAppMessageClick', data),
+        onInAppMessageShow: (data) =>
+            _handlePlatformEvent('onInAppMessageShow', data),
+        onCommandResult: (data) => _handlePlatformEvent('onCommandResult', data),
+        onReceiveDeviceToken: (data) =>
+            _handlePlatformEvent('onReceiveDeviceToken', data),
+      );
+    }
     _callbackRegistered = true;
   }
 
+  Future<void> _handlePlatformEvent(
+    String eventName,
+    Map<String, dynamic> data,
+  ) async {
+    debugPrint('[JPush] event: $eventName, data: $data');
+    _handleEvent(eventName, data);
+  }
+
   void _setupForCurrentEnvironment() {
+    if (!PushConfig.isConfigured) {
+      debugPrint(
+        '[JPush] AppKey not configured (placeholder), skip setup',
+      );
+      return;
+    }
+
     final appKey = PushConfig.appKey;
     if (_initialized && _activeAppKey == appKey) {
       debugPrint('[JPush] environment unchanged, skip setup, appKey: $appKey');
@@ -71,10 +113,18 @@ class JPushManager extends PushManager {
 
     _jpush.setup(
       appKey: appKey,
-      channel: 'developer-default',
+      channel: !kIsWeb && Platform.isIOS
+          ? PushConfig.iosChannel
+          : PushConfig.defaultChannel,
       production: PushConfig.isProduction,
       debug: kDebugMode,
     );
+
+    if (!kIsWeb && Platform.isIOS) {
+      _jpush.applyPushAuthority(
+        const NotificationSettingsIOS(sound: true, alert: true, badge: true),
+      );
+    }
 
     _activeAppKey = appKey;
     _initialized = true;
@@ -115,6 +165,10 @@ class JPushManager extends PushManager {
       debugPrint('[JPush] setAlias skipped: empty alias');
       return false;
     }
+    if (!_initialized) {
+      debugPrint('[JPush] setAlias skipped: not initialized');
+      return false;
+    }
     if (_aliasInFlight) {
       debugPrint('[JPush] setAlias skipped: already in flight');
       return false;
@@ -122,7 +176,6 @@ class JPushManager extends PushManager {
 
     _aliasInFlight = true;
     try {
-      // setup 刚完成时 RegistrationID 可能尚未就绪，先短暂等待再设别名。
       final ready = await _waitForRegistrationId();
       if (!ready) {
         debugPrint(
@@ -157,7 +210,6 @@ class JPushManager extends PushManager {
     }
   }
 
-  /// 轮询等待 RegistrationID，减少 setup 后立刻 setAlias 触发 6002 的概率。
   Future<bool> _waitForRegistrationId({
     Duration timeout = const Duration(seconds: 8),
     Duration interval = const Duration(milliseconds: 500),
@@ -170,9 +222,7 @@ class JPushManager extends PushManager {
           debugPrint('[JPush] registrationID ready: $id');
           return true;
         }
-      } catch (_) {
-        // ignore and keep polling
-      }
+      } catch (_) {}
       await Future<void>.delayed(interval);
     }
     return false;
@@ -188,6 +238,7 @@ class JPushManager extends PushManager {
 
   @override
   Future<void> deleteAlias() async {
+    if (!_initialized) return;
     try {
       final result = await _jpush.deleteAlias();
       debugPrint('[JPush] deleteAlias result: $result');
@@ -198,6 +249,7 @@ class JPushManager extends PushManager {
 
   @override
   Future<void> setBadgeNum(int num) async {
+    if (!_initialized) return;
     try {
       await _jpush.setBadge(num);
       debugPrint('[JPush] setBadge: $num');
@@ -208,6 +260,7 @@ class JPushManager extends PushManager {
 
   @override
   Future<String?> getRegistrationID() async {
+    if (!_initialized) return null;
     try {
       final id = await _jpush.getRegistrationID();
       debugPrint('[JPush] registrationID: $id');
@@ -220,6 +273,7 @@ class JPushManager extends PushManager {
 
   @override
   Future<bool> sendTestNotification() async {
+    if (!_initialized) return false;
     try {
       await _jpush.sendLocalNotification(
         LocalNotification(

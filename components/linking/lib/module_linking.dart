@@ -13,5 +13,8 @@ export 'navigation/main_tab_controller.dart';
 export 'navigation/pending_navigation.dart';
 export 'privacy/privacy_consent_service.dart';
 export 'privacy/privacy_consent_dialog.dart';
+export 'push/jpush_push_service.dart';
+export 'push/mock_push_service.dart';
+export 'push/push_registration_api.dart';
 export 'push/push_service.dart';
 export 'ui/in_app_push_banner_host.dart';

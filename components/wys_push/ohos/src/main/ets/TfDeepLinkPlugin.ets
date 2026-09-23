@@ -4,7 +4,7 @@ import Log from '@ohos/flutter_ohos/src/main/ets/util/Log';
 import Want from '@ohos.app.ability.Want';
 
 const TAG: string = 'TfDeepLinkPlugin';
-const CHANNEL_NAME: string = 'com.tf.flutter/deeplink';
+const CHANNEL_NAME: string = 'com.xiaomao.flutter/deeplink';
 const URI_KEYS: string[] = ['uri', 'url', 'deeplink', 'deepLink', 'route', 'page', 'path'];
 
 /** 把 HarmonyOS Want 中的推送/深链 URI 转发给 wys_push Dart 层。 */
@@ -68,7 +68,8 @@ export default class TfDeepLinkPlugin implements FlutterPlugin, MethodCallHandle
     const paramKeys: string[] = Object.keys(params);
     for (let index = 0; index < paramKeys.length; index++) {
       const value = params[paramKeys[index]];
-      if (typeof value === 'string' && value.startsWith('tfapp://')) {
+      if (typeof value === 'string' &&
+          (value.startsWith('xiaomao://') || value.startsWith('https://'))) {
         return value.trim();
       }
     }

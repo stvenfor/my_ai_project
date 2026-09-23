@@ -20,6 +20,10 @@ dependencies:
     path: ../../commons/toolkit
   module_global_cache:
     path: ../../commons/storage
+  module_http:
+    path: ../../commons/network
+  wys_push:
+    path: ../wys_push
 
 dev_dependencies:
   flutter_test:

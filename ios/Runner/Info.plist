@@ -28,10 +28,20 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
+			<string>xiaomao</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>xiaomao</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
 			<string>weixin</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>wxd92d02603e1c59dc</string>
+				<string>YOUR_WECHAT_APP_ID</string>
 			</array>
 		</dict>
 		<dict>
@@ -121,5 +131,9 @@
 	</array>
 	<key>io.flutter.embedded_views_preview</key>
 	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 </dict>
 </plist>
