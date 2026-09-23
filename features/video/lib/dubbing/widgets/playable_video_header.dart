@@ -114,11 +114,11 @@ class _PlayableVideoHeaderState extends State<PlayableVideoHeader> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      '英语趣配音',
+                      'iHome',
                       style: TextStyle(color: Colors.white, fontSize: 10),
                     ),
                     Text(
-                      'FUN DUBBING',
+                      'iHome',
                       style: TextStyle(color: Colors.white70, fontSize: 8),
                     ),
                   ],

@@ -134,7 +134,7 @@ class _MiniGiftCard extends StatelessWidget {
             children: [
               Text('🦜', style: TextStyle(fontSize: 16)),
               SizedBox(width: 6),
-              Text('英语趣配音', style: TextStyle(color: Colors.white, fontSize: 12)),
+              Text('iHome', style: TextStyle(color: Colors.white, fontSize: 12)),
             ],
           ),
           const Spacer(),

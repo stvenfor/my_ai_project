@@ -50,7 +50,7 @@ class MembershipRenewBar extends GetView<MembershipRenewController> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        '已阅读并同意《趣配音会员协议》《趣配音自动续费协议》',
+                        '已阅读并同意《iHome会员协议》《iHome自动续费协议》',
                         style: TextStyle(
                           fontSize: 11,
                           color: MembershipPalette.textGray,
@@ -98,7 +98,7 @@ class MembershipRenewBar extends GetView<MembershipRenewController> {
             if (!showCheckbox) ...[
               const SizedBox(height: 8),
               Text(
-                '趣配音会员协议',
+                'iHome会员协议',
                 style: TextStyle(
                   fontSize: 11,
                   color: MembershipPalette.textGrayLight,

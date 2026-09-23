@@ -103,7 +103,7 @@ class _GiftCardVisual extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 const Text(
-                  '英语趣配音',
+                  'iHome',
                   style: TextStyle(color: Colors.white, fontSize: 13),
                 ),
               ],

@@ -9,7 +9,7 @@ abstract final class HotRankDetailMockData {
 
     return HotRankDetailState(
       title: title,
-      subtitle: '趣配音用户近期热搜内容',
+      subtitle: 'iHome用户近期热搜内容',
       theme: theme,
       categories: HotRankCategory.values,
       selectedCategory: HotRankCategory.hotSearch,
