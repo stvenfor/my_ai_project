@@ -9,12 +9,53 @@ import 'package:module_home/home/theme/home_dashboard_theme.dart';
 import 'package:module_home/home/navigation/ai_stone_navigation.dart';
 import 'package:module_home/home/navigation/analytics_navigation.dart';
 import 'package:module_home/home/navigation/deal_invoice_navigation.dart';
+import 'package:module_home/home/navigation/new_car_follow_navigation.dart';
 import 'package:module_home/home/navigation/used_car_navigation.dart';
 import 'package:wys_router/src/route/route_path.dart';
 import 'package:module_utils/module_utils.dart';
 
 class HomeSearchBar extends StatelessWidget {
   const HomeSearchBar({super.key});
+
+  Future<void> _openScan(BuildContext context) async {
+    final perm = await ImagePickerUtils.requestCameraAccess();
+    switch (perm) {
+      case MediaPermissionResult.granted:
+        break;
+      case MediaPermissionResult.denied:
+        UiKitInitializer.toastError('需要相机权限才能扫码');
+        return;
+      case MediaPermissionResult.permanentlyDenied:
+        final go = await Get.dialog<bool>(
+          AlertDialog(
+            title: const Text('需要相机权限'),
+            content: const Text('相机权限已被关闭。请在系统设置中开启后，再回来扫码。'),
+            actions: [
+              TextButton(
+                onPressed: () => Get.back(result: false),
+                child: const Text('取消'),
+              ),
+              TextButton(
+                onPressed: () => Get.back(result: true),
+                child: const Text('去设置'),
+              ),
+            ],
+          ),
+        );
+        if (go == true) {
+          await ImagePickerUtils.openPermissionSettings();
+        }
+        return;
+    }
+
+    // Get.to 走根路由，避开首页 Tab IndexedStack 里 local Navigator 吞掉 push
+    final result = await Get.to<String>(
+      () => const ScanPage(),
+      fullscreenDialog: true,
+    );
+    if (result == null || result.isEmpty) return;
+    UiKitInitializer.toast(result);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,18 +103,14 @@ class HomeSearchBar extends StatelessWidget {
             color: HomeDashboardTheme.surface,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(HomeDashboardTheme.radiusMd),
-              side: const BorderSide(
+              side: BorderSide(
                 color: HomeDashboardTheme.separator,
                 width: 0.5,
               ),
             ),
             child: InkWell(
               borderRadius: BorderRadius.circular(HomeDashboardTheme.radiusMd),
-              onTap: () async {
-                final result = await ScanUtils.scanWithCamera(context);
-                if (result == null || result.isEmpty) return;
-                UiKitInitializer.toast(result);
-              },
+              onTap: () => _openScan(context),
               child: SizedBox(
                 width: 44.w,
                 height: 44.w,
@@ -202,6 +239,10 @@ class HomeFeatureGrid extends StatelessWidget {
     }
     if (item.label == '新车成交') {
       DealInvoiceNavigation.open();
+      return;
+    }
+    if (item.label == '新车跟进') {
+      NewCarFollowNavigation.open();
       return;
     }
     if (item.label == 'AI小石头') {
@@ -973,6 +1014,7 @@ class HomeStoreMetricsCard extends StatelessWidget {
     required this.metrics,
     required this.details,
     required this.onTabSelected,
+    this.onStoreTap,
   });
 
   final String storeName;
@@ -981,139 +1023,308 @@ class HomeStoreMetricsCard extends StatelessWidget {
   final List<HomeMetric> metrics;
   final List<HomeMetricDetail> details;
   final ValueChanged<int> onTabSelected;
+  final VoidCallback? onStoreTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 0),
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: HomeDashboardTheme.surface,
-        borderRadius: BorderRadius.circular(HomeDashboardTheme.radiusMd),
-        border: Border.all(
-          color: HomeDashboardTheme.separator,
-          width: 0.5,
-        ),
-      ),
+    final tokens = VercelTokens.of(context);
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Expanded(
-                child: Text(
-                  storeName,
-                  style: TextStyle(
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+              Text(
+                '公司数据',
+                style: HomeDashboardTheme.sectionTitle.copyWith(fontSize: 18.sp),
+              ),
+              const Spacer(),
+              Text(
+                '查看更多',
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w500,
+                  color: HomeDashboardTheme.accent,
                 ),
               ),
-              Icon(Icons.keyboard_arrow_down_rounded, size: 22.sp),
-              Icon(Icons.swap_horiz_rounded, size: 20.sp, color: HomeDashboardTheme.textGray),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 18.sp,
+                color: HomeDashboardTheme.accent,
+              ),
             ],
           ),
           SizedBox(height: 12.h),
-          Row(
-            children: List.generate(tabs.length, (index) {
-              final active = index == selectedTab;
-              return GestureDetector(
-                onTap: () => onTabSelected(index),
-                child: Container(
-                  margin: EdgeInsets.only(right: 20.w),
-                  child: Column(
-                    children: [
-                      Text(
-                        tabs[index],
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontWeight: active ? FontWeight.w600 : FontWeight.normal,
-                          color: active
-                              ? HomeDashboardTheme.primaryBlue
-                              : HomeDashboardTheme.textGray,
-                        ),
-                      ),
-                      SizedBox(height: 6.h),
-                      Container(
-                        width: 24.w,
-                        height: 2.h,
-                        color: active ? HomeDashboardTheme.primaryBlue : Colors.transparent,
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }),
-          ),
-          SizedBox(height: 16.h),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              mainAxisSpacing: 16.h,
-              crossAxisSpacing: 12.w,
-              childAspectRatio: 2.2,
-            ),
-            itemCount: metrics.length,
-            itemBuilder: (context, index) {
-              final metric = metrics[index];
-              return Column(
+          DecoratedBox(
+            decoration: HomeDashboardTheme.groupedCardDecoration,
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 16.h),
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    metric.value,
-                    style: TextStyle(
-                      fontSize: 24.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  _StorePickerRow(
+                    storeName: storeName,
+                    onTap: onStoreTap,
                   ),
-                  Text(
-                    metric.label,
-                    style: TextStyle(fontSize: 12.sp, color: HomeDashboardTheme.textGray),
+                  SizedBox(height: 14.h),
+                  _MetricTabBar(
+                    tabs: tabs,
+                    selectedTab: selectedTab,
+                    onTabSelected: onTabSelected,
+                  ),
+                  SizedBox(height: 14.h),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final gap = 10.w;
+                      final tileW = (constraints.maxWidth - gap) / 2;
+                      return Wrap(
+                        spacing: gap,
+                        runSpacing: 10.h,
+                        children: [
+                          for (final metric in metrics)
+                            SizedBox(
+                              width: tileW,
+                              child: _MetricTile(metric: metric),
+                            ),
+                        ],
+                      );
+                    },
+                  ),
+                  SizedBox(height: 14.h),
+                  Divider(height: 1, thickness: 0.5, color: tokens.hairline),
+                  SizedBox(height: 14.h),
+                  Row(
+                    children: [
+                      for (var i = 0; i < details.length; i++) ...[
+                        if (i > 0) SizedBox(width: 8.w),
+                        Expanded(child: _DetailActionTile(detail: details[i])),
+                      ],
+                    ],
                   ),
                 ],
-              );
-            },
+              ),
+            ),
           ),
-          Divider(height: 24.h, color: HomeDashboardTheme.background),
-          Row(
-            children: details.map((detail) {
-              return Expanded(
-                child: Column(
-                  children: [
-                    Text(
-                      detail.value,
-                      style: TextStyle(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 4.h),
-                    Text(
-                      detail.label,
-                      style: TextStyle(fontSize: 11.sp, color: HomeDashboardTheme.textGray),
-                    ),
-                    SizedBox(height: 4.h),
-                    Text(
-                      detail.actionLabel,
-                      style: TextStyle(
-                        fontSize: 11.sp,
-                        color: HomeDashboardTheme.primaryBlue,
-                      ),
-                    ),
-                  ],
+        ],
+      ),
+    );
+  }
+}
+
+class _StorePickerRow extends StatelessWidget {
+  const _StorePickerRow({
+    required this.storeName,
+    this.onTap,
+  });
+
+  final String storeName;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+        decoration: BoxDecoration(
+          color: HomeDashboardTheme.fillSecondary,
+          borderRadius: BorderRadius.circular(10.r),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 28.w,
+              height: 28.w,
+              decoration: BoxDecoration(
+                color: HomeDashboardTheme.accent.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+              child: Icon(
+                Icons.storefront_rounded,
+                size: 16.sp,
+                color: HomeDashboardTheme.accent,
+              ),
+            ),
+            SizedBox(width: 8.w),
+            Expanded(
+              child: Text(
+                storeName,
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w600,
+                  color: HomeDashboardTheme.labelPrimary,
+                  height: 1.2,
                 ),
-              );
-            }).toList(),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            Icon(
+              Icons.keyboard_arrow_down_rounded,
+              size: 20.sp,
+              color: HomeDashboardTheme.labelSecondary,
+            ),
+            SizedBox(width: 2.w),
+            Icon(
+              Icons.swap_horiz_rounded,
+              size: 18.sp,
+              color: HomeDashboardTheme.labelTertiary,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MetricTabBar extends StatelessWidget {
+  const _MetricTabBar({
+    required this.tabs,
+    required this.selectedTab,
+    required this.onTabSelected,
+  });
+
+  final List<String> tabs;
+  final int selectedTab;
+  final ValueChanged<int> onTabSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(3.w),
+      decoration: BoxDecoration(
+        color: HomeDashboardTheme.fillSecondary,
+        borderRadius: BorderRadius.circular(10.r),
+      ),
+      child: Row(
+        children: List.generate(tabs.length, (index) {
+          final active = index == selectedTab;
+          return Expanded(
+            child: GestureDetector(
+              onTap: () => onTabSelected(index),
+              behavior: HitTestBehavior.opaque,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                curve: Curves.easeOut,
+                padding: EdgeInsets.symmetric(vertical: 8.h),
+                decoration: BoxDecoration(
+                  color: active ? HomeDashboardTheme.surface : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8.r),
+                  border: active
+                      ? Border.all(color: HomeDashboardTheme.separator, width: 0.5)
+                      : null,
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  tabs[index],
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    fontWeight: active ? FontWeight.w600 : FontWeight.w400,
+                    color: active
+                        ? HomeDashboardTheme.labelPrimary
+                        : HomeDashboardTheme.labelSecondary,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+  }
+}
+
+class _MetricTile extends StatelessWidget {
+  const _MetricTile({required this.metric});
+
+  final HomeMetric metric;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = VercelTokens.of(context);
+    return Container(
+      padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 10.h),
+      decoration: BoxDecoration(
+        color: tokens.canvasSoft,
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: tokens.hairline, width: 0.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            metric.value,
+            style: TextStyle(
+              fontSize: 22.sp,
+              fontWeight: FontWeight.w700,
+              color: HomeDashboardTheme.labelPrimary,
+              height: 1.1,
+              letterSpacing: -0.6,
+            ),
           ),
-          SizedBox(height: 12.h),
-          Center(
-            child: Text(
-              '查看更多 >',
-              style: TextStyle(fontSize: 13.sp, color: HomeDashboardTheme.textGray),
+          SizedBox(height: 6.h),
+          Text(
+            metric.label,
+            style: TextStyle(
+              fontSize: 12.sp,
+              color: HomeDashboardTheme.labelSecondary,
+              height: 1.2,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DetailActionTile extends StatelessWidget {
+  const _DetailActionTile({required this.detail});
+
+  final HomeMetricDetail detail;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = VercelTokens.of(context);
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 10.h),
+      decoration: BoxDecoration(
+        color: tokens.linkBgSoft.withValues(alpha: 0.35),
+        borderRadius: BorderRadius.circular(10.r),
+      ),
+      child: Column(
+        children: [
+          Text(
+            detail.value,
+            style: TextStyle(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w700,
+              color: HomeDashboardTheme.accent,
+              height: 1.1,
+              letterSpacing: -0.4,
+            ),
+          ),
+          SizedBox(height: 4.h),
+          Text(
+            detail.label,
+            style: TextStyle(
+              fontSize: 11.sp,
+              color: HomeDashboardTheme.labelSecondary,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          SizedBox(height: 4.h),
+          Text(
+            detail.actionLabel.replaceAll(' >', ''),
+            style: TextStyle(
+              fontSize: 11.sp,
+              fontWeight: FontWeight.w500,
+              color: HomeDashboardTheme.accent,
             ),
           ),
         ],
@@ -1127,95 +1338,189 @@ class HomeServiceGrid extends StatelessWidget {
 
   final List<HomeServiceItem> items;
 
+  void _onServiceTap(HomeServiceItem item) {
+    if (item.label == '更多') {
+      Get.toNamed(RoutePath.homeAllServices);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final tokens = VercelTokens.of(context);
+    final accents = <Color>[
+      tokens.link,
+      tokens.violet,
+      tokens.cyan,
+      tokens.warning,
+      tokens.highlightPink,
+      tokens.linkDeep,
+      tokens.violet,
+      tokens.ink,
+    ];
+
     return Padding(
-      padding: EdgeInsets.fromLTRB(16.w, 24.h, 16.w, 0),
+      padding: EdgeInsets.fromLTRB(16.w, 16, 16.w, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            '服务推荐',
-            style: HomeDashboardTheme.sectionTitle.copyWith(fontSize: 20.sp),
-          ),
-          SizedBox(height: 12.h),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
-              mainAxisSpacing: 16.h,
-              childAspectRatio: 0.8,
-            ),
-            itemCount: items.length,
-            itemBuilder: (context, index) {
-              final item = items[index];
-              return Column(
-                children: [
-                  Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      Container(
-                        width: 48.w,
-                        height: 48.w,
-                        decoration: BoxDecoration(
-                          color: HomeDashboardTheme.background,
-                          borderRadius: BorderRadius.circular(14.r),
-                        ),
-                        child: item.imageUrl != null
-                            ? CacheImageUtils.network(
-                                item.imageUrl!,
-                                width: 48.w,
-                                height: 48.w,
-                                fit: BoxFit.cover,
-                                borderRadius: BorderRadius.circular(14.r),
-                                placeholder: (_, __) => Center(
-                                  child: SizedBox(
-                                    width: 16.w,
-                                    height: 16.w,
-                                    child: const CircularProgressIndicator(strokeWidth: 1.5),
-                                  ),
-                                ),
-                                errorWidget: (_, __, ___) => Icon(
-                                  Icons.image_outlined,
-                                  size: 22.sp,
-                                  color: HomeDashboardTheme.textGray,
-                                ),
-                              )
-                            : Center(
-                                child: Text(item.emoji ?? '?', style: TextStyle(fontSize: 24.sp)),
-                              ),
+          Row(
+            children: [
+              Text(
+                '服务推荐',
+                style: HomeDashboardTheme.sectionTitle.copyWith(fontSize: 18.sp),
+              ),
+              const Spacer(),
+              GestureDetector(
+                onTap: () => Get.toNamed(RoutePath.homeAllServices),
+                behavior: HitTestBehavior.opaque,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '全部',
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w500,
+                        color: HomeDashboardTheme.accent,
                       ),
-                      if (item.badge != null)
-                        Positioned(
-                          top: -2,
-                          right: -4,
-                          child: Container(
-                            padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 2.h),
-                            decoration: BoxDecoration(
-                              color: item.badge == '热门'
-                                  ? HomeDashboardTheme.badgeOrange
-                                  : HomeDashboardTheme.badgeBlue,
-                              borderRadius: BorderRadius.circular(6.r),
-                            ),
-                            child: Text(
-                              item.badge!,
-                              style: TextStyle(color: Colors.white, fontSize: 9.sp, fontWeight: FontWeight.w600),
-                            ),
+                    ),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      size: 18.sp,
+                      color: HomeDashboardTheme.accent,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          DecoratedBox(
+            decoration: HomeDashboardTheme.groupedCardDecoration,
+            // Wrap 按子项固有高度撑开，不用 GridView 固定行高（.h 还会被屏高放大）
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(4.w, 10, 4.w, 10),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  const cols = 4;
+                  final cellW = constraints.maxWidth / cols;
+                  return Wrap(
+                    runSpacing: 10,
+                    children: [
+                      for (var i = 0; i < items.length; i++)
+                        SizedBox(
+                          width: cellW,
+                          child: _ServiceGridItem(
+                            item: items[i],
+                            accent: accents[i % accents.length],
+                            onTap: () => _onServiceTap(items[i]),
                           ),
                         ),
                     ],
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ServiceGridItem extends StatelessWidget {
+  const _ServiceGridItem({
+    required this.item,
+    required this.accent,
+    required this.onTap,
+  });
+
+  final HomeServiceItem item;
+  final Color accent;
+  final VoidCallback onTap;
+
+  IconData get _icon {
+    switch (item.label) {
+      case '朋友圈':
+        return Icons.photo_camera_outlined;
+      case '视频号':
+        return Icons.videocam_outlined;
+      case '直播':
+        return Icons.live_tv_outlined;
+      case '素材库':
+        return Icons.photo_library_outlined;
+      case '话术库':
+        return Icons.chat_bubble_outline_rounded;
+      case '培训':
+        return Icons.school_outlined;
+      case '竞品分析':
+        return Icons.insights_outlined;
+      case '更多':
+        return Icons.apps_rounded;
+      default:
+        return Icons.apps_outlined;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.center,
+            children: [
+              Container(
+                width: 44.w,
+                height: 44.w,
+                decoration: BoxDecoration(
+                  color: accent.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                child: Icon(_icon, size: 22.sp, color: accent),
+              ),
+              if (item.badge != null)
+                Positioned(
+                  top: -4,
+                  right: -6,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1),
+                    decoration: BoxDecoration(
+                      color: item.badge == '热门'
+                          ? HomeDashboardTheme.badgeOrange
+                          : HomeDashboardTheme.badgeBlue,
+                      borderRadius: BorderRadius.circular(6.r),
+                    ),
+                    child: Text(
+                      item.badge!,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 9.sp,
+                        fontWeight: FontWeight.w700,
+                        height: 1.1,
+                      ),
+                    ),
                   ),
-                  SizedBox(height: 8.h),
-                  Text(
-                    item.label,
-                    style: TextStyle(fontSize: 12.sp, color: HomeDashboardTheme.textDarkGray),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              );
-            },
+                ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            item.label,
+            style: TextStyle(
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w500,
+              color: HomeDashboardTheme.labelPrimary,
+              height: 1.1,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
           ),
         ],
       ),
