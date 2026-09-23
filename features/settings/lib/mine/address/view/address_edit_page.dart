@@ -134,10 +134,10 @@ class AddressEditPage extends GetView<AddressEditController> {
         labelText: label,
         labelStyle: MineTheme.caption,
         border: InputBorder.none,
-        enabledBorder: const UnderlineInputBorder(
+        enabledBorder: UnderlineInputBorder(
           borderSide: BorderSide(color: MineTheme.separator),
         ),
-        focusedBorder: const UnderlineInputBorder(
+        focusedBorder: UnderlineInputBorder(
           borderSide: BorderSide(color: MineTheme.accent),
         ),
       ),

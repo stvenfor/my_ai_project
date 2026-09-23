@@ -5,6 +5,7 @@
 > 架构设计详见 [MODULE_ARCHITECTURE.md](./MODULE_ARCHITECTURE.md)。  
 > **Flutter ↔ Go 后端**详见 [BACKEND_INTEGRATION.md](./BACKEND_INTEGRATION.md)。  
 > **局域网真机两端启动**详见 Go 仓 [dual-end-lan-startup.md](../../my_code_study/my_go_study/docs/dual-end-lan-startup.md)。  
+> **真机 / 无线启动注意事项**：**无线用 release，USB 用 debug**；冻屏清理见 [device-startup-notes.md](./device-startup-notes.md)。  
 > **Git Markdown → 飞书 Wiki 同步**详见 [FEISHU_SYNC.md](./FEISHU_SYNC.md)。
 
 ---
@@ -59,9 +60,15 @@ flutter pub get
 ./scripts/run_app.sh --harmony
 
 ./scripts/run_app.sh   # 或 flutter run --dart-define-from-file=.env
+
+# 局域网真机（推荐走脚本）
+# 无线 → 自动 --release；USB 热重载加 --force-debug
+./scripts/run_app.sh --lan -d <device_udid>
+./scripts/run_app.sh --lan -d <device_udid> --force-debug   # 仅 USB
 ```
 
-> 真实登录联调：`USE_MOCK_AUTH=false`，并启动 Go 后端 `my_go_study`（默认 `http://127.0.0.1:8080`）。Supabase 密钥配置在 Go 后端，不在 Flutter。
+> 真实登录联调：`USE_MOCK_AUTH=false`，并启动 Go 后端 `my_go_study`（默认 `http://127.0.0.1:8080`）。Supabase 密钥配置在 Go 后端，不在 Flutter。  
+> **硬规则**：无线 → release；USB → debug。详见 [device-startup-notes.md](./device-startup-notes.md)。卡住：`./scripts/cleanup_ios_debug.sh -d <udid>`。
 
 > 数据库迁移 SQL 见 [`supabase/migrations/`](../supabase/migrations/)（由 Go 后端连接 Supabase 使用）。
 

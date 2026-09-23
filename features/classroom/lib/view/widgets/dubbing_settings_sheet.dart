@@ -164,7 +164,7 @@ class _SettingRow extends StatelessWidget {
             width: 80,
             child: Text(
               label,
-              style: const TextStyle(fontSize: 14, color: ClassroomColors.titleBlack),
+              style: TextStyle(fontSize: 14, color: ClassroomColors.titleBlack),
             ),
           ),
           Expanded(child: child),
@@ -197,13 +197,13 @@ class _SwitchRow extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(fontSize: 14, color: ClassroomColors.titleBlack),
+            style: TextStyle(fontSize: 14, color: ClassroomColors.titleBlack),
           ),
           if (showInfo) ...[
             const SizedBox(width: 4),
             GestureDetector(
               onTap: onInfoTap,
-              child: const Icon(Icons.help_outline, size: 16, color: ClassroomColors.textGray),
+              child: Icon(Icons.help_outline, size: 16, color: ClassroomColors.textGray),
             ),
           ],
           const Spacer(),

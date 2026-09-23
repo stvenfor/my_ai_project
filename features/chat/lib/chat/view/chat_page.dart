@@ -50,14 +50,14 @@ class ChatPage extends GetView<ChatViewModel> {
                           child: Text('消息', style: ChatTheme.largeTitle),
                         ),
                         IconButton(
-                          icon: const Icon(
+                          icon: Icon(
                             CupertinoIcons.search,
                             color: ChatTheme.accent,
                           ),
                           onPressed: () {},
                         ),
                         IconButton(
-                          icon: const Icon(
+                          icon: Icon(
                             CupertinoIcons.square_pencil,
                             color: ChatTheme.accent,
                           ),

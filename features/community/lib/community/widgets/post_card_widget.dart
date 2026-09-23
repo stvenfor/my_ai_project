@@ -50,7 +50,7 @@ class _PostCardWidgetState extends State<PostCardWidget>
                   child: CupertinoButton(
                     padding: EdgeInsets.zero,
                     onPressed: () => _showMore(context, vm, post),
-                    child: const Icon(
+                    child: Icon(
                       CupertinoIcons.ellipsis,
                       size: 20,
                       color: CommunityTheme.labelSecondary,
@@ -112,11 +112,11 @@ class _PostCardWidgetState extends State<PostCardWidget>
             ),
             if (post.isMine)
               ListTile(
-                leading: const Icon(
+                leading: Icon(
                   CupertinoIcons.delete,
                   color: CommunityTheme.likeRed,
                 ),
-                title: const Text(
+                title: Text(
                   '删除',
                   style: TextStyle(color: CommunityTheme.likeRed),
                 ),

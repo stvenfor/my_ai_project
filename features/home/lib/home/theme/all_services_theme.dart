@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:module_common_ui/module_common_ui.dart';
 
 abstract final class AllServicesTheme {
-  static const background = Color(0xFFFFFFFF);
-  static const titleBlack = Color(0xFF171717);
-  static const subtitleGray = Color(0xFF888888);
-  static const labelGray = Color(0xFF4D4D4D);
-  static const editBorderBlue = Color(0xFF0070F3);
+  static VercelTokens get _t => VercelTokens.current();
+
+  static Color get background => _t.canvas;
+  static Color get titleBlack => _t.ink;
+  static Color get subtitleGray => _t.mute;
+  static Color get labelGray => _t.body;
+  static Color get editBorderBlue => _t.link;
 }

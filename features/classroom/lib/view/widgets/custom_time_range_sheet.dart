@@ -69,7 +69,7 @@ class _CustomTimeRangeSheetState extends State<CustomTimeRangeSheet> {
             padding: const EdgeInsets.fromLTRB(16, 16, 8, 0),
             child: Row(
               children: [
-                const Expanded(
+                Expanded(
                   child: Text(
                     '自定义时间',
                     textAlign: TextAlign.center,
@@ -119,7 +119,7 @@ class _CustomTimeRangeSheetState extends State<CustomTimeRangeSheet> {
                       );
                     });
                   },
-                  icon: const Icon(Icons.chevron_right),
+                  icon: Icon(Icons.chevron_right),
                 ),
               ],
             ),
@@ -133,7 +133,7 @@ class _CustomTimeRangeSheetState extends State<CustomTimeRangeSheet> {
                       child: Center(
                         child: Text(
                           w,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 13,
                             color: ClassroomColors.textGray,
                           ),

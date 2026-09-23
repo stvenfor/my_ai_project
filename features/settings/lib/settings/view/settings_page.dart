@@ -28,101 +28,109 @@ class _SettingsPageState extends State<SettingsPage> {
     final config = _vm.config;
     final envService = _vm.envService;
 
-    return AppPageScaffold(
-      backgroundColor: MineTheme.background,
-      navBar: const AppNavBar(title: '设置', showBackButton: true),
-      body: config == null
-          ? Center(
-              child: Text(
-                '应用配置未初始化',
-                style: MineTheme.caption,
-              ),
-            )
-          : ListView(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
-              children: [
-                const _SectionHeader('通用'),
-                _SettingsCard(
-                  children: [
-                    if (envService != null) ...[
-                      Obx(
-                        () => _NavTile(
-                          icon: CupertinoIcons.cloud,
-                          title: '运行环境',
-                          value:
-                              '${envService.config.label} · ${envService.backendBaseUrl}',
-                          onTap: () => _showEnvironmentPicker(
-                            envService.currentEnv.value,
-                          ),
-                        ),
-                      ),
-                      const _RowDivider(),
-                    ],
-                    _SwitchTile(
-                      icon: CupertinoIcons.moon_stars,
-                      title: '深色模式',
-                      subtitle: '切换浅色 / 深色主题',
-                      value: config.themeMode == ThemeMode.dark,
-                      onChanged: (_) => _refreshAfter(_vm.toggleTheme),
-                    ),
-                    const _RowDivider(),
-                    _NavTile(
-                      icon: CupertinoIcons.globe,
-                      title: '语言',
-                      value: _localeLabel(config.locale),
-                      onTap: () =>
-                          _showLanguagePicker(config.locale.languageCode),
-                    ),
-                  ],
+    // Rebuild when themeMode flips so MineTheme + chrome stay in lockstep.
+    return Obx(() {
+      final configLive = Get.isRegistered<AppConfigController>()
+          ? Get.find<AppConfigController>()
+          : null;
+      final themeMode = configLive?.themeModeRx.value ?? config?.themeMode;
+
+      return AppPageScaffold(
+        backgroundColor: MineTheme.background,
+        navBar: const AppNavBar(title: '设置', showBackButton: true),
+        body: config == null
+            ? Center(
+                child: Text(
+                  '应用配置未初始化',
+                  style: MineTheme.caption,
                 ),
-                const _SectionHeader('示例'),
-                _SettingsCard(
-                  children: [
-                    _NavTile(
-                      icon: CupertinoIcons.bluetooth,
-                      title: '蓝牙连接示例',
-                      subtitle: 'BLE 扫描、连接、服务发现',
-                      onTap: () => Get.toNamed(RoutePath.bluetoothDemo),
-                    ),
-                  ],
-                ),
-                if (kDebugMode) ...[
-                  const _SectionHeader('开发调试'),
+              )
+            : ListView(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+                children: [
+                  const _SectionHeader('通用'),
                   _SettingsCard(
                     children: [
-                      _NavTile(
-                        icon: CupertinoIcons.square_stack_3d_up,
-                        title: '弹框调度示例',
-                        subtitle: '样式、优先级队列、清空/取消待展示',
-                        onTap: () => Get.toNamed(RoutePath.dialogDemo),
+                      if (envService != null) ...[
+                        Obx(
+                          () => _NavTile(
+                            icon: CupertinoIcons.cloud,
+                            title: '运行环境',
+                            value:
+                                '${envService.config.label} · ${envService.backendBaseUrl}',
+                            onTap: () => _showEnvironmentPicker(
+                              envService.currentEnv.value,
+                            ),
+                          ),
+                        ),
+                        const _RowDivider(),
+                      ],
+                      _SwitchTile(
+                        icon: CupertinoIcons.moon_stars,
+                        title: '深色模式',
+                        subtitle: '切换浅色 / 深色主题',
+                        value: themeMode == ThemeMode.dark,
+                        onChanged: (_) => _refreshAfter(_vm.toggleTheme),
                       ),
                       const _RowDivider(),
                       _NavTile(
-                        icon: CupertinoIcons.link,
-                        title: '链接与推送调试',
-                        subtitle: 'Mock Deeplink / 前台 Push Banner',
-                        onTap: () => Get.toNamed(RoutePath.linkingDebug),
-                      ),
-                      const _RowDivider(),
-                      _NavTile(
-                        icon: CupertinoIcons.antenna_radiowaves_left_right,
-                        title: 'Realtime / WebSocket 调试',
-                        subtitle: '连接状态、Mock 信令、离线队列',
-                        onTap: () => Get.toNamed(RoutePath.realtimeDebug),
-                      ),
-                      const _RowDivider(),
-                      _NavTile(
-                        icon: CupertinoIcons.chat_bubble_2,
-                        title: '融云 IM 调试',
-                        subtitle: 'imUserId、连接态、备份队列',
-                        onTap: () => Get.toNamed(RoutePath.imDebug),
+                        icon: CupertinoIcons.globe,
+                        title: '语言',
+                        value: _localeLabel(config.locale),
+                        onTap: () =>
+                            _showLanguagePicker(config.locale.languageCode),
                       ),
                     ],
                   ),
+                  const _SectionHeader('示例'),
+                  _SettingsCard(
+                    children: [
+                      _NavTile(
+                        icon: CupertinoIcons.bluetooth,
+                        title: '蓝牙连接示例',
+                        subtitle: 'BLE 扫描、连接、服务发现',
+                        onTap: () => Get.toNamed(RoutePath.bluetoothDemo),
+                      ),
+                    ],
+                  ),
+                  if (kDebugMode) ...[
+                    const _SectionHeader('开发调试'),
+                    _SettingsCard(
+                      children: [
+                        _NavTile(
+                          icon: CupertinoIcons.square_stack_3d_up,
+                          title: '弹框调度示例',
+                          subtitle: '样式、优先级队列、清空/取消待展示',
+                          onTap: () => Get.toNamed(RoutePath.dialogDemo),
+                        ),
+                        const _RowDivider(),
+                        _NavTile(
+                          icon: CupertinoIcons.link,
+                          title: '链接与推送调试',
+                          subtitle: 'Mock Deeplink / 前台 Push Banner',
+                          onTap: () => Get.toNamed(RoutePath.linkingDebug),
+                        ),
+                        const _RowDivider(),
+                        _NavTile(
+                          icon: CupertinoIcons.antenna_radiowaves_left_right,
+                          title: 'Realtime / WebSocket 调试',
+                          subtitle: '连接状态、Mock 信令、离线队列',
+                          onTap: () => Get.toNamed(RoutePath.realtimeDebug),
+                        ),
+                        const _RowDivider(),
+                        _NavTile(
+                          icon: CupertinoIcons.chat_bubble_2,
+                          title: '融云 IM 调试',
+                          subtitle: 'imUserId、连接态、备份队列',
+                          onTap: () => Get.toNamed(RoutePath.imDebug),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
-              ],
-            ),
-    );
+              ),
+      );
+    });
   }
 
   String _localeLabel(Locale locale) {
@@ -156,7 +164,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     style: MineTheme.caption,
                   ),
                   trailing: current == env
-                      ? const Icon(
+                      ? Icon(
                           CupertinoIcons.checkmark_alt,
                           color: MineTheme.accent,
                         )
@@ -193,7 +201,7 @@ class _SettingsPageState extends State<SettingsPage> {
               ListTile(
                 title: Text('简体中文', style: MineTheme.body),
                 trailing: currentCode == 'zh'
-                    ? const Icon(
+                    ? Icon(
                         CupertinoIcons.checkmark_alt,
                         color: MineTheme.accent,
                       )
@@ -206,7 +214,7 @@ class _SettingsPageState extends State<SettingsPage> {
               ListTile(
                 title: Text('English', style: MineTheme.body),
                 trailing: currentCode == 'en'
-                    ? const Icon(
+                    ? Icon(
                         CupertinoIcons.checkmark_alt,
                         color: MineTheme.accent,
                       )
@@ -264,7 +272,7 @@ class _RowDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Divider(
+    return Divider(
       height: 0.5,
       thickness: 0.5,
       indent: 52,
@@ -299,11 +307,13 @@ class _NavTile extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Icon(icon, size: 22, color: MineTheme.accent),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(title, style: MineTheme.body),
@@ -336,7 +346,7 @@ class _NavTile extends StatelessWidget {
                   ),
                 ],
                 const SizedBox(width: 4),
-                const Icon(
+                Icon(
                   CupertinoIcons.chevron_right,
                   size: 16,
                   color: MineTheme.labelTertiary,
@@ -370,13 +380,15 @@ class _SwitchTile extends StatelessWidget {
     return ConstrainedBox(
       constraints: const BoxConstraints(minHeight: 52),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 10, 12, 10),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Icon(icon, size: 22, color: MineTheme.accent),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(title, style: MineTheme.body),

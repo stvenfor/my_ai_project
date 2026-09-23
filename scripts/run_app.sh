@@ -15,13 +15,14 @@ USE_LAN=false          # true → .env.lan（真机局域网）
 LAN_EXPLICIT=false     # 用户显式 --lan / --env-file
 START_PLATFORM=""   # android | ios | harmony
 DEVICE_ID=""
+FORCE_DEBUG=false      # 无线也强制 debug（默认否）
 
 usage() {
   cat <<'EOF'
 用法:
   ./scripts/run_app.sh [选项] [flutter run/build 额外参数...]
 
-运行（默认 debug）:
+运行（默认 debug；无线真机自动改 release，避免 LLDB 冻屏）:
   ./scripts/run_app.sh
   ./scripts/run_app.sh -d <device_id>
   ./scripts/run_app.sh --lan -d <真机_id>   # 强制 .env.lan（BACKEND_HOST）
@@ -30,6 +31,7 @@ usage() {
   ./scripts/run_app.sh --harmony          # 启动鸿蒙模拟器并 run
   ./scripts/run_app.sh -r
   ./scripts/run_app.sh --release -d iPhone
+  ./scripts/run_app.sh --force-debug -d <无线真机>  # 强制 debug（易冻，需 USB）
 
 平台快捷（会先调用 start_emulator.sh --wait）:
   --android | --and
@@ -42,7 +44,11 @@ usage() {
 
 Release / Profile 模式:
   -r, --release    flutter run --release（或 build 时显式 release）
-  -p, --profile    flutter run --profile
+  -p, --profile    flutter run --profile（仍会挂调试器，无线勿用）
+  --force-debug    无线真机也强制 debug（默认无线会自动切 release）
+
+卡住无法进后台:
+  ./scripts/cleanup_ios_debug.sh -d <udid>
 
 构建产物（release 默认）:
   -b, --build TARGET
@@ -250,6 +256,10 @@ while [[ $# -gt 0 ]]; do
       MODE_ARGS+=(--profile)
       shift
       ;;
+    --force-debug)
+      FORCE_DEBUG=true
+      shift
+      ;;
     --android|--and)
       START_PLATFORM=android
       shift
@@ -354,13 +364,115 @@ echo "→ dart-define-from-file=$(basename "$ENV_FILE")"
 
 "$FLUTTER" pub get
 
+FLUTTER_PID=""
+
+# Ctrl+C / Warp 中断时：杀 flutter 进程树 + 本机 LLDB + 真机 Runner/debugserver。
+# 否则 LLDB start-stopped / debugserver 会把 App 冻住，表现为卡死且无法进后台。
+resolve_run_device_id() {
+  local i=0
+  local a=""
+  while ((i < ${#EXTRA_ARGS[@]})); do
+    a="${EXTRA_ARGS[$i]}"
+    if [[ "$a" == "-d" ]]; then
+      echo "${EXTRA_ARGS[$((i + 1))]:-}"
+      return 0
+    fi
+    i=$((i + 1))
+  done
+  if [[ -n "${DEVICE_ID:-}" ]]; then
+    echo "$DEVICE_ID"
+    return 0
+  fi
+  return 1
+}
+
+kill_local_debug_attachers() {
+  # 先拆本机附加，再动真机（顺序很重要）。
+  if [[ -n "${FLUTTER_PID:-}" ]]; then
+    pkill -9 -P "$FLUTTER_PID" 2>/dev/null || true
+    kill -9 "$FLUTTER_PID" 2>/dev/null || true
+  fi
+  pkill -9 -f '/Developer/usr/bin/lldb' 2>/dev/null || true
+}
+
+terminate_ios_debug_stack() {
+  local device="${1:-}"
+  [[ -z "$device" ]] && return 0
+  command -v xcrun >/dev/null 2>&1 || return 0
+  local tmp
+  tmp="$(mktemp)"
+  if ! xcrun devicectl device info processes \
+      --device "$device" --timeout 10 --json-output "$tmp" >/dev/null 2>&1; then
+    rm -f "$tmp"
+    return 0
+  fi
+  python3 - "$tmp" "$device" <<'PY'
+import json, subprocess, sys
+path, device = sys.argv[1], sys.argv[2]
+try:
+    data = json.load(open(path))
+except Exception:
+    raise SystemExit(0)
+procs = (data.get("result") or {}).get("runningProcesses") or []
+for p in procs:
+    exe = str(p.get("executable") or "")
+    pid = p.get("processIdentifier")
+    if not pid:
+        continue
+    if "/Runner.app/Runner" not in exe and "/usr/libexec/debugserver" not in exe and not exe.rstrip("/").endswith("/debugserver"):
+        continue
+    print(f"→ 中断清理: kill pid={pid} {exe}")
+    for args in (
+        ["xcrun", "devicectl", "device", "process", "resume", "--device", device, "--pid", str(pid), "--timeout", "5"],
+        ["xcrun", "devicectl", "device", "process", "terminate", "--device", device, "--pid", str(pid), "--kill", "--timeout", "8"],
+        ["xcrun", "devicectl", "device", "process", "signal", "--device", device, "--pid", str(pid), "--signal", "SIGKILL", "--timeout", "8"],
+    ):
+        subprocess.run(args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+PY
+  rm -f "$tmp"
+}
+
+on_interrupt() {
+  echo "" >&2
+  echo "→ 收到中断，拆掉 LLDB/debugserver（避免真机冻屏无法进后台）…" >&2
+  kill_local_debug_attachers
+  # 给 debugserver 一点时间随 lldb 退出
+  sleep 0.5
+  local device=""
+  device="$(resolve_run_device_id || true)"
+  if [[ -n "$device" ]]; then
+    terminate_ios_debug_stack "$device"
+  fi
+  exit 130
+}
+
 # bash 3.2 + set -u 下空数组 "${arr[@]}" 会报 unbound variable，需先判长度。
 run_flutter() {
   local -a cmd=("$FLUTTER" "$@")
   if ((${#ENV_ARGS[@]} > 0)); then cmd+=("${ENV_ARGS[@]}"); fi
   if ((${#MODE_ARGS[@]} > 0)); then cmd+=("${MODE_ARGS[@]}"); fi
   if ((${#EXTRA_ARGS[@]} > 0)); then cmd+=("${EXTRA_ARGS[@]}"); fi
-  exec "${cmd[@]}"
+  # 不用 exec：保留 trap，才能在 Warp/终端中断时清理冻住的真机进程。
+  if [[ "$1" == "run" ]]; then
+    trap on_interrupt INT TERM
+    # 新建进程组，便于一次杀掉 flutter + 子进程 lldb
+    set -m
+    "${cmd[@]}" &
+    FLUTTER_PID=$!
+    set +m
+    wait "$FLUTTER_PID"
+    local ec=$?
+    trap - INT TERM
+    # 正常退出也扫一眼，防止残留 debugserver
+    if [[ "$ec" -ne 0 ]]; then
+      kill_local_debug_attachers
+      local device=""
+      device="$(resolve_run_device_id || true)"
+      [[ -n "$device" ]] && terminate_ios_debug_stack "$device"
+    fi
+    return "$ec"
+  fi
+  "${cmd[@]}"
 }
 
 if [[ "$BUILD" == true ]]; then
@@ -387,5 +499,25 @@ if [[ "$BUILD" == true ]]; then
       ;;
   esac
 else
+  # 无线真机：debug/profile 都会挂 lldb+debugserver，卡死且无法进后台。
+  # 只有 --release 走 DebuggingOptions.disabled（纯 install+launch）。
+  # 默认自动切 release；要热重载请 USB + --force-debug。
+  _mode_joined=" "
+  if ((${#MODE_ARGS[@]} > 0)); then
+    _mode_joined=" ${MODE_ARGS[*]} "
+  fi
+  _needs_debugger=true
+  if [[ "$_mode_joined" == *" --release "* ]]; then
+    _needs_debugger=false
+  fi
+  if [[ "$_needs_debugger" == true && "$FORCE_DEBUG" != true ]]; then
+    local_dev="$(resolve_run_device_id || true)"
+    if [[ -n "$local_dev" ]] && "$FLUTTER" devices 2>/dev/null | grep -F "$local_dev" | grep -q '(wireless)'; then
+      echo "→ 检测到无线真机：自动改用 --release（profile/debug 仍会挂 LLDB 冻屏）" >&2
+      echo "  需要热重载请插 USB 后加 --force-debug；已卡住请跑:" >&2
+      echo "  ./scripts/cleanup_ios_debug.sh -d $local_dev" >&2
+      MODE_ARGS=(--release)
+    fi
+  fi
   run_flutter run
 fi

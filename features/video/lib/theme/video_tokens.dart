@@ -4,26 +4,27 @@ import 'package:module_common_ui/module_common_ui.dart';
 /// Video / dubbing / short-video shared tokens — Vercel Design Source of Truth.
 ///
 /// Prefer [of] in widgets so light/dark follow app [ThemeMode].
-/// Statics mirror [VercelTokens.light] for const call sites.
+/// Legacy static getters also follow [VercelTokens.current].
 abstract final class VideoTokens {
   static VercelTokens of(BuildContext context) => VercelTokens.of(context);
 
-  // DESIGN.md / VercelTokens.light aliases.
-  static const primary = Color(0xFF171717);
-  static const onPrimary = Color(0xFFFFFFFF);
-  static const link = Color(0xFF0070F3);
-  static const background = Color(0xFFF5F5F5);
-  static const surface = Color(0xFFFFFFFF);
-  static const ink = Color(0xFF171717);
-  static const body = Color(0xFF4D4D4D);
-  static const mute = Color(0xFF888888);
-  static const hairline = Color(0xFFEBEBEB);
-  static const hairlineStrong = Color(0xFFA1A1A1);
-  static const error = Color(0xFFEE0000);
-  static const warning = Color(0xFFF5A623);
-  static const warningSoft = Color(0xFFFFEFCF);
-  static const linkSoft = Color(0xFFD3E5FF);
-  static const highlightPink = Color(0xFFFF0080);
+  static VercelTokens get _t => VercelTokens.current();
+
+  static Color get primary => _t.primary;
+  static Color get onPrimary => _t.onPrimary;
+  static Color get link => _t.link;
+  static Color get background => _t.canvasSoft2;
+  static Color get surface => _t.canvas;
+  static Color get ink => _t.ink;
+  static Color get body => _t.body;
+  static Color get mute => _t.mute;
+  static Color get hairline => _t.hairline;
+  static Color get hairlineStrong => _t.hairlineStrong;
+  static Color get error => _t.error;
+  static Color get warning => _t.warning;
+  static Color get warningSoft => _t.warningSoft;
+  static Color get linkSoft => _t.linkBgSoft;
+  static Color get highlightPink => _t.highlightPink;
 
   /// Overlay chrome on video (always light-on-dark; not theme-inverted).
   static const overlayFg = Color(0xFFFFFFFF);

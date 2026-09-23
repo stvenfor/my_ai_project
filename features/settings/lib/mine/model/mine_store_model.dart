@@ -1,9 +1,4 @@
-class MineStoreOption {
-  const MineStoreOption({
-    required this.id,
-    required this.name,
-  });
+import 'package:module_auth/store/store_option.dart';
 
-  final String id;
-  final String name;
-}
+/// 兼容「我的」旧命名；与首页共用 [StoreOption]。
+typedef MineStoreOption = StoreOption;

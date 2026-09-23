@@ -98,6 +98,24 @@ class MockAuthService extends AuthService {
   }
 
   @override
+  Future<void> signInWithWechatCode({required String code}) async {
+    final trimmed = code.trim();
+    if (trimmed.isEmpty) {
+      throw UnknownAuthFailure('微信授权码为空');
+    }
+    await Future<void>.delayed(const Duration(milliseconds: 400));
+    await _userService.setUser(
+      User(
+        id: 'mock_wx_${trimmed.hashCode.abs()}',
+        name: '微信用户',
+        avatar: 'https://api.dicebear.com/7.x/avataaars/png?seed=wechat',
+        token: 'mock_wx_token_${DateTime.now().millisecondsSinceEpoch}',
+      ),
+    );
+    _emit(AuthSessionState.signedIn);
+  }
+
+  @override
   void onClose() {
     _events.close();
     super.onClose();

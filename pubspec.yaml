@@ -109,8 +109,16 @@ dependencies:
       url: https://gitcode.com/openharmony-tpc/flutter_packages.git
       path: packages/shared_preferences/shared_preferences
       ref: br_shared_preferences-v2.5.4_ohos
-  # video_player OHOS 暂不接入：video_player_ohos → pigeon(git) 锁定旧 analyzer，
-  # 与 json_serializable ^6.9 / json_annotation ^4.12 冲突。短视频仍用 pub.dev。
+  # 视频：openharmony-tpc video_player + CPF chewie（社区播放页；小视频同底层）
+  video_player:
+    git:
+      url: https://gitcode.com/openharmony-tpc/flutter_packages.git
+      path: packages/video_player/video_player
+      ref: br_video_player-v2.10.0_ohos
+  chewie:
+    git:
+      url: https://gitcode.com/CPF-Flutter/fluttertpc_chewie.git
+      ref: br_v1.13.0_ohos
 
   # plus_plugins（CPF-Flutter）
   connectivity_plus:
@@ -176,21 +184,24 @@ flutter:
     - assets/web/
     - commons/toolkit/assets/data/video_mock_sources.json
 
-# 支付宝 tobias：iOS 回跳 scheme（禁止含 `_`；须与支付宝开放平台配置一致）
+# 支付宝 tobias：iOS 回跳 scheme（禁止含 `_`；与 WysAlipayConfig.urlScheme 对齐）
 tobias:
   url_scheme: xiaomaoalipay
 
-# 微信 fluwx：iOS URL Scheme / Universal Link（app_id 与 WysWechatConfig 对齐）
+# 微信 fluwx：须与 WysWechatConfig.appId / universalLink 一致；未申请前可留空，填 key 后同步改三处
 fluwx:
-  app_id: wxd92d02603e1c59dc
+  app_id: ""
   ios:
-    # 正式环境请换成已备案的 Universal Link
-    universal_link: https://example.com/app/
+    universal_link: ""
 
 dependency_overrides:
   # 非鸿蒙钉选
   rxdart: ^0.27.7
   screen_brightness_ios: 2.1.2
+  # video_player_ohos 把 pigeon(codegen) 写成 dependencies → analyzer<8 与 json_serializable 冲突；
+  # lib 已提交 messages.g.dart，运行时用 stub 顶掉 path pigeon。
+  pigeon:
+    path: packages/pigeon_runtime_stub
   # ---------------------------------------------------------------------------
   # OHOS git 同源消解：features/commons 仍写 pub.dev 版本，pub 会与根
   # dependencies 的 git 源冲突。下列条目与 dependencies 完全一致，仅用于
@@ -211,6 +222,15 @@ dependency_overrides:
       url: https://gitcode.com/openharmony-tpc/flutter_packages.git
       path: packages/shared_preferences/shared_preferences
       ref: br_shared_preferences-v2.5.4_ohos
+  video_player:
+    git:
+      url: https://gitcode.com/openharmony-tpc/flutter_packages.git
+      path: packages/video_player/video_player
+      ref: br_video_player-v2.10.0_ohos
+  chewie:
+    git:
+      url: https://gitcode.com/CPF-Flutter/fluttertpc_chewie.git
+      ref: br_v1.13.0_ohos
   connectivity_plus:
     git:
       url: https://gitcode.com/CPF-Flutter/flutter_plus_plugins.git

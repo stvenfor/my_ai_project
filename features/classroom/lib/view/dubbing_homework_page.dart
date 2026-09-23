@@ -24,7 +24,7 @@ class DubbingHomeworkPage extends StatelessWidget {
             child: Transform.translate(
               offset: const Offset(0, -16),
               child: Container(
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   color: ClassroomColors.cardWhite,
                   borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
                 ),
@@ -37,7 +37,7 @@ class DubbingHomeworkPage extends StatelessWidget {
                         children: [
                           Text(
                             '配音作业（${homework.items.length}）',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                               color: ClassroomColors.titleBlack,
@@ -53,7 +53,7 @@ class DubbingHomeworkPage extends StatelessWidget {
                               color: const Color(0xFFFFF3E0),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Text(
+                            child: Text(
                               '本次作业可享受免费评分',
                               style: TextStyle(
                                 fontSize: 11,
@@ -100,7 +100,7 @@ class DubbingHomeworkPage extends StatelessWidget {
             height: 48,
             child: ElevatedButton.icon(
               onPressed: () => UiKitInitializer.toast('分享到班级群'),
-              icon: const Icon(Icons.share, size: 18),
+              icon: Icon(Icons.share, size: 18),
               label: const Text('分享到班级群'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: ClassroomColors.primaryGreen,
@@ -149,7 +149,7 @@ class _GradientHeader extends StatelessWidget {
         right: 16,
         bottom: 32,
       ),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -243,7 +243,7 @@ class _DubbingItemRow extends StatelessWidget {
               color: ClassroomColors.divider,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Icon(Icons.movie, color: ClassroomColors.textGray),
+            child: Icon(Icons.movie, color: ClassroomColors.textGray),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -252,7 +252,7 @@ class _DubbingItemRow extends StatelessWidget {
               children: [
                 Text(
                   item.title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                     color: ClassroomColors.titleBlack,

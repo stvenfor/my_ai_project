@@ -15,6 +15,7 @@ class UserAuthApi {
   static const logoutPath = '/api/v1/user/logout';
   static const sendPhoneOtpPath = '/api/v1/user/phone/otp/send';
   static const verifyPhoneOtpPath = '/api/v1/user/phone/otp/verify';
+  static const wechatLoginPath = '/api/v1/user/wechat/login';
 
   Future<LoginResult> login({
     required String username,
@@ -88,6 +89,39 @@ class UserAuthApi {
         data: {
           'phone': phone,
           'otp': otp,
+          'device_id': deviceId,
+          'platform': platform,
+        },
+        converter: _parseLoginResult,
+      );
+      final model = result.data;
+      if (model == null || !model.isSuccess || model.data == null) {
+        throw _mapFailure(model?.code, model?.message);
+      }
+      return model.data!;
+    } on AuthFailure {
+      rethrow;
+    } on HttpRequestException catch (error) {
+      throw _mapFailure(
+        int.tryParse(error.code ?? ''),
+        error.message,
+      );
+    } catch (error) {
+      throw _mapFailure(null, error.toString());
+    }
+  }
+
+  Future<LoginResult> loginWithWechat({
+    required String code,
+    required String deviceId,
+    required String platform,
+  }) async {
+    AuthHttpConfig.ensureInitialized();
+    try {
+      final result = await HttpManager.instance.post<ResultModel<LoginResult>>(
+        wechatLoginPath,
+        data: {
+          'code': code,
           'device_id': deviceId,
           'platform': platform,
         },
@@ -279,6 +313,13 @@ class UserAuthApi {
     }
     if (text.contains('短信登录暂未开放')) {
       return UnknownAuthFailure(text);
+    }
+    if (text.contains('微信登录未配置') ||
+        text.contains('WECHAT_APP') ||
+        text.contains('微信授权失败')) {
+      return UnknownAuthFailure(
+        text.isNotEmpty ? text : '微信登录未配置，请填写 AppID/AppSecret',
+      );
     }
     if (text.contains('用户已存在')) {
       return const EmailAlreadyRegisteredFailure();

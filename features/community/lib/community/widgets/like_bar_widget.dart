@@ -1,9 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_community/community/models/post_model.dart';
 import 'package:module_community/community/theme/community_theme.dart';
 import 'package:module_community/community/viewmodel/community_viewmodel.dart';
+import 'package:wys_login_share_pay/wys_login_share_pay.dart';
 
 class LikeBarWidget extends StatefulWidget {
   const LikeBarWidget({super.key, required this.post});
@@ -44,7 +46,7 @@ class _LikeBarWidgetState extends State<LikeBarWidget>
   Widget build(BuildContext context) {
     final vm = Get.find<CommunityViewModel>();
     final post = widget.post;
-    const defaultColor = CommunityTheme.labelSecondary;
+    final defaultColor = CommunityTheme.labelSecondary;
 
     // 与媒体/正文的间距由 PostCard 统一控制（12），此处不再额外 top padding。
     return Row(
@@ -85,10 +87,67 @@ class _LikeBarWidgetState extends State<LikeBarWidget>
           ),
           label: '分享',
           color: defaultColor,
-          onTap: () {},
+          onTap: () => _sharePost(context, post),
         ),
       ],
     );
+  }
+
+  Future<void> _sharePost(BuildContext context, PostModel post) async {
+    if (!WysWechatConfig.isConfigured) {
+      UiKitInitializer.toast('请先在 WysWechatConfig 填写微信 AppID / Universal Link');
+      return;
+    }
+    final scene = await showCupertinoModalPopup<WysWechatScene>(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        title: const Text('分享到微信'),
+        actions: [
+          CupertinoActionSheetAction(
+            onPressed: () => Navigator.pop(ctx, WysWechatScene.session),
+            child: const Text('微信好友'),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () => Navigator.pop(ctx, WysWechatScene.timeline),
+            child: const Text('朋友圈'),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('取消'),
+        ),
+      ),
+    );
+    if (scene == null) return;
+
+    final title = post.nickname.isNotEmpty ? '${post.nickname}的动态' : '社区动态';
+    final desc = post.content.trim().isEmpty
+        ? '来自 App 社区'
+        : (post.content.length > 60
+            ? '${post.content.substring(0, 60)}…'
+            : post.content);
+    final thumb = post.images.isNotEmpty
+        ? post.images.first
+        : (post.videoCoverUrl ?? '');
+    // 网页分享需公网 URL；落地页未就绪前用占位，换正式 H5 时只改这里。
+    final url = 'https://xiaomaomain.com/app/community/posts/${post.id}';
+
+    final result = await WysWechatService.instance.shareWebpage(
+      title: title,
+      description: desc,
+      webpageUrl: url,
+      thumbUrl: thumb,
+      scene: scene,
+    );
+    if (result.isSuccess) {
+      UiKitInitializer.toast(
+        scene == WysWechatScene.timeline ? '已唤起朋友圈' : '已唤起微信好友',
+      );
+    } else if (result.status == WysWechatStatus.notInstalled) {
+      UiKitInitializer.toast('未安装微信');
+    } else {
+      UiKitInitializer.toast(result.message ?? '分享失败');
+    }
   }
 }
 

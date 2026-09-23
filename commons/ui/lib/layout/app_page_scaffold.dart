@@ -33,10 +33,9 @@ class AppPageScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = VercelTokens.of(context);
-    final isLight = Theme.of(context).brightness == Brightness.light;
+    final tokens = VercelTokens.resolve(context);
     final bg = backgroundColor ??
-        (isLight ? tokens.canvasSoft2 : tokens.canvas);
+        (tokens == VercelTokens.dark ? tokens.canvas : tokens.canvasSoft2);
 
     return ImmersiveAnnotated(
       child: Scaffold(
@@ -90,7 +89,9 @@ class ImmersiveAnnotated extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final brightness = Theme.of(context).brightness;
+    final tokens = VercelTokens.resolve(context);
+    final brightness =
+        tokens == VercelTokens.dark ? Brightness.dark : Brightness.light;
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: ImmersiveHelper.overlayStyle(
         brightness: brightness,

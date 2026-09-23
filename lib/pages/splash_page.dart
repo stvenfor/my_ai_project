@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:module_sample/l10n/app_localizations.dart';
 import 'package:get/get.dart';
@@ -18,6 +20,7 @@ class SplashPage extends StatefulWidget {
 class _SplashPageState extends State<SplashPage> {
   var _busy = true;
   var _denied = false;
+  var _stuck = false;
 
   @override
   void initState() {
@@ -29,25 +32,46 @@ class _SplashPageState extends State<SplashPage> {
     setState(() {
       _busy = true;
       _denied = false;
+      _stuck = false;
     });
     ModuleRegistry.ensureBindings();
 
-    LogUtils.i('[Splash] checking privacy consent');
-    final granted = await PrivacyConsentDialog.showIfNeeded(context);
-    if (!mounted) return;
-    if (!granted) {
-      LogUtils.w('[Splash] privacy denied, stay on splash');
+    try {
+      LogUtils.i('[Splash] checking privacy consent');
+      final granted = await PrivacyConsentDialog.showIfNeeded(context);
+      if (!mounted) return;
+      if (!granted) {
+        LogUtils.w('[Splash] privacy denied, stay on splash');
+        setState(() {
+          _busy = false;
+          _denied = true;
+        });
+        return;
+      }
+
+      LogUtils.i('[Splash] privacy granted, go main');
+      // 中断 debug / 半启动后偶发导航挂起：超时露出重试，避免永久转圈。
+      await Future<void>(() async {
+        await Get.offNamed(RoutePath.main);
+      }).timeout(const Duration(seconds: 8));
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+      await LinkingInitializer.flushPendingNavigation()
+          .timeout(const Duration(seconds: 5));
+    } on TimeoutException {
+      if (!mounted) return;
+      LogUtils.w('[Splash] route timed out — show retry');
       setState(() {
         _busy = false;
-        _denied = true;
+        _stuck = true;
       });
-      return;
+    } catch (e, st) {
+      if (!mounted) return;
+      LogUtils.e('[Splash] route failed', e, st);
+      setState(() {
+        _busy = false;
+        _stuck = true;
+      });
     }
-
-    LogUtils.i('[Splash] privacy granted, go main');
-    Get.offNamed(RoutePath.main);
-    await Future<void>.delayed(const Duration(milliseconds: 150));
-    await LinkingInitializer.flushPendingNavigation();
   }
 
   @override
@@ -71,14 +95,29 @@ class _SplashPageState extends State<SplashPage> {
                   ),
                 ],
               )
-            : Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (_busy) const CircularProgressIndicator(),
-                  if (_busy) const SizedBox(height: 16),
-                  Text(l10n.splashLoading),
-                ],
-              ),
+            : _stuck
+                ? Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        '启动未完成（可能被终端中断）。请重试，或重新 run 后再打开。',
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      FilledButton(
+                        onPressed: _routeByAuth,
+                        child: const Text('重试进入'),
+                      ),
+                    ],
+                  )
+                : Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (_busy) const CircularProgressIndicator(),
+                      if (_busy) const SizedBox(height: 16),
+                      Text(l10n.splashLoading),
+                    ],
+                  ),
       ),
     );
   }

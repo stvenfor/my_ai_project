@@ -509,10 +509,13 @@ path_provider:
 | 设备信息 | `device_info_plus` | CPF plus_plugins / `br_device_info_plus-v12.3.0_ohos` |
 | 包信息 | `package_info_plus` | CPF plus_plugins / `br_package_info_plus-v9.0.0_ohos` |
 | 常亮 | `wakelock_plus` | CPF / `br_v1.4.0_ohos` |
+| 视频解码 | `video_player` | openharmony-tpc / `br_video_player-v2.10.0_ohos` |
+| 社区播放控件 | `chewie` | CPF `fluttertpc_chewie` / `br_v1.13.0_ohos` |
+
+`video_player_ohos` 误将 codegen `pigeon` 写进 `dependencies`（与 `json_serializable` 的 analyzer 冲突）。根工程用 `packages/pigeon_runtime_stub` **override** 顶掉；插件 `lib` 已含 `messages.g.dart`，运行时不需要真 pigeon。
 
 ### 暂缓 / 仍用 pub.dev
 
-- `video_player`：OHOS 分支已有，但 `video_player_ohos → pigeon` 锁定旧 `analyzer`，与 `json_serializable` 冲突
 - `flutter_blue_plus`（蓝牙 demo）
 - `screen_brightness` / `volume_controller`（短视频控制条）
 
@@ -532,7 +535,11 @@ path_provider:
 
 ### 正确写法
 
-用 `VideoPlaybackImmersiveScope` 包裹播放页根节点；顶部内嵌播放区用 `AppSafeInsets.top(context)` 定位返回按钮；底部用 `AppVideoControlsBar`。
+用 `VideoPlaybackImmersiveScope` 包裹播放页根节点；顶部内嵌播放区用 `AppSafeInsets.top(context)` 定位返回按钮。
+
+- 社区：`VideoPlayPage` → Chewie（controls + 全屏横竖屏）
+- 小视频：`ShortVideoPlayerKit` + `AppVideoControlsBar` / 手势（不共用 Chewie）
+- 内嵌头图等：底部可用 `AppVideoControlsBar`
 
 ```dart
 // ❌ 错误：沉浸式下为状态栏留白会出现顶部黑条

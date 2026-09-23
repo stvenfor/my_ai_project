@@ -21,7 +21,7 @@ class MallOrdersPage extends GetView<MallOrdersController> {
     return AppPageScaffold(
       layout: AppPageLayout.standard,
       backgroundColor: MallTheme.background,
-      navBar: const AppNavBar(
+      navBar: AppNavBar(
         title: '我的订单',
         showBackButton: true,
         backgroundColor: MallTheme.surface,

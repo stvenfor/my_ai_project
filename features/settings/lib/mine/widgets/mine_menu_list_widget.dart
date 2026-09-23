@@ -62,7 +62,7 @@ class MineMenuListWidget extends StatelessWidget {
                                 shape: BoxShape.circle,
                               ),
                             ),
-                          const Icon(
+                          Icon(
                             CupertinoIcons.chevron_right,
                             size: 16,
                             color: MineTheme.labelTertiary,

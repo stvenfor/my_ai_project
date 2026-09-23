@@ -60,7 +60,7 @@ class _HeaderBody extends StatelessWidget {
                   child: CupertinoButton(
                     padding: EdgeInsets.zero,
                     onPressed: () => Get.back<void>(),
-                    child: const Icon(
+                    child: Icon(
                       CupertinoIcons.back,
                       size: 24,
                       color: MineTheme.accent,
@@ -135,7 +135,7 @@ class _HeaderBody extends StatelessWidget {
                                   style: MineTheme.caption,
                                 ),
                               ),
-                              const Icon(
+                              Icon(
                                 CupertinoIcons.chevron_down,
                                 size: 14,
                                 color: MineTheme.labelSecondary,
@@ -332,7 +332,7 @@ class _Avatar extends StatelessWidget {
   Widget _placeholder() {
     return Container(
       color: MineTheme.fillSecondary,
-      child: const Icon(
+      child: Icon(
         CupertinoIcons.person_fill,
         size: 36,
         color: MineTheme.labelTertiary,

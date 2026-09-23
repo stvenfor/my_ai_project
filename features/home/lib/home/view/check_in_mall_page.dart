@@ -170,7 +170,7 @@ class _CheckInMallPageState extends State<CheckInMallPage> {
                 children: [
                   Text(
                     _error!,
-                    style: const TextStyle(color: CheckInMallTheme.textSecondary),
+                    style: TextStyle(color: CheckInMallTheme.textSecondary),
                   ),
                   SizedBox(height: 12.h),
                   FilledButton(

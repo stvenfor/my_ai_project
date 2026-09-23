@@ -49,7 +49,7 @@ class _LoginPasswordPageState extends State<LoginPasswordPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 '请输入你的密码',
                 style: TextStyle(
                   fontSize: 26,
@@ -64,8 +64,8 @@ class _LoginPasswordPageState extends State<LoginPasswordPage> {
                 obscureText: true,
                 keyboardType: TextInputType.visiblePassword,
                 onChanged: _controller.updatePassword,
-                style: const TextStyle(fontSize: 18),
-                decoration: const InputDecoration(
+                style: TextStyle(fontSize: 18),
+                decoration: InputDecoration(
                   hintText: '至少6位密码',
                   hintStyle: TextStyle(color: AuthTheme.inputHint),
                   border: UnderlineInputBorder(

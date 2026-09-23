@@ -24,7 +24,11 @@ dependencies:
     path: ../../commons/wys_router
   module_utils:
     path: ../../commons/toolkit
-  video_player: ^2.9.2
+  video_player: ^2.10.0
+  wys_login_share_pay:
+    path: ../../components/wys_login_share_pay
+  # 根 pubspec 用 CPF br_v1.13.0_ohos 同源消解（三端）
+  chewie: ^1.13.0
 
 dev_dependencies:
   flutter_test:

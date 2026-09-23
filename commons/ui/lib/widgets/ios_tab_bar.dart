@@ -30,7 +30,7 @@ class IosTabBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = VercelTokens.of(context);
+    final tokens = VercelTokens.resolve(context);
 
     return ClipRect(
       child: BackdropFilter(
@@ -86,7 +86,7 @@ class _TabItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = VercelTokens.of(context);
+    final tokens = VercelTokens.resolve(context);
     final color = selected ? tokens.link : tokens.mute;
 
     return Material(

@@ -37,17 +37,19 @@ class AppNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final top = AppSafeInsets.top(context);
-    final theme = Theme.of(context);
-    final tokens = VercelTokens.of(context);
+    final tokens = VercelTokens.resolve(context);
+    final brightness = style == AppNavBarStyle.dark
+        ? Brightness.dark
+        : tokens == VercelTokens.dark
+            ? Brightness.dark
+            : Brightness.light;
     final fg = foregroundColor ?? _defaultForeground(tokens);
     final bg = backgroundColor ?? _defaultBackground(tokens);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: overlayStyle ??
           ImmersiveHelper.overlayStyle(
-            brightness: style == AppNavBarStyle.dark
-                ? Brightness.dark
-                : theme.brightness,
+            brightness: brightness,
             immersive: true,
           ),
       child: Material(

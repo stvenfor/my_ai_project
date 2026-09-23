@@ -18,9 +18,18 @@ import 'package:module_rongcloud_im/im_initializer.dart';
 import 'package:module_sample/config/module_manifest.dart';
 import 'package:module_settings/env/environment_session.dart';
 import 'package:module_utils/module_utils.dart';
+import 'package:wys_login_share_pay/wys_login_share_pay.dart';
 import 'package:wys_router/wys_router.dart';
 
 class AppInitializer {
+  /// 壳工程最小 DI：进 UI 前必须已有 [AppController]。
+  /// init 超时 / 半完成后仍可安全调用（幂等）。
+  static void ensureShellBindings() {
+    if (!Get.isRegistered<AppController>()) {
+      AppBinding().dependencies();
+    }
+  }
+
   static Future<void> init() async {
     await ModuleUtilsInitializer.initialize(
       config: ModuleUtilsConfig(
@@ -33,6 +42,9 @@ class AppInitializer {
 
     await SpManager.init();
     await AppDatabase.init();
+
+    // 尽早注册，避免 init 后半段超时后 runApp 找不到 AppController。
+    ensureShellBindings();
 
     await EnvironmentSession.register();
     _wireEnvironmentHttpRefresh();
@@ -62,7 +74,7 @@ class AppInitializer {
     );
     await ModuleRegistry.bootstrap(hostContext);
 
-    AppBinding().dependencies();
+    ensureShellBindings();
     LinkingBinding().dependencies();
     await ImInitializer.initDeferred();
     for (final binding in ModuleRegistry.collectBindings()) {
@@ -74,6 +86,13 @@ class AppInitializer {
 
     await LinkingInitializer.initDeferred();
     await RealtimeInitializer.initDeferred();
+
+    if (WysWechatConfig.isConfigured) {
+      final ok = await WysWechatService.instance.init();
+      LogUtils.i('[App] wechat sdk init=$ok appId=${WysWechatConfig.appId}');
+    } else {
+      LogUtils.i('[App] wechat sdk skipped (WysWechatConfig 未填 AppID/UL)');
+    }
 
     final wsClient = RealtimeInitializer.client;
     LogUtils.i(

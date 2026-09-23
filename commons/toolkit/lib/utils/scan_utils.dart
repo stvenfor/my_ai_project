@@ -14,15 +14,28 @@ abstract final class ScanUtils {
       ImagePickerUtils.ensureCameraPermission();
 
   /// 打开全屏扫码页，成功返回内容；取消或无权限返回 null。
+  ///
+  /// 使用 rootNavigator，避免嵌在 Tab / IndexedStack 时 push 进错 Navigator、
+  /// 页面看起来「点了没跳转」。
   static Future<String?> scanWithCamera(
     BuildContext context, {
     ScanOptions options = const ScanOptions(),
   }) async {
-    final granted = await ensureCameraPermission();
-    if (!granted || !context.mounted) return null;
+    final perm = await ImagePickerUtils.requestCameraAccess();
+    if (perm != MediaPermissionResult.granted) {
+      return null;
+    }
+    if (!context.mounted) return null;
 
-    return Navigator.of(context).push<String>(
-      MaterialPageRoute(builder: (_) => ScanPage(options: options)),
+    final navigator = Navigator.maybeOf(context, rootNavigator: true) ??
+        Navigator.maybeOf(context);
+    if (navigator == null) return null;
+
+    return navigator.push<String>(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (_) => ScanPage(options: options),
+      ),
     );
   }
 

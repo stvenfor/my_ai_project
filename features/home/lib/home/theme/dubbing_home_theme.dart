@@ -1,28 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:module_common_ui/module_common_ui.dart';
 
-/// Dubbing home — Vercel tokens; drop green Category Skin.
+/// Dubbing home — resolves from [VercelTokens.current]; no green Category Skin.
 abstract final class DubbingHomeTheme {
-  static const background = Color(0xFFFFFFFF);
-  static const primaryGreen = Color(0xFF0070F3); // was brand green → link
-  static const titleBlack = Color(0xFF171717);
-  static const textGray = Color(0xFF4D4D4D);
-  static const subtitleGray = Color(0xFF888888);
-  static const searchFieldBackground = Color(0xFFF5F5F5);
-  static const divider = Color(0xFFEBEBEB);
-  static const svipGold = Color(0xFFF5A623);
-  static const cardShadow = Color(0x00000000);
-  static const viewAllBackground = Color(0xFFFAFAFA);
+  static VercelTokens get _t => VercelTokens.current();
+
+  static Color get background => _t.canvas;
+  static Color get primaryGreen => _t.link;
+  static Color get titleBlack => _t.ink;
+  static Color get textGray => _t.body;
+  static Color get subtitleGray => _t.mute;
+  static Color get searchFieldBackground => _t.canvasSoft2;
+  static Color get divider => _t.hairline;
+  static Color get svipGold => _t.warning;
+  static Color get cardShadow => const Color(0x00000000);
+  static Color get viewAllBackground => _t.canvasSoft;
   static const sectionTitleSize = 18.0;
   static const cardRadius = 8.0;
   static const thumbRadius = 8.0;
 
-  static const hotRankHeaderPink = Color(0xFFFAFAFA);
-  static const hotRankSidebarBg = Color(0xFFF5F5F5);
-  static const hotRankSidebarActive = Color(0xFFFFFFFF);
-  static const hotRankRankGold = Color(0xFFF5A623);
-  static const hotRankRankSilver = Color(0xFFA1A1A1);
-  static const hotRankRankBronze = Color(0xFFAB570A);
-  static const hotRankRankDefault = Color(0xFF888888);
+  static Color get hotRankHeaderPink => _t.canvasSoft;
+  static Color get hotRankSidebarBg => _t.canvasSoft2;
+  static Color get hotRankSidebarActive => _t.canvas;
+  static Color get hotRankRankGold => _t.warning;
+  static Color get hotRankRankSilver => _t.hairlineStrong;
+  static Color get hotRankRankBronze => _t.warningDeep;
+  static Color get hotRankRankDefault => _t.mute;
   static const hotRankDropdownShadow = Color(0x1A000000);
 }
 
@@ -49,7 +52,7 @@ enum HotRankCardTheme {
   LinearGradient get bodyGradient => LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [top.withValues(alpha: 0.5), Colors.white],
+        colors: [top.withValues(alpha: 0.5), VercelTokens.current().canvas],
         stops: const [0.0, 0.6],
       );
 }

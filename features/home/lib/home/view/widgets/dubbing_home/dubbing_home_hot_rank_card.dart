@@ -99,7 +99,7 @@ class DubbingHomeHotRankCard extends StatelessWidget {
             behavior: HitTestBehavior.opaque,
             child: Container(
               padding: EdgeInsets.symmetric(vertical: 11.h),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: DubbingHomeTheme.viewAllBackground,
                 border: Border(
                   top: BorderSide(color: DubbingHomeTheme.divider, width: 0.5),
@@ -152,7 +152,7 @@ class _RankPreviewRow extends StatelessWidget {
         if (showDivider)
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 10.w),
-            child: const Divider(height: 1, color: DubbingHomeTheme.divider),
+            child: Divider(height: 1, color: DubbingHomeTheme.divider),
           ),
         GestureDetector(
           onTap: onTap,

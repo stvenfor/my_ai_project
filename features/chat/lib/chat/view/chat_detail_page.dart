@@ -72,7 +72,7 @@ class _ChatDetailHeader extends StatelessWidget {
           CupertinoButton(
             padding: EdgeInsets.zero,
             onPressed: onBack,
-            child: const Icon(
+            child: Icon(
               CupertinoIcons.back,
               color: ChatTheme.accent,
               size: 24,
@@ -104,7 +104,7 @@ class _ChatDetailHeader extends StatelessWidget {
           CupertinoButton(
             padding: EdgeInsets.zero,
             onPressed: () {},
-            child: const Icon(
+            child: Icon(
               CupertinoIcons.ellipsis,
               color: ChatTheme.accent,
             ),

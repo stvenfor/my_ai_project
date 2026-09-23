@@ -101,7 +101,7 @@ class _HotRankHeader extends StatelessWidget {
 
     return Container(
       padding: EdgeInsets.fromLTRB(8.w, top + 4.h, 8.w, 16.h),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
@@ -109,7 +109,7 @@ class _HotRankHeader extends StatelessWidget {
             DubbingHomeTheme.hotRankHeaderPink,
             Colors.white,
           ],
-          stops: [0.0, 1.0],
+          stops: const [0.0, 1.0],
         ),
       ),
       child: Column(

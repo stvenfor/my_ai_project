@@ -35,7 +35,7 @@ class HomeworkDetailStudentPage extends StatelessWidget {
             height: 48,
             child: ElevatedButton.icon(
               onPressed: () => UiKitInitializer.toast('分享到班级群'),
-              icon: const Icon(Icons.share, size: 18),
+              icon: Icon(Icons.share, size: 18),
               label: const Text('分享到班级群'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: ClassroomColors.primaryGreen,
@@ -86,12 +86,12 @@ class _UserCard extends StatelessWidget {
               CircleAvatar(
                 radius: 24,
                 backgroundColor: ClassroomColors.primaryGreenLight,
-                child: Text(student.avatarEmoji, style: const TextStyle(fontSize: 24)),
+                child: Text(student.avatarEmoji, style: TextStyle(fontSize: 24)),
               ),
               const SizedBox(width: 12),
               Text(
                 student.name,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w600,
                   color: ClassroomColors.titleBlack,
@@ -107,7 +107,7 @@ class _UserCard extends StatelessWidget {
               color: ClassroomColors.background,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Text(
+            child: Text(
               '这里老师没写的话默认会有一句话',
               style: TextStyle(fontSize: 13, color: ClassroomColors.textGray),
             ),
@@ -136,13 +136,13 @@ class _ProgressCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 '作业进度',
                 style: TextStyle(fontSize: 14, color: ClassroomColors.titleBlack),
               ),
               Text(
                 '已完成 ${(progress * 100).toInt()}%',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   color: ClassroomColors.primaryGreen,
                   fontWeight: FontWeight.w600,
@@ -160,7 +160,7 @@ class _ProgressCard extends StatelessWidget {
                   value: progress,
                   minHeight: 8,
                   backgroundColor: ClassroomColors.divider,
-                  valueColor: const AlwaysStoppedAnimation(ClassroomColors.primaryGreen),
+                  valueColor: AlwaysStoppedAnimation(ClassroomColors.primaryGreen),
                 ),
               ),
               Positioned(
@@ -211,10 +211,10 @@ class _SocialProofRow extends StatelessWidget {
           Expanded(
             child: Text(
               '已有$completedCount人完成作业',
-              style: const TextStyle(fontSize: 13, color: ClassroomColors.textGray),
+              style: TextStyle(fontSize: 13, color: ClassroomColors.textGray),
             ),
           ),
-          const Icon(Icons.chevron_right, color: ClassroomColors.textGrayLight),
+          Icon(Icons.chevron_right, color: ClassroomColors.textGrayLight),
         ],
       ),
     );
@@ -238,7 +238,7 @@ class _ContentCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Unit 3 Part A: Let\'s talk & Let\'s learn',
             style: TextStyle(
               fontSize: 15,
@@ -259,14 +259,14 @@ class _ContentCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   '谭老师：本次作业完成的很棒！送你 1 张体验卡，以资鼓励。',
                   style: TextStyle(fontSize: 13, color: ClassroomColors.titleBlack),
                 ),
                 const SizedBox(height: 8),
                 GestureDetector(
                   onTap: () => Get.toNamed(RoutePath.classroomClaimGift),
-                  child: const Text(
+                  child: Text(
                     '点击领取',
                     style: TextStyle(
                       fontSize: 13,
@@ -284,7 +284,7 @@ class _ContentCard extends StatelessWidget {
               RoutePath.classroomDubbingHomework,
               arguments: args,
             ),
-            child: const Text(
+            child: Text(
               '查看配音作业 >',
               style: TextStyle(
                 fontSize: 13,
@@ -335,7 +335,7 @@ class _TaskRow extends StatelessWidget {
                   children: [
                     Text(
                       task.title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                         color: ClassroomColors.titleBlack,
@@ -344,7 +344,7 @@ class _TaskRow extends StatelessWidget {
                     const SizedBox(width: 6),
                     Text(
                       '+${task.starReward}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         color: ClassroomColors.orange,
                       ),
@@ -354,7 +354,7 @@ class _TaskRow extends StatelessWidget {
                 ),
                 Text(
                   task.subtitle,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     color: ClassroomColors.textGray,
                   ),

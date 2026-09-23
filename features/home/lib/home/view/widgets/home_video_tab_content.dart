@@ -267,7 +267,7 @@ class _HotCourseCard extends StatelessWidget {
                     ),
                     child: Text(
                       course.isLive ? '直播中' : '回放',
-                      style: const TextStyle(color: Colors.white, fontSize: 10),
+                      style: TextStyle(color: Colors.white, fontSize: 10),
                     ),
                   ),
                 ),

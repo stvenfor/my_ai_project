@@ -1,8 +1,13 @@
+import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
-import 'package:video_player/video_player.dart';
+import 'package:flutter/services.dart';
 import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_utils/module_utils.dart';
+import 'package:video_player/video_player.dart';
 
+/// 社区视频播放页（Chewie controls + 横竖屏全屏）。
+///
+/// 小视频仍走 [ShortVideoPlayerKit]，本页不共用。
 class VideoPlayPage extends StatefulWidget {
   const VideoPlayPage({super.key, required this.videoUrl});
 
@@ -13,8 +18,8 @@ class VideoPlayPage extends StatefulWidget {
 }
 
 class _VideoPlayPageState extends State<VideoPlayPage> {
-  VideoPlayerController? _controller;
-  var _initialized = false;
+  VideoPlayerController? _videoController;
+  ChewieController? _chewieController;
   var _failed = false;
 
   @override
@@ -25,17 +30,48 @@ class _VideoPlayPageState extends State<VideoPlayPage> {
 
   Future<void> _init() async {
     try {
-      final c = await AppVideoPlayer.createController(
+      final video = await AppVideoPlayer.createController(
         widget.videoUrl,
         autoPlay: true,
       );
       if (!mounted) {
-        c.dispose();
+        await video.dispose();
         return;
       }
+
+      final chewie = ChewieController(
+        videoPlayerController: video,
+        autoPlay: true,
+        looping: false,
+        allowFullScreen: true,
+        allowMuting: true,
+        showControls: true,
+        materialProgressColors: ChewieProgressColors(
+          playedColor: Colors.white,
+          handleColor: Colors.white,
+          bufferedColor: Colors.white38,
+          backgroundColor: Colors.white24,
+        ),
+        deviceOrientationsOnEnterFullScreen: const [
+          DeviceOrientation.landscapeLeft,
+          DeviceOrientation.landscapeRight,
+        ],
+        deviceOrientationsAfterFullScreen: const [
+          DeviceOrientation.portraitUp,
+        ],
+        systemOverlaysAfterFullScreen: SystemUiOverlay.values,
+        errorBuilder: (context, errorMessage) => Center(
+          child: Text(
+            errorMessage.isEmpty ? '视频加载失败' : errorMessage,
+            style: const TextStyle(color: Colors.white),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+
       setState(() {
-        _controller = c;
-        _initialized = true;
+        _videoController = video;
+        _chewieController = chewie;
       });
     } catch (_) {
       if (mounted) setState(() => _failed = true);
@@ -44,22 +80,15 @@ class _VideoPlayPageState extends State<VideoPlayPage> {
 
   @override
   void dispose() {
-    _controller?.dispose();
+    _chewieController?.dispose();
+    _videoController?.dispose();
     super.dispose();
-  }
-
-  void _togglePlay() {
-    final c = _controller;
-    if (c == null) return;
-    if (c.value.isPlaying) {
-      c.pause();
-    } else {
-      c.play();
-    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final chewie = _chewieController;
+
     return VideoPlaybackImmersiveScope(
       child: AppPageScaffold(
         layout: AppPageLayout.fullBleed,
@@ -72,24 +101,11 @@ class _VideoPlayPageState extends State<VideoPlayPage> {
             ? const Center(
                 child: Text('视频加载失败', style: TextStyle(color: Colors.white)),
               )
-            : !_initialized || _controller == null
-                ? const Center(child: CircularProgressIndicator(color: Colors.white))
-                : Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      GestureDetector(
-                        onTap: _togglePlay,
-                        behavior: HitTestBehavior.opaque,
-                        child: Center(child: AppVideoPlayer.view(_controller!)),
-                      ),
-                      Positioned(
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        child: AppVideoControlsBar(controller: _controller!),
-                      ),
-                    ],
-                  ),
+            : chewie == null
+                ? const Center(
+                    child: CircularProgressIndicator(color: Colors.white),
+                  )
+                : Chewie(controller: chewie),
       ),
     );
   }

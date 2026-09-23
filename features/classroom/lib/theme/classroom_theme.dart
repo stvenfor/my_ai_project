@@ -1,22 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:module_common_ui/module_common_ui.dart';
 
-/// Classroom — Vercel tokens; drop green Category Skin.
+/// Classroom — resolves from [VercelTokens.current]; no green Category Skin.
 abstract final class ClassroomColors {
-  static const Color background = Color(0xFFF5F5F5);
-  static const Color cardWhite = Color(0xFFFFFFFF);
-  static const Color primaryGreen = Color(0xFF171717); // primary CTA ink
-  static const Color primaryGreenDark = Color(0xFF171717);
-  static const Color primaryGreenLight = Color(0xFFF5F5F5);
-  static const Color gradientEnd = Color(0xFF0070F3);
-  static const Color titleBlack = Color(0xFF171717);
-  static const Color textGray = Color(0xFF888888);
-  static const Color textGrayLight = Color(0xFFA1A1A1);
-  static const Color divider = Color(0xFFEBEBEB);
-  static const Color orange = Color(0xFFF5A623);
-  static const Color cardBlue = Color(0xFF0070F3);
-  static const Color stampGray = Color(0xFFEBEBEB);
-  static const Color noteBackground = Color(0xFFD3E5FF);
-  static const Color giftCardBlue = Color(0xFF0070F3);
+  static VercelTokens get _t => VercelTokens.current();
+
+  static Color get background => _t.canvasSoft2;
+  static Color get cardWhite => _t.canvas;
+  static Color get primaryGreen => _t.primary;
+  static Color get primaryGreenDark => _t.primary;
+  static Color get primaryGreenLight => _t.canvasSoft2;
+  static Color get gradientEnd => _t.link;
+  static Color get titleBlack => _t.ink;
+  static Color get textGray => _t.mute;
+  static Color get textGrayLight => _t.hairlineStrong;
+  static Color get divider => _t.hairline;
+  static Color get orange => _t.warning;
+  static Color get cardBlue => _t.link;
+  static Color get stampGray => _t.hairline;
+  static Color get noteBackground => _t.linkBgSoft;
+  static Color get giftCardBlue => _t.link;
 }
 
 abstract final class ClassroomDimens {

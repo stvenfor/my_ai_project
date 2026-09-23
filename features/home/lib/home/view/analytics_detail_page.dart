@@ -16,7 +16,7 @@ class AnalyticsDetailPage extends GetView<AnalyticsDetailController> {
       navBar: const AppNavBar(title: '数据详情', showBackButton: true),
       body: Obx(() {
         if (controller.isLoading.value && controller.record.value == null) {
-          return const Center(
+          return Center(
             child: CircularProgressIndicator(color: AnalyticsTheme.primary),
           );
         }
@@ -31,7 +31,7 @@ class AnalyticsDetailPage extends GetView<AnalyticsDetailController> {
                   Text(
                     error,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(color: AnalyticsTheme.muted),
+                    style: TextStyle(color: AnalyticsTheme.muted),
                   ),
                   const SizedBox(height: 16),
                   SizedBox(
@@ -60,14 +60,14 @@ class AnalyticsDetailPage extends GetView<AnalyticsDetailController> {
           padding: const EdgeInsets.fromLTRB(12, 12, 12, 28),
           children: [
             if (item.flagAnomaly)
-              const _CueBanner(
+              _CueBanner(
                 color: AnalyticsTheme.destructive,
                 icon: Icons.warning_amber_rounded,
                 title: '异常记录',
                 subtitle: '该观测被标记为异常，请优先核对流量与转化。',
               )
             else if (item.flagFeatured)
-              const _CueBanner(
+              _CueBanner(
                 color: AnalyticsTheme.accent,
                 icon: Icons.star_rounded,
                 title: '精选记录',
@@ -199,7 +199,7 @@ class AnalyticsDetailPage extends GetView<AnalyticsDetailController> {
                 children: [
                   Text(
                     item.notes,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AnalyticsTheme.foreground,
                       fontSize: 14,
                       height: 1.5,
@@ -265,7 +265,7 @@ class _CueBanner extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AnalyticsTheme.muted,
                     fontSize: 12,
                     height: 1.35,
@@ -317,7 +317,7 @@ class _ChartSection extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AnalyticsTheme.foreground,
                   fontSize: 15,
                   fontWeight: FontWeight.w800,
@@ -462,7 +462,7 @@ class _SectionCard extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AnalyticsTheme.foreground,
                   fontSize: 15,
                   fontWeight: FontWeight.w800,
@@ -504,7 +504,7 @@ class _KV extends StatelessWidget {
             width: 96,
             child: Text(
               label,
-              style: const TextStyle(color: AnalyticsTheme.muted, fontSize: 13),
+              style: TextStyle(color: AnalyticsTheme.muted, fontSize: 13),
             ),
           ),
           Expanded(

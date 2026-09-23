@@ -97,9 +97,10 @@ Go 后端仓库（独立）：`my_go_study`（默认 `http://127.0.0.1:8080`）�
 ```bash
 cp .env.lan.example .env.lan   # BACKEND_HOST=与 Go REALTIME_PUBLIC_WS_HOST 相同的 IP
 
-# IDE：Run 选「my_ai_project (LAN 真机)」（已带 --dart-define-from-file=.env.lan）
+# IDE：无线 →「my_ai_project (LAN 真机)」release；USB 热重载 →「LAN 真机 · debug·需USB」
 # CLI：
-./scripts/run_app.sh --lan -d <device_id>
+./scripts/run_app.sh --lan -d <device_id>                 # 无线自动 --release
+./scripts/run_app.sh --lan -d <device_id> --force-debug   # 仅 USB debug
 # 或只传真机 -d（脚本会自动改用 .env.lan）
 ./scripts/run_app.sh -d <device_id>
 ```
@@ -107,6 +108,8 @@ cp .env.lan.example .env.lan   # BACKEND_HOST=与 Go REALTIME_PUBLIC_WS_HOST 相
 `.env.lan` 不入库。Android 主 Manifest 已 `usesCleartextTraffic=true`，明文 `http://` 可用。Realtime WS 主机以 Go ticket 返回为准（依赖后端 `REALTIME_PUBLIC_WS_HOST`）。
 
 **真机仍连 `127.0.0.1`**：看启动日志 `BACKEND_HOST=`；若为 `(未注入)` 说明未带 `.env.lan`（Xcode / 裸 run 常见）。须完整重装，或依赖 debug 回退 `commons/network/lib/http/lan_host.dart`（与 Mac 局域网 IP 对齐）。完整调试记录见 Go 仓 [ios-lan-device-debug-2026-09-16.md](../../my_code_study/my_go_study/docs/ios-lan-device-debug-2026-09-16.md)。
+
+**硬规则**：**无线 → release**；**USB → debug**。无线误用 debug/profile 会冻屏无法进后台。见 [device-startup-notes.md](./device-startup-notes.md)。
 
 ### 2.3 请求头
 

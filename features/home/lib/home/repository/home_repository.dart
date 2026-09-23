@@ -7,16 +7,19 @@ class HomeRepository {
 
   final HomeTodoApi _todoApi;
 
-  Future<HomeDashboardData> loadDashboard() async {
+  Future<HomeDashboardData> loadDashboard({String? storeName}) async {
     final todoCards = await _loadTodoCards();
     await Future<void>.delayed(const Duration(milliseconds: 50));
     return HomeDashboardData(
-      storeName: '[4S]北京沃德龙鼎吉利',
+      storeName: (storeName != null && storeName.isNotEmpty)
+          ? storeName
+          : '[4S]北京沃德龙鼎吉利',
       features: const [
         HomeFeatureItem(label: 'H5 调试', imageUrl: 'https://picsum.photos/seed/sales/200/200'),
         HomeFeatureItem(label: '生活服务', imageUrl: 'https://picsum.photos/seed/life/200/200'),
         HomeFeatureItem(label: '二手车', imageUrl: 'https://picsum.photos/seed/usedcar/200/200'),
         HomeFeatureItem(label: '新车成交', imageUrl: 'https://picsum.photos/seed/newcar/200/200'),
+        HomeFeatureItem(label: '新车跟进', imageUrl: 'https://picsum.photos/seed/follow/200/200'),
         HomeFeatureItem(label: 'AI小石头', imageUrl: 'https://picsum.photos/seed/customer/200/200'),
         HomeFeatureItem(label: 'Club', imageUrl: 'https://picsum.photos/seed/order/200/200'),
         HomeFeatureItem(label: '数据分析', imageUrl: 'https://picsum.photos/seed/data/200/200'),

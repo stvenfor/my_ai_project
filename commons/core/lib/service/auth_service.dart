@@ -27,5 +27,8 @@ abstract class AuthService extends GetxService {
     required String otp,
   });
 
+  /// 微信授权 code 换会话（需 Go 配置 WECHAT_APP_SECRET）。
+  Future<void> signInWithWechatCode({required String code});
+
   Future<void> signOut();
 }

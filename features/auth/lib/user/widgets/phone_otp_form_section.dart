@@ -37,7 +37,7 @@ class PhoneOtpFormSection extends StatelessWidget {
                 borderRadius: BorderRadius.circular(AuthTheme.radiusMd),
                 border: Border.all(color: AuthTheme.separator, width: 0.5),
               ),
-              child: const Text(
+              child: Text(
                 '+86',
                 style: TextStyle(
                   fontSize: 17,
@@ -170,7 +170,7 @@ class _SendOtpButton extends StatelessWidget {
             minimumSize: const Size(96, AuthTheme.fieldHeight),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AuthTheme.radiusMd),
-              side: const BorderSide(color: AuthTheme.separator, width: 0.5),
+              side: BorderSide(color: AuthTheme.separator, width: 0.5),
             ),
           ),
           child: Text(

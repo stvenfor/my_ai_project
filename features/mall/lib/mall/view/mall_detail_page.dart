@@ -12,7 +12,7 @@ class MallDetailPage extends GetView<MallDetailController> {
     return AppPageScaffold(
       layout: AppPageLayout.standard,
       backgroundColor: MallTheme.background,
-      navBar: const AppNavBar(
+      navBar: AppNavBar(
         title: '商品详情',
         showBackButton: true,
         backgroundColor: MallTheme.surface,
@@ -334,7 +334,7 @@ class _BottomBar extends StatelessWidget {
       color: MallTheme.surface,
       child: Container(
         padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 10.h + bottom),
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           border: Border(top: BorderSide(color: MallTheme.separator)),
         ),
         child: Obx(() {
@@ -346,7 +346,7 @@ class _BottomBar extends StatelessWidget {
                   onPressed: busy ? null : onCart,
                   style: OutlinedButton.styleFrom(
                     foregroundColor: MallTheme.labelPrimary,
-                    side: const BorderSide(color: MallTheme.separator),
+                    side: BorderSide(color: MallTheme.separator),
                     padding: EdgeInsets.symmetric(vertical: 12.h),
                   ),
                   child: const Text('加入购物车'),

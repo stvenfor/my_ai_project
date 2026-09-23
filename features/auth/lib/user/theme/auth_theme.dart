@@ -1,32 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:module_common_ui/module_common_ui.dart';
 
-/// Auth module tokens — Vercel Design Source of Truth.
+/// Auth module tokens — resolves from [VercelTokens.current] (light/dark).
 abstract final class AuthTheme {
-  static const accent = Color(0xFF0070F3);
-  static const background = Color(0xFFF5F5F5);
-  static const surface = Color(0xFFFFFFFF);
-  static const fillSecondary = Color(0xFFF5F5F5);
-  static const labelPrimary = Color(0xFF171717);
-  static const labelSecondary = Color(0xFF4D4D4D);
-  static const labelTertiary = Color(0xFF888888);
-  static const separator = Color(0xFFEBEBEB);
-  static const buttonDisabled = Color(0xFFA1A1A1);
+  static VercelTokens get _t => VercelTokens.current();
 
-  static const primaryBlue = accent;
-  static const titleBlack = labelPrimary;
-  static const textGray = labelSecondary;
-  static const linkGray = labelSecondary;
-  static const dividerGray = separator;
-  static const inputHint = labelTertiary;
-  static const countryCodeBg = fillSecondary;
+  static Color get accent => _t.link;
+  static Color get background => _t.canvasSoft2;
+  static Color get surface => _t.canvas;
+  static Color get fillSecondary => _t.canvasSoft2;
+  static Color get labelPrimary => _t.ink;
+  static Color get labelSecondary => _t.body;
+  static Color get labelTertiary => _t.mute;
+  static Color get separator => _t.hairline;
+  static Color get buttonDisabled => _t.hairlineStrong;
+
+  static Color get primaryBlue => accent;
+  static Color get titleBlack => labelPrimary;
+  static Color get textGray => labelSecondary;
+  static Color get linkGray => labelSecondary;
+  static Color get dividerGray => separator;
+  static Color get inputHint => labelTertiary;
+  static Color get countryCodeBg => fillSecondary;
 
   static const double radiusMd = 8;
   static const double radiusLg = 12;
   static const double fieldHeight = 52;
   static const double buttonHeight = 52;
 
-  static TextStyle get largeTitle => const TextStyle(
+  static TextStyle get largeTitle => TextStyle(
         fontFamily: VercelTypography.fontFamily,
         fontSize: 32,
         fontWeight: FontWeight.w600,
@@ -35,7 +37,7 @@ abstract final class AuthTheme {
         letterSpacing: -1.6,
       );
 
-  static TextStyle get subtitle => const TextStyle(
+  static TextStyle get subtitle => TextStyle(
         fontFamily: VercelTypography.fontFamily,
         fontSize: 14,
         fontWeight: FontWeight.w400,
@@ -44,7 +46,7 @@ abstract final class AuthTheme {
         letterSpacing: -0.28,
       );
 
-  static TextStyle get fieldText => const TextStyle(
+  static TextStyle get fieldText => TextStyle(
         fontFamily: VercelTypography.fontFamily,
         fontSize: 16,
         fontWeight: FontWeight.w400,
@@ -52,7 +54,7 @@ abstract final class AuthTheme {
         height: 24 / 16,
       );
 
-  static TextStyle get caption => const TextStyle(
+  static TextStyle get caption => TextStyle(
         fontFamily: VercelTypography.fontFamily,
         fontSize: 12,
         fontWeight: FontWeight.w400,
@@ -60,15 +62,15 @@ abstract final class AuthTheme {
         height: 16 / 12,
       );
 
-  static TextStyle get buttonLabel => const TextStyle(
+  static TextStyle get buttonLabel => TextStyle(
         fontFamily: VercelTypography.fontFamily,
         fontSize: 16,
         fontWeight: FontWeight.w500,
-        color: Color(0xFFFFFFFF),
+        color: _t.onPrimary,
         height: 24 / 16,
       );
 
-  static TextStyle get sectionLabel => const TextStyle(
+  static TextStyle get sectionLabel => TextStyle(
         fontFamily: VercelTypography.fontFamily,
         fontSize: 14,
         fontWeight: FontWeight.w400,
@@ -83,7 +85,7 @@ abstract final class AuthTheme {
         border: Border.all(color: separator),
       );
 
-  static Divider get groupedDivider => const Divider(
+  static Divider get groupedDivider => Divider(
         height: 0.5,
         thickness: 0.5,
         indent: 16,
@@ -110,11 +112,11 @@ abstract final class AuthTheme {
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(radiusMd),
-        borderSide: const BorderSide(color: separator),
+        borderSide: BorderSide(color: separator),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(radiusMd),
-        borderSide: const BorderSide(color: accent, width: 1.5),
+        borderSide: BorderSide(color: accent, width: 1.5),
       ),
     );
   }

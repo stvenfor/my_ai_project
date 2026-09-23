@@ -142,7 +142,7 @@ class _MineCollapsedNavBar extends StatelessWidget {
       color: MineTheme.surface,
       elevation: 0,
       child: DecoratedBox(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: MineTheme.surface,
           border: Border(
             bottom: BorderSide(color: MineTheme.separator),
@@ -163,7 +163,7 @@ class _MineCollapsedNavBar extends StatelessWidget {
                       child: CupertinoButton(
                         padding: EdgeInsets.zero,
                         onPressed: () => Get.back<void>(),
-                        child: const Icon(
+                        child: Icon(
                           CupertinoIcons.back,
                           size: 22,
                           color: MineTheme.accent,

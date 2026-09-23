@@ -45,7 +45,7 @@ class AuthPrivacyRow extends StatelessWidget {
                         ),
                       ),
                       child: controller.agreedPrivacy.value
-                          ? const Icon(Icons.check, size: 14, color: Colors.white)
+                          ? Icon(Icons.check, size: 14, color: Colors.white)
                           : null,
                     ),
                   ),
@@ -56,8 +56,8 @@ class AuthPrivacyRow extends StatelessWidget {
                     child: RichText(
                       text: TextSpan(
                         style: AuthTheme.caption,
-                        children: const [
-                          TextSpan(text: '我已阅读并同意'),
+                        children: [
+                          const TextSpan(text: '我已阅读并同意'),
                           TextSpan(
                             text: '《某个隐私条款》',
                             style: TextStyle(color: AuthTheme.accent),
@@ -143,7 +143,7 @@ class AuthBackButton extends StatelessWidget {
       child: CupertinoButton(
         padding: EdgeInsets.zero,
         onPressed: onPressed ?? () => Get.back<void>(),
-        child: const Icon(
+        child: Icon(
           CupertinoIcons.back,
           size: 24,
           color: AuthTheme.accent,

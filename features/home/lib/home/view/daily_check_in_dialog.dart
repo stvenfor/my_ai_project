@@ -260,14 +260,14 @@ class _DailyCheckInAlertState extends State<_DailyCheckInAlert> {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.fromLTRB(20.w, 28.h, 20.w, 24.h),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFF1A8CFF),
+            const Color(0xFF1A8CFF),
             CheckInMallTheme.primaryBlue,
-            Color(0xFF0050C8),
+            const Color(0xFF0050C8),
           ],
         ),
       ),

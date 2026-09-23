@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:module_community/community/view/community_convention_page.dart';
 import 'package:module_community/community/view/community_page.dart';
 import 'package:module_community/community/view/community_search_page.dart';
 import 'package:module_community/community/view/publish_page.dart';
@@ -30,6 +31,7 @@ class CommunityModule extends FeatureModule {
   Map<String, WidgetBuilder> routes() => {
         RoutePath.community: (_) => const CommunityPage(),
         RoutePath.communityPublish: (_) => const PublishPage(),
+        RoutePath.communityConvention: (_) => const CommunityConventionPage(),
         RoutePath.communitySearch: (_) => const CommunitySearchPage(),
       };
 

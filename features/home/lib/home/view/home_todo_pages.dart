@@ -117,7 +117,7 @@ class _PartnerPendingPageState extends State<PartnerPendingPage> {
                               onPressed: () => _reject(app),
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: HomeDashboardTheme.labelSecondary,
-                                side: const BorderSide(
+                                side: BorderSide(
                                   color: HomeDashboardTheme.separator,
                                 ),
                                 padding: EdgeInsets.symmetric(vertical: 10.h),
@@ -349,7 +349,7 @@ class _TodoListBody<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (snap.connectionState != ConnectionState.done) {
-      return const Center(
+      return Center(
         child: CircularProgressIndicator(color: HomeDashboardTheme.accent),
       );
     }

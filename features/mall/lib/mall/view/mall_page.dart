@@ -20,9 +20,9 @@ class MallPage extends GetView<MallController> {
           Column(
             children: [
               const MallSearchHeader(),
-              const Divider(height: 1, thickness: 1, color: MallTheme.separator),
+              Divider(height: 1, thickness: 1, color: MallTheme.separator),
               const MallCategoryTabs(),
-              const Divider(height: 1, thickness: 1, color: MallTheme.separator),
+              Divider(height: 1, thickness: 1, color: MallTheme.separator),
               const MallFilterBar(),
               Expanded(child: _buildBody()),
             ],

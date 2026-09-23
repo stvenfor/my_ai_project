@@ -38,7 +38,7 @@ class SvipRewardDialog extends StatelessWidget {
               children: [
                 RichText(
                   text: TextSpan(
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
                       color: ClassroomColors.titleBlack,
                     ),
@@ -46,7 +46,7 @@ class SvipRewardDialog extends StatelessWidget {
                       const TextSpan(text: '恭喜获得 '),
                       TextSpan(
                         text: '$cardCount张',
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: ClassroomColors.orange,
                           fontWeight: FontWeight.bold,
                         ),
@@ -56,7 +56,7 @@ class SvipRewardDialog extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
+                Text(
                   '会员卡领取成功后可在背包中查看',
                   style: TextStyle(fontSize: 13, color: ClassroomColors.textGray),
                 ),
@@ -88,7 +88,7 @@ class SvipRewardDialog extends StatelessWidget {
                 const SizedBox(height: 12),
                 GestureDetector(
                   onTap: () => Navigator.of(context).pop(),
-                  child: const Text(
+                  child: Text(
                     '查看礼品卡规则 >',
                     style: TextStyle(fontSize: 13, color: ClassroomColors.textGray),
                   ),

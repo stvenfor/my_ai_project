@@ -6,6 +6,7 @@ import 'package:module_common_ui/module_common_ui.dart';
 import 'package:wys_router/src/route/route_path.dart';
 import 'package:module_linking/ui/in_app_push_banner_host.dart';
 import 'package:module_realtime/ui/realtime_notify_banner_host.dart';
+import 'package:module_sample/app/app_binding.dart';
 import 'package:module_sample/app/app_controller.dart';
 import 'package:module_sample/app/app_pages.dart';
 import 'package:module_sample/bootstrap/dokit_navigator_observers_debug.dart'
@@ -17,6 +18,10 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // init 超时/半启动时仍可能未 put；兜底一次，避免红屏 "AppController not found"。
+    if (!Get.isRegistered<AppController>()) {
+      AppBinding().dependencies();
+    }
     final controller = Get.find<AppController>();
 
     return Obx(

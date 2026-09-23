@@ -1,35 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:module_common_ui/module_common_ui.dart';
 
-/// Home dashboard visual tokens — Vercel Design Source of Truth values.
-/// Prefer [VercelTokens.of] in new widgets; statics keep existing call sites compiling.
+/// Home dashboard visual tokens — resolves from [VercelTokens.current].
 abstract final class HomeDashboardTheme {
   static VercelTokens tokens(BuildContext context) => VercelTokens.of(context);
 
-  // DESIGN.md / VercelTokens.light (expand; dark via Theme when widgets migrate).
-  static const accent = Color(0xFF0070F3);
-  static const background = Color(0xFFF5F5F5);
-  static const surface = Color(0xFFFFFFFF);
-  static const fillSecondary = Color(0xFFF5F5F5);
-  static const labelPrimary = Color(0xFF171717);
-  static const labelSecondary = Color(0xFF4D4D4D);
-  static const labelTertiary = Color(0xFF888888);
-  static const separator = Color(0xFFEBEBEB);
-  static const badgeOrange = Color(0xFFF5A623);
-  static const badgeBlue = accent;
+  static VercelTokens get _t => VercelTokens.current();
 
-  static const primaryBlue = accent;
-  static const cardWhite = surface;
-  static const titleBlack = labelPrimary;
-  static const textGray = labelSecondary;
-  static const textDarkGray = Color(0xFF4D4D4D);
-  static const bannerDark = background;
+  static Color get accent => _t.link;
+  static Color get background => _t.canvasSoft2;
+  static Color get surface => _t.canvas;
+  static Color get fillSecondary => _t.canvasSoft2;
+  static Color get labelPrimary => _t.ink;
+  static Color get labelSecondary => _t.body;
+  static Color get labelTertiary => _t.mute;
+  static Color get separator => _t.hairline;
+  static Color get badgeOrange => _t.warning;
+  static Color get badgeBlue => accent;
+
+  static Color get primaryBlue => accent;
+  static Color get cardWhite => surface;
+  static Color get titleBlack => labelPrimary;
+  static Color get textGray => labelSecondary;
+  static Color get textDarkGray => labelSecondary;
+  static Color get bannerDark => background;
 
   static const double radiusMd = 8;
   static const double radiusLg = 12;
   static const double contentMaxWidth = 720;
 
-  static TextStyle get largeTitle => const TextStyle(
+  static TextStyle get largeTitle => TextStyle(
         fontFamily: VercelTypography.fontFamily,
         fontSize: 32,
         fontWeight: FontWeight.w600,
@@ -38,7 +38,7 @@ abstract final class HomeDashboardTheme {
         letterSpacing: -1.6,
       );
 
-  static TextStyle get sectionTitle => const TextStyle(
+  static TextStyle get sectionTitle => TextStyle(
         fontFamily: VercelTypography.fontFamily,
         fontSize: 18,
         fontWeight: FontWeight.w600,
@@ -47,7 +47,7 @@ abstract final class HomeDashboardTheme {
         letterSpacing: -0.54,
       );
 
-  static TextStyle get sectionLabel => const TextStyle(
+  static TextStyle get sectionLabel => TextStyle(
         fontFamily: VercelTypography.fontFamily,
         fontSize: 14,
         fontWeight: FontWeight.w400,

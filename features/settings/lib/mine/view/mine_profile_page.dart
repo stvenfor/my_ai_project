@@ -167,7 +167,7 @@ class _InfoCard extends StatelessWidget {
       child: Column(
         children: [
           _NicknameRow(controller: controller),
-          const Divider(
+          Divider(
             height: 0.5,
             thickness: 0.5,
             indent: 16,
@@ -225,7 +225,7 @@ class _NicknameRow extends StatelessWidget {
               ),
             ),
           ),
-          const Icon(
+          Icon(
             CupertinoIcons.chevron_right,
             size: 16,
             color: MineTheme.labelTertiary,

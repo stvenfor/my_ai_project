@@ -30,7 +30,7 @@ class MyClassListPage extends StatelessWidget {
               children: [
                 Icon(Icons.swap_horiz, color: ClassroomColors.primaryGreen, size: 20),
                 const SizedBox(width: 6),
-                const Text(
+                Text(
                   '班级',
                   style: TextStyle(
                     fontSize: 16,
@@ -41,7 +41,7 @@ class MyClassListPage extends StatelessWidget {
                 const Spacer(),
                 GestureDetector(
                   onTap: () => UiKitInitializer.toast('禁用班级功能开发中'),
-                  child: const Text(
+                  child: Text(
                     '禁用班级',
                     style: TextStyle(
                       fontSize: 14,
@@ -121,7 +121,7 @@ class _ClassCard extends StatelessWidget {
               children: [
                 Text(
                   classInfo.name,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
                     color: ClassroomColors.titleBlack,
@@ -132,7 +132,7 @@ class _ClassCard extends StatelessWidget {
                   children: [
                     Text(
                       '邀请码：${classInfo.inviteCode}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         color: ClassroomColors.textGray,
                       ),
@@ -140,7 +140,7 @@ class _ClassCard extends StatelessWidget {
                     const Spacer(),
                     Text(
                       '班级成员：${classInfo.memberCount}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         color: ClassroomColors.textGray,
                       ),
@@ -150,7 +150,7 @@ class _ClassCard extends StatelessWidget {
               ],
             ),
           ),
-          const Divider(height: 1, color: ClassroomColors.divider),
+          Divider(height: 1, color: ClassroomColors.divider),
           Row(
             children: [
               _ActionButton(
@@ -178,7 +178,7 @@ class _ClassCard extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
             child: GestureDetector(
               onTap: () => Get.toNamed(RoutePath.classroomHomeworkReview),
-              child: const Text(
+              child: Text(
                 '作业点评 >',
                 style: TextStyle(
                   fontSize: 13,
@@ -217,7 +217,7 @@ class _ActionButton extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 label,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
                   color: ClassroomColors.titleBlack,
                 ),

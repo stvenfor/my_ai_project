@@ -28,7 +28,7 @@ class LoginOtpPage extends GetView<AuthController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 '输入验证码',
                 style: TextStyle(
                   fontSize: 26,
@@ -40,14 +40,14 @@ class LoginOtpPage extends GetView<AuthController> {
               Obx(
                 () => Text(
                   '验证码已发送至 ${controller.maskedPendingPhone}',
-                  style: const TextStyle(color: AuthTheme.textGray, fontSize: 14),
+                  style: TextStyle(color: AuthTheme.textGray, fontSize: 14),
                 ),
               ),
               if (_showTestPhoneHint()) ...[
                 const SizedBox(height: 8),
                 Text(
                   '测试号 ${MockAuthService.mockTestPhone}，验证码 ${MockAuthService.mockOtpCode}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AuthTheme.primaryBlue,
                     fontSize: 13,
                   ),
@@ -62,8 +62,8 @@ class LoginOtpPage extends GetView<AuthController> {
                   LengthLimitingTextInputFormatter(6),
                 ],
                 onChanged: controller.updateOtpCode,
-                style: const TextStyle(fontSize: 24, letterSpacing: 8),
-                decoration: const InputDecoration(
+                style: TextStyle(fontSize: 24, letterSpacing: 8),
+                decoration: InputDecoration(
                   hintText: '6 位验证码',
                   hintStyle: TextStyle(color: AuthTheme.inputHint, letterSpacing: 0),
                   border: UnderlineInputBorder(

@@ -1,0 +1,13 @@
+# ponytail: video_player_ohos 误把 codegen 用 pigeon 写进 dependencies，
+# 会把 analyzer <8 拉进根图，与 json_serializable 冲突。lib 已含 messages.g.dart，运行时不需要 pigeon。
+name: pigeon
+description: Runtime stub replacing path pigeon from video_player_ohos (codegen only).
+version: 25.3.2
+publish_to: none
+
+environment:
+  sdk: '>=3.6.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter

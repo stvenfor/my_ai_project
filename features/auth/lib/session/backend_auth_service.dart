@@ -177,6 +177,17 @@ class BackendAuthService extends AuthService implements SessionRefreshable {
     await _persistLogin(result, deviceId: device.deviceId);
   }
 
+  @override
+  Future<void> signInWithWechatCode({required String code}) async {
+    final device = await _resolveDevice();
+    final result = await _api.loginWithWechat(
+      code: code.trim(),
+      deviceId: device.deviceId,
+      platform: device.platform,
+    );
+    await _persistLogin(result, deviceId: device.deviceId);
+  }
+
   Future<void> _persistLogin(
     LoginResult result, {
     required String deviceId,

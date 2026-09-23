@@ -40,6 +40,7 @@ class AppController extends GetxController implements AppConfigController {
   @override
   Future<void> setThemeMode(ThemeMode mode) async {
     _themeMode.value = mode;
+    Get.changeThemeMode(mode);
     await _persist();
     await _applySystemUi();
   }

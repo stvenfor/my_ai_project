@@ -64,7 +64,7 @@ class MineQuickServicesWidget extends StatelessWidget {
                                         ),
                                         child: Text(
                                           item.badge!,
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             color: Colors.white,
                                             fontSize: 9,
                                             fontWeight: FontWeight.w700,

@@ -170,7 +170,7 @@ class _NotePaper extends StatelessWidget {
           left: 24,
           child: Transform.rotate(
             angle: -0.3,
-            child: const Icon(Icons.attach_file, size: 28, color: Color(0xFF999999)),
+            child: Icon(Icons.attach_file, size: 28, color: Color(0xFF999999)),
           ),
         ),
         Container(
@@ -191,7 +191,7 @@ class _NotePaper extends StatelessWidget {
             children: [
               Text(
                 '${gift.studentName} 同学：',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w500,
                   color: ClassroomColors.titleBlack,
@@ -200,7 +200,7 @@ class _NotePaper extends StatelessWidget {
               const SizedBox(height: 12),
               Text(
                 gift.message,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   height: 1.6,
                   color: ClassroomColors.titleBlack,
@@ -214,7 +214,7 @@ class _NotePaper extends StatelessWidget {
                   children: [
                     Text(
                       gift.teacherName,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         color: ClassroomColors.titleBlack,
                       ),
@@ -222,7 +222,7 @@ class _NotePaper extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       gift.date,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         color: ClassroomColors.textGray,
                       ),

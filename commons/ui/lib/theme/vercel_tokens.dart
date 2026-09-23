@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:module_common_ui/config/app_config_controller.dart';
 
 /// Vercel Token API — Design Source of Truth colors for light/dark.
 ///
-/// Consume via `VercelTokens.of(context)` or `Theme.of(context).extension<VercelTokens>()`.
+/// Prefer `VercelTokens.of(context)` in widgets. Use [current] only from
+/// legacy feature `*Theme` getters that lack a [BuildContext].
 @immutable
 class VercelTokens extends ThemeExtension<VercelTokens> {
   const VercelTokens({
@@ -125,6 +128,40 @@ class VercelTokens extends ThemeExtension<VercelTokens> {
     final tokens = Theme.of(context).extension<VercelTokens>();
     assert(tokens != null, 'VercelTokens missing from ThemeData.extensions');
     return tokens ?? VercelTokens.light;
+  }
+
+  /// Active palette for feature `*Theme` getters and shared chrome.
+  ///
+  /// **AppConfig first** — [Get.context] Theme can lag behind [GetMaterialApp]
+  /// rebuilds and desync NavBar (`Theme.of`) from page body (`current()`).
+  static VercelTokens current() {
+    if (Get.isRegistered<AppConfigController>()) {
+      return _forThemeMode(Get.find<AppConfigController>().themeMode);
+    }
+    final context = Get.context;
+    if (context != null) {
+      final tokens = Theme.of(context).extension<VercelTokens>();
+      if (tokens != null) return tokens;
+      return Theme.of(context).brightness == Brightness.dark ? dark : light;
+    }
+    return light;
+  }
+
+  /// Widgets with [BuildContext]: same palette as [current] when config exists,
+  /// otherwise [of]. Keeps NavBar / Scaffold / TabBar aligned with feature themes.
+  static VercelTokens resolve(BuildContext context) {
+    if (Get.isRegistered<AppConfigController>()) return current();
+    return of(context);
+  }
+
+  static VercelTokens _forThemeMode(ThemeMode mode) {
+    final brightness = switch (mode) {
+      ThemeMode.dark => Brightness.dark,
+      ThemeMode.light => Brightness.light,
+      ThemeMode.system =>
+        WidgetsBinding.instance.platformDispatcher.platformBrightness,
+    };
+    return brightness == Brightness.dark ? dark : light;
   }
 
   @override

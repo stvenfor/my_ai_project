@@ -9,6 +9,17 @@
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
+            "flutterMode": "release",
+            "preLaunchTask": "sync-lan-ip",
+            "toolArgs": [
+                "--dart-define-from-file=.env.lan"
+            ]
+        },
+        {
+            "name": "my_ai_project (LAN 真机 · debug·需USB)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
             "preLaunchTask": "sync-lan-ip",
             "toolArgs": [
                 "--dart-define-from-file=.env.lan"
@@ -39,6 +50,7 @@
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
+            "flutterMode": "release",
             "preLaunchTask": "sync-lan-ip",
             "toolArgs": [
                 "--dart-define-from-file=.env.lan"

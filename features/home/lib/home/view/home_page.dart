@@ -47,6 +47,7 @@ class _HomePageState extends State<HomePage> {
         final error = controller.errorMessage.value;
         controller.userGreeting.value;
         controller.selectedMetricTab.value;
+        controller.displayStoreName.value;
         final bottomInset = _musicBottomInset(context);
 
         if (data == null) {
@@ -133,12 +134,15 @@ class _HomePageState extends State<HomePage> {
         HomeFeatureGrid(items: data.features),
         HomeTodoCardStrip(cards: data.todoCards),
         HomeStoreMetricsCard(
-          storeName: data.storeName,
+          storeName: controller.displayStoreName.value.isNotEmpty
+              ? controller.displayStoreName.value
+              : data.storeName,
           selectedTab: controller.selectedMetricTab.value,
           tabs: HomeController.metricTabs,
           metrics: controller.currentMetrics,
           details: data.metricDetails,
           onTabSelected: controller.selectMetricTab,
+          onStoreTap: controller.onStoreTap,
         ),
         _StrategyEntry(onTap: () => Get.toNamed(RoutePath.homeStrategy)),
         HomeServiceGrid(items: data.services),
@@ -211,7 +215,7 @@ class _StrategyEntry extends StatelessWidget {
                     ],
                   ),
                 ),
-                const Icon(
+                Icon(
                   Icons.chevron_right_rounded,
                   color: HomeDashboardTheme.labelTertiary,
                 ),
@@ -279,7 +283,7 @@ class _LearningReportEntry extends StatelessWidget {
                     ],
                   ),
                 ),
-                const Icon(
+                Icon(
                   Icons.chevron_right_rounded,
                   color: HomeDashboardTheme.labelTertiary,
                 ),

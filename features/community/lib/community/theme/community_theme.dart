@@ -1,22 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:module_common_ui/module_common_ui.dart';
 
-/// Community page tokens — Vercel Design Source of Truth.
+/// Community page tokens — resolves from [VercelTokens.current] (light/dark).
 abstract final class CommunityTheme {
-  static const accent = Color(0xFF0070F3);
-  static const background = Color(0xFFF5F5F5);
-  static const surface = Color(0xFFFFFFFF);
-  static const fillSecondary = Color(0xFFF5F5F5);
-  static const labelPrimary = Color(0xFF171717);
-  static const labelSecondary = Color(0xFF4D4D4D);
-  static const labelTertiary = Color(0xFF888888);
-  static const separator = Color(0xFFEBEBEB);
-  static const likeRed = Color(0xFFEE0000);
+  static VercelTokens get _t => VercelTokens.current();
+
+  static Color get accent => _t.link;
+  static Color get background => _t.canvasSoft2;
+  static Color get surface => _t.canvas;
+  static Color get fillSecondary => _t.canvasSoft2;
+  static Color get labelPrimary => _t.ink;
+  static Color get labelSecondary => _t.body;
+  static Color get labelTertiary => _t.mute;
+  static Color get separator => _t.hairline;
+  static Color get likeRed => _t.error;
 
   static const double radiusMd = 8;
   static const double contentMaxWidth = 720;
 
-  static TextStyle get largeTitle => const TextStyle(
+  static TextStyle get largeTitle => TextStyle(
         fontFamily: VercelTypography.fontFamily,
         fontSize: 32,
         fontWeight: FontWeight.w600,
@@ -25,7 +27,7 @@ abstract final class CommunityTheme {
         letterSpacing: -1.6,
       );
 
-  static TextStyle get headline => const TextStyle(
+  static TextStyle get headline => TextStyle(
         fontFamily: VercelTypography.fontFamily,
         fontSize: 16,
         fontWeight: FontWeight.w600,
@@ -33,7 +35,7 @@ abstract final class CommunityTheme {
         height: 24 / 16,
       );
 
-  static TextStyle get body => const TextStyle(
+  static TextStyle get body => TextStyle(
         fontFamily: VercelTypography.fontFamily,
         fontSize: 16,
         fontWeight: FontWeight.w400,
@@ -41,7 +43,7 @@ abstract final class CommunityTheme {
         height: 24 / 16,
       );
 
-  static TextStyle get caption => const TextStyle(
+  static TextStyle get caption => TextStyle(
         fontFamily: VercelTypography.fontFamily,
         fontSize: 14,
         fontWeight: FontWeight.w400,

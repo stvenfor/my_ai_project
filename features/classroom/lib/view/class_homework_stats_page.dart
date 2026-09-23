@@ -33,7 +33,7 @@ class ClassHomeworkStatsPage extends GetView<HomeworkStatsController> {
         actions: [
           TextButton.icon(
             onPressed: () => UiKitInitializer.toast('导出成绩功能开发中'),
-            icon: const Icon(Icons.file_download_outlined, size: 18),
+            icon: Icon(Icons.file_download_outlined, size: 18),
             label: const Text('导出成绩'),
             style: TextButton.styleFrom(
               foregroundColor: ClassroomColors.primaryGreen,
@@ -91,13 +91,13 @@ class ClassHomeworkStatsPage extends GetView<HomeworkStatsController> {
               final label = controller.timeFilterLabel;
               return Text(
                 label,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
                   color: ClassroomColors.textGray,
                 ),
               );
             }),
-            const Icon(Icons.keyboard_arrow_down, size: 18, color: ClassroomColors.textGray),
+            Icon(Icons.keyboard_arrow_down, size: 18, color: ClassroomColors.textGray),
           ],
         ),
       );
@@ -261,7 +261,7 @@ class _StatsCard extends StatelessWidget {
           const SizedBox(height: 16),
           Row(
             children: [
-              const Text(
+              Text(
                 '作业类型',
                 style: TextStyle(fontSize: 13, color: ClassroomColors.textGray),
               ),
@@ -298,7 +298,7 @@ class _StatItem extends StatelessWidget {
         children: [
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w600,
               color: ClassroomColors.titleBlack,
@@ -307,7 +307,7 @@ class _StatItem extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             label,
-            style: const TextStyle(fontSize: 12, color: ClassroomColors.textGray),
+            style: TextStyle(fontSize: 12, color: ClassroomColors.textGray),
           ),
         ],
       ),
@@ -341,7 +341,7 @@ class _TypeTag extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: const TextStyle(fontSize: 11, color: ClassroomColors.textGray),
+        style: TextStyle(fontSize: 11, color: ClassroomColors.textGray),
       ),
     );
   }
@@ -365,8 +365,8 @@ class _StudentListCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          const Padding(
-            padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: Row(
               children: [
                 Expanded(
@@ -400,7 +400,7 @@ class _StudentListCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(width: 24),
+                const SizedBox(width: 24),
               ],
             ),
           ),
@@ -434,7 +434,7 @@ class _StudentRow extends StatelessWidget {
             Expanded(
               child: Text(
                 student.name,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 15,
                   color: ClassroomColors.titleBlack,
                 ),
@@ -445,7 +445,7 @@ class _StudentRow extends StatelessWidget {
               child: Text(
                 '${student.completed}',
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 15,
                   color: ClassroomColors.titleBlack,
                 ),
@@ -456,13 +456,13 @@ class _StudentRow extends StatelessWidget {
               child: Text(
                 '${student.pending}',
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 15,
                   color: ClassroomColors.titleBlack,
                 ),
               ),
             ),
-            const Icon(
+            Icon(
               Icons.chevron_right,
               size: 20,
               color: ClassroomColors.textGrayLight,

@@ -25,7 +25,7 @@ class AnalyticsListPage extends GetView<AnalyticsListController> {
         final page = controller.currentPage.value;
 
         if (isLoading && items.isEmpty) {
-          return const Center(
+          return Center(
             child: CircularProgressIndicator(color: AnalyticsTheme.primary),
           );
         }
@@ -54,8 +54,8 @@ class AnalyticsListPage extends GetView<AnalyticsListController> {
                   itemCount: items.length + (isLoadingMore ? 1 : 0),
                   itemBuilder: (context, index) {
                     if (index >= items.length) {
-                      return const Padding(
-                        padding: EdgeInsets.all(16),
+                      return Padding(
+                        padding: const EdgeInsets.all(16),
                         child: Center(
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
@@ -108,13 +108,13 @@ class _SummaryBar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.insights_outlined,
+          Icon(Icons.insights_outlined,
               size: 18, color: AnalyticsTheme.primary),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               '已加载 $count / 共 $total · 第 $page 页',
-              style: const TextStyle(
+              style: TextStyle(
                 color: AnalyticsTheme.muted,
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
@@ -127,7 +127,7 @@ class _SummaryBar extends StatelessWidget {
               color: AnalyticsTheme.primary.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(999),
             ),
-            child: const Text(
+            child: Text(
               'gRPC',
               style: TextStyle(
                 color: AnalyticsTheme.primary,
@@ -197,7 +197,7 @@ class _AnalyticsListTile extends StatelessWidget {
                                 item.title,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   color: AnalyticsTheme.foreground,
                                   fontSize: 16,
                                   fontWeight: FontWeight.w700,
@@ -213,7 +213,7 @@ class _AnalyticsListTile extends StatelessWidget {
                           item.subtitle,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: AnalyticsTheme.muted,
                             fontSize: 13,
                           ),
@@ -264,14 +264,14 @@ class _AnalyticsListTile extends StatelessWidget {
                             const Spacer(),
                             Text(
                               item.code,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontFamily: 'monospace',
                                 fontSize: 12,
                                 color: AnalyticsTheme.muted,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                            const Icon(
+                            Icon(
                               Icons.chevron_right,
                               size: 20,
                               color: AnalyticsTheme.muted,
@@ -376,7 +376,7 @@ class _EmptyState extends StatelessWidget {
         children: [
           SizedBox(
             height: MediaQuery.sizeOf(context).height * 0.5,
-            child: const Column(
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(Icons.analytics_outlined,
@@ -418,13 +418,13 @@ class _ErrorState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.cloud_off_outlined,
+            Icon(Icons.cloud_off_outlined,
                 size: 48, color: AnalyticsTheme.destructive),
             const SizedBox(height: 12),
             Text(
               message,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: AnalyticsTheme.muted, fontSize: 14),
+              style: TextStyle(color: AnalyticsTheme.muted, fontSize: 14),
             ),
             const SizedBox(height: 16),
             SizedBox(

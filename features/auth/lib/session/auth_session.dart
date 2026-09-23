@@ -5,6 +5,7 @@ import 'package:module_auth/session/auth_session_guard_service.dart';
 import 'package:module_auth/session/backend_auth_service.dart';
 import 'package:module_auth/session/user_service_impl.dart';
 import 'package:module_auth/session/session_recovery.dart';
+import 'package:module_auth/store/current_store_service.dart';
 import 'package:module_core/core.dart';
 
 /// 登录模块会话入口：注册 AuthService + UserService（Mock 或 my_go_study HTTP）。
@@ -53,6 +54,12 @@ class AuthSession {
     if (!Get.isRegistered<SessionGuardService>()) {
       Get.put<SessionGuardService>(
         AuthSessionGuardService(),
+        permanent: permanent,
+      );
+    }
+    if (!Get.isRegistered<CurrentStoreService>()) {
+      Get.put<CurrentStoreService>(
+        CurrentStoreService(),
         permanent: permanent,
       );
     }
@@ -119,6 +126,9 @@ class AuthSession {
       await Get.find<AuthService>().signOut();
     } else if (Get.isRegistered<UserService>()) {
       await Get.find<UserService>().clearUser();
+    }
+    if (Get.isRegistered<CurrentStoreService>()) {
+      await Get.find<CurrentStoreService>().clear();
     }
     await AuthLifecycle.notifyAfterLogout();
   }

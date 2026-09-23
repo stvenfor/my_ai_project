@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:module_auth/navigation/auth_navigation.dart';
 import 'package:module_auth/session/auth_session.dart';
 import 'package:module_core/core.dart';
+import 'package:wys_login_share_pay/wys_login_share_pay.dart';
 import 'package:wys_router/src/module/module_registry.dart';
 import 'package:wys_router/src/route/login_redirect.dart';
 import 'package:wys_router/src/route/route_path.dart';
@@ -463,6 +464,45 @@ class AuthController extends GetxController {
   Future<void> registerWithPhone() async {
     _logRegister('start: phone=${phone.value}');
     await verifyPhoneOtp(fromRegister: true);
+  }
+
+  /// 微信一键登录：拉起 SDK → code → Go 换会话。
+  Future<void> loginWithWechat() async {
+    AppKeyboard.dismiss();
+    if (!agreedPrivacy.value) {
+      _showLoginToast('请先阅读并同意隐私条款');
+      return;
+    }
+    if (!AppDebounce.tryThrottle('auth.loginWithWechat')) {
+      return;
+    }
+
+    isLoading.value = true;
+    try {
+      if (!WysWechatConfig.isConfigured) {
+        _showLoginToast('请先在 WysWechatConfig 填写微信 AppID / Universal Link');
+        return;
+      }
+      final wx = await WysWechatService.instance.authorize();
+      if (wx.isCancelled) {
+        _showLoginToast('已取消微信登录');
+        return;
+      }
+      if (!wx.isSuccess || (wx.authCode ?? '').isEmpty) {
+        _showLoginToast(
+          wx.message?.isNotEmpty == true
+              ? wx.message!
+              : '微信授权失败（${wx.status.name}）',
+        );
+        return;
+      }
+      await _authService.signInWithWechatCode(code: wx.authCode!);
+      await _navigateAfterAuth();
+    } catch (error) {
+      _showLoginAuthFailure(error);
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   void _startOtpCooldown(int seconds) {

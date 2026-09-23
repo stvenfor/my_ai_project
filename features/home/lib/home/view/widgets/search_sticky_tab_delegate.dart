@@ -5,8 +5,8 @@ import 'package:module_home/home/theme/search_page_theme.dart';
 class SearchStickyTabBarDelegate extends SliverPersistentHeaderDelegate {
   SearchStickyTabBarDelegate({
     required this.tabBar,
-    this.backgroundColor = SearchPageTheme.background,
-  });
+    Color? backgroundColor,
+  }) : backgroundColor = backgroundColor ?? SearchPageTheme.background;
 
   final TabBar tabBar;
   final Color backgroundColor;

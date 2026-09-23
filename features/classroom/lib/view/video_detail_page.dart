@@ -154,7 +154,7 @@ class _IntroTab extends StatelessWidget {
       children: [
         Row(
           children: [
-            const Icon(Icons.thumb_up_outlined, size: 18),
+            Icon(Icons.thumb_up_outlined, size: 18),
             const SizedBox(width: 4),
             const Text('3983'),
             const SizedBox(width: 16),
@@ -317,11 +317,11 @@ class _LeaderboardItem extends StatelessWidget {
         const SizedBox(width: 8),
         const CircleAvatar(radius: 18, child: Text('美')),
         const SizedBox(width: 8),
-        const Expanded(
+        Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('美诺明年夏天见', style: TextStyle(fontSize: 13)),
+              const Text('美诺明年夏天见', style: TextStyle(fontSize: 13)),
               Text(
                 '2020-11-03 · 杭州市',
                 style: TextStyle(fontSize: 11, color: ClassroomColors.textGray),
@@ -382,7 +382,7 @@ class _BottomBar extends StatelessWidget {
         ),
         child: Row(
           children: [
-            const Icon(Icons.star_border, size: 22),
+            Icon(Icons.star_border, size: 22),
             const SizedBox(width: 4),
             const Text('收藏', style: TextStyle(fontSize: 12)),
             const SizedBox(width: 16),

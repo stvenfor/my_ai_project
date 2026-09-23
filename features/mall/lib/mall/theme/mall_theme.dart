@@ -1,26 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:module_common_ui/module_common_ui.dart';
 
-/// Mall tokens — Vercel Design Source of Truth（对齐 DESIGN.md / MineTheme）。
+/// Mall tokens — resolves from [VercelTokens.current] (light/dark).
 abstract final class MallTheme {
-  static const accent = Color(0xFF0070F3);
-  static const background = Color(0xFFF5F5F5);
-  static const surface = Color(0xFFFFFFFF);
-  static const labelPrimary = Color(0xFF171717);
-  static const labelSecondary = Color(0xFF4D4D4D);
-  static const labelTertiary = Color(0xFF888888);
-  static const separator = Color(0xFFEBEBEB);
-  static const price = Color(0xFFEE0000);
-  static const warning = Color(0xFFF5A623);
-  static const chipSelectedBg = Color(0xFFD3E5FF);
-  static const badgeRed = Color(0xFFEE0000);
-  static const badgeGoldBg = Color(0xFFFFEFCF);
-  static const badgeGoldText = Color(0xFFAB570A);
+  static VercelTokens get _t => VercelTokens.current();
+
+  static Color get accent => _t.link;
+  static Color get background => _t.canvasSoft2;
+  static Color get surface => _t.canvas;
+  static Color get labelPrimary => _t.ink;
+  static Color get labelSecondary => _t.body;
+  static Color get labelTertiary => _t.mute;
+  static Color get separator => _t.hairline;
+  static Color get price => _t.error;
+  static Color get warning => _t.warning;
+  static Color get chipSelectedBg => _t.linkBgSoft;
+  static Color get badgeRed => _t.error;
+  static Color get badgeGoldBg => _t.warningSoft;
+  static Color get badgeGoldText => _t.warningDeep;
 
   static const double radiusMd = 8;
   static const double radiusLg = 12;
 
-  static TextStyle get searchHint => const TextStyle(
+  static TextStyle get searchHint => TextStyle(
         fontFamily: VercelTypography.fontFamily,
         fontSize: 14,
         fontWeight: FontWeight.w400,
@@ -29,7 +31,7 @@ abstract final class MallTheme {
         letterSpacing: -0.28,
       );
 
-  static TextStyle get tabActive => const TextStyle(
+  static TextStyle get tabActive => TextStyle(
         fontFamily: VercelTypography.fontFamily,
         fontSize: 15,
         fontWeight: FontWeight.w600,
@@ -38,7 +40,7 @@ abstract final class MallTheme {
         letterSpacing: -0.3,
       );
 
-  static TextStyle get tabInactive => const TextStyle(
+  static TextStyle get tabInactive => TextStyle(
         fontFamily: VercelTypography.fontFamily,
         fontSize: 14,
         fontWeight: FontWeight.w400,
@@ -47,7 +49,7 @@ abstract final class MallTheme {
         letterSpacing: -0.28,
       );
 
-  static TextStyle get cardTitle => const TextStyle(
+  static TextStyle get cardTitle => TextStyle(
         fontFamily: VercelTypography.fontFamily,
         fontSize: 14,
         fontWeight: FontWeight.w500,
@@ -56,7 +58,7 @@ abstract final class MallTheme {
         letterSpacing: -0.28,
       );
 
-  static TextStyle get priceText => const TextStyle(
+  static TextStyle get priceText => TextStyle(
         fontFamily: VercelTypography.fontFamily,
         fontSize: 14,
         fontWeight: FontWeight.w600,
@@ -65,7 +67,7 @@ abstract final class MallTheme {
         letterSpacing: -0.28,
       );
 
-  static TextStyle get caption => const TextStyle(
+  static TextStyle get caption => TextStyle(
         fontFamily: VercelTypography.fontFamily,
         fontSize: 12,
         fontWeight: FontWeight.w400,

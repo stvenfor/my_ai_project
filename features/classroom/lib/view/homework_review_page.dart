@@ -96,7 +96,7 @@ class _StudentTags extends GetView<HomeworkReviewController> {
                     ),
                     child: Text(
                       name,
-                      style: const TextStyle(fontSize: 13, color: ClassroomColors.titleBlack),
+                      style: TextStyle(fontSize: 13, color: ClassroomColors.titleBlack),
                     ),
                   ),
                 )
@@ -120,7 +120,7 @@ class _FeedbackCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             '作业完成的非常好，交作业时间也及时，一整个好评好评再好评，希望再接再厉，再创辉煌',
             style: TextStyle(fontSize: 14, height: 1.5, color: ClassroomColors.titleBlack),
           ),
@@ -160,14 +160,14 @@ class _AudioRow extends StatelessWidget {
               value: 0.4,
               minHeight: 6,
               backgroundColor: ClassroomColors.divider,
-              valueColor: const AlwaysStoppedAnimation(ClassroomColors.primaryGreen),
+              valueColor: AlwaysStoppedAnimation(ClassroomColors.primaryGreen),
             ),
           ),
         ),
         const SizedBox(width: 8),
-        Text(duration, style: const TextStyle(fontSize: 12, color: ClassroomColors.textGray)),
+        Text(duration, style: TextStyle(fontSize: 12, color: ClassroomColors.textGray)),
         const SizedBox(width: 8),
-        const Icon(Icons.delete_outline, size: 18, color: ClassroomColors.textGray),
+        Icon(Icons.delete_outline, size: 18, color: ClassroomColors.textGray),
       ],
     );
   }
@@ -185,7 +185,7 @@ class _ActionChip extends StatelessWidget {
       children: [
         Icon(icon, size: 18, color: ClassroomColors.textGray),
         const SizedBox(width: 4),
-        Text(label, style: const TextStyle(fontSize: 13, color: ClassroomColors.textGray)),
+        Text(label, style: TextStyle(fontSize: 13, color: ClassroomColors.textGray)),
       ],
     );
   }
@@ -215,7 +215,7 @@ class _GiftCardSection extends GetView<HomeworkReviewController> {
                 ),
                 Text(
                   '送礼品卡 (${HomeworkReviewController.totalGiftCards})',
-                  style: const TextStyle(fontSize: 14, color: ClassroomColors.titleBlack),
+                  style: TextStyle(fontSize: 14, color: ClassroomColors.titleBlack),
                 ),
                 const Spacer(),
                 _StepperButton(
@@ -226,7 +226,7 @@ class _GiftCardSection extends GetView<HomeworkReviewController> {
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: Text(
                     '$count',
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                 ),
                 _StepperButton(
@@ -239,7 +239,7 @@ class _GiftCardSection extends GetView<HomeworkReviewController> {
               padding: const EdgeInsets.only(left: 12),
               child: Text(
                 '+$count 即为以上${HomeworkReviewController.studentCount}名同学各送${count}张',
-                style: const TextStyle(fontSize: 12, color: ClassroomColors.textGray),
+                style: TextStyle(fontSize: 12, color: ClassroomColors.textGray),
               ),
             ),
           ],

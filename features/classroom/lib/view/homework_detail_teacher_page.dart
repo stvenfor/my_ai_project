@@ -30,7 +30,7 @@ class HomeworkDetailTeacherPage extends GetView<HomeworkDetailTeacherController>
         actions: [
           TextButton.icon(
             onPressed: () {},
-            icon: const Icon(Icons.file_download_outlined, size: 18),
+            icon: Icon(Icons.file_download_outlined, size: 18),
             label: const Text('导出成绩'),
             style: TextButton.styleFrom(
               foregroundColor: ClassroomColors.primaryGreen,
@@ -105,7 +105,7 @@ class _ProfileCard extends StatelessWidget {
           CircleAvatar(
             radius: 28,
             backgroundColor: ClassroomColors.primaryGreenLight,
-            child: Text(profile.avatarEmoji, style: const TextStyle(fontSize: 28)),
+            child: Text(profile.avatarEmoji, style: TextStyle(fontSize: 28)),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -114,7 +114,7 @@ class _ProfileCard extends StatelessWidget {
               children: [
                 Text(
                   profile.name,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
                     color: ClassroomColors.titleBlack,
@@ -123,7 +123,7 @@ class _ProfileCard extends StatelessWidget {
                 const SizedBox(height: 6),
                 Text(
                   '作业数：${profile.homeworkCount}    完成率：${profile.completionRate.toInt()}%',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     color: ClassroomColors.textGray,
                   ),
@@ -208,7 +208,7 @@ class _TimelineItem extends StatelessWidget {
               children: [
                 Text(
                   item.dateLabel,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11,
                     color: ClassroomColors.textGray,
                   ),
@@ -265,7 +265,7 @@ class _TimelineItem extends StatelessWidget {
                             children: [
                               Text(
                                 item.title,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
                                   color: ClassroomColors.titleBlack,
@@ -274,7 +274,7 @@ class _TimelineItem extends StatelessWidget {
                               const SizedBox(height: 4),
                               Text(
                                 item.className,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 12,
                                   color: ClassroomColors.textGray,
                                 ),

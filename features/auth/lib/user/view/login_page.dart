@@ -78,6 +78,8 @@ class _LoginPageState extends State<LoginPage> {
             Obx(() => _buildPrivacyRow()),
             const SizedBox(height: 32),
             Obx(() => _buildPrimaryButton()),
+            const SizedBox(height: 16),
+            Obx(() => _buildWechatButton()),
             const SizedBox(height: 24),
             const Align(
               alignment: Alignment.center,
@@ -205,7 +207,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     child: _controller.agreedPrivacy.value
-                        ? const Icon(Icons.check, size: 14, color: Colors.white)
+                        ? Icon(Icons.check, size: 14, color: Colors.white)
                         : null,
                   ),
                 ),
@@ -216,8 +218,8 @@ class _LoginPageState extends State<LoginPage> {
                   child: RichText(
                     text: TextSpan(
                       style: AuthTheme.caption,
-                      children: const [
-                        TextSpan(text: '我已阅读并同意'),
+                      children: [
+                        const TextSpan(text: '我已阅读并同意'),
                         TextSpan(
                           text: '《某个隐私条款》',
                           style: TextStyle(color: AuthTheme.accent),
@@ -279,6 +281,32 @@ class _LoginPageState extends State<LoginPage> {
                 '登录',
                 style: AuthTheme.buttonLabel,
               ),
+      ),
+    );
+  }
+
+  Widget _buildWechatButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: AuthTheme.buttonHeight,
+      child: OutlinedButton.icon(
+        onPressed: _controller.isLoading.value
+            ? null
+            : AppDebounce.wrapThrottle(
+                'auth.wechat_button',
+                _controller.loginWithWechat,
+              ),
+        icon: const Icon(Icons.chat_bubble_outline, size: 22),
+        label: Text('微信登录', style: AuthTheme.buttonLabel.copyWith(
+          color: AuthTheme.accent,
+        )),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AuthTheme.accent,
+          side: BorderSide(color: AuthTheme.separator),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AuthTheme.radiusLg),
+          ),
+        ),
       ),
     );
   }

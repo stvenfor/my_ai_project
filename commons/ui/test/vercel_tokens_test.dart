@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get/get.dart';
+import 'package:module_common_ui/config/app_config_controller.dart';
 import 'package:module_common_ui/theme/app_theme.dart';
 import 'package:module_common_ui/theme/vercel_tokens.dart';
 import 'package:module_common_ui/theme/vercel_typography.dart';
@@ -58,5 +60,84 @@ void main() {
       expect(AppTheme.separator, VercelTokens.light.hairline);
       expect(AppTheme.background, VercelTokens.light.canvasSoft2);
     });
+
+    testWidgets('VercelTokens.current prefers AppConfig over Theme.of',
+        (tester) async {
+      final config = _FakeAppConfig(ThemeMode.dark);
+      Get.put<AppConfigController>(config);
+
+      late VercelTokens fromCurrent;
+      await tester.pumpWidget(
+        GetMaterialApp(
+          theme: AppTheme.light,
+          darkTheme: AppTheme.dark,
+          // ThemeMode.light on purpose — config says dark; current must follow config.
+          themeMode: ThemeMode.light,
+          home: Builder(
+            builder: (context) {
+              fromCurrent = VercelTokens.current();
+              expect(VercelTokens.resolve(context).canvas, VercelTokens.dark.canvas);
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
+      expect(fromCurrent.canvas, VercelTokens.dark.canvas);
+      expect(fromCurrent.ink, VercelTokens.dark.ink);
+      Get.reset();
+    });
+
+    testWidgets('VercelTokens.current follows GetMaterialApp themeMode',
+        (tester) async {
+      Get.reset();
+      late VercelTokens darkCurrent;
+      await tester.pumpWidget(
+        GetMaterialApp(
+          theme: AppTheme.light,
+          darkTheme: AppTheme.dark,
+          themeMode: ThemeMode.dark,
+          home: Builder(
+            builder: (context) {
+              darkCurrent = VercelTokens.current();
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
+      expect(darkCurrent.canvas, VercelTokens.dark.canvas);
+      expect(darkCurrent.ink, VercelTokens.dark.ink);
+      expect(darkCurrent.canvasSoft2, VercelTokens.dark.canvasSoft2);
+    });
   });
+}
+
+class _FakeAppConfig extends AppConfigController {
+  _FakeAppConfig(ThemeMode mode) : themeModeRx = mode.obs;
+
+  @override
+  final Rx<ThemeMode> themeModeRx;
+
+  @override
+  ThemeMode get themeMode => themeModeRx.value;
+
+  @override
+  Locale get locale => const Locale('zh');
+
+  @override
+  bool get immersiveMode => true;
+
+  @override
+  Future<void> toggleTheme() async {}
+
+  @override
+  Future<void> setThemeMode(ThemeMode mode) async => themeModeRx.value = mode;
+
+  @override
+  Future<void> setLocale(Locale locale) async {}
+
+  @override
+  Future<void> toggleImmersive() async {}
+
+  @override
+  Future<void> setImmersive(bool enabled) async {}
 }

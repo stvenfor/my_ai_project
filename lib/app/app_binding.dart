@@ -5,6 +5,7 @@ import 'package:module_sample/app/app_controller.dart';
 class AppBinding extends Bindings {
   @override
   void dependencies() {
+    if (Get.isRegistered<AppController>()) return;
     final controller = AppController();
     Get.put<AppController>(controller, permanent: true);
     Get.put<AppConfigController>(controller, permanent: true);
