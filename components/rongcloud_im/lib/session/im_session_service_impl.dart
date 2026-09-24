@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:get/get.dart';
 import 'package:module_core/model/im/im_session_state.dart';
+import 'package:module_core/service/environment_service.dart';
 import 'package:module_core/service/im_session_service.dart';
 import 'package:module_rongcloud_im/api/im_session_api.dart';
 import 'package:module_rongcloud_im/config/rong_im_config.dart';
@@ -33,19 +35,28 @@ class ImSessionServiceImpl implements ImSessionService {
   @override
   String? get currentImUserId => _sessionInfo?.imUserId;
 
+  bool get _mock {
+    final env = Get.isRegistered<EnvironmentService>()
+        ? Get.find<EnvironmentService>()
+        : null;
+    return RongImConfig.useMockImFor(env?.rongAppKey);
+  }
+
   @override
   Future<void> connect({required String bizUserId}) async {
     if (_state == ImConnectionState.connected) return;
     _setState(ImConnectionState.connecting);
     try {
       final session = await _sessionApi.createSession(bizUserId: bizUserId);
+      final expires =
+          session.expiresInSeconds > 0 ? session.expiresInSeconds : 86400 * 365;
       _sessionInfo = ImSessionInfo(
         imUserId: session.imUserId,
         bizUserId: bizUserId,
-        tokenExpiresAt: DateTime.now().add(Duration(seconds: session.expiresInSeconds)),
+        tokenExpiresAt: DateTime.now().add(Duration(seconds: expires)),
       );
 
-      if (RongImConfig.useMockIm) {
+      if (_mock) {
         await _engineHolder.connectMock(session: session);
       } else {
         await _engineHolder.connectReal(session: session);

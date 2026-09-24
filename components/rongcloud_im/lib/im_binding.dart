@@ -5,8 +5,10 @@ import 'package:module_core/service/im_session_service.dart';
 import 'package:module_core/service/im_user_profile_service.dart';
 import 'package:module_rongcloud_im/api/im_session_api.dart';
 import 'package:module_rongcloud_im/api/im_user_profile_api.dart';
+import 'package:module_rongcloud_im/backup/http_im_backup_service.dart';
 import 'package:module_rongcloud_im/backup/mock_im_backup_service.dart';
 import 'package:module_rongcloud_im/cache/cached_im_user_profile_service.dart';
+import 'package:module_rongcloud_im/config/rong_im_config.dart';
 import 'package:module_rongcloud_im/engine/rong_engine_holder.dart';
 import 'package:module_rongcloud_im/registry/im_user_id_registry.dart';
 import 'package:module_rongcloud_im/session/im_session_service_impl.dart';
@@ -52,7 +54,14 @@ class ImBinding extends Bindings {
       );
     }
     if (!Get.isRegistered<ImBackupService>()) {
-      Get.put<ImBackupService>(MockImBackupService(), permanent: true);
+      final env = Get.isRegistered<EnvironmentService>()
+          ? Get.find<EnvironmentService>()
+          : null;
+      final mock = RongImConfig.useMockImFor(env?.rongAppKey);
+      Get.put<ImBackupService>(
+        mock ? MockImBackupService() : HttpImBackupService(),
+        permanent: true,
+      );
     }
     if (!Get.isRegistered<ImSessionService>()) {
       Get.put<ImSessionService>(

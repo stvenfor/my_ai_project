@@ -11,14 +11,21 @@ dependencies:
     sdk: flutter
   module_common_ui:
     path: ../../commons/ui
-  wys_router:
-    path: ../../commons/wys_router
+  module_chat:
+    path: ../chat
+  module_rongcloud_im:
+    path: ../../components/rongcloud_im
   module_utils:
     path: ../../commons/toolkit
+  wys_router:
+    path: ../../commons/wys_router
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.0
+
+dependency_overrides:
+  rxdart: ^0.27.7
 
 flutter:

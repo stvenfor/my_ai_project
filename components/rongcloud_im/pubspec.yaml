@@ -11,10 +11,13 @@ dependencies:
     sdk: flutter
   get: ^4.7.3
   uuid: ^4.5.1
+  rongcloud_im_wrapper_plugin: ^5.44.0
   module_common_ui:
     path: ../../commons/ui
   module_core:
     path: ../../commons/core
+  module_http:
+    path: ../../commons/network
   module_global_cache:
     path: ../../commons/storage
   wys_router:
@@ -26,5 +29,9 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.0
+
+# 与根工程一致：消解 module_utils 内 rxdart 冲突。
+dependency_overrides:
+  rxdart: ^0.27.7
 
 flutter:

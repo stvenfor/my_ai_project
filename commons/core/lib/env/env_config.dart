@@ -21,26 +21,33 @@ class EnvConfig {
   final String rongAppKey;
   final String label;
 
-  static const configs = {
+  /// `--dart-define=RONG_APP_KEY=...` 优先，否则用环境默认占位。
+  static String _rongKey(String fallback) {
+    const fromDefine = String.fromEnvironment('RONG_APP_KEY', defaultValue: '');
+    if (fromDefine.trim().isNotEmpty) return fromDefine.trim();
+    return fallback;
+  }
+
+  static final configs = {
     AppEnv.test: EnvConfig(
       env: AppEnv.test,
       backendBaseUrl: 'http://127.0.0.1:8080',
       wsBaseUrl: 'ws://127.0.0.1:8080/realtime/v1/connect',
-      rongAppKey: 'DEV_RONG_APP_KEY_PLACEHOLDER',
+      rongAppKey: _rongKey('DEV_RONG_APP_KEY_PLACEHOLDER'),
       label: '测试',
     ),
     AppEnv.staging: EnvConfig(
       env: AppEnv.staging,
       backendBaseUrl: 'http://127.0.0.1:8080',
       wsBaseUrl: 'ws://127.0.0.1:8080/realtime/v1/connect',
-      rongAppKey: 'DEV_RONG_APP_KEY_PLACEHOLDER',
+      rongAppKey: _rongKey('DEV_RONG_APP_KEY_PLACEHOLDER'),
       label: '预发',
     ),
     AppEnv.production: EnvConfig(
       env: AppEnv.production,
       backendBaseUrl: 'https://api.xiaomaomain.com',
       wsBaseUrl: 'wss://ws.xiaomaomain.com/realtime/v1/connect',
-      rongAppKey: 'PROD_RONG_APP_KEY_PLACEHOLDER',
+      rongAppKey: _rongKey('PROD_RONG_APP_KEY_PLACEHOLDER'),
       label: '线上',
     ),
   };
