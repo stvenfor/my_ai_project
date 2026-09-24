@@ -39,8 +39,6 @@ class TransactionRepository {
     }
     return item;
   }
-
-  String get sourceLabel => 'my_go_study HTTP API';
 }
 
 /// 把底层异常翻译成用户可读中文（401 → 重新登录）。

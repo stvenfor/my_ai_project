@@ -15,21 +15,9 @@ class MembershipApi {
   Future<Map<String, dynamic>> fetchMe() async {
     final result = await _http.get<ResultModel<Map<String, dynamic>>>(
       mePath,
-      converter: (json) => ResultModel.fromJson(
-        json,
-        (data) => data is Map
-            ? Map<String, dynamic>.from(data)
-            : <String, dynamic>{},
-      ),
+      converter: _mapConverter,
     );
-    final model = result.data;
-    if (model == null || !model.isSuccess || model.data == null) {
-      throw HttpRequestException(
-        message: model?.message ?? '加载会员信息失败',
-        code: model?.code.toString(),
-      );
-    }
-    return model.data!;
+    return _requireData(result.data, '加载会员信息失败');
   }
 
   Future<Map<String, dynamic>> buyout({
@@ -39,42 +27,18 @@ class MembershipApi {
     final result = await _http.post<ResultModel<Map<String, dynamic>>>(
       buyoutPath,
       data: {'plan_id': planId, 'channel': channel},
-      converter: (json) => ResultModel.fromJson(
-        json,
-        (data) => data is Map
-            ? Map<String, dynamic>.from(data)
-            : <String, dynamic>{},
-      ),
+      converter: _mapConverter,
     );
-    final model = result.data;
-    if (model == null || !model.isSuccess || model.data == null) {
-      throw HttpRequestException(
-        message: model?.message ?? '下单失败',
-        code: model?.code.toString(),
-      );
-    }
-    return model.data!;
+    return _requireData(result.data, '下单失败');
   }
 
   Future<Map<String, dynamic>> confirmBuyout({required int orderId}) async {
     final result = await _http.post<ResultModel<Map<String, dynamic>>>(
       confirmPath,
       data: {'order_id': orderId},
-      converter: (json) => ResultModel.fromJson(
-        json,
-        (data) => data is Map
-            ? Map<String, dynamic>.from(data)
-            : <String, dynamic>{},
-      ),
+      converter: _mapConverter,
     );
-    final model = result.data;
-    if (model == null || !model.isSuccess || model.data == null) {
-      throw HttpRequestException(
-        message: model?.message ?? '确认支付失败',
-        code: model?.code.toString(),
-      );
-    }
-    return model.data!;
+    return _requireData(result.data, '确认支付失败');
   }
 
   Future<Map<String, dynamic>> verifyHuawei({
@@ -93,21 +57,9 @@ class MembershipApi {
         'subscription_id': subscriptionId,
         'jws_purchase_order': jwsPurchaseOrder,
       },
-      converter: (json) => ResultModel.fromJson(
-        json,
-        (data) => data is Map
-            ? Map<String, dynamic>.from(data)
-            : <String, dynamic>{},
-      ),
+      converter: _mapConverter,
     );
-    final model = result.data;
-    if (model == null || !model.isSuccess || model.data == null) {
-      throw HttpRequestException(
-        message: model?.message ?? '华为内购验单失败',
-        code: model?.code.toString(),
-      );
-    }
-    return model.data!;
+    return _requireData(result.data, '华为内购验单失败');
   }
 
   Future<Map<String, dynamic>> verifyApple({
@@ -124,17 +76,27 @@ class MembershipApi {
         'original_transaction_id': originalTransactionId,
         'receipt_data': receiptData,
       },
-      converter: (json) => ResultModel.fromJson(
-        json,
-        (data) => data is Map
-            ? Map<String, dynamic>.from(data)
-            : <String, dynamic>{},
-      ),
+      converter: _mapConverter,
     );
-    final model = result.data;
+    return _requireData(result.data, '苹果内购验单失败');
+  }
+
+  static ResultModel<Map<String, dynamic>> _mapConverter(dynamic json) {
+    return ResultModel.fromJson(
+      json,
+      (data) => data is Map
+          ? Map<String, dynamic>.from(data)
+          : <String, dynamic>{},
+    );
+  }
+
+  static Map<String, dynamic> _requireData(
+    ResultModel<Map<String, dynamic>>? model,
+    String fallback,
+  ) {
     if (model == null || !model.isSuccess || model.data == null) {
       throw HttpRequestException(
-        message: model?.message ?? '苹果内购验单失败',
+        message: model?.message ?? fallback,
         code: model?.code.toString(),
       );
     }

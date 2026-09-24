@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:module_home/home/model/used_car_order_models.dart';
+import 'package:module_home/home/repository/transaction_repository.dart';
 import 'package:module_home/home/repository/used_car_order_repository.dart';
 import 'package:module_common_ui/module_common_ui.dart';
 
@@ -46,7 +47,7 @@ class UsedCarCreateController extends GetxController {
         selectedCustomer.value = customers.first;
       }
     } catch (e) {
-      UiKitInitializer.toastError(formatUsedCarLoadError(e));
+      UiKitInitializer.toastError(formatTransactionLoadError(e));
     }
   }
 
@@ -84,7 +85,7 @@ class UsedCarCreateController extends GetxController {
       UiKitInitializer.toast('提交成功');
       return true;
     } catch (e) {
-      UiKitInitializer.toastError(formatUsedCarLoadError(e));
+      UiKitInitializer.toastError(formatTransactionLoadError(e));
       return false;
     } finally {
       submitting.value = false;

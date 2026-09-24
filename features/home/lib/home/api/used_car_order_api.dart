@@ -5,16 +5,18 @@ import 'package:module_http/module_http.dart';
 class UsedCarOrderApi {
   static const _base = '/api/v1/used-car-orders';
 
-  Future<UsedCarOrderSummary> fetchSummary() async {
-    HomeHttpConfig.ensureInitialized();
-    final result = await HttpManager.instance.get<ResultModel<UsedCarOrderSummary>>(
-      '$_base/summary',
-      converter: (json) => ResultModel.fromJson(
-        json as Map<String, dynamic>,
-        (data) => UsedCarOrderSummary.fromJson(data as Map<String, dynamic>),
-      ),
-    );
-    return _data(result.data, '加载摘要失败');
+  Future<UsedCarOrderSummary> fetchSummary() {
+    return _guarded(() async {
+      final result =
+          await HttpManager.instance.get<ResultModel<UsedCarOrderSummary>>(
+        '$_base/summary',
+        converter: (json) => ResultModel.fromJson(
+          json as Map<String, dynamic>,
+          (data) => UsedCarOrderSummary.fromJson(data as Map<String, dynamic>),
+        ),
+      );
+      return _data(result.data, '加载摘要失败');
+    });
   }
 
   Future<({List<UsedCarOrderItem> list, bool hasMore})> fetchList({
@@ -22,60 +24,64 @@ class UsedCarOrderApi {
     required UsedCarKindFilter kindFilter,
     required int page,
     int size = 10,
-  }) async {
-    HomeHttpConfig.ensureInitialized();
-    final query = <String, dynamic>{
-      'page': page,
-      'size': size,
-      'status': statusTab.apiStatus,
-    };
-    final kind = kindFilter.apiKind;
-    if (kind != null) query['kind'] = kind;
-    final result = await HttpManager.instance
-        .get<ResultModel<ListData<UsedCarOrderItem>>>(
-      _base,
-      queryParameters: query,
-      converter: (json) => ResultModel.listPage(
-        json as Map<String, dynamic>,
-        UsedCarOrderItem.fromJson,
-      ),
-    );
-    final listData = _data(result.data, '加载列表失败');
-    final total = listData.pagination?.total ?? listData.list.length;
-    final hasMore = page * size < total;
-    return (list: listData.list, hasMore: hasMore);
+  }) {
+    return _guarded(() async {
+      final query = <String, dynamic>{
+        'page': page,
+        'size': size,
+        'status': statusTab.apiStatus,
+      };
+      final kind = kindFilter.apiKind;
+      if (kind != null) query['kind'] = kind;
+      final result = await HttpManager.instance
+          .get<ResultModel<ListData<UsedCarOrderItem>>>(
+        _base,
+        queryParameters: query,
+        converter: (json) => ResultModel.listPage(
+          json as Map<String, dynamic>,
+          UsedCarOrderItem.fromJson,
+        ),
+      );
+      final listData = _data(result.data, '加载列表失败');
+      final total = listData.pagination?.total ?? listData.list.length;
+      final hasMore = page * size < total;
+      return (list: listData.list, hasMore: hasMore);
+    });
   }
 
-  Future<UsedCarOrderItem> fetchDetail(String orderId) async {
-    HomeHttpConfig.ensureInitialized();
-    final result = await HttpManager.instance.get<ResultModel<UsedCarOrderItem>>(
-      '$_base/$orderId',
-      converter: (json) => ResultModel.fromJson(
-        json as Map<String, dynamic>,
-        (data) => UsedCarOrderItem.fromJson(data as Map<String, dynamic>),
-      ),
-    );
-    return _data(result.data, '加载详情失败');
+  Future<UsedCarOrderItem> fetchDetail(String orderId) {
+    return _guarded(() async {
+      final result =
+          await HttpManager.instance.get<ResultModel<UsedCarOrderItem>>(
+        '$_base/$orderId',
+        converter: (json) => ResultModel.fromJson(
+          json as Map<String, dynamic>,
+          (data) => UsedCarOrderItem.fromJson(data as Map<String, dynamic>),
+        ),
+      );
+      return _data(result.data, '加载详情失败');
+    });
   }
 
   Future<List<UsedCarCustomer>> fetchCustomers({
     int page = 1,
     int size = 50,
     String? q,
-  }) async {
-    HomeHttpConfig.ensureInitialized();
-    final query = <String, dynamic>{'page': page, 'size': size};
-    if (q != null && q.trim().isNotEmpty) query['q'] = q.trim();
-    final result = await HttpManager.instance
-        .get<ResultModel<ListData<UsedCarCustomer>>>(
-      '$_base/customers',
-      queryParameters: query,
-      converter: (json) => ResultModel.listPage(
-        json as Map<String, dynamic>,
-        UsedCarCustomer.fromJson,
-      ),
-    );
-    return _data(result.data, '加载客户失败').list;
+  }) {
+    return _guarded(() async {
+      final query = <String, dynamic>{'page': page, 'size': size};
+      if (q != null && q.trim().isNotEmpty) query['q'] = q.trim();
+      final result = await HttpManager.instance
+          .get<ResultModel<ListData<UsedCarCustomer>>>(
+        '$_base/customers',
+        queryParameters: query,
+        converter: (json) => ResultModel.listPage(
+          json as Map<String, dynamic>,
+          UsedCarCustomer.fromJson,
+        ),
+      );
+      return _data(result.data, '加载客户失败').list;
+    });
   }
 
   Future<UsedCarOrderItem> create({
@@ -88,27 +94,34 @@ class UsedCarOrderApi {
     required int modelYear,
     required double amount,
     String? imageUrl,
-  }) async {
+  }) {
+    return _guarded(() async {
+      final result =
+          await HttpManager.instance.post<ResultModel<UsedCarOrderItem>>(
+        _base,
+        data: {
+          'kind': kind,
+          'customer_id': customerId,
+          'vehicle_model': vehicleModel,
+          'plate_no': plateNo,
+          'vin': vin,
+          'mileage_km': mileageKm,
+          'model_year': modelYear,
+          'amount': amount,
+          'image_url': imageUrl,
+        },
+        converter: (json) => ResultModel.fromJson(
+          json as Map<String, dynamic>,
+          (data) => UsedCarOrderItem.fromJson(data as Map<String, dynamic>),
+        ),
+      );
+      return _data(result.data, '提交失败');
+    });
+  }
+
+  Future<T> _guarded<T>(Future<T> Function() action) async {
     HomeHttpConfig.ensureInitialized();
-    final result = await HttpManager.instance.post<ResultModel<UsedCarOrderItem>>(
-      _base,
-      data: {
-        'kind': kind,
-        'customer_id': customerId,
-        'vehicle_model': vehicleModel,
-        'plate_no': plateNo,
-        'vin': vin,
-        'mileage_km': mileageKm,
-        'model_year': modelYear,
-        'amount': amount,
-        'image_url': imageUrl,
-      },
-      converter: (json) => ResultModel.fromJson(
-        json as Map<String, dynamic>,
-        (data) => UsedCarOrderItem.fromJson(data as Map<String, dynamic>),
-      ),
-    );
-    return _data(result.data, '提交失败');
+    return action();
   }
 
   T _data<T>(ResultModel<T>? model, String fallback) {

@@ -2,12 +2,7 @@ import 'package:module_auth/api/auth_http_config.dart';
 import 'package:module_core/core.dart';
 import 'package:module_http/module_http.dart';
 
-/// =============================================================================
-/// UserAuthApi — 登录/注册 HTTP 封装
-///
-/// 响应格式：ResultModel { code, message, data: { token, user } }
-/// _mapFailure：把 Go 中文 message 映射为 typed AuthFailure，UI 好展示
-/// =============================================================================
+/// UserAuthApi — 登录/注册 HTTP 封装（ResultModel → typed AuthFailure）。
 class UserAuthApi {
   static const loginPath = '/api/v1/user/login';
   static const registerPath = '/api/v1/user/register';
@@ -22,9 +17,8 @@ class UserAuthApi {
     required String password,
     required String deviceId,
     required String platform,
-  }) async {
-    AuthHttpConfig.ensureInitialized();
-    try {
+  }) {
+    return _guarded(() async {
       final result = await HttpManager.instance.post<ResultModel<LoginResult>>(
         loginPath,
         data: {
@@ -35,45 +29,19 @@ class UserAuthApi {
         },
         converter: _parseLoginResult,
       );
-      final model = result.data;
-      if (model == null || !model.isSuccess || model.data == null) {
-        throw _mapFailure(model?.code, model?.message);
-      }
-      return model.data!;
-    } on AuthFailure {
-      rethrow;
-    } on HttpRequestException catch (error) {
-      throw _mapFailure(
-        int.tryParse(error.code ?? ''),
-        error.message,
-      );
-    } catch (error) {
-      throw _mapFailure(null, error.toString());
-    }
+      return _requireData(result.data);
+    });
   }
 
-  Future<void> sendPhoneOtp({required String phone}) async {
-    AuthHttpConfig.ensureInitialized();
-    try {
+  Future<void> sendPhoneOtp({required String phone}) {
+    return _guarded(() async {
       final result = await HttpManager.instance.post<ResultModel<Object?>>(
         sendPhoneOtpPath,
         data: {'phone': phone},
         converter: _parseOkResult,
       );
-      final model = result.data;
-      if (model == null || !model.isSuccess) {
-        throw _mapFailure(model?.code, model?.message);
-      }
-    } on AuthFailure {
-      rethrow;
-    } on HttpRequestException catch (error) {
-      throw _mapFailure(
-        int.tryParse(error.code ?? ''),
-        error.message,
-      );
-    } catch (error) {
-      throw _mapFailure(null, error.toString());
-    }
+      _requireOk(result.data);
+    });
   }
 
   Future<LoginResult> verifyPhoneOtp({
@@ -81,9 +49,8 @@ class UserAuthApi {
     required String otp,
     required String deviceId,
     required String platform,
-  }) async {
-    AuthHttpConfig.ensureInitialized();
-    try {
+  }) {
+    return _guarded(() async {
       final result = await HttpManager.instance.post<ResultModel<LoginResult>>(
         verifyPhoneOtpPath,
         data: {
@@ -94,30 +61,16 @@ class UserAuthApi {
         },
         converter: _parseLoginResult,
       );
-      final model = result.data;
-      if (model == null || !model.isSuccess || model.data == null) {
-        throw _mapFailure(model?.code, model?.message);
-      }
-      return model.data!;
-    } on AuthFailure {
-      rethrow;
-    } on HttpRequestException catch (error) {
-      throw _mapFailure(
-        int.tryParse(error.code ?? ''),
-        error.message,
-      );
-    } catch (error) {
-      throw _mapFailure(null, error.toString());
-    }
+      return _requireData(result.data);
+    });
   }
 
   Future<LoginResult> loginWithWechat({
     required String code,
     required String deviceId,
     required String platform,
-  }) async {
-    AuthHttpConfig.ensureInitialized();
-    try {
+  }) {
+    return _guarded(() async {
       final result = await HttpManager.instance.post<ResultModel<LoginResult>>(
         wechatLoginPath,
         data: {
@@ -127,21 +80,8 @@ class UserAuthApi {
         },
         converter: _parseLoginResult,
       );
-      final model = result.data;
-      if (model == null || !model.isSuccess || model.data == null) {
-        throw _mapFailure(model?.code, model?.message);
-      }
-      return model.data!;
-    } on AuthFailure {
-      rethrow;
-    } on HttpRequestException catch (error) {
-      throw _mapFailure(
-        int.tryParse(error.code ?? ''),
-        error.message,
-      );
-    } catch (error) {
-      throw _mapFailure(null, error.toString());
-    }
+      return _requireData(result.data);
+    });
   }
 
   Future<RefreshTokenResult> refresh({
@@ -149,9 +89,8 @@ class UserAuthApi {
     String? deviceId,
     String? sessionId,
     String? platform,
-  }) async {
-    AuthHttpConfig.ensureInitialized();
-    try {
+  }) {
+    return _guarded(() async {
       final result =
           await HttpManager.instance.post<ResultModel<RefreshTokenResult>>(
         refreshPath,
@@ -164,30 +103,16 @@ class UserAuthApi {
         options: Options(extra: const {'skipAuthRefresh': true}),
         converter: _parseRefreshResult,
       );
-      final model = result.data;
-      if (model == null || !model.isSuccess || model.data == null) {
-        throw _mapFailure(model?.code, model?.message);
-      }
-      return model.data!;
-    } on AuthFailure {
-      rethrow;
-    } on HttpRequestException catch (error) {
-      throw _mapFailure(
-        int.tryParse(error.code ?? ''),
-        error.message,
-      );
-    } catch (error) {
-      throw _mapFailure(null, error.toString());
-    }
+      return _requireData(result.data);
+    });
   }
 
   Future<void> logout({
     required String token,
     required String sessionId,
     required String deviceId,
-  }) async {
-    AuthHttpConfig.ensureInitialized();
-    try {
+  }) {
+    return _guarded(() async {
       final result = await HttpManager.instance.post<ResultModel<Object?>>(
         logoutPath,
         options: Options(
@@ -200,20 +125,8 @@ class UserAuthApi {
         ),
         converter: _parseOkResult,
       );
-      final model = result.data;
-      if (model == null || !model.isSuccess) {
-        throw _mapFailure(model?.code, model?.message);
-      }
-    } on AuthFailure {
-      rethrow;
-    } on HttpRequestException catch (error) {
-      throw _mapFailure(
-        int.tryParse(error.code ?? ''),
-        error.message,
-      );
-    } catch (error) {
-      throw _mapFailure(null, error.toString());
-    }
+      _requireOk(result.data);
+    });
   }
 
   Future<RegisterResult> register({
@@ -222,9 +135,8 @@ class UserAuthApi {
     required String email,
     required String deviceId,
     required String platform,
-  }) async {
-    AuthHttpConfig.ensureInitialized();
-    try {
+  }) {
+    return _guarded(() async {
       final result =
           await HttpManager.instance.post<ResultModel<RegisterResult>>(
         registerPath,
@@ -237,11 +149,14 @@ class UserAuthApi {
         },
         converter: _parseRegisterResult,
       );
-      final model = result.data;
-      if (model == null || !model.isSuccess || model.data == null) {
-        throw _mapFailure(model?.code, model?.message);
-      }
-      return model.data!;
+      return _requireData(result.data);
+    });
+  }
+
+  Future<T> _guarded<T>(Future<T> Function() action) async {
+    AuthHttpConfig.ensureInitialized();
+    try {
+      return await action();
     } on AuthFailure {
       rethrow;
     } on HttpRequestException catch (error) {
@@ -251,6 +166,19 @@ class UserAuthApi {
       );
     } catch (error) {
       throw _mapFailure(null, error.toString());
+    }
+  }
+
+  T _requireData<T>(ResultModel<T>? model) {
+    if (model == null || !model.isSuccess || model.data == null) {
+      throw _mapFailure(model?.code, model?.message);
+    }
+    return model.data as T;
+  }
+
+  void _requireOk(ResultModel<Object?>? model) {
+    if (model == null || !model.isSuccess) {
+      throw _mapFailure(model?.code, model?.message);
     }
   }
 

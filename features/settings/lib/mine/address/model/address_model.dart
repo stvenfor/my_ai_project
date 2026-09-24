@@ -53,16 +53,4 @@ class AddressModel {
         'is_default': isDefault,
         'label': label,
       };
-
-  Map<String, dynamic> toBody({bool? isDefaultOverride}) => {
-        'receiver_name': receiverName,
-        'receiver_phone': receiverPhone,
-        'province': province,
-        'city': city,
-        'district': district,
-        'detail_address': detailAddress,
-        'postal_code': postalCode,
-        'is_default': isDefaultOverride ?? isDefault,
-        'label': label,
-      };
 }

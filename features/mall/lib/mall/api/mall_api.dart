@@ -12,55 +12,61 @@ class MallApi {
     required int storeId,
     required int page,
     int size = pageSize,
-  }) async {
-    AuthHttpConfig.ensureInitialized();
-    final result = await HttpManager.instance.get<ResultModel<ListData<MallProductCardModel>>>(
-      '/api/v1/mall/stores/$storeId/products',
-      queryParameters: {
-        'page': page,
-        'size': size,
-      },
-      converter: (json) => ResultModel.listPage(
-        json as Map<String, dynamic>,
-        MallProductCardModel.fromJson,
-      ),
-    );
-    final model = result.data;
-    if (model == null || !model.isSuccess || model.data == null) {
-      throw HttpRequestException(
-        message: model?.message ?? '加载商品失败',
-        code: model?.code.toString(),
+  }) {
+    return _guarded(() async {
+      final result = await HttpManager.instance
+          .get<ResultModel<ListData<MallProductCardModel>>>(
+        '/api/v1/mall/stores/$storeId/products',
+        queryParameters: {
+          'page': page,
+          'size': size,
+        },
+        converter: (json) => ResultModel.listPage(
+          json as Map<String, dynamic>,
+          MallProductCardModel.fromJson,
+        ),
       );
-    }
-    return PageResult.fromListData(model.data!, pageSize: size);
+      final model = result.data;
+      if (model == null || !model.isSuccess || model.data == null) {
+        throw HttpRequestException(
+          message: model?.message ?? '加载商品失败',
+          code: model?.code.toString(),
+        );
+      }
+      return PageResult.fromListData(model.data!, pageSize: size);
+    });
   }
 
   Future<MallProductDetail> fetchDetail({
     required int storeId,
     required String productId,
-  }) async {
-    AuthHttpConfig.ensureInitialized();
-    final result = await HttpManager.instance.get<ResultModel<MallProductDetail>>(
-      '/api/v1/mall/stores/$storeId/products/$productId',
-      converter: (json) => ResultModel.object(
-        json as Map<String, dynamic>,
-        MallProductDetail.fromJson,
-      ),
-    );
-    return _data(result.data, '加载详情失败');
+  }) {
+    return _guarded(() async {
+      final result =
+          await HttpManager.instance.get<ResultModel<MallProductDetail>>(
+        '/api/v1/mall/stores/$storeId/products/$productId',
+        converter: (json) => ResultModel.object(
+          json as Map<String, dynamic>,
+          MallProductDetail.fromJson,
+        ),
+      );
+      return _data(result.data, '加载详情失败');
+    });
   }
 
-  Future<void> addToCart({required int skuId, required int qty}) async {
-    AuthHttpConfig.ensureInitialized();
-    final result = await HttpManager.instance.post<ResultModel<Map<String, dynamic>>>(
-      '/api/v1/mall/cart',
-      data: {'sku_id': skuId, 'qty': qty},
-      converter: (json) => ResultModel.object(
-        json as Map<String, dynamic>,
-        (data) => Map<String, dynamic>.from(data),
-      ),
-    );
-    _data(result.data, '加入购物车失败');
+  Future<void> addToCart({required int skuId, required int qty}) {
+    return _guarded(() async {
+      final result = await HttpManager.instance
+          .post<ResultModel<Map<String, dynamic>>>(
+        '/api/v1/mall/cart',
+        data: {'sku_id': skuId, 'qty': qty},
+        converter: (json) => ResultModel.object(
+          json as Map<String, dynamic>,
+          (data) => Map<String, dynamic>.from(data),
+        ),
+      );
+      _data(result.data, '加入购物车失败');
+    });
   }
 
   /// 仅创建待支付订单（不支付），返回 order_id。客户端进详情完成支付。
@@ -71,31 +77,35 @@ class MallApi {
     String receiverName = '',
     String receiverPhone = '',
     String receiverAddress = '',
-  }) async {
-    AuthHttpConfig.ensureInitialized();
-    final created = await HttpManager.instance.post<ResultModel<Map<String, dynamic>>>(
-      '/api/v1/mall/orders',
-      data: {
-        'idempotency_key': '$skuId-${DateTime.now().microsecondsSinceEpoch}',
-        'store_id': storeId,
-        'lines': [
-          {'sku_id': skuId, 'qty': qty},
-        ],
-        'receiver_name': receiverName,
-        'receiver_phone': receiverPhone,
-        'receiver_address': receiverAddress,
-      },
-      converter: (json) => ResultModel.object(
-        json as Map<String, dynamic>,
-        (data) => Map<String, dynamic>.from(data),
-      ),
-    );
-    final order = _data(created.data, '下单失败')['order'] as Map<String, dynamic>? ?? const {};
-    final orderId = (order['order_id'] as num?)?.toInt() ?? 0;
-    if (orderId <= 0) {
-      throw HttpRequestException(message: '下单失败：缺少订单号');
-    }
-    return orderId;
+  }) {
+    return _guarded(() async {
+      final created = await HttpManager.instance
+          .post<ResultModel<Map<String, dynamic>>>(
+        '/api/v1/mall/orders',
+        data: {
+          'idempotency_key': '$skuId-${DateTime.now().microsecondsSinceEpoch}',
+          'store_id': storeId,
+          'lines': [
+            {'sku_id': skuId, 'qty': qty},
+          ],
+          'receiver_name': receiverName,
+          'receiver_phone': receiverPhone,
+          'receiver_address': receiverAddress,
+        },
+        converter: (json) => ResultModel.object(
+          json as Map<String, dynamic>,
+          (data) => Map<String, dynamic>.from(data),
+        ),
+      );
+      final order =
+          _data(created.data, '下单失败')['order'] as Map<String, dynamic>? ??
+              const {};
+      final orderId = (order['order_id'] as num?)?.toInt() ?? 0;
+      if (orderId <= 0) {
+        throw HttpRequestException(message: '下单失败：缺少订单号');
+      }
+      return orderId;
+    });
   }
 
   /// 下单并按渠道本地支付，返回订单号（兼容旧调用）。
@@ -116,7 +126,8 @@ class MallApi {
       receiverPhone: receiverPhone,
       receiverAddress: receiverAddress,
     );
-    final paid = await payOrder(orderId: orderId, paymentChannel: paymentChannel);
+    final paid =
+        await payOrder(orderId: orderId, paymentChannel: paymentChannel);
     return paid.orderNo;
   }
 
@@ -125,71 +136,84 @@ class MallApi {
     required int page,
     int size = pageSize,
     String? status,
-  }) async {
-    AuthHttpConfig.ensureInitialized();
-    final query = <String, dynamic>{
-      'page': page,
-      'size': size,
-    };
-    if (status != null && status.isNotEmpty) {
-      query['status'] = status;
-    }
-    final result = await HttpManager.instance.get<ResultModel<ListData<MallOrderListRow>>>(
-      '/api/v1/mall/orders',
-      queryParameters: query,
-      converter: (json) => ResultModel.listPage(
-        json as Map<String, dynamic>,
-        MallOrderListRow.fromJson,
-      ),
-    );
-    final model = result.data;
-    if (model == null || !model.isSuccess || model.data == null) {
-      throw HttpRequestException(
-        message: model?.message ?? '加载订单失败',
-        code: model?.code.toString(),
+  }) {
+    return _guarded(() async {
+      final query = <String, dynamic>{
+        'page': page,
+        'size': size,
+      };
+      if (status != null && status.isNotEmpty) {
+        query['status'] = status;
+      }
+      final result = await HttpManager.instance
+          .get<ResultModel<ListData<MallOrderListRow>>>(
+        '/api/v1/mall/orders',
+        queryParameters: query,
+        converter: (json) => ResultModel.listPage(
+          json as Map<String, dynamic>,
+          MallOrderListRow.fromJson,
+        ),
       );
-    }
-    return PageResult.fromListData(model.data!, pageSize: size);
+      final model = result.data;
+      if (model == null || !model.isSuccess || model.data == null) {
+        throw HttpRequestException(
+          message: model?.message ?? '加载订单失败',
+          code: model?.code.toString(),
+        );
+      }
+      return PageResult.fromListData(model.data!, pageSize: size);
+    });
   }
 
-  Future<MallOrderDetail> fetchOrderDetail(int orderId) async {
-    AuthHttpConfig.ensureInitialized();
-    final result = await HttpManager.instance.get<ResultModel<MallOrderDetail>>(
-      '/api/v1/mall/orders/$orderId',
-      converter: (json) => ResultModel.object(
-        json as Map<String, dynamic>,
-        MallOrderDetail.fromJson,
-      ),
-    );
-    return _data(result.data, '加载订单详情失败');
+  Future<MallOrderDetail> fetchOrderDetail(int orderId) {
+    return _guarded(() async {
+      final result =
+          await HttpManager.instance.get<ResultModel<MallOrderDetail>>(
+        '/api/v1/mall/orders/$orderId',
+        converter: (json) => ResultModel.object(
+          json as Map<String, dynamic>,
+          MallOrderDetail.fromJson,
+        ),
+      );
+      return _data(result.data, '加载订单详情失败');
+    });
   }
 
   Future<MallOrderDetail> payOrder({
     required int orderId,
     required int paymentChannel,
-  }) async {
-    AuthHttpConfig.ensureInitialized();
-    final result = await HttpManager.instance.post<ResultModel<MallOrderDetail>>(
-      '/api/v1/mall/orders/$orderId/pay',
-      data: {'payment_channel': paymentChannel},
-      converter: (json) => ResultModel.object(
-        json as Map<String, dynamic>,
-        MallOrderDetail.fromJson,
-      ),
-    );
-    return _data(result.data, '支付失败');
+  }) {
+    return _guarded(() async {
+      final result =
+          await HttpManager.instance.post<ResultModel<MallOrderDetail>>(
+        '/api/v1/mall/orders/$orderId/pay',
+        data: {'payment_channel': paymentChannel},
+        converter: (json) => ResultModel.object(
+          json as Map<String, dynamic>,
+          MallOrderDetail.fromJson,
+        ),
+      );
+      return _data(result.data, '支付失败');
+    });
   }
 
-  Future<void> cancelOrder(int orderId) async {
+  Future<void> cancelOrder(int orderId) {
+    return _guarded(() async {
+      final result = await HttpManager.instance
+          .post<ResultModel<Map<String, dynamic>>>(
+        '/api/v1/mall/orders/$orderId/cancel',
+        converter: (json) => ResultModel.object(
+          json as Map<String, dynamic>,
+          (data) => Map<String, dynamic>.from(data),
+        ),
+      );
+      _data(result.data, '取消订单失败');
+    });
+  }
+
+  Future<T> _guarded<T>(Future<T> Function() action) async {
     AuthHttpConfig.ensureInitialized();
-    final result = await HttpManager.instance.post<ResultModel<Map<String, dynamic>>>(
-      '/api/v1/mall/orders/$orderId/cancel',
-      converter: (json) => ResultModel.object(
-        json as Map<String, dynamic>,
-        (data) => Map<String, dynamic>.from(data),
-      ),
-    );
-    _data(result.data, '取消订单失败');
+    return action();
   }
 
   static T _data<T>(ResultModel<T>? model, String fallback) {

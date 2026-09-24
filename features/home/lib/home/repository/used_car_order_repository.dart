@@ -1,6 +1,5 @@
 import 'package:module_home/home/api/used_car_order_api.dart';
 import 'package:module_home/home/model/used_car_order_models.dart';
-import 'package:module_home/home/repository/transaction_repository.dart';
 import 'package:module_http/module_http.dart';
 
 class UsedCarOrderRepository {
@@ -55,5 +54,3 @@ class UsedCarOrderRepository {
     );
   }
 }
-
-String formatUsedCarLoadError(Object error) => formatTransactionLoadError(error);

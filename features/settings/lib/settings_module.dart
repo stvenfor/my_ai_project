@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:module_http/module_http.dart';
 import 'package:wys_router/src/module/feature_module.dart';
 import 'package:wys_router/src/module/module_host_context.dart';
 import 'package:wys_router/src/module/module_tab_item.dart';
@@ -109,12 +108,10 @@ class SettingsModule extends FeatureModule {
 
   @override
   Future<void> onRegister(ModuleHostContext context) async {
-    if (context.isStandalone || !HttpManager.instance.isInitialized) {
-      MineHttpConfig.init(
-        enableLog: context.enableHttpLog,
-        maxRetries: context.httpMaxRetries,
-      );
-    }
+    MineHttpConfig.ensureInitialized(
+      enableLog: context.enableHttpLog,
+      maxRetries: context.httpMaxRetries,
+    );
     if (context.isStandalone) {
       SettingsBinding().dependencies();
     }

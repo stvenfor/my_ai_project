@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:module_home/home/model/used_car_order_models.dart';
+import 'package:module_home/home/repository/transaction_repository.dart';
 import 'package:module_home/home/repository/used_car_order_repository.dart';
 
 class UsedCarDetailController extends GetxController {
@@ -36,7 +37,7 @@ class UsedCarDetailController extends GetxController {
     try {
       order.value = await _repository.fetchById(orderId);
     } catch (error) {
-      errorMessage.value = formatUsedCarLoadError(error);
+      errorMessage.value = formatTransactionLoadError(error);
     } finally {
       isLoading.value = false;
     }

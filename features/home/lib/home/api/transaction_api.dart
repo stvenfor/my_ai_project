@@ -18,36 +18,43 @@ class TransactionApi {
     required int page,
     int size = 20,
     String? type,
-  }) async {
-    HomeHttpConfig.ensureInitialized();
-    final result = await HttpManager.instance.get<TransactionListResult>(
-      transactionsPath,
-      queryParameters: {
-        'limit': size,
-        'offset': page * size,
-        if (type != null && type.isNotEmpty) 'type': type,
-      },
-      converter: _parseListResult,
-    );
-    return result.data ??
-        ResultModel(
-          code: 0,
-          message: 'success',
-          data: const ListData<TransactionModel>(list: []),
-        );
+  }) {
+    return _guarded(() async {
+      final result = await HttpManager.instance.get<TransactionListResult>(
+        transactionsPath,
+        queryParameters: {
+          'limit': size,
+          'offset': page * size,
+          if (type != null && type.isNotEmpty) 'type': type,
+        },
+        converter: _parseListResult,
+      );
+      return result.data ??
+          ResultModel(
+            code: 0,
+            message: 'success',
+            data: const ListData<TransactionModel>(list: []),
+          );
+    });
   }
 
-  Future<TransactionDetailResult> getTransaction(int id) async {
+  Future<TransactionDetailResult> getTransaction(int id) {
+    return _guarded(() async {
+      final result = await HttpManager.instance.get<TransactionDetailResult>(
+        '$transactionsPath/$id',
+        converter: _parseDetailResult,
+      );
+      final data = result.data;
+      if (data == null || data.data == null) {
+        throw HttpRequestException(message: '交易记录不存在');
+      }
+      return data;
+    });
+  }
+
+  Future<T> _guarded<T>(Future<T> Function() action) async {
     HomeHttpConfig.ensureInitialized();
-    final result = await HttpManager.instance.get<TransactionDetailResult>(
-      '$transactionsPath/$id',
-      converter: _parseDetailResult,
-    );
-    final data = result.data;
-    if (data == null || data.data == null) {
-      throw HttpRequestException(message: '交易记录不存在');
-    }
-    return data;
+    return action();
   }
 
   /// 兼容两种后端 JSON：ResultModel 信封 或 直出 { items: [] }。

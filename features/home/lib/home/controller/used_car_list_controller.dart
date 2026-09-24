@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:module_auth/session/auth_session.dart';
 import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_home/home/model/used_car_order_models.dart';
+import 'package:module_home/home/repository/transaction_repository.dart';
 import 'package:module_home/home/repository/used_car_order_repository.dart';
 
 class UsedCarListController extends GetxController {
@@ -41,7 +42,7 @@ class UsedCarListController extends GetxController {
       hasMore.value = result.hasMore;
       currentPage.value = result.list.isEmpty ? 1 : 2;
     } catch (error) {
-      errorMessage.value = formatUsedCarLoadError(error);
+      errorMessage.value = formatTransactionLoadError(error);
     } finally {
       isLoading.value = false;
     }
@@ -62,7 +63,7 @@ class UsedCarListController extends GetxController {
       hasMore.value = result.hasMore;
       currentPage.value = result.list.isEmpty ? 1 : 2;
     } catch (error) {
-      errorMessage.value = formatUsedCarLoadError(error);
+      errorMessage.value = formatTransactionLoadError(error);
       UiKitInitializer.toastError('刷新失败');
     }
   }

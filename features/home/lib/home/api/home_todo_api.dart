@@ -10,92 +10,105 @@ class HomeTodoApi {
   static const appointmentsPath = '/api/v1/home/after-sales-appointments';
   static const reviewOrdersPath = '/api/v1/home/store-review-orders';
 
-  Future<List<HomeTodoCard>> fetchTodoCards() async {
-    AuthHttpConfig.ensureInitialized();
-    final result = await HttpManager.instance.get<ResultModel<List<HomeTodoCard>>>(
-      todoCardsPath,
-      converter: (json) => ResultModel.fromJson(
-        json as Map<String, dynamic>,
-        (data) => _parseItems(data, HomeTodoCard.fromJson),
-      ),
-    );
-    return _data(result.data, '加载待办卡失败');
+  Future<List<HomeTodoCard>> fetchTodoCards() {
+    return _guarded(() async {
+      final result =
+          await HttpManager.instance.get<ResultModel<List<HomeTodoCard>>>(
+        todoCardsPath,
+        converter: (json) => ResultModel.fromJson(
+          json as Map<String, dynamic>,
+          (data) => _parseItems(data, HomeTodoCard.fromJson),
+        ),
+      );
+      return _data(result.data, '加载待办卡失败');
+    });
   }
 
-  Future<List<HomeTodoJoinApplication>> fetchJoinApplications() async {
-    AuthHttpConfig.ensureInitialized();
-    final result = await HttpManager.instance
-        .get<ResultModel<List<HomeTodoJoinApplication>>>(
-      joinApplicationsPath,
-      converter: (json) => ResultModel.fromJson(
-        json as Map<String, dynamic>,
-        (data) => _parseItems(data, HomeTodoJoinApplication.fromJson),
-      ),
-    );
-    return _data(result.data, '加载入店申请失败');
+  Future<List<HomeTodoJoinApplication>> fetchJoinApplications() {
+    return _guarded(() async {
+      final result = await HttpManager.instance
+          .get<ResultModel<List<HomeTodoJoinApplication>>>(
+        joinApplicationsPath,
+        converter: (json) => ResultModel.fromJson(
+          json as Map<String, dynamic>,
+          (data) => _parseItems(data, HomeTodoJoinApplication.fromJson),
+        ),
+      );
+      return _data(result.data, '加载入店申请失败');
+    });
   }
 
-  Future<void> approveJoin(int applicationId) async {
-    AuthHttpConfig.ensureInitialized();
-    final result = await HttpManager.instance.post<ResultModel<Object?>>(
-      '$joinApplicationsPath/$applicationId/approve',
-      converter: (json) => ResultModel.fromJson(
-        json as Map<String, dynamic>,
-        (_) => null,
-      ),
-    );
-    _ensureOk(result.data, '确认失败');
+  Future<void> approveJoin(int applicationId) {
+    return _guarded(() async {
+      final result = await HttpManager.instance.post<ResultModel<Object?>>(
+        '$joinApplicationsPath/$applicationId/approve',
+        converter: (json) => ResultModel.fromJson(
+          json as Map<String, dynamic>,
+          (_) => null,
+        ),
+      );
+      _ensureOk(result.data, '确认失败');
+    });
   }
 
-  Future<void> rejectJoin(int applicationId) async {
-    AuthHttpConfig.ensureInitialized();
-    final result = await HttpManager.instance.post<ResultModel<Object?>>(
-      '$joinApplicationsPath/$applicationId/reject',
-      converter: (json) => ResultModel.fromJson(
-        json as Map<String, dynamic>,
-        (_) => null,
-      ),
-    );
-    _ensureOk(result.data, '拒绝失败');
+  Future<void> rejectJoin(int applicationId) {
+    return _guarded(() async {
+      final result = await HttpManager.instance.post<ResultModel<Object?>>(
+        '$joinApplicationsPath/$applicationId/reject',
+        converter: (json) => ResultModel.fromJson(
+          json as Map<String, dynamic>,
+          (_) => null,
+        ),
+      );
+      _ensureOk(result.data, '拒绝失败');
+    });
   }
 
-  Future<List<HomeTodoFollowUpCustomer>> fetchFollowUpCustomers() async {
-    AuthHttpConfig.ensureInitialized();
-    final result = await HttpManager.instance
-        .get<ResultModel<List<HomeTodoFollowUpCustomer>>>(
-      followUpPath,
-      converter: (json) => ResultModel.fromJson(
-        json as Map<String, dynamic>,
-        (data) => _parseItems(data, HomeTodoFollowUpCustomer.fromJson),
-      ),
-    );
-    return _data(result.data, '加载待跟进客户失败');
+  Future<List<HomeTodoFollowUpCustomer>> fetchFollowUpCustomers() {
+    return _guarded(() async {
+      final result = await HttpManager.instance
+          .get<ResultModel<List<HomeTodoFollowUpCustomer>>>(
+        followUpPath,
+        converter: (json) => ResultModel.fromJson(
+          json as Map<String, dynamic>,
+          (data) => _parseItems(data, HomeTodoFollowUpCustomer.fromJson),
+        ),
+      );
+      return _data(result.data, '加载待跟进客户失败');
+    });
   }
 
-  Future<List<HomeTodoAppointment>> fetchAppointments() async {
-    AuthHttpConfig.ensureInitialized();
-    final result =
-        await HttpManager.instance.get<ResultModel<List<HomeTodoAppointment>>>(
-      appointmentsPath,
-      converter: (json) => ResultModel.fromJson(
-        json as Map<String, dynamic>,
-        (data) => _parseItems(data, HomeTodoAppointment.fromJson),
-      ),
-    );
-    return _data(result.data, '加载售后预约失败');
+  Future<List<HomeTodoAppointment>> fetchAppointments() {
+    return _guarded(() async {
+      final result = await HttpManager.instance
+          .get<ResultModel<List<HomeTodoAppointment>>>(
+        appointmentsPath,
+        converter: (json) => ResultModel.fromJson(
+          json as Map<String, dynamic>,
+          (data) => _parseItems(data, HomeTodoAppointment.fromJson),
+        ),
+      );
+      return _data(result.data, '加载售后预约失败');
+    });
   }
 
-  Future<List<HomeTodoReviewOrder>> fetchReviewOrders() async {
+  Future<List<HomeTodoReviewOrder>> fetchReviewOrders() {
+    return _guarded(() async {
+      final result =
+          await HttpManager.instance.get<ResultModel<List<HomeTodoReviewOrder>>>(
+        reviewOrdersPath,
+        converter: (json) => ResultModel.fromJson(
+          json as Map<String, dynamic>,
+          (data) => _parseItems(data, HomeTodoReviewOrder.fromJson),
+        ),
+      );
+      return _data(result.data, '加载店务审核单失败');
+    });
+  }
+
+  Future<T> _guarded<T>(Future<T> Function() action) async {
     AuthHttpConfig.ensureInitialized();
-    final result =
-        await HttpManager.instance.get<ResultModel<List<HomeTodoReviewOrder>>>(
-      reviewOrdersPath,
-      converter: (json) => ResultModel.fromJson(
-        json as Map<String, dynamic>,
-        (data) => _parseItems(data, HomeTodoReviewOrder.fromJson),
-      ),
-    );
-    return _data(result.data, '加载店务审核单失败');
+    return action();
   }
 
   List<T> _parseItems<T>(

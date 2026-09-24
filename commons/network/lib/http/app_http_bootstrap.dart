@@ -47,7 +47,7 @@ class AppHttpBootstrap {
     int maxRetries = 0,
     List<Interceptor> interceptors = const [],
   }) {
-    _apply(
+    initialize(
       headerProvider: headerProvider,
       responseHook: responseHook,
       responseParser: responseParser,

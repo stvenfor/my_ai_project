@@ -9,9 +9,8 @@ class UserProfileApi {
   static const mePath = '/api/v1/profiles/me';
   static const storesPath = '/api/v1/me/stores';
 
-  Future<UserProfile> fetchMe({String? storeId}) async {
-    AuthHttpConfig.ensureInitialized();
-    try {
+  Future<UserProfile> fetchMe({String? storeId}) {
+    return _guarded(() async {
       final result = await HttpManager.instance.get<ResultModel<UserProfile>>(
         mePath,
         queryParameters: {
@@ -20,50 +19,30 @@ class UserProfileApi {
         },
         converter: _parseProfile,
       );
-      final model = result.data;
-      if (model == null || !model.isSuccess || model.data == null) {
-        throw _mapFailure(model?.code, model?.message);
-      }
-      return model.data!;
-    } on AuthFailure {
-      rethrow;
-    } on HttpRequestException catch (error) {
-      throw _mapFailure(int.tryParse(error.code ?? ''), error.message);
-    } catch (error) {
-      throw _mapFailure(null, error.toString());
-    }
+      return _requireData(result.data);
+    });
   }
 
   /// GET `/api/v1/me/stores`，当前用户可切换的经销商列表。
-  Future<UserStoreListResult> listMyStores() async {
-    AuthHttpConfig.ensureInitialized();
-    try {
-      final result = await HttpManager.instance.get<ResultModel<UserStoreListResult>>(
+  Future<UserStoreListResult> listMyStores() {
+    return _guarded(() async {
+      final result =
+          await HttpManager.instance.get<ResultModel<UserStoreListResult>>(
         storesPath,
         converter: (json) => ResultModel.object(
           json as Map<String, dynamic>,
           UserStoreListResult.fromJson,
         ),
       );
-      final model = result.data;
-      if (model == null || !model.isSuccess || model.data == null) {
-        throw _mapFailure(model?.code, model?.message);
-      }
-      return model.data!;
-    } on AuthFailure {
-      rethrow;
-    } on HttpRequestException catch (error) {
-      throw _mapFailure(int.tryParse(error.code ?? ''), error.message);
-    } catch (error) {
-      throw _mapFailure(null, error.toString());
-    }
+      return _requireData(result.data);
+    });
   }
 
   /// POST `/api/v1/profiles/me/store`，返回切换后的店铺统计。
-  Future<UserStoreStats> switchStore(int storeId) async {
-    AuthHttpConfig.ensureInitialized();
-    try {
-      final result = await HttpManager.instance.post<ResultModel<UserStoreStats>>(
+  Future<UserStoreStats> switchStore(int storeId) {
+    return _guarded(() async {
+      final result =
+          await HttpManager.instance.post<ResultModel<UserStoreStats>>(
         '$mePath/store',
         data: {'store_id': storeId},
         converter: (json) => ResultModel.object(
@@ -71,11 +50,25 @@ class UserProfileApi {
           UserStoreStats.fromJson,
         ),
       );
-      final model = result.data;
-      if (model == null || !model.isSuccess || model.data == null) {
-        throw _mapFailure(model?.code, model?.message);
-      }
-      return model.data!;
+      return _requireData(result.data);
+    });
+  }
+
+  Future<UserProfile> updateMe(UpdateUserProfileRequest request) {
+    return _guarded(() async {
+      final result = await HttpManager.instance.patch<ResultModel<UserProfile>>(
+        mePath,
+        data: request.toJson(),
+        converter: _parseProfile,
+      );
+      return _requireData(result.data);
+    });
+  }
+
+  Future<T> _guarded<T>(Future<T> Function() action) async {
+    AuthHttpConfig.ensureInitialized();
+    try {
+      return await action();
     } on AuthFailure {
       rethrow;
     } on HttpRequestException catch (error) {
@@ -85,26 +78,11 @@ class UserProfileApi {
     }
   }
 
-  Future<UserProfile> updateMe(UpdateUserProfileRequest request) async {
-    AuthHttpConfig.ensureInitialized();
-    try {
-      final result = await HttpManager.instance.patch<ResultModel<UserProfile>>(
-        mePath,
-        data: request.toJson(),
-        converter: _parseProfile,
-      );
-      final model = result.data;
-      if (model == null || !model.isSuccess || model.data == null) {
-        throw _mapFailure(model?.code, model?.message);
-      }
-      return model.data!;
-    } on AuthFailure {
-      rethrow;
-    } on HttpRequestException catch (error) {
-      throw _mapFailure(int.tryParse(error.code ?? ''), error.message);
-    } catch (error) {
-      throw _mapFailure(null, error.toString());
+  T _requireData<T>(ResultModel<T>? model) {
+    if (model == null || !model.isSuccess || model.data == null) {
+      throw _mapFailure(model?.code, model?.message);
     }
+    return model.data as T;
   }
 
   static ResultModel<UserProfile> _parseProfile(dynamic json) {
