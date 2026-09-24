@@ -6,6 +6,7 @@ abstract final class ChatTheme {
   static VercelTokens get _t => VercelTokens.current();
 
   static Color get accent => _t.link;
+  /// Page wash behind the thread (distinct from peer bubbles).
   static Color get background => _t.canvasSoft2;
   static Color get surface => _t.canvas;
   static Color get fillSecondary => _t.canvasSoft2;
@@ -13,16 +14,17 @@ abstract final class ChatTheme {
   static Color get labelSecondary => _t.body;
   static Color get labelTertiary => _t.mute;
   static Color get separator => _t.hairline;
-  /// Self bubble: primary ink, not iMessage blue.
+  /// Self bubble: solid ink.
   static Color get selfBubble => _t.primary;
-  static Color get peerBubble => _t.canvasSoft2;
-  static Color get online => _t.link;
+  /// Peer bubble must contrast with [background].
+  static Color get peerBubble => _t.canvas;
+  static Color get online => _t.success;
   static Color get unreadBadge => _t.error;
 
   static const double radiusMd = 8;
   static const double radiusLg = 12;
-  static const double bubbleRadius = 8;
-  static const double inputRadius = 8;
+  static const double bubbleRadius = 16;
+  static const double inputRadius = 20;
 
   static TextStyle get largeTitle => TextStyle(
         fontFamily: VercelTypography.fontFamily,
@@ -71,7 +73,7 @@ abstract final class ChatTheme {
         fontSize: 16,
         fontWeight: FontWeight.w400,
         color: _t.onPrimary,
-        height: 24 / 16,
+        height: 22 / 16,
       );
 
   static TextStyle get peerBubbleText => TextStyle(
@@ -79,7 +81,7 @@ abstract final class ChatTheme {
         fontSize: 16,
         fontWeight: FontWeight.w400,
         color: labelPrimary,
-        height: 24 / 16,
+        height: 22 / 16,
       );
 
   static BoxDecoration get groupedCardDecoration => BoxDecoration(

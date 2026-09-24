@@ -59,6 +59,9 @@ class AuthController extends GetxController {
   }
 
   /// 从本地恢复上次登录成功的邮箱/密码、手机号，以及登录方式 Tab。
+  ///
+  /// 注意：只恢复输入框展示，**不**写入 `_pendingPhone`。
+  /// `_pendingPhone` 表示「已发验证码的号码」；误写入会导致改号后仍用旧号验码登录。
   void _restoreLastLoginCredentials() {
     final savedEmail = SpUtils.getString(_lastLoginEmailKey);
     final savedPassword = SpUtils.getString(_lastLoginPasswordKey);
@@ -74,7 +77,6 @@ class AuthController extends GetxController {
     }
     if (savedPhone != null && savedPhone.isNotEmpty) {
       phone.value = savedPhone;
-      _pendingPhone = savedPhone;
     }
 
     if (savedMode == AuthCredentialMode.phone.name) {
@@ -82,6 +84,11 @@ class AuthController extends GetxController {
     } else if (savedMode == AuthCredentialMode.email.name) {
       credentialMode.value = AuthCredentialMode.email;
     }
+  }
+
+  /// 打开登录页时再读一次本地（确保展示最近一次成功登录的号码）。
+  void syncFormFromStorage() {
+    _restoreLastLoginCredentials();
   }
 
   /// 邮箱登录成功后记住邮箱 + 密码（仅本地）。
@@ -143,7 +150,15 @@ class AuthController extends GetxController {
     _pendingEmail = trimmed;
   }
 
-  void updatePhone(String value) => phone.value = value;
+  void updatePhone(String value) {
+    phone.value = value;
+    final digits = PhoneAuthUtils.normalizeDigits(value);
+    // 改号后作废已发验证码绑定，避免仍用旧号 verify。
+    if (_pendingPhone.isNotEmpty && digits != _pendingPhone) {
+      _pendingPhone = '';
+      phoneOtpSent.value = false;
+    }
+  }
 
   void updatePassword(String value) => password.value = value;
 
@@ -311,10 +326,9 @@ class AuthController extends GetxController {
   Future<void> resendPhoneOtp() async {
     AppKeyboard.dismiss();
     if (!canResendOtp) return;
-    final targetPhone =
-        _pendingPhone.isNotEmpty ? _pendingPhone : phone.value;
-    if (!validatePhone(targetPhone)) {
-      _showToast('手机号无效');
+    final targetPhone = _requirePendingOtpPhone();
+    if (targetPhone == null) {
+      _showToast('请先获取验证码');
       return;
     }
     if (!AppDebounce.tryThrottle('auth.resendPhoneOtp')) {
@@ -350,10 +364,9 @@ class AuthController extends GetxController {
       return;
     }
 
-    final targetPhone =
-        _pendingPhone.isNotEmpty ? _pendingPhone : phone.value;
-    if (!validatePhone(targetPhone)) {
-      toast('手机号无效');
+    final targetPhone = _requirePendingOtpPhone();
+    if (targetPhone == null) {
+      toast('手机号已变更或未获取验证码，请重新获取');
       return;
     }
     if (!AppDebounce.tryThrottle('auth.verifyPhoneOtp')) {
@@ -378,6 +391,28 @@ class AuthController extends GetxController {
       isLoading.value = false;
     }
   }
+
+  /// 验码目标号：必须等于已发码号码；改号后返回 null（需重发）。
+  ///
+  /// 根因防护：恢复表单/改号不得让 verify 仍打到旧号（串号显示 134****0000）。
+  static String? resolveOtpVerifyPhone({
+    required String pendingPhone,
+    required String typedPhone,
+  }) {
+    final pending = PhoneAuthUtils.normalizeDigits(pendingPhone);
+    if (pending.isEmpty || !PhoneAuthUtils.isValidChinaMobile(pending)) {
+      return null;
+    }
+    final typed = PhoneAuthUtils.normalizeDigits(typedPhone);
+    if (typed.isNotEmpty && typed != pending) return null;
+    return pending;
+  }
+
+  /// 验码/重发必须用「已发码号码」；与输入框不一致时返回 null。
+  String? _requirePendingOtpPhone() => resolveOtpVerifyPhone(
+        pendingPhone: _pendingPhone,
+        typedPhone: phone.value,
+      );
 
   Future<void> loginWithPassword() async {
     AppKeyboard.dismiss();

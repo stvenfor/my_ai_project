@@ -139,10 +139,9 @@ class MusicMiniPlayerBar extends GetView<MusicPlaybackController> {
     return bottomInset(playback.hasActiveSession);
   }
 
-  /// 首页 Tab：迷你条高度 + Tab 栏占位。
+  /// 首页 Tab：始终预留 Tab 栏；有播放会话时再叠迷你条。
+  /// （extendBody 下 body 铺满，不预留则底部入口会被 Tab 挡住、只能回弹。）
   static double bottomInsetForHomeSession(BuildContext context) {
-    final miniBar = bottomInsetForSession();
-    if (miniBar == 0) return 0;
-    return miniBar + mainTabBarBottomOffset(context);
+    return bottomInsetForSession() + mainTabBarBottomOffset(context);
   }
 }

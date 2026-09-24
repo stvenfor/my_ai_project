@@ -4,6 +4,13 @@ import 'package:wys_push/wys_push.dart';
 
 void main() {
   group('PushConfig', () {
+    test('uninitialized AppEnvironment is treated as non-production', () {
+      // 不调用 AppEnvironment.initialize：启动早期 Linking 也会读 isConfigured。
+      expect(PushConfig.isProduction, isFalse);
+      expect(PushConfig.appKey, PushConfig.testAppKey);
+      expect(PushConfig.isConfigured, isFalse);
+    });
+
     test('product uses the production AppKey placeholder', () {
       AppEnvironment.initialize(
         AppEnv.debug,

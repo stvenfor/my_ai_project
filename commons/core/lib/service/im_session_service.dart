@@ -10,7 +10,7 @@ abstract class ImSessionService {
 
   String? get currentImUserId;
 
-  Future<void> connect({required String bizUserId});
+  Future<void> connect({required String bizUserId, String? displayName});
 
   Future<void> disconnect({String? reason});
 }

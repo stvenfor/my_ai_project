@@ -17,35 +17,11 @@ class HomeSearchBar extends StatelessWidget {
   const HomeSearchBar({super.key});
 
   Future<void> _openScan(BuildContext context) async {
-    final perm = await ImagePickerUtils.requestCameraAccess();
-    switch (perm) {
-      case MediaPermissionResult.granted:
-        break;
-      case MediaPermissionResult.denied:
-        UiKitInitializer.toastError('需要相机权限才能扫码');
-        return;
-      case MediaPermissionResult.permanentlyDenied:
-        final go = await Get.dialog<bool>(
-          AlertDialog(
-            title: const Text('需要相机权限'),
-            content: const Text('相机权限已被关闭。请在系统设置中开启后，再回来扫码。'),
-            actions: [
-              TextButton(
-                onPressed: () => Get.back(result: false),
-                child: const Text('取消'),
-              ),
-              TextButton(
-                onPressed: () => Get.back(result: true),
-                child: const Text('去设置'),
-              ),
-            ],
-          ),
-        );
-        if (go == true) {
-          await ImagePickerUtils.openPermissionSettings();
-        }
-        return;
-    }
+    final ok = await CameraPermissionGate.ensure(
+      deniedToast: '需要相机权限才能扫码，请在系统弹窗中允许',
+      settingsMessage: '相机权限已被关闭。请在系统设置中开启后，再回来扫码。',
+    );
+    if (!ok) return;
 
     // Get.to 走根路由，避开首页 Tab IndexedStack 里 local Navigator 吞掉 push
     final result = await Get.to<String>(

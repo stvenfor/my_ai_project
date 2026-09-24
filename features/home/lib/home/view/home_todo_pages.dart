@@ -26,7 +26,9 @@ class _PartnerPendingPageState extends State<PartnerPendingPage> {
   }
 
   Future<void> _reload() async {
-    setState(() => _future = _api.fetchJoinApplications());
+    setState(() {
+      _future = _api.fetchJoinApplications();
+    });
     await _future;
   }
 
@@ -176,7 +178,9 @@ class _FollowUpCustomersPageState extends State<FollowUpCustomersPage> {
   }
 
   Future<void> _reload() async {
-    setState(() => _future = _api.fetchFollowUpCustomers());
+    setState(() {
+      _future = _api.fetchFollowUpCustomers();
+    });
     await _future;
   }
 
@@ -232,7 +236,9 @@ class _AfterSalesAppointmentsPageState
   }
 
   Future<void> _reload() async {
-    setState(() => _future = _api.fetchAppointments());
+    setState(() {
+      _future = _api.fetchAppointments();
+    });
     await _future;
   }
 
@@ -286,7 +292,9 @@ class _StoreReviewOrdersPageState extends State<StoreReviewOrdersPage> {
   }
 
   Future<void> _reload() async {
-    setState(() => _future = _api.fetchReviewOrders());
+    setState(() {
+      _future = _api.fetchReviewOrders();
+    });
     await _future;
   }
 

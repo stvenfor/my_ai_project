@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_utils/module_utils.dart';
 
 /// 假上传：仅本地选图预览，不接 OSS。
@@ -63,8 +64,11 @@ class NewCarFollowFakeUpload extends StatelessWidget {
         ? MediaPickSource.camera
         : MediaPickSource.gallery;
     if (action == 'camera') {
-      final granted = await ImagePickerUtils.ensureCameraPermission();
-      if (!granted) return;
+      final ok = await CameraPermissionGate.ensure(
+        deniedToast: '需要相机权限才能拍摄，请在系统弹窗中允许',
+        settingsMessage: '相机权限已被关闭。请在系统设置中开启后，再回来拍摄。',
+      );
+      if (!ok) return;
     }
     final path = await ImagePickerUtils.pickImage(source, maxWidth: 1600);
     if (path != null && path.isNotEmpty) {

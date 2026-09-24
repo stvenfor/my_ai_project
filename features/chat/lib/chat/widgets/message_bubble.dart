@@ -34,6 +34,8 @@ class MessageBubble extends StatelessWidget {
 
     final controller = Get.find<ChatDetailViewModel>();
     final isSelf = message.isSelf;
+    final isMedia = message.type == MessageType.image ||
+        message.type == MessageType.voice;
 
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: 1),
@@ -43,20 +45,20 @@ class MessageBubble extends StatelessWidget {
         return Opacity(
           opacity: value,
           child: Transform.translate(
-            offset: Offset(isSelf ? (1 - value) * 16 : (value - 1) * 16, 0),
+            offset: Offset(isSelf ? (1 - value) * 12 : (value - 1) * 12, 0),
             child: child,
           ),
         );
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         child: Row(
           mainAxisAlignment:
               isSelf ? MainAxisAlignment.end : MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             if (!isSelf) ...[
-              CacheImageUtils.circle(peerAvatar, size: 32),
+              CacheImageUtils.circle(peerAvatar, size: 36),
               const SizedBox(width: 8),
             ],
             Flexible(
@@ -67,33 +69,52 @@ class MessageBubble extends StatelessWidget {
                   GestureDetector(
                     onLongPress: onLongPress,
                     child: Container(
-                      padding: message.type == MessageType.text
-                          ? const EdgeInsets.symmetric(
+                      padding: isMedia
+                          ? (message.type == MessageType.voice
+                              ? EdgeInsets.zero
+                              : const EdgeInsets.all(3))
+                          : const EdgeInsets.symmetric(
                               horizontal: 14,
                               vertical: 10,
-                            )
-                          : EdgeInsets.zero,
+                            ),
                       decoration: BoxDecoration(
-                        color: isSelf ? ChatTheme.selfBubble : ChatTheme.peerBubble,
+                        color:
+                            isSelf ? ChatTheme.selfBubble : ChatTheme.peerBubble,
                         borderRadius: ChatTheme.bubbleRadiusFor(isSelf: isSelf),
+                        border: isSelf
+                            ? null
+                            : Border.all(
+                                color: ChatTheme.separator,
+                                width: 0.5,
+                              ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.04),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
                       child: _buildContent(isSelf),
                     ),
                   ),
-                  const SizedBox(height: 4),
                   Obx(() {
-                    final index =
-                        controller.messages.indexWhere((m) => m.id == message.id);
-                    final current = index >= 0
-                        ? controller.messages[index]
-                        : message;
-                    return Text(
-                      controller.readStatusLabel(current),
-                      style: ChatTheme.caption.copyWith(
-                        fontSize: 11,
-                        color: current.sendStatus == MessageSendStatus.failed
-                            ? ChatTheme.unreadBadge
-                            : ChatTheme.labelSecondary,
+                    final index = controller.messages
+                        .indexWhere((m) => m.id == message.id);
+                    final current =
+                        index >= 0 ? controller.messages[index] : message;
+                    final label = controller.readStatusLabel(current);
+                    if (label.isEmpty) return const SizedBox.shrink();
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 4, left: 4, right: 4),
+                      child: Text(
+                        label,
+                        style: ChatTheme.caption.copyWith(
+                          fontSize: 11,
+                          color: current.sendStatus == MessageSendStatus.failed
+                              ? ChatTheme.unreadBadge
+                              : ChatTheme.labelTertiary,
+                        ),
                       ),
                     );
                   }),
@@ -102,7 +123,7 @@ class MessageBubble extends StatelessWidget {
             ),
             if (isSelf) ...[
               const SizedBox(width: 8),
-              CacheImageUtils.circle(ChatAvatarUrls.self, size: 32),
+              CacheImageUtils.circle(ChatAvatarUrls.self, size: 36),
             ],
           ],
         ),
@@ -118,7 +139,6 @@ class MessageBubble extends StatelessWidget {
         ),
       MessageType.image => ImageMessageWidget(
           url: message.content,
-          isSelf: message.isSelf,
         ),
       MessageType.voice => VoiceMessageWidget(
           message: message,

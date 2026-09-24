@@ -17,8 +17,19 @@ enum WysNetEnvironment {
 class AppEnvironment {
   AppEnvironment._internal(this.env, this.baseUrl, this.netEnvironment);
 
-  static late AppEnvironment _instance;
-  static AppEnvironment get instance => _instance;
+  static AppEnvironment? _instance;
+
+  static bool get isInitialized => _instance != null;
+
+  static AppEnvironment get instance {
+    final current = _instance;
+    if (current == null) {
+      throw StateError(
+        'AppEnvironment not initialized. Call bootstrap() or initialize() first.',
+      );
+    }
+    return current;
+  }
 
   final AppEnv env;
   final String baseUrl;
@@ -63,8 +74,17 @@ class AppEnvironment {
     required WysNetEnvironment netEnvironment,
     required String baseUrl,
   }) {
+    final current = _instance;
+    if (current == null) {
+      initialize(
+        AppEnv.debug,
+        netEnvironment: netEnvironment,
+        baseUrl: baseUrl,
+      );
+      return;
+    }
     _instance = AppEnvironment._internal(
-      _instance.env,
+      current.env,
       baseUrl,
       netEnvironment,
     );

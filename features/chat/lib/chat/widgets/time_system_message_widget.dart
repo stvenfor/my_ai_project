@@ -11,9 +11,19 @@ class TimeMessageWidget extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Center(
-        child: Text(
-          label,
-          style: ChatTheme.caption.copyWith(fontSize: 12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: ChatTheme.fillSecondary,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Text(
+            label,
+            style: ChatTheme.caption.copyWith(
+              fontSize: 11,
+              color: ChatTheme.labelTertiary,
+            ),
+          ),
         ),
       ),
     );
@@ -33,7 +43,7 @@ class SystemMessageWidget extends StatelessWidget {
         child: Text(
           text,
           textAlign: TextAlign.center,
-          style: ChatTheme.caption,
+          style: ChatTheme.caption.copyWith(color: ChatTheme.labelTertiary),
         ),
       ),
     );

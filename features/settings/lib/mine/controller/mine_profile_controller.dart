@@ -80,11 +80,11 @@ class MineProfileController extends GetxController {
 
     try {
       if (source == MediaPickSource.camera) {
-        final granted = await ImagePickerUtils.ensureCameraPermission();
-        if (!granted) {
-          UiKitInitializer.toastError('需要相机权限才能拍摄');
-          return;
-        }
+        final ok = await CameraPermissionGate.ensure(
+          deniedToast: '需要相机权限才能拍摄，请在系统弹窗中允许',
+          settingsMessage: '相机权限已被关闭。请在系统设置中开启后，再回来拍摄。',
+        );
+        if (!ok) return;
       }
       final path = await ImagePickerUtils.pickImage(source, maxWidth: 800);
       if (path == null || path.isEmpty) return;

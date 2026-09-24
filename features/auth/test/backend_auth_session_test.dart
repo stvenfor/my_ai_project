@@ -370,8 +370,17 @@ void main() {
 
       expect(userService.isLoggedIn, isTrue);
       expect(userService.currentUser.value?.token, 'otp_token');
+      expect(userService.currentUser.value?.phoneMasked, '134****0000');
       expect(api.verifyOtpCalls, 1);
       expect(auth.currentState, AuthSessionState.signedIn);
+    });
+
+    test('verifyPhoneOtp masks the login phone even if API user.phone empty',
+        () async {
+      await auth.verifyPhoneOtp(phone: '13400000001', otp: '123456');
+
+      expect(userService.currentUser.value?.phoneMasked, '134****0001');
+      expect(userService.currentUser.value?.id, 'otp-user');
     });
 
     test('sendPhoneOtp forwards to API', () async {

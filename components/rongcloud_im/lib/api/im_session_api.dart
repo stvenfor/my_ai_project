@@ -46,7 +46,10 @@ class ImSessionApi {
   bool get _mock =>
       RongImConfig.useMockImFor(_envService?.rongAppKey);
 
-  Future<ImSessionResult> createSession({required String bizUserId}) async {
+  Future<ImSessionResult> createSession({
+    required String bizUserId,
+    String? displayName,
+  }) async {
     if (_mock) {
       await Future<void>.delayed(const Duration(milliseconds: 150));
       final imUserId = await _registry.resolveImUserId(bizUserId);
@@ -60,9 +63,15 @@ class ImSessionApi {
       );
     }
 
+    final body = <String, dynamic>{};
+    final name = displayName?.trim() ?? '';
+    if (name.isNotEmpty) {
+      body['display_name'] = name;
+    }
+
     final result = await HttpManager.instance.post<ResultModel<ImSessionResult>>(
       RongImConfig.sessionPath,
-      data: <String, dynamic>{},
+      data: body,
       converter: (json) => ResultModel.object(
         Map<String, dynamic>.from(json as Map),
         (m) => ImSessionResult.fromJson(m),

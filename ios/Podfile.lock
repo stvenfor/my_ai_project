@@ -49,6 +49,15 @@ PODS:
     - FlutterMacOS
   - permission_handler_apple (9.4.8):
     - Flutter
+  - record_ios (1.2.1):
+    - Flutter
+  - rongcloud_im_wrapper_plugin (0.0.1):
+    - Flutter
+    - RongCloudIM/ChatRoom (= 5.44.0)
+    - RongCloudIM/IMLibCore (= 5.44.0)
+  - RongCloudIM/ChatRoom (5.44.0):
+    - RongCloudIM/IMLibCore
+  - RongCloudIM/IMLibCore (5.44.0)
   - scan (0.0.1):
     - Flutter
   - screen_brightness_ios (0.1.0):
@@ -97,6 +106,8 @@ DEPENDENCIES:
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
+  - record_ios (from `.symlinks/plugins/record_ios/ios`)
+  - rongcloud_im_wrapper_plugin (from `.symlinks/plugins/rongcloud_im_wrapper_plugin/ios`)
   - scan (from `.symlinks/plugins/scan/ios`)
   - screen_brightness_ios (from `.symlinks/plugins/screen_brightness_ios/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
@@ -114,6 +125,7 @@ SPEC REPOS:
     - JCore
     - JPush
     - OrderedSet
+    - RongCloudIM
     - Toast
     - WechatOpenSDK-XCFramework
 
@@ -148,6 +160,10 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/path_provider_foundation/darwin"
   permission_handler_apple:
     :path: ".symlinks/plugins/permission_handler_apple/ios"
+  record_ios:
+    :path: ".symlinks/plugins/record_ios/ios"
+  rongcloud_im_wrapper_plugin:
+    :path: ".symlinks/plugins/rongcloud_im_wrapper_plugin/ios"
   scan:
     :path: ".symlinks/plugins/scan/ios"
   screen_brightness_ios:
@@ -190,6 +206,9 @@ SPEC CHECKSUMS:
   package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
   path_provider_foundation: bb55f6dbba17d0dccd6737fe6f7f34fbd0376880
   permission_handler_apple: 92d754bbaa7361d436db2d6c3c1c2a0fdcec462e
+  record_ios: 980fd386a97a35987d0fce3dfda4b26a38c90f4c
+  rongcloud_im_wrapper_plugin: 009ddd07ae6c3f37814a64227082e3262acb449d
+  RongCloudIM: 194750858cfcaafc1f3ac1bc9ca2cae8720c34db
   scan: 28e4f67b9b0d63ccd5c649acc3d6aaf94c0a7a81
   screen_brightness_ios: 9953fd7da5bd480f1a93990daeec2eb42d4f3b52
   shared_preferences_foundation: 7036424c3d8ec98dfe75ff1667cb0cd531ec82bb
@@ -204,6 +223,6 @@ SPEC CHECKSUMS:
   WechatOpenSDK-XCFramework: 5df9b250e9839dcc306ad8b00f46822eead1ed47
   wys_router: 934ca3e525dba7d43b53238d0bf6c120831af497
 
-PODFILE CHECKSUM: 3c63482e143d1b91d2d2560aee9fb04ecc74ac7e
+PODFILE CHECKSUM: 02eb93fd88005a4ec2c5b05efd9f954bdd672c1e
 
 COCOAPODS: 1.16.2

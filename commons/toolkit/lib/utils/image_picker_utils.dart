@@ -31,7 +31,10 @@ class ImagePickerUtils {
 
   /// 申请相机权限；拍视频时传 [withMicrophone] 一并申请麦克风。
   ///
-  /// 未授权时会主动弹出系统权限框；仅在永久拒绝时无法弹框。
+  /// 未授权时**始终**调用系统 `request()`（即使用户曾拒绝）。
+  /// 部分机型会在首次使用前误报 [permanentlyDenied]，若此处直接 return
+  /// 则永远不弹系统框，业务侧只能 toast「需要权限」——体验像没申请。
+  /// 真·永久拒绝时 `request()` 为 no-op，结果仍是 permanentlyDenied。
   static Future<MediaPermissionResult> requestCameraAccess({
     bool withMicrophone = false,
   }) async {
@@ -44,24 +47,26 @@ class ImagePickerUtils {
       if (withMicrophone) Permission.microphone,
     ];
 
-    // 先读状态：永久拒绝则不再无效 request。
-    var anyPermanent = false;
-    var allOk = true;
-    for (final p in permissions) {
-      final s = await p.status;
-      if (s.isGranted || s.isLimited) continue;
-      allOk = false;
-      if (s.isPermanentlyDenied || s.isRestricted) {
-        anyPermanent = true;
-      }
-    }
-    if (allOk) return MediaPermissionResult.granted;
-    if (anyPermanent) return MediaPermissionResult.permanentlyDenied;
+    final before = <PermissionStatus>[
+      for (final p in permissions) await p.status,
+    ];
+    if (_allGranted(before)) return MediaPermissionResult.granted;
 
     final results = await permissions.request();
-    allOk = true;
-    anyPermanent = false;
-    for (final s in results.values) {
+    return _classify(results.values);
+  }
+
+  static bool _allGranted(Iterable<PermissionStatus> statuses) {
+    for (final s in statuses) {
+      if (!(s.isGranted || s.isLimited)) return false;
+    }
+    return true;
+  }
+
+  static MediaPermissionResult _classify(Iterable<PermissionStatus> statuses) {
+    var allOk = true;
+    var anyPermanent = false;
+    for (final s in statuses) {
       if (s.isGranted || s.isLimited) continue;
       allOk = false;
       if (s.isPermanentlyDenied || s.isRestricted) {
@@ -74,6 +79,8 @@ class ImagePickerUtils {
   }
 
   /// 兼容旧调用：仅相机，返回是否已授权（内部会主动 request）。
+  ///
+  /// 业务 UI 请优先用 `CameraPermissionGate.ensure`（含去设置引导）。
   static Future<bool> ensureCameraPermission() async {
     final r = await requestCameraAccess();
     return r == MediaPermissionResult.granted;

@@ -11,6 +11,8 @@ import 'package:module_chat/chat/models/message_send_status.dart';
 import 'package:module_chat/chat/models/message_type.dart';
 import 'package:module_chat/chat/repository/chat_repository.dart';
 import 'package:module_chat/chat/repository/im_chat_repository.dart';
+import 'package:module_chat/chat/services/voice_player.dart';
+import 'package:module_chat/chat/services/voice_recorder.dart';
 import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_core/model/im/conversation_ref.dart';
 import 'package:module_utils/module_utils.dart';
@@ -21,10 +23,16 @@ class ChatDetailViewModel extends GetxController {
   ChatDetailViewModel({
     required this.conversation,
     ChatRepository? repository,
-  }) : _repository = repository ?? resolveChatRepository();
+    VoiceRecorder? voiceRecorder,
+    VoicePlayer? voicePlayer,
+  })  : _repository = repository ?? resolveChatRepository(),
+        _voiceRecorder = voiceRecorder ?? VoiceRecorder(),
+        _voicePlayer = voicePlayer ?? VoicePlayer();
 
   final ConversationModel conversation;
   final ChatRepository _repository;
+  final VoiceRecorder _voiceRecorder;
+  final VoicePlayer _voicePlayer;
 
   ConversationRef get _ref => conversation.ref;
 
@@ -35,6 +43,8 @@ class ChatDetailViewModel extends GetxController {
   final playingVoiceId = RxnString();
   final isRecordingVoice = false.obs;
   final recordDurationSeconds = 0.obs;
+  /// Finger slid up past cancel threshold while holding.
+  final voiceCancelIntent = false.obs;
 
   final scrollController = ScrollController();
   StreamSubscription<List<MessageModel>>? _msgSub;
@@ -43,7 +53,13 @@ class ChatDetailViewModel extends GetxController {
   int _voiceAnimFrame = 0;
   final voiceAnimFrame = 0.obs;
 
+  DateTime? _recordStartedAt;
+  Future<void>? _startFuture;
+  bool _endingVoice = false;
+  int _pressId = 0;
+
   static const recallWindowMinutes = 3;
+  static const minVoiceMs = 600;
   static const emojiList = [
     '😀', '😂', '🥰', '😎', '🤔', '👍', '🙏', '🎉',
     '❤️', '🔥', '👋', '😭', '🤣', '😊', '🥳', '💪',
@@ -70,8 +86,23 @@ class ChatDetailViewModel extends GetxController {
   void updateInput(String value) => inputText.value = value;
 
   void toggleVoiceInput() {
-    inputPanelMode.value =
-        inputPanelMode.value == InputPanelMode.voice ? InputPanelMode.text : InputPanelMode.voice;
+    final next = inputPanelMode.value == InputPanelMode.voice
+        ? InputPanelMode.text
+        : InputPanelMode.voice;
+    inputPanelMode.value = next;
+    if (next == InputPanelMode.voice) {
+      // Warm mic permission so the first press isn't blocked by a dialog.
+      unawaited(_voiceRecorder.ensurePermission());
+    }
+  }
+
+  void setVoiceCancelIntent(bool cancel) {
+    if (!isRecordingVoice.value) return;
+    if (voiceCancelIntent.value == cancel) return;
+    voiceCancelIntent.value = cancel;
+    if (cancel) {
+      HapticFeedback.selectionClick();
+    }
   }
 
   void toggleEmojiPanel() {
@@ -170,55 +201,204 @@ class ChatDetailViewModel extends GetxController {
     }
   }
 
-  void startRecordVoice() {
+  /// Press-down: start immediately (no long-press delay).
+  Future<void> beginVoicePress() async {
+    if (_endingVoice || isRecordingVoice.value) return;
+    final pressId = ++_pressId;
+    voiceCancelIntent.value = false;
+    _recordStartedAt = DateTime.now();
     isRecordingVoice.value = true;
     recordDurationSeconds.value = 0;
+    HapticFeedback.mediumImpact();
+
     _recordTimer?.cancel();
-    _recordTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-      recordDurationSeconds.value++;
-      if (recordDurationSeconds.value >= 60) {
-        stopRecordVoice(send: true);
+    _recordTimer = Timer.periodic(const Duration(milliseconds: 200), (_) {
+      final started = _recordStartedAt;
+      if (started == null) return;
+      final sec = DateTime.now().difference(started).inSeconds.clamp(0, 60);
+      recordDurationSeconds.value = sec;
+      if (sec >= 60) {
+        endVoicePress(send: true);
       }
     });
+
+    final startFuture = _voiceRecorder.start();
+    _startFuture = startFuture;
+    try {
+      await startFuture;
+      if (pressId != _pressId) return;
+      LogUtils.d('[ChatDetail] voice recorder ready');
+    } catch (e, st) {
+      LogUtils.e('[ChatDetail] beginVoicePress failed', e, st);
+      if (pressId != _pressId) return;
+      _resetVoiceUi();
+      UiKitInitializer.toastError('无法开始录音，请检查麦克风权限');
+    }
   }
 
-  Future<void> stopRecordVoice({required bool send}) async {
+  /// Finger up / cancel. [send] false = discard (slide-up cancel or pointer cancel).
+  Future<void> endVoicePress({required bool send}) async {
+    if (_endingVoice) return;
+    if (!isRecordingVoice.value) return;
+
+    _endingVoice = true;
+    final pressId = _pressId;
+    _pressId++; // invalidate in-flight begin success path
     _recordTimer?.cancel();
-    final duration = recordDurationSeconds.value.clamp(1, 60);
+
+    final started = _recordStartedAt;
+    final elapsedMs = started == null
+        ? 0
+        : DateTime.now().difference(started).inMilliseconds;
+    final shouldSend = send && !voiceCancelIntent.value;
+    final pendingStart = _startFuture;
+
+    try {
+      // Await the same start Future. Do NOT rely on a ready flag set by begin():
+      // end() bumps _pressId first, so begin() would skip setting the flag.
+      var startedOk = false;
+      if (pendingStart != null) {
+        try {
+          await pendingStart.timeout(const Duration(seconds: 8));
+          startedOk = true;
+        } catch (e) {
+          LogUtils.w('[ChatDetail] wait start failed: $e');
+          await _voiceRecorder.cancel();
+          if (shouldSend) {
+            UiKitInitializer.toastError('录音启动失败');
+          }
+          return;
+        }
+      }
+
+      _resetVoiceUi();
+
+      if (!shouldSend) {
+        await _voiceRecorder.cancel();
+        return;
+      }
+
+      if (!startedOk) {
+        await _voiceRecorder.cancel();
+        UiKitInitializer.toastError('录音启动失败');
+        return;
+      }
+
+      if (elapsedMs < minVoiceMs) {
+        await _voiceRecorder.cancel();
+        UiKitInitializer.toast('说话时间太短');
+        return;
+      }
+
+      final durationSec = (elapsedMs / 1000).round().clamp(1, 60);
+      VoiceRecording? recording;
+      try {
+        recording = await _voiceRecorder.stop(durationSeconds: durationSec);
+      } catch (e, st) {
+        LogUtils.e('[ChatDetail] stopRecord failed', e, st);
+        UiKitInitializer.toastError('语音发送失败');
+        return;
+      }
+
+      if (recording == null) {
+        LogUtils.w(
+          '[ChatDetail] empty recording after ${elapsedMs}ms pressId=$pressId',
+        );
+        UiKitInitializer.toastError('录音文件无效，请重试');
+        return;
+      }
+
+      _insertTimeDividerIfNeeded(DateTime.now());
+      HapticFeedback.lightImpact();
+      try {
+        await _repository.sendVoice(
+          _ref,
+          recording.pathForSdk,
+          recording.durationSeconds,
+        );
+      } catch (e, st) {
+        LogUtils.e('[ChatDetail] sendVoice failed', e, st);
+        UiKitInitializer.toastError('语音发送失败');
+      }
+    } finally {
+      _startFuture = null;
+      _endingVoice = false;
+    }
+  }
+
+  void _resetVoiceUi() {
     isRecordingVoice.value = false;
     recordDurationSeconds.value = 0;
-    if (!send || duration < 1) return;
-    inputPanelMode.value = InputPanelMode.text;
-    try {
-      await _repository.sendVoice(_ref, 'voice_mock_$duration', duration);
-    } catch (e) {
-      UiKitInitializer.toastError('语音发送失败');
-    }
+    voiceCancelIntent.value = false;
+    _recordStartedAt = null;
+    _recordTimer?.cancel();
   }
 
-  void toggleVoicePlay(MessageModel message) {
+  Future<void> toggleVoicePlay(MessageModel message) async {
     if (message.type != MessageType.voice) return;
     if (playingVoiceId.value == message.id) {
-      _stopVoicePlay();
+      await _stopVoicePlay();
       return;
     }
-    _stopVoicePlay();
+
+    final source = VoicePlayer.resolveSource(message);
+    if (source == null) {
+      UiKitInitializer.toast('语音文件不可用');
+      return;
+    }
+
+    await _stopVoicePlay();
     playingVoiceId.value = message.id;
     _voiceAnimFrame = 0;
+    voiceAnimFrame.value = 0;
     _voicePlayTimer = Timer.periodic(const Duration(milliseconds: 300), (_) {
       _voiceAnimFrame = (_voiceAnimFrame + 1) % 3;
       voiceAnimFrame.value = _voiceAnimFrame;
     });
-    Future.delayed(
-      Duration(seconds: message.voiceDurationSeconds.clamp(1, 60)),
-      _stopVoicePlay,
-    );
+
+    final playId = message.id;
+    _voicePlayer.onComplete = () {
+      if (playingVoiceId.value == playId) {
+        unawaited(_stopVoicePlay());
+      }
+    };
+
+    try {
+      await _voicePlayer.play(source);
+    } catch (e, st) {
+      LogUtils.e('[ChatDetail] voice play failed', e, st);
+      await _stopVoicePlay();
+      // 本地失败时再试远程（融云下载后的 URL）。
+      final remote = message.remoteUrl?.trim();
+      if (remote != null &&
+          remote.isNotEmpty &&
+          remote != source &&
+          (remote.startsWith('http://') || remote.startsWith('https://'))) {
+        try {
+          playingVoiceId.value = message.id;
+          _voicePlayTimer =
+              Timer.periodic(const Duration(milliseconds: 300), (_) {
+            _voiceAnimFrame = (_voiceAnimFrame + 1) % 3;
+            voiceAnimFrame.value = _voiceAnimFrame;
+          });
+          await _voicePlayer.play(remote);
+          return;
+        } catch (e2, st2) {
+          LogUtils.e('[ChatDetail] voice play remote failed', e2, st2);
+          await _stopVoicePlay();
+        }
+      }
+      UiKitInitializer.toastError('播放失败');
+    }
   }
 
-  void _stopVoicePlay() {
+  Future<void> _stopVoicePlay() async {
     _voicePlayTimer?.cancel();
+    _voicePlayTimer = null;
     playingVoiceId.value = null;
     voiceAnimFrame.value = 0;
+    _voicePlayer.onComplete = null;
+    await _voicePlayer.stop();
   }
 
   Future<void> copyMessage(MessageModel message) async {
@@ -261,14 +441,13 @@ class ChatDetailViewModel extends GetxController {
     if (message.type == MessageType.time || message.type == MessageType.system) {
       return '';
     }
-    if (!message.isSelf) {
-      return message.readStatus == MessageReadStatus.read ? '已读' : '未读';
-    }
+    // Peer bubbles: no status chrome (avoid "未读" under inbound).
+    if (!message.isSelf) return '';
     return switch (message.sendStatus) {
       MessageSendStatus.sending => '发送中',
       MessageSendStatus.failed => '发送失败',
       MessageSendStatus.success =>
-        message.readStatus == MessageReadStatus.read ? '已读' : '未读',
+        message.readStatus == MessageReadStatus.read ? '已读' : '送达',
     };
   }
 
@@ -277,6 +456,8 @@ class ChatDetailViewModel extends GetxController {
     _msgSub?.cancel();
     _voicePlayTimer?.cancel();
     _recordTimer?.cancel();
+    unawaited(_voiceRecorder.dispose());
+    unawaited(_voicePlayer.dispose());
     scrollController.dispose();
     super.onClose();
   }

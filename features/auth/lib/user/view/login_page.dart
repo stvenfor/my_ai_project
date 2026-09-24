@@ -27,6 +27,7 @@ class _LoginPageState extends State<LoginPage> {
   void initState() {
     super.initState();
     _controller = Get.find<AuthController>();
+    _controller.syncFormFromStorage();
     _emailController = TextEditingController(text: _controller.email.value);
     _passwordController =
         TextEditingController(text: _controller.password.value);

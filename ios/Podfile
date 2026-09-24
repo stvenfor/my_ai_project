@@ -39,5 +39,14 @@ end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
+    # rongcloud_im_wrapper_plugin podspec still sets
+    # EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386 arm64. Flutter then adds
+    # "$(inherited) i386", so arm64 stays and the plugin is not compiled for
+    # Apple Silicon simulators → Undefined symbol _OBJC_CLASS_$_RCIMWrapperPlugin.
+    # Force an absolute value (no $(inherited)) so xcconfig arm64 is not pulled in.
+    # RongCloud / WeChat xcframeworks already include ios-arm64_x86_64-simulator.
+    target.build_configurations.each do |config|
+      config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'i386'
+    end
   end
 end

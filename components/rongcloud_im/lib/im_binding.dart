@@ -45,7 +45,14 @@ class ImBinding extends Bindings {
       );
     }
     if (!Get.isRegistered<ImUserProfileApi>()) {
-      Get.put(ImUserProfileApi(), permanent: true);
+      Get.put(
+        ImUserProfileApi(
+          envService: Get.isRegistered<EnvironmentService>()
+              ? Get.find<EnvironmentService>()
+              : null,
+        ),
+        permanent: true,
+      );
     }
     if (!Get.isRegistered<ImUserProfileService>()) {
       Get.put<ImUserProfileService>(

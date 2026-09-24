@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
 import 'package:module_core/core.dart';
-import 'package:module_core/env/app_env.dart';
 import 'package:module_http/module_http.dart';
 import 'package:module_utils/module_utils.dart';
 
@@ -29,11 +28,18 @@ class EnvironmentServiceImpl extends EnvironmentService {
   }
 
   void _restoreFromStorage() {
+    final locked = AppEnv.fromCompileDefines();
+    if (locked != null) {
+      currentEnv.value = locked;
+      return;
+    }
     currentEnv.value = AppEnv.fromKey(SpUtils.getString(storageKey));
   }
 
   @override
   Future<void> setEnv(AppEnv env) async {
+    // 编译宏锁定的环境不可运行时切换（正式包 / 指定测试包）。
+    if (AppEnv.isCompileEnvLocked) return;
     if (currentEnv.value == env) return;
     currentEnv.value = env;
     await SpUtils.setString(storageKey, env.name);

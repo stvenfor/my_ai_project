@@ -6,6 +6,7 @@ import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_linking/navigation/main_tab_controller.dart';
 import 'package:module_music/controller/music_playback_controller.dart';
 import 'package:module_music/widgets/music_mini_player_bar.dart';
+import 'package:module_utils/module_utils.dart';
 import 'package:wys_router/src/module/module_registry.dart';
 import 'package:wys_router/src/route/route_path.dart';
 import 'package:module_sample/l10n/app_localizations.dart';
@@ -48,6 +49,8 @@ class _MainPageState extends State<MainPage> {
     _tabSyncWorker?.dispose();
     _tabSyncWorker = ever(tabController.switchRevision, (_) {
       if (!mounted) return;
+      // IndexedStack 切 Tab 不会卸焦点，须主动收键盘。
+      AppKeyboard.dismiss();
       setState(() {
         _currentIndex = tabController.selectedIndex.value;
       });
@@ -66,6 +69,8 @@ class _MainPageState extends State<MainPage> {
       _goLogin();
       return;
     }
+    // IndexedStack 保活隐藏页上的 TextField 焦点，切 Tab 时统一收起。
+    AppKeyboard.dismiss();
     setState(() => _currentIndex = index);
     if (Get.isRegistered<MainTabController>()) {
       Get.find<MainTabController>().selectedIndex.value = index;

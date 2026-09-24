@@ -12,9 +12,26 @@ import 'package:module_core/service/user_service.dart';
 class MockAuthService extends AuthService {
   MockAuthService(this._userService);
 
-  /// Mock 环境下固定测试手机号与验证码。
-  static const mockTestPhone = '13400000000';
+  /// Mock 环境下固定测试手机号与验证码（与 Go AUTH_DEV_TEST_PHONE 对齐）。
+  static const mockTestPhones = {
+    '13400000000',
+    '13400000001',
+    '13400000002',
+    '13400000003',
+    '13400000004',
+  };
   static const mockOtpCode = '123456';
+
+  /// 兼容旧引用。
+  static const mockTestPhone = '13400000000';
+
+  static const _displayNames = {
+    '13400000000': '测试甲',
+    '13400000001': '测试乙',
+    '13400000002': '测试丙',
+    '13400000003': '测试丁',
+    '13400000004': '测试戊',
+  };
 
   final UserService _userService;
   final _state = AuthSessionState.initial.obs;
@@ -67,8 +84,8 @@ class MockAuthService extends AuthService {
   @override
   Future<void> sendPhoneOtp({required String phone}) async {
     final digits = PhoneAuthUtils.normalizeDigits(phone);
-    if (digits != mockTestPhone) {
-      throw UnknownAuthFailure('测试环境请使用 $mockTestPhone');
+    if (!mockTestPhones.contains(digits)) {
+      throw UnknownAuthFailure('测试环境请使用 ${mockTestPhones.join(" / ")}');
     }
     await Future<void>.delayed(const Duration(milliseconds: 400));
   }
@@ -79,19 +96,24 @@ class MockAuthService extends AuthService {
     required String otp,
   }) async {
     final digits = PhoneAuthUtils.normalizeDigits(phone);
-    if (digits != mockTestPhone) {
-      throw UnknownAuthFailure('测试环境请使用 $mockTestPhone');
+    if (!mockTestPhones.contains(digits)) {
+      throw UnknownAuthFailure('测试环境请使用 ${mockTestPhones.join(" / ")}');
     }
     if (otp.trim() != mockOtpCode) {
       throw const InvalidOtpFailure();
     }
     await Future<void>.delayed(const Duration(milliseconds: 400));
+    final label = _displayNames[digits] ?? '用户${digits.substring(digits.length - 4)}';
+    final masked = digits.length >= 11
+        ? '${digits.substring(0, 3)}****${digits.substring(7)}'
+        : digits;
     await _userService.setUser(
       User(
         id: 'mock_phone_$digits',
-        name: '用户${digits.substring(digits.length - 4)}',
-        avatar: 'https://api.dicebear.com/7.x/avataaars/png?seed=$digits',
+        name: label,
+        avatar: 'https://picsum.photos/seed/im_$digits/200/200',
         token: 'mock_phone_token_${DateTime.now().millisecondsSinceEpoch}',
+        phoneMasked: masked,
       ),
     );
     _emit(AuthSessionState.signedIn);

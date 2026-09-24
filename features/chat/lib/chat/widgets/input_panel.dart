@@ -1,10 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:module_chat/chat/theme/chat_theme.dart';
 import 'package:module_chat/chat/viewmodel/chat_detail_viewmodel.dart';
 import 'package:module_chat/chat/widgets/emoji_panel.dart';
 import 'package:module_chat/chat/widgets/more_panel.dart';
+import 'package:module_utils/module_utils.dart';
 
 class InputPanel extends StatefulWidget {
   const InputPanel({super.key});
@@ -55,24 +59,24 @@ class _InputPanelState extends State<InputPanel> {
       return AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeOut,
-        color: ChatTheme.surface,
+        decoration: BoxDecoration(
+          color: ChatTheme.surface,
+          border: Border(
+            top: BorderSide(color: ChatTheme.separator, width: 0.5),
+          ),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Padding(
-              padding: EdgeInsets.fromLTRB(
-                8,
-                8,
-                8,
-                8 + (bottomInset > 0 ? 0 : 0),
-              ),
+              padding: const EdgeInsets.fromLTRB(4, 8, 4, 8),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   _PanelIconButton(
                     icon: isVoiceMode
                         ? CupertinoIcons.keyboard
-                        : CupertinoIcons.mic,
+                        : CupertinoIcons.mic_fill,
                     onPressed: controller.toggleVoiceInput,
                   ),
                   Expanded(
@@ -90,7 +94,7 @@ class _InputPanelState extends State<InputPanel> {
                       onPressed: controller.toggleEmojiPanel,
                     ),
                     _PanelIconButton(
-                      icon: CupertinoIcons.plus,
+                      icon: CupertinoIcons.plus_circle_fill,
                       onPressed: controller.toggleMorePanel,
                     ),
                   ],
@@ -154,7 +158,6 @@ class _TextInput extends StatelessWidget {
       decoration: BoxDecoration(
         color: ChatTheme.fillSecondary,
         borderRadius: BorderRadius.circular(ChatTheme.inputRadius),
-        border: Border.all(color: ChatTheme.separator, width: 0.5),
       ),
       child: TextField(
         controller: controller,
@@ -165,11 +168,11 @@ class _TextInput extends StatelessWidget {
         style: ChatTheme.body,
         textInputAction: TextInputAction.send,
         decoration: InputDecoration(
-          hintText: '信息',
+          hintText: '发消息…',
           hintStyle: ChatTheme.body.copyWith(color: ChatTheme.labelTertiary),
           border: InputBorder.none,
           contentPadding:
-              const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           isDense: true,
         ),
       ),
@@ -205,42 +208,114 @@ class _SendButton extends StatelessWidget {
   }
 }
 
-class _VoiceHoldButton extends StatelessWidget {
+class _VoiceHoldButton extends StatefulWidget {
   const _VoiceHoldButton({required this.controller});
 
   final ChatDetailViewModel controller;
 
   @override
-  Widget build(BuildContext context) {
-    return Obx(() {
-      final recording = controller.isRecordingVoice.value;
-      final seconds = controller.recordDurationSeconds.value;
+  State<_VoiceHoldButton> createState() => _VoiceHoldButtonState();
+}
 
-      return GestureDetector(
-        onLongPressStart: (_) => controller.startRecordVoice(),
-        onLongPressEnd: (_) => controller.stopRecordVoice(send: true),
-        onLongPressCancel: () => controller.stopRecordVoice(send: false),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          height: 40,
+class _VoiceHoldButtonState extends State<_VoiceHoldButton> {
+  int? _activePointer;
+  double _startY = 0;
+  static const _cancelSlop = 72.0;
+
+  ChatDetailViewModel get _vm => widget.controller;
+
+  void _attachGlobalRoute(int pointer) {
+    GestureBinding.instance.pointerRouter.addRoute(pointer, _onGlobalPointer);
+  }
+
+  void _detachGlobalRoute(int pointer) {
+    GestureBinding.instance.pointerRouter.removeRoute(pointer, _onGlobalPointer);
+  }
+
+  void _onGlobalPointer(PointerEvent event) {
+    if (event.pointer != _activePointer) return;
+    if (event is PointerMoveEvent) {
+      final dy = _startY - event.position.dy;
+      _vm.setVoiceCancelIntent(dy >= _cancelSlop);
+      return;
+    }
+    if (event is PointerUpEvent) {
+      _finish(send: !_vm.voiceCancelIntent.value);
+      return;
+    }
+    if (event is PointerCancelEvent) {
+      // Ignore cancel while actively holding — rebuilds used to abort every take.
+      // Real system cancels are rare; user can still slide-up to discard.
+      LogUtils.w('[VoiceHold] pointer cancel ignored (pointer=${event.pointer})');
+    }
+  }
+
+  void _onDown(PointerDownEvent e) {
+    if (_activePointer != null) return;
+    _activePointer = e.pointer;
+    _startY = e.position.dy;
+    _vm.setVoiceCancelIntent(false);
+    _attachGlobalRoute(e.pointer);
+    unawaited(_vm.beginVoicePress());
+  }
+
+  void _finish({required bool send}) {
+    final pointer = _activePointer;
+    if (pointer == null) return;
+    _activePointer = null;
+    _detachGlobalRoute(pointer);
+    unawaited(_vm.endVoicePress(send: send));
+  }
+
+  @override
+  void dispose() {
+    final pointer = _activePointer;
+    if (pointer != null) {
+      _detachGlobalRoute(pointer);
+      _activePointer = null;
+      unawaited(_vm.endVoicePress(send: false));
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Keep Listener OUTSIDE Obx — rebuilding Listener on record state change
+    // was delivering PointerCancel and aborting every take.
+    return Listener(
+      behavior: HitTestBehavior.opaque,
+      onPointerDown: _onDown,
+      child: Obx(() {
+        final recording = _vm.isRecordingVoice.value;
+        final cancel = _vm.voiceCancelIntent.value;
+        final seconds = _vm.recordDurationSeconds.value;
+
+        final bg = !recording
+            ? ChatTheme.fillSecondary
+            : (cancel ? const Color(0xFFE53935) : ChatTheme.accent);
+        final label = !recording
+            ? '按住 说话'
+            : (cancel ? '松开 取消' : '松开发送 ${seconds}s');
+
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 120),
+          height: 44,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: recording ? ChatTheme.accent : ChatTheme.fillSecondary,
+            color: bg,
             borderRadius: BorderRadius.circular(ChatTheme.inputRadius),
-            border: Border.all(
-              color: recording ? ChatTheme.accent : ChatTheme.separator,
-              width: 0.5,
-            ),
           ),
           child: Text(
-            recording ? '松开发送 ${seconds}s' : '按住 说话',
+            label,
             style: TextStyle(
               color: recording ? Colors.white : ChatTheme.labelPrimary,
               fontSize: 15,
+              fontWeight: FontWeight.w600,
             ),
           ),
-        ),
-      );
-    });
+        );
+      }),
+    );
   }
 }
+

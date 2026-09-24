@@ -174,7 +174,11 @@ class BackendAuthService extends AuthService implements SessionRefreshable {
       deviceId: device.deviceId,
       platform: device.platform,
     );
-    await _persistLogin(result, deviceId: device.deviceId);
+    await _persistLogin(
+      result,
+      deviceId: device.deviceId,
+      loginPhone: phone,
+    );
   }
 
   @override
@@ -191,20 +195,34 @@ class BackendAuthService extends AuthService implements SessionRefreshable {
   Future<void> _persistLogin(
     LoginResult result, {
     required String deviceId,
+    String? loginPhone,
   }) async {
+    // 作废上一账号未完成的 hydrate，避免旧资料盖住新登录。
+    UserProfileSync.invalidatePendingHydrates();
+
     final backendUser = result.user;
     final displayName = backendUser.username.isNotEmpty
         ? backendUser.username
         : backendUser.email.split('@').first;
+    // 登录手机号优先：防止响应用户字段缺失/错绑时展示串号。
+    final rawPhone = () {
+      final fromLogin = PhoneAuthUtils.normalizeDigits(loginPhone ?? '');
+      if (fromLogin.isNotEmpty) return fromLogin;
+      final fromUser = backendUser.phone.trim();
+      if (fromUser.isNotEmpty) return fromUser;
+      return backendUser.email.split('@').first;
+    }();
+    final phoneMasked = UserProfileSync.maskPhone(rawPhone);
     await _userService.setUser(
       User(
         id: backendUser.id,
         name: displayName,
-        avatar: '',
+        avatar: backendUser.avatarUrl,
         token: result.token,
         refreshToken: result.refreshToken,
         sessionId: result.sessionId,
         deviceId: deviceId,
+        phoneMasked: phoneMasked,
       ),
     );
     _emit(AuthSessionState.signedIn);

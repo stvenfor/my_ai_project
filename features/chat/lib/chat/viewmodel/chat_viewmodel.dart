@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:module_chat/chat/models/conversation_model.dart';
 import 'package:module_chat/chat/repository/chat_repository.dart';
@@ -24,9 +25,40 @@ class ChatViewModel extends BaseViewModel {
 
   final conversations = <ConversationModel>[].obs;
   final imStateLabel = '未连接'.obs;
+  final searchOpen = false.obs;
+  final searchQuery = ''.obs;
+  final searchController = TextEditingController();
 
   StreamSubscription<List<ConversationModel>>? _convSub;
   StreamSubscription<ImConnectionState>? _imSub;
+
+  List<ConversationModel> get visibleConversations {
+    final q = searchQuery.value.trim().toLowerCase();
+    if (q.isEmpty) return conversations.toList(growable: false);
+    return conversations
+        .where((c) {
+          final name = c.peerName.toLowerCase();
+          final last = c.lastMessage.toLowerCase();
+          return name.contains(q) || last.contains(q);
+        })
+        .toList(growable: false);
+  }
+
+  void toggleSearch() {
+    searchOpen.toggle();
+    if (!searchOpen.value) {
+      clearSearchQuery();
+    }
+  }
+
+  void onSearchQueryChanged(String value) {
+    searchQuery.value = value;
+  }
+
+  void clearSearchQuery() {
+    searchController.clear();
+    searchQuery.value = '';
+  }
 
   @override
   void onInit() {
@@ -67,6 +99,7 @@ class ChatViewModel extends BaseViewModel {
   void onClose() {
     _convSub?.cancel();
     _imSub?.cancel();
+    searchController.dispose();
     super.onClose();
   }
 }

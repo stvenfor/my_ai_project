@@ -113,8 +113,9 @@ class PhoneOtpFormSection extends StatelessWidget {
             );
           }
           if (_showTestPhoneHint()) {
+            final phones = MockAuthService.mockTestPhones.join(' / ');
             return Text(
-              '开发测试号 ${MockAuthService.mockTestPhone}，验证码 ${MockAuthService.mockOtpCode}',
+              '开发测试号 $phones，验证码 ${MockAuthService.mockOtpCode}',
               style: AuthTheme.caption.copyWith(color: AuthTheme.accent),
             );
           }

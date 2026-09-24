@@ -21,26 +21,30 @@ class EnvConfig {
   final String rongAppKey;
   final String label;
 
-  /// `--dart-define=RONG_APP_KEY=...` 优先，否则用环境默认占位。
+  /// `--dart-define=RONG_APP_KEY=...` 优先；测试/预发默认真连 lab App Key。
+  /// App Key 可公开；App Secret 只在 Go 服务端。强制 Mock：`--dart-define=USE_MOCK_IM=true`。
   static String _rongKey(String fallback) {
     const fromDefine = String.fromEnvironment('RONG_APP_KEY', defaultValue: '');
     if (fromDefine.trim().isNotEmpty) return fromDefine.trim();
     return fallback;
   }
 
+  /// 与 `.env.lan` / Go `.env.local` 对齐的国内 lab App Key（非 Secret）。
+  static const _labRongAppKey = '6tnym1br64wl7';
+
   static final configs = {
     AppEnv.test: EnvConfig(
       env: AppEnv.test,
       backendBaseUrl: 'http://127.0.0.1:8080',
       wsBaseUrl: 'ws://127.0.0.1:8080/realtime/v1/connect',
-      rongAppKey: _rongKey('DEV_RONG_APP_KEY_PLACEHOLDER'),
+      rongAppKey: _rongKey(_labRongAppKey),
       label: '测试',
     ),
     AppEnv.staging: EnvConfig(
       env: AppEnv.staging,
       backendBaseUrl: 'http://127.0.0.1:8080',
       wsBaseUrl: 'ws://127.0.0.1:8080/realtime/v1/connect',
-      rongAppKey: _rongKey('DEV_RONG_APP_KEY_PLACEHOLDER'),
+      rongAppKey: _rongKey(_labRongAppKey),
       label: '预发',
     ),
     AppEnv.production: EnvConfig(

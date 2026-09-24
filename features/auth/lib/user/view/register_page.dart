@@ -31,6 +31,7 @@ class _RegisterPageState extends State<RegisterPage> {
   void initState() {
     super.initState();
     _controller = Get.find<AuthController>();
+    _controller.syncFormFromStorage();
     _emailController = TextEditingController(text: _controller.email.value);
     _displayNameController =
         TextEditingController(text: _controller.displayName.value);

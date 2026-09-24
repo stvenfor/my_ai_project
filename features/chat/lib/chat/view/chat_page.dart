@@ -6,8 +6,10 @@ import 'package:module_chat/chat/models/conversation_model.dart';
 import 'package:module_chat/chat/theme/chat_theme.dart';
 import 'package:module_chat/chat/view/chat_detail_page.dart';
 import 'package:module_chat/chat/viewmodel/chat_viewmodel.dart';
+import 'package:module_chat/chat/widgets/conversation_list_empty.dart';
 import 'package:module_chat/chat/widgets/conversation_list_item.dart';
 import 'package:module_common_ui/module_common_ui.dart';
+import 'package:wys_router/wys_router.dart';
 
 class ChatPage extends GetView<ChatViewModel> {
   const ChatPage({super.key});
@@ -19,6 +21,10 @@ class ChatPage extends GetView<ChatViewModel> {
       transition: Transition.rightToLeft,
       duration: const Duration(milliseconds: 250),
     )?.then((_) => controller.refreshConversations());
+  }
+
+  void _openFriends() {
+    Get.toNamed(RoutePath.friend);
   }
 
   @override
@@ -50,22 +56,92 @@ class ChatPage extends GetView<ChatViewModel> {
                           child: Text('消息', style: ChatTheme.largeTitle),
                         ),
                         IconButton(
-                          icon: Icon(
-                            CupertinoIcons.search,
-                            color: ChatTheme.accent,
+                          icon: Obx(
+                            () => Icon(
+                              controller.searchOpen.value
+                                  ? CupertinoIcons.xmark
+                                  : CupertinoIcons.search,
+                              color: ChatTheme.accent,
+                            ),
                           ),
-                          onPressed: () {},
+                          onPressed: controller.toggleSearch,
                         ),
                         IconButton(
                           icon: Icon(
                             CupertinoIcons.square_pencil,
                             color: ChatTheme.accent,
                           ),
-                          onPressed: () {},
+                          onPressed: _openFriends,
                         ),
                       ],
                     ),
                   ),
+                  Obx(() {
+                    if (!controller.searchOpen.value) {
+                      return const SizedBox.shrink();
+                    }
+                    return Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                      child: AnimatedSize(
+                        duration: const Duration(milliseconds: 220),
+                        curve: Curves.easeOutCubic,
+                        child: TextField(
+                          controller: controller.searchController,
+                          autofocus: true,
+                          onChanged: controller.onSearchQueryChanged,
+                          style: ChatTheme.body,
+                          decoration: InputDecoration(
+                            hintText: '搜索会话名称或消息',
+                            hintStyle: ChatTheme.subhead.copyWith(
+                              color: ChatTheme.labelTertiary,
+                            ),
+                            prefixIcon: Icon(
+                              CupertinoIcons.search,
+                              size: 18,
+                              color: ChatTheme.labelTertiary,
+                            ),
+                            suffixIcon: Obx(() {
+                              if (controller.searchQuery.value.isEmpty) {
+                                return const SizedBox.shrink();
+                              }
+                              return IconButton(
+                                icon: Icon(
+                                  CupertinoIcons.clear_circled_solid,
+                                  size: 18,
+                                  color: ChatTheme.labelTertiary,
+                                ),
+                                onPressed: controller.clearSearchQuery,
+                              );
+                            }),
+                            filled: true,
+                            fillColor: ChatTheme.surface,
+                            contentPadding:
+                                const EdgeInsets.symmetric(vertical: 10),
+                            border: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.circular(ChatTheme.radiusLg),
+                              borderSide:
+                                  BorderSide(color: ChatTheme.separator),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.circular(ChatTheme.radiusLg),
+                              borderSide:
+                                  BorderSide(color: ChatTheme.separator),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.circular(ChatTheme.radiusLg),
+                              borderSide: BorderSide(
+                                color: ChatTheme.accent,
+                                width: 1.2,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
                   Expanded(
                     child: Obx(() {
                       if (controller.isLoading.value &&
@@ -95,7 +171,38 @@ class ChatPage extends GetView<ChatViewModel> {
                         );
                       }
 
-                      final conversations = controller.conversations;
+                      final conversations = controller.visibleConversations;
+                      if (controller.conversations.isEmpty) {
+                        return RefreshIndicator(
+                          onRefresh: controller.refreshConversations,
+                          color: ChatTheme.accent,
+                          child: CustomScrollView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            slivers: [
+                              SliverFillRemaining(
+                                hasScrollBody: false,
+                                child: ConversationListEmpty(
+                                  connectionHint:
+                                      'IM ${controller.imStateLabel.value}',
+                                  onAddFriend: _openFriends,
+                                  onRefreshHint:
+                                      controller.refreshConversations,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+
+                      if (conversations.isEmpty) {
+                        return Center(
+                          child: Text(
+                            '没有匹配的会话',
+                            style: ChatTheme.subhead,
+                          ),
+                        );
+                      }
+
                       return RefreshIndicator(
                         onRefresh: controller.refreshConversations,
                         color: ChatTheme.accent,

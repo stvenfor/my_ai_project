@@ -323,10 +323,12 @@ class ImChatRepository implements ChatRepository {
   Future<ConversationModel> ensurePrivateConversation(String peerImUserId) async {
     _requireConnected();
     final profile = await _profileService.getProfile(peerImUserId);
+    final name = profile?.displayName.trim() ?? '';
+    final avatar = profile?.avatarUrl.trim() ?? '';
     return _store.ensurePrivateConversation(
       peerImUserId: peerImUserId,
-      title: profile?.displayName ?? peerImUserId,
-      portraitUrl: profile?.avatarUrl ?? ChatAvatarUrls.peer(peerImUserId),
+      title: name.isNotEmpty ? name : peerImUserId,
+      portraitUrl: avatar.isNotEmpty ? avatar : ChatAvatarUrls.peer(peerImUserId),
     );
   }
 
@@ -351,10 +353,12 @@ class ImChatRepository implements ChatRepository {
         if (model.targetId.isEmpty) continue;
         if (model.isPrivate) {
           final profile = await _profileService.getProfile(model.targetId);
+          final name = profile?.displayName.trim() ?? '';
+          final avatar = profile?.avatarUrl.trim() ?? '';
           mapped.add(
             model.copyWith(
-              title: profile?.displayName ?? model.title,
-              portraitUrl: profile?.avatarUrl ?? model.portraitUrl,
+              title: name.isNotEmpty ? name : model.title,
+              portraitUrl: avatar.isNotEmpty ? avatar : model.portraitUrl,
             ),
           );
         } else {

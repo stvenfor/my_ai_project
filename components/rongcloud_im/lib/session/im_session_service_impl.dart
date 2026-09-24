@@ -22,6 +22,7 @@ class ImSessionServiceImpl implements ImSessionService {
 
   ImConnectionState _state = ImConnectionState.disconnected;
   ImSessionInfo? _sessionInfo;
+  Future<void>? _connectInFlight;
 
   @override
   Stream<ImConnectionState> get connectionState => _stateController.stream;
@@ -43,11 +44,33 @@ class ImSessionServiceImpl implements ImSessionService {
   }
 
   @override
-  Future<void> connect({required String bizUserId}) async {
+  Future<void> connect({required String bizUserId, String? displayName}) async {
+    if (_state == ImConnectionState.connected) return;
+    final inFlight = _connectInFlight;
+    if (inFlight != null) return inFlight;
+
+    final future = _connectOnce(bizUserId: bizUserId, displayName: displayName);
+    _connectInFlight = future;
+    try {
+      await future;
+    } finally {
+      if (identical(_connectInFlight, future)) {
+        _connectInFlight = null;
+      }
+    }
+  }
+
+  Future<void> _connectOnce({
+    required String bizUserId,
+    String? displayName,
+  }) async {
     if (_state == ImConnectionState.connected) return;
     _setState(ImConnectionState.connecting);
     try {
-      final session = await _sessionApi.createSession(bizUserId: bizUserId);
+      final session = await _sessionApi.createSession(
+        bizUserId: bizUserId,
+        displayName: displayName,
+      );
       final expires =
           session.expiresInSeconds > 0 ? session.expiresInSeconds : 86400 * 365;
       _sessionInfo = ImSessionInfo(

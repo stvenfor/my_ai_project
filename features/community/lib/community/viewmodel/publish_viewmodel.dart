@@ -65,11 +65,11 @@ class PublishViewModel extends GetxController {
     if (source == null) return;
     try {
       if (source == MediaPickSource.camera) {
-        final granted = await ImagePickerUtils.ensureCameraPermission();
-        if (!granted) {
-          UiKitInitializer.toastError('需要相机权限才能拍摄');
-          return;
-        }
+        final ok = await CameraPermissionGate.ensure(
+          deniedToast: '需要相机权限才能拍摄，请在系统弹窗中允许',
+          settingsMessage: '相机权限已被关闭。请在系统设置中开启后，再回来拍摄。',
+        );
+        if (!ok) return;
         final path = await ImagePickerUtils.pickImage(source);
         if (path == null || path.isEmpty) return;
         _clearVideo();
@@ -112,13 +112,17 @@ class PublishViewModel extends GetxController {
     if (source == null) return;
     try {
       if (source == MediaPickSource.camera) {
-        final granted = await ImagePickerUtils.ensureCameraPermission();
-        if (!granted) {
-          UiKitInitializer.toastError('需要相机权限才能拍摄');
-          return;
-        }
+        final ok = await CameraPermissionGate.ensure(
+          withMicrophone: true,
+          deniedToast: '需要相机权限才能拍摄，请在系统弹窗中允许',
+          settingsMessage: '相机或麦克风权限已被关闭。请在系统设置中开启后，再回来拍摄。',
+        );
+        if (!ok) return;
       }
-      final path = await ImagePickerUtils.pickVideo(source);
+      final path = await ImagePickerUtils.pickVideo(
+        source,
+        skipPermissionCheck: source == MediaPickSource.camera,
+      );
       if (path == null || path.isEmpty) return;
       _clearImages();
       mediaType.value = 'video';
@@ -141,11 +145,11 @@ class PublishViewModel extends GetxController {
     if (source == null) return;
     try {
       if (source == MediaPickSource.camera) {
-        final granted = await ImagePickerUtils.ensureCameraPermission();
-        if (!granted) {
-          UiKitInitializer.toastError('需要相机权限才能拍摄');
-          return;
-        }
+        final ok = await CameraPermissionGate.ensure(
+          deniedToast: '需要相机权限才能拍摄，请在系统弹窗中允许',
+          settingsMessage: '相机权限已被关闭。请在系统设置中开启后，再回来拍摄。',
+        );
+        if (!ok) return;
       }
       final path = await ImagePickerUtils.pickImage(source);
       if (path == null || path.isEmpty) return;

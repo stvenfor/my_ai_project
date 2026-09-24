@@ -19,6 +19,7 @@ import 'package:module_sample/config/module_manifest.dart';
 import 'package:module_settings/env/environment_session.dart';
 import 'package:module_utils/module_utils.dart';
 import 'package:wys_login_share_pay/wys_login_share_pay.dart';
+import 'package:wys_network/wys_network.dart' as wys_net;
 import 'package:wys_router/wys_router.dart';
 
 class AppInitializer {
@@ -47,6 +48,7 @@ class AppInitializer {
     ensureShellBindings();
 
     await EnvironmentSession.register();
+    _syncWysAppEnvironment();
     _wireEnvironmentHttpRefresh();
     AppHttpBootstrap.initialize(
       headerProvider: const AuthHeaderProvider(),
@@ -118,8 +120,28 @@ class AppInitializer {
     WysRouter.registerPath(WysCapabilityRoutes.web, RoutePath.web);
   }
 
+  /// 把壳工程 [EnvironmentService] 同步到 wys_network [AppEnvironment]
+  ///（PushConfig / HttpsClient 等依赖）。
+  /// wys 的 AppEnv.debug/release 是历史命名，表示业务环境档，不是 Flutter 包类型。
+  static void _syncWysAppEnvironment() {
+    final svc = Get.find<EnvironmentService>();
+    final appEnv = svc.currentEnv.value;
+    final wysEnv = appEnv == AppEnv.production
+        ? wys_net.AppEnv.release
+        : wys_net.AppEnv.debug;
+    final net = appEnv == AppEnv.production
+        ? wys_net.WysNetEnvironment.product
+        : wys_net.WysNetEnvironment.test;
+    wys_net.AppEnvironment.initialize(
+      wysEnv,
+      netEnvironment: net,
+      baseUrl: svc.backendBaseUrl,
+    );
+  }
+
   static void _wireEnvironmentHttpRefresh() {
     Get.find<EnvironmentService>().onEnvChanged = (_) async {
+      _syncWysAppEnvironment();
       AppHttpBootstrap.reinitialize(
         headerProvider: const AuthHeaderProvider(),
         responseHook: SessionGuardHook(),

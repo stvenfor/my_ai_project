@@ -51,13 +51,17 @@ class App extends StatelessWidget {
             getPages: AppPages.routes(),
             navigatorObservers: [
               ...UiKitInitializer.navigatorObservers,
+              AppKeyboard.navigatorObserver,
               ...dokitNavigatorObservers(),
             ],
             builder: UiKitInitializer.appBuilder(
               inner: (context, child) => ModuleUtilsInitializer.wrapApp(
                 builder: (_, __) => RealtimeNotifyBannerHost(
                   child: InAppPushBannerHost(
-                    child: child ?? const SizedBox.shrink(),
+                    // 全局点空白收键盘；路由切换由 AppKeyboard.navigatorObserver 处理。
+                    child: AppKeyboard.dismissOnTap(
+                      child: child ?? const SizedBox.shrink(),
+                    ),
                   ),
                 ),
               ),

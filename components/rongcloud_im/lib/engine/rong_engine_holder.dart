@@ -28,6 +28,9 @@ class RongEngineHolder {
   /// 真实模式且 Engine 已创建。
   bool get isSdkReady => !isMock && _engine != null && _connected;
 
+  /// 融云：连接已存在或正在重连（勿当失败）。
+  static const int _rcConnectionExist = 34001;
+
   Future<void> connectMock({required ImSessionResult session}) async {
     _session = session;
     await Future<void>.delayed(const Duration(milliseconds: 100));
@@ -40,13 +43,17 @@ class RongEngineHolder {
     if (isMock) {
       return connectMock(session: session);
     }
+    if (_connected && _session?.imUserId == session.imUserId) {
+      LogUtils.i('[RongEngine] already connected imUserId=${session.imUserId}');
+      return;
+    }
     final appKey = (_envService?.rongAppKey ?? '').trim();
     if (appKey.isEmpty || appKey.toUpperCase().contains('PLACEHOLDER')) {
       throw StateError('融云 App Key 未配置');
     }
     _session = session;
-    final options = RCIMIWEngineOptions.create();
-    _engine = await RCIMIWEngine.create(appKey, options);
+    // 生命周期内只 create 一次；重复 create + connect 易触发 34001。
+    _engine ??= await RCIMIWEngine.create(appKey, RCIMIWEngineOptions.create());
     final completer = Completer<void>();
     final code = await _engine!.connect(
       session.token,
@@ -55,7 +62,7 @@ class RongEngineHolder {
         onDatabaseOpened: (int? c) {},
         onConnected: (int? c, String? userId) {
           if (completer.isCompleted) return;
-          if (c == 0) {
+          if (_isConnectOk(c)) {
             completer.complete();
           } else {
             completer.completeError(StateError('融云连接失败 code=$c'));
@@ -63,7 +70,13 @@ class RongEngineHolder {
         },
       ),
     );
-    if (code != 0 && !completer.isCompleted) {
+    // 同步返回码：0=已受理；34001=已在连/已连接（回调可能不再触发）。
+    if (_isConnectOk(code)) {
+      if (code == _rcConnectionExist && !completer.isCompleted) {
+        LogUtils.i('[RongEngine] connect code=34001 (already connecting/connected)');
+        completer.complete();
+      }
+    } else if (!completer.isCompleted) {
       completer.completeError(StateError('融云 connect 返回 code=$code'));
     }
     await completer.future.timeout(
@@ -72,6 +85,9 @@ class RongEngineHolder {
     _connected = true;
     LogUtils.i('[RongEngine] real connected appKey=$appKey imUserId=${session.imUserId}');
   }
+
+  static bool _isConnectOk(int? code) =>
+      code == null || code == 0 || code == _rcConnectionExist;
 
   void attachMessageListener(
     void Function(RCIMIWMessage message) onMessage,

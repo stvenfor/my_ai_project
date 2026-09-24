@@ -16,7 +16,9 @@ class PushConfig {
   static const String productionAppKey = 'PROD_JPUSH_APP_KEY_PLACEHOLDER';
 
   /// 仅 product 使用正式极光环境；dev/test/custom 均使用测试环境。
+  /// AppEnvironment 未初始化时按非生产处理（避免启动早期 LateInitializationError）。
   static bool get isProduction =>
+      AppEnvironment.isInitialized &&
       AppEnvironment.instance.netEnvironment == WysNetEnvironment.product;
 
   /// 获取当前环境的 AppKey。

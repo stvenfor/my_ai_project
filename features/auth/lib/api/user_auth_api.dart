@@ -407,6 +407,8 @@ class BackendUser {
     this.userId = '',
     this.userName = '',
     this.status = 0,
+    this.phone = '',
+    this.avatarUrl = '',
   });
 
   factory BackendUser.fromJson(Map<String, dynamic> json) {
@@ -426,6 +428,8 @@ class BackendUser {
       userName: userName.isNotEmpty ? userName : name,
       email: json['email']?.toString() ?? '',
       status: _statusOf(json['status']),
+      phone: json['phone']?.toString() ?? '',
+      avatarUrl: (json['avatar_url'] ?? json['avatarUrl'])?.toString() ?? '',
     );
   }
 
@@ -435,6 +439,8 @@ class BackendUser {
   final String userName;
   final String email;
   final int status;
+  final String phone;
+  final String avatarUrl;
 
   static int _statusOf(Object? value) {
     if (value is int) return value;

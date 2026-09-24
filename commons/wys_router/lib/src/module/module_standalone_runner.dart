@@ -71,11 +71,16 @@ class ModuleStandaloneRunner {
               ),
             )
             .toList(),
-        navigatorObservers: config.navigatorObservers ?? const [],
+        navigatorObservers: [
+          AppKeyboard.navigatorObserver,
+          ...?config.navigatorObservers,
+        ],
         builder: (context, child) {
           return ModuleUtilsInitializer.wrapApp(
             builder: (_, innerChild) {
-              final content = innerChild ?? const SizedBox.shrink();
+              final content = AppKeyboard.dismissOnTap(
+                child: innerChild ?? const SizedBox.shrink(),
+              );
               if (config.innerAppBuilder != null) {
                 return config.innerAppBuilder!(context, content);
               }

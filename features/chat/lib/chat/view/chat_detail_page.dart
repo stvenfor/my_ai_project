@@ -6,6 +6,7 @@ import 'package:module_chat/chat/theme/chat_theme.dart';
 import 'package:module_chat/chat/viewmodel/chat_detail_viewmodel.dart';
 import 'package:module_chat/chat/widgets/input_panel.dart';
 import 'package:module_chat/chat/widgets/message_list_view.dart';
+import 'package:module_chat/chat/widgets/voice_record_overlay.dart';
 import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_rongcloud_im/api/im_friend_api.dart';
 import 'package:module_rongcloud_im/api/im_group_api.dart';
@@ -31,19 +32,26 @@ class ChatDetailPage extends GetView<ChatDetailViewModel> {
           return Center(
             child: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: maxWidth),
-              child: Column(
+              child: Stack(
                 children: [
-                  _ChatDetailHeader(
-                    conversation: conversation,
-                    onBack: () => Get.back<void>(),
-                    onMore: conversation.isGroup
-                        ? () => _showGroupActions(context)
-                        : null,
+                  Column(
+                    children: [
+                      _ChatDetailHeader(
+                        conversation: conversation,
+                        onBack: () => Get.back<void>(),
+                        onMore: conversation.isGroup
+                            ? () => _showGroupActions(context)
+                            : null,
+                      ),
+                      Expanded(
+                        child: MessageListView(
+                          peerAvatar: conversation.peerAvatar,
+                        ),
+                      ),
+                      const InputPanel(),
+                    ],
                   ),
-                  Expanded(
-                    child: MessageListView(peerAvatar: conversation.peerAvatar),
-                  ),
-                  const InputPanel(),
+                  const VoiceRecordOverlay(),
                 ],
               ),
             ),
@@ -186,17 +194,22 @@ class _ChatDetailHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: ChatTheme.surface,
+      decoration: BoxDecoration(
+        color: ChatTheme.surface,
+        border: Border(
+          bottom: BorderSide(color: ChatTheme.separator, width: 0.5),
+        ),
+      ),
       padding: EdgeInsets.only(
         top: AppSafeInsets.top(context),
         left: 4,
-        right: 4,
-        bottom: 8,
+        right: 8,
+        bottom: 10,
       ),
       child: Row(
         children: [
           CupertinoButton(
-            padding: EdgeInsets.zero,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             onPressed: onBack,
             child: Icon(
               CupertinoIcons.back,
@@ -204,7 +217,7 @@ class _ChatDetailHeader extends StatelessWidget {
               size: 24,
             ),
           ),
-          CacheImageUtils.circle(conversation.peerAvatar, size: 36),
+          CacheImageUtils.circle(conversation.peerAvatar, size: 40),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -212,10 +225,11 @@ class _ChatDetailHeader extends StatelessWidget {
               children: [
                 Text(
                   conversation.peerName,
-                  style: ChatTheme.headline.copyWith(fontSize: 16),
+                  style: ChatTheme.headline.copyWith(fontSize: 17),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
+                const SizedBox(height: 2),
                 Text(
                   conversation.isGroup
                       ? '群聊'
@@ -225,7 +239,7 @@ class _ChatDetailHeader extends StatelessWidget {
                         ? ChatTheme.labelSecondary
                         : (conversation.isOnline
                             ? ChatTheme.online
-                            : ChatTheme.labelSecondary),
+                            : ChatTheme.labelTertiary),
                   ),
                 ),
               ],
@@ -233,11 +247,12 @@ class _ChatDetailHeader extends StatelessWidget {
           ),
           if (onMore != null)
             CupertinoButton(
-              padding: EdgeInsets.zero,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
               onPressed: onMore,
               child: Icon(
-                CupertinoIcons.ellipsis,
-                color: ChatTheme.accent,
+                CupertinoIcons.ellipsis_circle,
+                color: ChatTheme.labelSecondary,
+                size: 26,
               ),
             ),
         ],

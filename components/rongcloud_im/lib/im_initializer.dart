@@ -94,10 +94,10 @@ class ImInitializer {
       unawaited(syncStoreGroupIfNeeded());
       return;
     }
-
+    // 启动 / 登录 / 聊天 Tab 可能并发触发；交给 session 层串行。
     try {
       await session
-          .connect(bizUserId: user.id)
+          .connect(bizUserId: user.id, displayName: user.name)
           .timeout(const Duration(seconds: 12));
       unawaited(syncStoreGroupIfNeeded());
     } on TimeoutException {
