@@ -20,6 +20,29 @@ class ChatNavigator {
     );
   }
 
+  static Future<void> openGroup({
+    required String groupId,
+    required String title,
+  }) async {
+    final repo = resolveChatRepository();
+    final ConversationModel conv;
+    if (repo is ImChatRepository) {
+      conv = await repo.ensureGroupConversation(groupId: groupId, title: title);
+    } else {
+      conv = ConversationModel.group(
+        targetId: groupId,
+        title: title,
+        portraitUrl: '',
+        lastMessage: '',
+        lastMessageTime: DateTime.now(),
+      );
+    }
+    await Get.to<void>(
+      () => ChatDetailPage(conversation: conv),
+      binding: ChatDetailBinding(conv),
+    );
+  }
+
   static Future<void> openConversation(ConversationModel conversation) async {
     await Get.to<void>(
       () => ChatDetailPage(conversation: conversation),

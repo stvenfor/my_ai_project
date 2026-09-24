@@ -7,6 +7,7 @@ import 'package:module_core/service/im_session_service.dart';
 import 'package:module_global_cache/prefs/sp_keys.dart';
 import 'package:module_global_cache/prefs/sp_manager.dart';
 import 'package:module_linking/privacy/privacy_consent_service.dart';
+import 'package:module_rongcloud_im/api/im_group_api.dart';
 import 'package:module_rongcloud_im/im_binding.dart';
 import 'package:module_rongcloud_im/session/im_session_service_impl.dart';
 import 'package:module_utils/module_utils.dart';
@@ -15,6 +16,9 @@ class ImInitializer {
   ImInitializer._();
 
   static ImSessionServiceImpl? _sessionImpl;
+
+  /// 与 CurrentStoreService.selectedStoreIdKey 对齐（避免 auth→im 反向依赖）。
+  static const _storeIdSpKey = 'mine_selected_store_id';
 
   static ImSessionService? get session =>
       Get.isRegistered<ImSessionService>() ? Get.find<ImSessionService>() : null;
@@ -86,16 +90,32 @@ class ImInitializer {
 
     final session = _sessionImpl;
     if (session == null) return;
-    if (session.currentState == ImConnectionState.connected) return;
+    if (session.currentState == ImConnectionState.connected) {
+      unawaited(syncStoreGroupIfNeeded());
+      return;
+    }
 
     try {
       await session
           .connect(bizUserId: user.id)
           .timeout(const Duration(seconds: 12));
+      unawaited(syncStoreGroupIfNeeded());
     } on TimeoutException {
       LogUtils.w('[ImInitializer] connect timed out');
     } catch (e, st) {
       LogUtils.e('[ImInitializer] connect failed', e, st);
+    }
+  }
+
+  /// 登录补拉：当前门店群幂等入群。
+  static Future<void> syncStoreGroupIfNeeded() async {
+    final storeId = SpUtils.getString(_storeIdSpKey);
+    if (storeId == null || storeId.isEmpty) return;
+    try {
+      await ImGroupApi().syncStoreGroup(storeId);
+      LogUtils.i('[ImInitializer] store group synced storeId=$storeId');
+    } catch (e, st) {
+      LogUtils.e('[ImInitializer] store group sync failed', e, st);
     }
   }
 

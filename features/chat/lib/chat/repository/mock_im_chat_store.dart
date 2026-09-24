@@ -4,12 +4,11 @@ import 'package:module_chat/chat/models/chat_avatar_urls.dart';
 import 'package:module_chat/chat/models/conversation_model.dart';
 import 'package:module_chat/chat/models/message_model.dart';
 import 'package:module_chat/chat/models/message_read_status.dart';
-import 'package:module_chat/chat/models/message_send_status.dart';
 import 'package:module_chat/chat/models/message_type.dart';
 import 'package:module_core/model/im/conversation_ref.dart';
 import 'package:uuid/uuid.dart';
 
-/// Mock IM 内存存储（Phase0+1；真实 SDK 接入后由 Engine 回调驱动同一结构）。
+/// IM 本地 UI 缓存（Mock 种子或 SDK 驱动）。
 class MockImChatStore {
   MockImChatStore._();
 
@@ -21,15 +20,17 @@ class MockImChatStore {
   final _conversationController = StreamController<List<ConversationModel>>.broadcast();
   final _messageControllers = <String, StreamController<List<MessageModel>>>{};
 
-  String? _selfImUserId;
   bool _seeded = false;
+  bool seedEnabled = true;
 
   Stream<List<ConversationModel>> get conversationsStream =>
       _conversationController.stream;
 
-  void bindSelfImUserId(String? imUserId) {
-    _selfImUserId = imUserId;
-    _ensureSeed();
+  void bindSelfImUserId(String? imUserId, {bool enableSeed = true}) {
+    seedEnabled = enableSeed;
+    if (enableSeed) {
+      _ensureSeed();
+    }
     _emitConversations();
   }
 
@@ -39,7 +40,7 @@ class MockImChatStore {
       key,
       () => StreamController<List<MessageModel>>.broadcast(),
     );
-    _ensureSeed();
+    if (seedEnabled) _ensureSeed();
     _emitMessages(key);
     return _messageControllers[key]!.stream;
   }
@@ -49,8 +50,20 @@ class MockImChatStore {
   List<MessageModel> messagesOf(ConversationRef ref) =>
       List.unmodifiable(_messages[ref.storageId] ?? []);
 
+  void replaceConversations(List<ConversationModel> list) {
+    _conversations
+      ..clear()
+      ..addAll(list);
+    _emitConversations();
+  }
+
+  void replaceMessages(ConversationRef ref, List<MessageModel> list) {
+    _messages[ref.storageId] = List<MessageModel>.from(list);
+    _emitMessages(ref.storageId);
+  }
+
   void _ensureSeed() {
-    if (_seeded) return;
+    if (!seedEnabled || _seeded) return;
     _seeded = true;
     final now = DateTime.now();
     const peers = ['mock_peer_01', 'mock_peer_02', 'mock_peer_03'];
@@ -101,6 +114,10 @@ class MockImChatStore {
     required MessageModel message,
   }) async {
     final list = _messages.putIfAbsent(ref.storageId, () => []);
+    if (message.messageUid != null &&
+        list.any((m) => m.messageUid == message.messageUid)) {
+      return message;
+    }
     list.insert(0, message);
     _upsertConversationPreview(ref, message);
     _emitMessages(ref.storageId);
@@ -156,13 +173,45 @@ class MockImChatStore {
     required String title,
     required String portraitUrl,
   }) {
-    _ensureSeed();
+    if (seedEnabled) _ensureSeed();
     final ref = ConversationRef.private(peerImUserId);
     final existing = _conversations.where((c) => c.id == ref.storageId);
     if (existing.isNotEmpty) return existing.first;
     final conv = ConversationModel.private(
       targetId: peerImUserId,
       title: title,
+      portraitUrl: portraitUrl,
+      lastMessage: '',
+      lastMessageTime: DateTime.now(),
+    );
+    _conversations.insert(0, conv);
+    _emitConversations();
+    return conv;
+  }
+
+  ConversationModel ensureGroupConversation({
+    required String groupId,
+    required String title,
+    required String portraitUrl,
+  }) {
+    final ref = ConversationRef.group(groupId);
+    final existing = _conversations.where((c) => c.id == ref.storageId);
+    if (existing.isNotEmpty) {
+      final cur = existing.first;
+      if (title.isNotEmpty && cur.title != title) {
+        final updated = cur.copyWith(title: title);
+        final idx = _conversations.indexWhere((c) => c.id == ref.storageId);
+        if (idx >= 0) {
+          _conversations[idx] = updated;
+          _emitConversations();
+        }
+        return updated;
+      }
+      return cur;
+    }
+    final conv = ConversationModel.group(
+      targetId: groupId,
+      title: title.isEmpty ? groupId : title,
       portraitUrl: portraitUrl,
       lastMessage: '',
       lastMessageTime: DateTime.now(),
@@ -203,6 +252,18 @@ class MockImChatStore {
           targetId: ref.targetId,
           title: message.senderDisplayName ?? ref.targetId,
           portraitUrl: ChatAvatarUrls.peer(ref.targetId),
+          lastMessage: preview,
+          lastMessageTime: message.createdAt,
+          unreadCount: message.isSelf ? 0 : 1,
+        ),
+      );
+    } else if (ref.isGroup) {
+      _conversations.insert(
+        0,
+        ConversationModel.group(
+          targetId: ref.targetId,
+          title: ref.targetId,
+          portraitUrl: ChatAvatarUrls.peer('g_${ref.targetId}'),
           lastMessage: preview,
           lastMessageTime: message.createdAt,
           unreadCount: message.isSelf ? 0 : 1,

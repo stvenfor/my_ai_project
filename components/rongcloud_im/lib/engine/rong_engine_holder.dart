@@ -7,7 +7,7 @@ import 'package:module_rongcloud_im/config/rong_im_config.dart';
 import 'package:module_utils/module_utils.dart';
 import 'package:rongcloud_im_wrapper_plugin/rongcloud_im_wrapper_plugin.dart';
 
-/// 融云 Engine 持有（Mock / Real）。
+/// 融云 Engine 持有（Mock / Real）+ 会话/消息薄封装。
 class RongEngineHolder {
   RongEngineHolder({EnvironmentService? envService}) : _envService = envService;
 
@@ -15,6 +15,7 @@ class RongEngineHolder {
   bool _connected = false;
   ImSessionResult? _session;
   RCIMIWEngine? _engine;
+  bool _listenerAttached = false;
 
   bool get isConnected => _connected;
 
@@ -22,7 +23,10 @@ class RongEngineHolder {
 
   RCIMIWEngine? get engine => _engine;
 
-  bool get _mock => RongImConfig.useMockImFor(_envService?.rongAppKey);
+  bool get isMock => RongImConfig.useMockImFor(_envService?.rongAppKey);
+
+  /// 真实模式且 Engine 已创建。
+  bool get isSdkReady => !isMock && _engine != null && _connected;
 
   Future<void> connectMock({required ImSessionResult session}) async {
     _session = session;
@@ -33,7 +37,7 @@ class RongEngineHolder {
   }
 
   Future<void> connectReal({required ImSessionResult session}) async {
-    if (_mock) {
+    if (isMock) {
       return connectMock(session: session);
     }
     final appKey = (_envService?.rongAppKey ?? '').trim();
@@ -69,11 +73,179 @@ class RongEngineHolder {
     LogUtils.i('[RongEngine] real connected appKey=$appKey imUserId=${session.imUserId}');
   }
 
+  void attachMessageListener(
+    void Function(RCIMIWMessage message) onMessage,
+  ) {
+    final engine = _engine;
+    if (engine == null || _listenerAttached) return;
+    _listenerAttached = true;
+    engine.onMessageReceived = (message, left, offline, hasPackage) {
+      if (message != null) onMessage(message);
+    };
+  }
+
+  Future<List<RCIMIWConversation>> fetchConversations({int count = 50}) async {
+    final engine = _engine;
+    if (engine == null) return const [];
+    final completer = Completer<List<RCIMIWConversation>>();
+    final code = await engine.getConversations(
+      [RCIMIWConversationType.private, RCIMIWConversationType.group],
+      null,
+      0,
+      count,
+      callback: IRCIMIWGetConversationsCallback(
+        onSuccess: (list) {
+          if (!completer.isCompleted) {
+            completer.complete(list ?? const []);
+          }
+        },
+        onError: (c) {
+          if (!completer.isCompleted) {
+            completer.completeError(StateError('getConversations code=$c'));
+          }
+        },
+      ),
+    );
+    if (code != 0 && !completer.isCompleted) {
+      completer.completeError(StateError('getConversations 返回 code=$code'));
+    }
+    return completer.future.timeout(const Duration(seconds: 8));
+  }
+
+  Future<List<RCIMIWMessage>> fetchMessages({
+    required RCIMIWConversationType type,
+    required String targetId,
+    int sentTime = 0,
+    int count = 20,
+  }) async {
+    final engine = _engine;
+    if (engine == null) return const [];
+    final completer = Completer<List<RCIMIWMessage>>();
+    final code = await engine.getMessages(
+      type,
+      targetId,
+      null,
+      sentTime,
+      RCIMIWTimeOrder.before,
+      RCIMIWMessageOperationPolicy.local,
+      count,
+      callback: IRCIMIWGetMessagesCallback(
+        onSuccess: (list, syncTimestamp, hasMoreMsg) {
+          if (!completer.isCompleted) {
+            completer.complete(list ?? const []);
+          }
+        },
+        onError: (c) {
+          if (!completer.isCompleted) {
+            completer.completeError(StateError('getMessages code=$c'));
+          }
+        },
+      ),
+    );
+    if (code != 0 && !completer.isCompleted) {
+      completer.completeError(StateError('getMessages 返回 code=$code'));
+    }
+    return completer.future.timeout(const Duration(seconds: 8));
+  }
+
+  Future<RCIMIWMessage> sendText({
+    required RCIMIWConversationType type,
+    required String targetId,
+    required String text,
+  }) async {
+    final engine = _requireEngine();
+    final msg = await engine.createTextMessage(type, targetId, null, text);
+    if (msg == null) throw StateError('createTextMessage failed');
+    return _sendPlain(msg);
+  }
+
+  Future<RCIMIWMessage> sendImage({
+    required RCIMIWConversationType type,
+    required String targetId,
+    required String localPath,
+  }) async {
+    final engine = _requireEngine();
+    final msg = await engine.createImageMessage(type, targetId, null, localPath);
+    if (msg == null) throw StateError('createImageMessage failed');
+    return _sendMedia(msg);
+  }
+
+  Future<RCIMIWMessage> sendVoice({
+    required RCIMIWConversationType type,
+    required String targetId,
+    required String localPath,
+    required int durationSeconds,
+  }) async {
+    final engine = _requireEngine();
+    final msg = await engine.createVoiceMessage(
+      type,
+      targetId,
+      null,
+      localPath,
+      durationSeconds,
+    );
+    if (msg == null) throw StateError('createVoiceMessage failed');
+    return _sendMedia(msg);
+  }
+
+  Future<RCIMIWMessage> _sendPlain(RCIMIWMessage message) async {
+    final engine = _requireEngine();
+    final completer = Completer<RCIMIWMessage>();
+    final code = await engine.sendMessage(
+      message,
+      callback: RCIMIWSendMessageCallback(
+        onMessageSent: (c, sent) {
+          if (completer.isCompleted) return;
+          if (c == 0 && sent != null) {
+            completer.complete(sent);
+          } else {
+            completer.completeError(StateError('sendMessage code=$c'));
+          }
+        },
+      ),
+    );
+    if (code != 0 && !completer.isCompleted) {
+      completer.completeError(StateError('sendMessage 返回 code=$code'));
+    }
+    return completer.future.timeout(const Duration(seconds: 15));
+  }
+
+  Future<RCIMIWMessage> _sendMedia(RCIMIWMediaMessage message) async {
+    final engine = _requireEngine();
+    final completer = Completer<RCIMIWMessage>();
+    final code = await engine.sendMediaMessage(
+      message,
+      listener: RCIMIWSendMediaMessageListener(
+        onMediaMessageSent: (c, sent) {
+          if (completer.isCompleted) return;
+          if (c == 0 && sent != null) {
+            completer.complete(sent);
+          } else {
+            completer.completeError(StateError('sendMediaMessage code=$c'));
+          }
+        },
+      ),
+    );
+    if (code != 0 && !completer.isCompleted) {
+      completer.completeError(StateError('sendMediaMessage 返回 code=$code'));
+    }
+    return completer.future.timeout(const Duration(seconds: 60));
+  }
+
+  RCIMIWEngine _requireEngine() {
+    final engine = _engine;
+    if (engine == null || !_connected) {
+      throw StateError('融云 Engine 未就绪');
+    }
+    return engine;
+  }
+
   Future<void> disconnect({String? reason}) async {
     final engine = _engine;
     _engine = null;
     _connected = false;
     _session = null;
+    _listenerAttached = false;
     if (engine != null) {
       try {
         await engine.disconnect(false);

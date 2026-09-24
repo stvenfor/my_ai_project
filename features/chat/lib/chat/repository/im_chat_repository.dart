@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:get/get.dart';
+import 'package:module_chat/chat/models/chat_avatar_urls.dart';
 import 'package:module_chat/chat/models/conversation_model.dart';
 import 'package:module_chat/chat/models/message_model.dart';
 import 'package:module_chat/chat/models/message_read_status.dart';
@@ -8,32 +9,50 @@ import 'package:module_chat/chat/models/message_send_status.dart';
 import 'package:module_chat/chat/models/message_type.dart';
 import 'package:module_chat/chat/repository/chat_repository.dart';
 import 'package:module_chat/chat/repository/mock_im_chat_store.dart';
+import 'package:module_chat/chat/repository/rong_sdk_mapper.dart';
 import 'package:module_core/model/im/conversation_ref.dart';
 import 'package:module_core/model/im/im_session_state.dart';
 import 'package:module_core/service/im_backup_service.dart';
 import 'package:module_core/service/im_session_service.dart';
 import 'package:module_core/service/im_user_profile_service.dart';
+import 'package:module_rongcloud_im/engine/rong_engine_holder.dart';
+import 'package:module_utils/module_utils.dart';
 
-/// 融云 IM ChatRepository（Mock Engine + 备份 + 资料缓存）。
+/// 融云 IM ChatRepository：Mock 走内存种子；真连走 SDK，本地 store 仅作 UI 缓存。
 class ImChatRepository implements ChatRepository {
   ImChatRepository({
     required ImSessionService sessionService,
     required ImUserProfileService profileService,
     required ImBackupService backupService,
     MockImChatStore? store,
+    RongEngineHolder? engineHolder,
   })  : _session = sessionService,
         _profileService = profileService,
         _backup = backupService,
-        _store = store ?? MockImChatStore.instance;
+        _store = store ?? MockImChatStore.instance,
+        _engineHolder = engineHolder;
 
   final ImSessionService _session;
   final ImUserProfileService _profileService;
   final ImBackupService _backup;
   final MockImChatStore _store;
+  final RongEngineHolder? _engineHolder;
+  bool _listenerWired = false;
+
+  RongEngineHolder? get _engine {
+    if (_engineHolder != null) return _engineHolder;
+    if (Get.isRegistered<RongEngineHolder>()) {
+      return Get.find<RongEngineHolder>();
+    }
+    return null;
+  }
+
+  bool get _sdk => _engine?.isSdkReady == true;
 
   @override
   Stream<List<ConversationModel>> watchConversations() {
     _bindSelfIfNeeded();
+    _wireListenerIfNeeded();
     return _store.conversationsStream;
   }
 
@@ -41,12 +60,20 @@ class ImChatRepository implements ChatRepository {
   Future<void> refreshConversations() async {
     _requireConnected();
     _bindSelfIfNeeded();
+    _wireListenerIfNeeded();
+    if (_sdk) {
+      await _pullConversationsFromSdk();
+    }
     await _hydrateConversationProfiles();
   }
 
   @override
   Stream<List<MessageModel>> watchMessages(ConversationRef ref) {
     _bindSelfIfNeeded();
+    _wireListenerIfNeeded();
+    if (_sdk) {
+      unawaited(_pullHistoryFromSdk(ref));
+    }
     return _store.watchMessages(ref);
   }
 
@@ -57,6 +84,9 @@ class ImChatRepository implements ChatRepository {
     int limit = 20,
   }) async {
     _requireConnected();
+    if (_sdk) {
+      await _pullHistoryFromSdk(ref, limit: limit);
+    }
     var list = _store.messagesOf(ref);
     if (beforeMessageId != null) {
       final idx = list.indexWhere((m) => m.id == beforeMessageId);
@@ -141,11 +171,10 @@ class ImChatRepository implements ChatRepository {
     _requireConnected();
     final imUserId = _session.currentImUserId!;
     final localId = _store.nextLocalId();
-    final uid = _store.nextMessageUid();
 
     var pending = MessageModel(
       id: localId,
-      messageUid: uid,
+      messageUid: null,
       conversationId: ref.storageId,
       type: type,
       content: content,
@@ -160,31 +189,91 @@ class ImChatRepository implements ChatRepository {
     );
     await _store.insertMessage(ref: ref, message: pending);
 
-    await Future<void>.delayed(const Duration(milliseconds: 280));
+    try {
+      MessageModel saved;
+      if (_sdk && type != MessageType.custom) {
+        saved = await _sendViaSdk(
+          ref,
+          pending: pending,
+          type: type,
+          content: content,
+          localPath: localPath,
+          voiceDurationSeconds: voiceDurationSeconds,
+        );
+      } else {
+        await Future<void>.delayed(const Duration(milliseconds: 280));
+        saved = pending.copyWith(
+          sendStatus: MessageSendStatus.success,
+          messageUid: _store.nextMessageUid(),
+        );
+        await _store.replaceMessage(ref, saved);
+        if (ref.isPrivate) {
+          unawaited(
+            Future.delayed(const Duration(seconds: 2), () {
+              _store.simulatePeerRead(ref, localId);
+            }),
+          );
+        }
+      }
 
-    final saved = pending.copyWith(sendStatus: MessageSendStatus.success);
-    await _store.replaceMessage(ref, saved);
-
-    unawaited(
-      _backup.backupOutbound(
-        imUserId: imUserId,
-        conversationId: ref.storageId,
-        messageUid: uid,
-        type: backupType,
-        payload: payload,
-        sentAt: saved.createdAt,
-      ),
-    );
-
-    if (ref.isPrivate) {
       unawaited(
-        Future.delayed(const Duration(seconds: 2), () {
-          _store.simulatePeerRead(ref, localId);
-        }),
+        _backup.backupOutbound(
+          imUserId: imUserId,
+          conversationId: ref.storageId,
+          messageUid: saved.messageUid ?? saved.id,
+          type: backupType,
+          payload: payload,
+          sentAt: saved.createdAt,
+        ),
       );
+      return saved;
+    } catch (e, st) {
+      LogUtils.e('[ImChat] send failed', e, st);
+      final failed = pending.copyWith(sendStatus: MessageSendStatus.failed);
+      await _store.replaceMessage(ref, failed);
+      rethrow;
     }
+  }
 
-    return saved;
+  Future<MessageModel> _sendViaSdk(
+    ConversationRef ref, {
+    required MessageModel pending,
+    required MessageType type,
+    required String content,
+    String? localPath,
+    int voiceDurationSeconds = 0,
+  }) async {
+    final engine = _engine!;
+    final rongType = toRongType(ref.type);
+    final sent = switch (type) {
+      MessageType.text => await engine.sendText(
+          type: rongType,
+          targetId: ref.targetId,
+          text: content,
+        ),
+      MessageType.image => await engine.sendImage(
+          type: rongType,
+          targetId: ref.targetId,
+          localPath: localPath ?? content,
+        ),
+      MessageType.voice => await engine.sendVoice(
+          type: rongType,
+          targetId: ref.targetId,
+          localPath: localPath ?? content,
+          durationSeconds: voiceDurationSeconds,
+        ),
+      _ => throw StateError('unsupported sdk type $type'),
+    };
+    final mapped = messageFromRong(
+      msg: sent,
+      conversationId: ref.storageId,
+      selfImUserId: _session.currentImUserId,
+    ).copyWith(
+      id: pending.id,
+      sendStatus: MessageSendStatus.success,
+    );
+    await _store.replaceMessage(ref, mapped);
+    return mapped;
   }
 
   @override
@@ -237,8 +326,97 @@ class ImChatRepository implements ChatRepository {
     return _store.ensurePrivateConversation(
       peerImUserId: peerImUserId,
       title: profile?.displayName ?? peerImUserId,
-      portraitUrl: profile?.avatarUrl ?? '',
+      portraitUrl: profile?.avatarUrl ?? ChatAvatarUrls.peer(peerImUserId),
     );
+  }
+
+  Future<ConversationModel> ensureGroupConversation({
+    required String groupId,
+    required String title,
+  }) async {
+    _requireConnected();
+    return _store.ensureGroupConversation(
+      groupId: groupId,
+      title: title,
+      portraitUrl: ChatAvatarUrls.peer('g_$groupId'),
+    );
+  }
+
+  Future<void> _pullConversationsFromSdk() async {
+    try {
+      final list = await _engine!.fetchConversations();
+      final mapped = <ConversationModel>[];
+      for (final c in list) {
+        final model = conversationFromRong(c);
+        if (model.targetId.isEmpty) continue;
+        if (model.isPrivate) {
+          final profile = await _profileService.getProfile(model.targetId);
+          mapped.add(
+            model.copyWith(
+              title: profile?.displayName ?? model.title,
+              portraitUrl: profile?.avatarUrl ?? model.portraitUrl,
+            ),
+          );
+        } else {
+          mapped.add(model);
+        }
+      }
+      _store.replaceConversations(mapped);
+    } catch (e, st) {
+      LogUtils.e('[ImChat] pull conversations failed', e, st);
+    }
+  }
+
+  Future<void> _pullHistoryFromSdk(ConversationRef ref, {int limit = 20}) async {
+    try {
+      final list = await _engine!.fetchMessages(
+        type: toRongType(ref.type),
+        targetId: ref.targetId,
+        count: limit,
+      );
+      final selfId = _session.currentImUserId;
+      final mapped = list
+          .map(
+            (m) => messageFromRong(
+              msg: m,
+              conversationId: ref.storageId,
+              selfImUserId: selfId,
+            ),
+          )
+          .toList();
+      // SDK 常按时间倒序；store 也用 insert(0)=最新在前。
+      _store.replaceMessages(ref, mapped);
+    } catch (e, st) {
+      LogUtils.e('[ImChat] pull history failed', e, st);
+    }
+  }
+
+  void _wireListenerIfNeeded() {
+    if (_listenerWired || !_sdk) return;
+    _listenerWired = true;
+    _engine!.attachMessageListener((msg) {
+      final ref = refFromRongMessage(msg);
+      if (ref == null) return;
+      final mapped = messageFromRong(
+        msg: msg,
+        conversationId: ref.storageId,
+        selfImUserId: _session.currentImUserId,
+      );
+      unawaited(_store.insertMessage(ref: ref, message: mapped));
+      final imUserId = _session.currentImUserId;
+      if (imUserId != null && mapped.messageUid != null && !mapped.isSelf) {
+        unawaited(
+          _backup.backupInbound(
+            imUserId: imUserId,
+            conversationId: ref.storageId,
+            messageUid: mapped.messageUid!,
+            type: mapped.type.name,
+            payload: {'content': mapped.content},
+            sentAt: mapped.createdAt,
+          ),
+        );
+      }
+    });
   }
 
   Future<void> _hydrateConversationProfiles() async {
@@ -252,7 +430,7 @@ class ImChatRepository implements ChatRepository {
 
   void _bindSelfIfNeeded() {
     final imUserId = _session.currentImUserId;
-    _store.bindSelfImUserId(imUserId);
+    _store.bindSelfImUserId(imUserId, enableSeed: !_sdk);
   }
 
   void _requireConnected() {

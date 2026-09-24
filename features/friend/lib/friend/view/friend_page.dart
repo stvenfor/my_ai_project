@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:module_chat/chat/navigation/chat_navigator.dart';
 import 'package:module_common_ui/module_common_ui.dart';
 import 'package:module_rongcloud_im/api/im_friend_api.dart';
+import 'package:module_rongcloud_im/api/im_group_api.dart';
 import 'package:module_utils/module_utils.dart';
 
 class FriendPage extends StatefulWidget {
@@ -13,6 +14,7 @@ class FriendPage extends StatefulWidget {
 
 class _FriendPageState extends State<FriendPage> {
   final _api = ImFriendApi();
+  final _groupApi = ImGroupApi();
   final _searchCtrl = TextEditingController();
   List<ImFriendUser> _friends = [];
   List<ImFriendUser> _searchHits = [];
@@ -100,11 +102,129 @@ class _FriendPageState extends State<FriendPage> {
     }
   }
 
+  Future<void> _createFreeGroup() async {
+    if (_friends.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('请先添加好友再建群')),
+      );
+      return;
+    }
+    final nameCtrl = TextEditingController();
+    final selected = <String>{};
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setLocal) {
+            return AlertDialog(
+              title: const Text('创建自由群'),
+              content: SizedBox(
+                width: 360,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: nameCtrl,
+                      decoration: const InputDecoration(
+                        labelText: '群名称',
+                        border: OutlineInputBorder(),
+                        isDense: true,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        '邀请好友（可选）',
+                        style: Theme.of(ctx).textTheme.labelLarge,
+                      ),
+                    ),
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxHeight: 240),
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: _friends.length,
+                        itemBuilder: (_, i) {
+                          final u = _friends[i];
+                          final checked = selected.contains(u.userId);
+                          return CheckboxListTile(
+                            dense: true,
+                            value: checked,
+                            title: Text(u.displayName),
+                            subtitle: Text(u.userId, maxLines: 1, overflow: TextOverflow.ellipsis),
+                            onChanged: (v) {
+                              setLocal(() {
+                                if (v == true) {
+                                  selected.add(u.userId);
+                                } else {
+                                  selected.remove(u.userId);
+                                }
+                              });
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, false),
+                  child: const Text('取消'),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.pop(ctx, true),
+                  child: const Text('创建'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+    final name = nameCtrl.text.trim();
+    nameCtrl.dispose();
+    if (ok != true || !mounted) return;
+    if (name.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('请填写群名称')),
+      );
+      return;
+    }
+    try {
+      final created = await _groupApi.createFreeGroup(
+        name: name,
+        memberIds: selected.toList(),
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('已创建群「${created.name}」')),
+      );
+      await ChatNavigator.openGroup(
+        groupId: created.groupId,
+        title: created.name,
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final tokens = VercelTokens.of(context);
     return AppPageScaffold(
-      navBar: const AppNavBar(title: '好友'),
+      navBar: AppNavBar(
+        title: '好友',
+        actions: [
+          TextButton(
+            onPressed: _createFreeGroup,
+            child: const Text('建群'),
+          ),
+        ],
+      ),
       body: Column(
         children: [
           Padding(

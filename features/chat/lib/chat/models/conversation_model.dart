@@ -88,4 +88,26 @@ class ConversationModel {
       unreadCount: unreadCount,
     );
   }
+
+  factory ConversationModel.group({
+    required String targetId,
+    required String title,
+    required String portraitUrl,
+    required String lastMessage,
+    required DateTime lastMessageTime,
+    int unreadCount = 0,
+    int memberCount = 0,
+  }) {
+    return ConversationModel(
+      id: ConversationRef.group(targetId).storageId,
+      type: ConversationType.group,
+      targetId: targetId,
+      title: title,
+      portraitUrl: portraitUrl,
+      lastMessage: lastMessage,
+      lastMessageTime: lastMessageTime,
+      unreadCount: unreadCount,
+      memberCount: memberCount,
+    );
+  }
 }
