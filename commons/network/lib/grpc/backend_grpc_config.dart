@@ -2,7 +2,6 @@ import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:module_http/http/backend_http_config.dart';
-import 'package:module_http/http/lan_host.dart';
 
 /// Go BFF gRPC 地址解析（与 HTTP 同源 host，默认端口 9090）。
 class BackendGrpcConfig {
@@ -31,10 +30,12 @@ class BackendGrpcConfig {
     if (lan.isNotEmpty) return lan;
     if (!kIsWeb) {
       try {
-        if (Platform.isAndroid) return '10.0.2.2';
+        // 仅模拟器需要 10.0.2.2；真机上它无意义（且真机必须注入 BACKEND_HOST）。
+        if (Platform.isAndroid && !BackendHttpConfig.isPhysicalDevice) {
+          return '10.0.2.2';
+        }
       } catch (_) {}
     }
-    if (LanHost.fallback.isNotEmpty) return LanHost.fallback;
     return '127.0.0.1';
   }
 }

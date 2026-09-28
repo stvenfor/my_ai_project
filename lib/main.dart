@@ -48,6 +48,13 @@ class AppInitializer {
     ensureShellBindings();
 
     await EnvironmentSession.register();
+
+    // 后端地址改写要先知道「真机 or 模拟器」：模拟器/桌面端走 loopback，真机必须显式注入 BACKEND_HOST。
+    // module_http 不依赖 module_toolkit，所以由壳工程把探测结果推进去。
+    BackendHttpConfig.cacheIsPhysicalDevice(
+      await DeviceInfoUtils.isPhysicalDevice(),
+    );
+
     _syncWysAppEnvironment();
     _wireEnvironmentHttpRefresh();
     AppHttpBootstrap.initialize(
@@ -101,6 +108,7 @@ class AppInitializer {
       '[App] 应用初始化完成 env=${Get.find<EnvironmentService>().config.label} '
       'baseUrl=${AppHttpBootstrap.resolveBaseUrl()} '
       'BACKEND_HOST=${BackendHttpConfig.effectiveBackendHost.isEmpty ? "(未注入)" : BackendHttpConfig.effectiveBackendHost} '
+      '真机=${BackendHttpConfig.isPhysicalDevice} '
       'loggedIn=${AuthSession.isLoggedIn} '
       'ws=${wsClient?.currentState.label ?? '未初始化'}',
     );
