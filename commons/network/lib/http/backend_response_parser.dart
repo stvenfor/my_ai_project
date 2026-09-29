@@ -16,8 +16,10 @@ class BackendResponseParser implements HttpResponseParser {
     if (rawData is Map<String, dynamic>) {
       final error = rawData['error'];
       if (error is String && error.isNotEmpty) {
+        final code = rawData['code'];
         throw HttpRequestException(
           message: error,
+          code: code?.toString(),
           statusCode: response.statusCode,
           data: rawData,
           origin: response,
@@ -111,6 +113,7 @@ ResultModel<T> expectBackendResult<T>(
   if (error is String && error.isNotEmpty) {
     throw HttpRequestException(
       message: error,
+      code: raw['code']?.toString(),
       statusCode: response.statusCode,
       data: raw,
       origin: response,

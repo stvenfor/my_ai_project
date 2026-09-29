@@ -265,6 +265,16 @@ void main() {
       expect(userService.isLoggedIn, isFalse);
     });
 
+    test('Gone (token 无效) clears local Auth Session', () async {
+      await userService.setUser(_loggedInUser());
+      api.logoutError = const UnknownAuthFailure('token 无效');
+
+      await auth.signOut();
+
+      expect(userService.isLoggedIn, isFalse);
+      expect(api.logoutCalls, 1);
+    });
+
     test('network failure keeps local Auth Session and rethrows', () async {
       await userService.setUser(_loggedInUser());
       api.logoutError = const NetworkAuthFailure('无法连接服务端');

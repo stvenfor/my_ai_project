@@ -35,19 +35,36 @@ class AuthTokenRefreshInterceptor extends QueuedInterceptor {
     final path = err.requestOptions.path;
     if (path.contains('/user/login') ||
         path.contains('/user/register') ||
-        path.contains('/user/refresh')) {
+        path.contains('/user/refresh') ||
+        path.contains('/user/logout')) {
       handler.next(err);
       return;
     }
 
     final message = SessionGuardHook.extractMessage(err.response?.data);
     final code = SessionGuardHook.extractCode(err.response?.data);
-    if (SessionGuardHook.shouldForceLogout(code: code, message: message)) {
-      // 互踢/会话无效交给 SessionGuardHook 弹确认框并 Force Reset Login。
-      handler.next(err);
+    final statusCode = err.response?.statusCode;
+    if (SessionGuardHook.shouldForceLogout(
+      statusCode: statusCode,
+      code: code,
+      message: message,
+    )) {
+      // 互踢/会话无效：清会话回登录，勿把 401 原文抛给业务 toast。
+      await SessionGuardHook.handleIfForceLogout(
+        HttpRequestException(
+          message: message.isEmpty ? '会话无效，请重新登录' : message,
+          code: code?.toString(),
+          statusCode: statusCode,
+        ),
+      );
+      handler.reject(_sessionCleared(err));
       return;
     }
-    if (!SessionGuardHook.shouldTryTokenRefresh(code: code, message: message)) {
+    if (!SessionGuardHook.shouldTryTokenRefresh(
+      statusCode: statusCode,
+      code: code,
+      message: message,
+    )) {
       handler.next(err);
       return;
     }
@@ -60,7 +77,11 @@ class AuthTokenRefreshInterceptor extends QueuedInterceptor {
     final user = userService.currentUser.value;
     final refreshToken = user?.refreshToken ?? '';
     if (refreshToken.isEmpty) {
-      handler.next(err);
+      await SessionGuardHook.handleRefreshExhausted(
+        code: code,
+        message: message.isEmpty ? '登录已失效，请重新登录' : message,
+      );
+      handler.reject(_sessionCleared(err));
       return;
     }
 
@@ -69,8 +90,22 @@ class AuthTokenRefreshInterceptor extends QueuedInterceptor {
       final response = await HttpManager.instance.dio.fetch(err.requestOptions);
       handler.resolve(response);
     } catch (_) {
-      handler.next(err);
+      await SessionGuardHook.handleRefreshExhausted(
+        code: code,
+        message: message.isEmpty ? '登录已失效，请重新登录' : message,
+      );
+      handler.reject(_sessionCleared(err));
     }
+  }
+
+  DioException _sessionCleared(DioException err) {
+    return DioException(
+      requestOptions: err.requestOptions,
+      response: err.response,
+      type: DioExceptionType.cancel,
+      error: const SessionClearedFailure(),
+      message: '登录已失效，请重新登录',
+    );
   }
 
   Future<void> _refreshTokens(

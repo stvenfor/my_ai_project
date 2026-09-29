@@ -81,3 +81,8 @@ class SessionReplacedFailure extends AuthFailure {
 class SessionInvalidFailure extends AuthFailure {
   const SessionInvalidFailure([super.message = '会话无效，请重新登录']);
 }
+
+/// 全局守卫已清会话并即将回登录页；业务层勿再 toast「token 无效」。
+class SessionClearedFailure extends AuthFailure {
+  const SessionClearedFailure([super.message = '登录已失效，请重新登录']);
+}

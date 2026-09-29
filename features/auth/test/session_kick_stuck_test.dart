@@ -143,6 +143,18 @@ void main() {
         SessionGuardHook.shouldForceLogout(code: AuthBizCode.unauthorized),
         isFalse,
       );
+      expect(
+        SessionGuardHook.classify(statusCode: 401, message: 'token 无效'),
+        AuthHttpDecision.tryRefresh,
+      );
+      expect(
+        SessionGuardHook.classify(code: AuthBizCode.tokenInvalid),
+        AuthHttpDecision.tryRefresh,
+      );
+      expect(
+        SessionGuardHook.classify(statusCode: 403),
+        AuthHttpDecision.forbidden,
+      );
     });
 
     test('extractCode reads ResultModel envelope', () {

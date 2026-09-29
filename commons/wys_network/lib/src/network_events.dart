@@ -1,9 +1,10 @@
 import 'wys_network_error.dart';
 
-/// 业务码 / HTTP 401 等全局回调（UI 由主工程或 module 注册，对齐 iOS Dialog / 旧 Flutter ApiService）。
+/// 业务码 / HTTP 401·403 等全局回调（UI 由主工程或 module 注册，对齐 iOS Dialog / 旧 Flutter ApiService）。
 typedef NetworkEventHandler = void Function(WysNetworkError error);
 
 NetworkEventHandler? onTokenExpired;
+NetworkEventHandler? onForbidden;
 NetworkEventHandler? onInvalidAccount;
 NetworkEventHandler? onInvalidMember;
 NetworkEventHandler? onInvalidAuth;

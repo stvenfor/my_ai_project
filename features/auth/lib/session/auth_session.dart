@@ -107,7 +107,14 @@ class AuthSession {
             .refreshSession()
             .timeout(const Duration(seconds: 8));
       }
-    } catch (_) {
+    } catch (error) {
+      // refresh token 已废：清本地进登录页，勿带着废会话刷 401。
+      if (isLogoutSessionGone(error)) {
+        try {
+          await logout(remote: false);
+        } catch (_) {}
+        return;
+      }
       // 网络超时 / 后端不可达：不阻塞启动；本地会话可能过期，用户可重新登录。
     }
     if (isLoggedIn) {
@@ -120,9 +127,17 @@ class AuthSession {
     }
   }
 
-  /// 登出：优先走 [AuthService.signOut]。
-  static Future<void> logout() async {
-    if (Get.isRegistered<AuthService>()) {
+  /// 登出：先作废资料 hydrate、停 Realtime/IM，再清本地会话。
+  ///
+  /// [remote] 为 false 时跳过服务端 logout（token 已废时避免再打 401）。
+  static Future<void> logout({bool remote = true}) async {
+    UserProfileSync.invalidatePendingHydrates();
+    await AuthLifecycle.notifyAfterLogout();
+    if (!remote) {
+      if (Get.isRegistered<UserService>()) {
+        await Get.find<UserService>().clearUser();
+      }
+    } else if (Get.isRegistered<AuthService>()) {
       await Get.find<AuthService>().signOut();
     } else if (Get.isRegistered<UserService>()) {
       await Get.find<UserService>().clearUser();
@@ -130,7 +145,6 @@ class AuthSession {
     if (Get.isRegistered<CurrentStoreService>()) {
       await Get.find<CurrentStoreService>().clear();
     }
-    await AuthLifecycle.notifyAfterLogout();
   }
 
   static UserService? get maybeService => AuthLifecycle.maybeUserService;

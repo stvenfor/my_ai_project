@@ -101,8 +101,15 @@ class UserProfileApi {
         text.contains('参数错误')) {
       return UnknownAuthFailure(text.isEmpty ? '资料参数无效' : text);
     }
-    if (code == 401 || text.contains('未授权') || text.contains('Unauthorized')) {
-      return const UnknownAuthFailure('登录已失效，请重新登录');
+    if (code == 401 ||
+        code == AuthBizCode.unauthorized ||
+        text.contains('未授权') ||
+        text.contains('Unauthorized') ||
+        text.contains('token 无效') ||
+        text.contains('token 已过期') ||
+        text.contains('登录已失效')) {
+      // 全局拦截器应已清会话；此处不再冒充成可重试业务错。
+      return const SessionClearedFailure();
     }
     return UnknownAuthFailure(text.isEmpty ? '资料请求失败' : text);
   }

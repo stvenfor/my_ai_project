@@ -96,6 +96,8 @@ class BackendAuthService extends AuthService implements SessionRefreshable {
 
   @override
   Future<void> signOut() async {
+    // 作废进行中的 /profiles/me，避免退出后 401 token 无效刷屏。
+    UserProfileSync.invalidatePendingHydrates();
     final user = _userService.currentUser.value;
     if (user != null &&
         user.token.isNotEmpty &&
@@ -251,15 +253,23 @@ class BackendAuthService extends AuthService implements SessionRefreshable {
 /// Used by Server-Confirmed Logout so Gone clears local Auth Session while
 /// network and other failures keep it.
 bool isLogoutSessionGone(Object error) {
-  if (error is SessionReplacedFailure || error is SessionInvalidFailure) {
+  if (error is SessionClearedFailure ||
+      error is SessionReplacedFailure ||
+      error is SessionInvalidFailure ||
+      error is InvalidCredentialsFailure) {
     return true;
   }
-  if (error is InvalidCredentialsFailure) return true;
-  if (error is! AuthFailure) return false;
-  final text = error.message;
+  // 旧包无 typed failure 时的文案兜底。
+  final text = error is AuthFailure ? error.message : error.toString();
   if (text.contains('Unauthorized')) return true;
-  if (text.contains('未登录')) return true;
+  if (text.contains('未登录') || text.contains('未授权')) return true;
+  if (text.contains('token 无效') || text.contains('token 已过期')) return true;
+  if (text.contains('登录已失效')) return true;
   if (text.toLowerCase().contains('session not found')) return true;
-  if (text.contains('会话不存在') || text.contains('会话已失效')) return true;
+  if (text.contains('会话不存在') ||
+      text.contains('会话已失效') ||
+      text.contains('会话无效')) {
+    return true;
+  }
   return false;
 }

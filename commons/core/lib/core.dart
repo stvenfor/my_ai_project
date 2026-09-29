@@ -10,6 +10,7 @@ export 'env/app_auth_config.dart';
 export 'model/auth/auth_biz_code.dart';
 export 'model/auth/auth_credential_mode.dart';
 export 'model/auth/auth_failure.dart';
+export 'model/auth/auth_http_decision.dart';
 export 'model/auth/auth_session_state.dart';
 export 'model/auth/phone_auth_utils.dart';
 export 'model/user.dart';

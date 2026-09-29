@@ -10,6 +10,7 @@ import 'package:module_core/service/app_realtime_client.dart';
 import 'package:module_http/module_http.dart';
 import 'package:module_realtime/api/ws_sync_api.dart';
 import 'package:module_realtime/api/ws_ticket_api.dart';
+import 'package:module_realtime/client/realtime_auth_failure.dart';
 import 'package:module_realtime/config/realtime_config.dart';
 import 'package:module_realtime/connection/heartbeat_scheduler.dart';
 import 'package:module_realtime/connection/reconnect_policy.dart';
@@ -129,6 +130,15 @@ class AppRealtimeClientImpl implements AppRealtimeClient {
   /// 内部连接：换票 → 建连 → 发 auth 帧。
   Future<void> _connectInternal({required bool isReconnect}) async {
     _reconnectTimer?.cancel();
+    // 退出登录后禁止继续换票/重连（避免 401 token 无效刷屏）。
+    if (_manualDisconnect || !AuthLifecycle.isLoggedIn) {
+      _setState(RealtimeConnectionState.disconnected);
+      LogUtils.i(
+        '[Realtime] skip connectInternal: '
+        'manual=$_manualDisconnect loggedIn=${AuthLifecycle.isLoggedIn}',
+      );
+      return;
+    }
     _setState(
       isReconnect
           ? RealtimeConnectionState.reconnecting
@@ -166,6 +176,12 @@ class AppRealtimeClientImpl implements AppRealtimeClient {
     } catch (e, st) {
       sw.stop();
       _telemetry.error('ws_connect_fail', e);
+      if (_manualDisconnect || !AuthLifecycle.isLoggedIn) {
+        _reconnectTimer?.cancel();
+        _setState(RealtimeConnectionState.disconnected);
+        LogUtils.i('[Realtime] abort reconnect: logged out during connect');
+        return;
+      }
       final guard = Get.isRegistered<SessionGuardService>()
           ? Get.find<SessionGuardService>()
           : null;
@@ -176,16 +192,33 @@ class AppRealtimeClientImpl implements AppRealtimeClient {
           await _connectInternal(isReconnect: isReconnect);
           return;
         }
-        _manualDisconnect = true;
-        _reconnectTimer?.cancel();
-        _setState(RealtimeConnectionState.disconnected);
-        LogUtils.w('[Realtime] session invalid, stop reconnect');
+        _stopReconnectPermanently(reason: 'session invalid');
         unawaited(guard.handleIfForceLogout(e));
+        return;
+      }
+      // 401 / token 无效：勿指数退避死循环（退出登录或 JWT 已废）。
+      if (isRealtimeAuthHardFailure(e)) {
+        if (guard != null) {
+          final recovered = await guard.tryRecover();
+          if (recovered && AuthLifecycle.isLoggedIn) {
+            LogUtils.i('[Realtime] token recovered, retry connect');
+            await _connectInternal(isReconnect: isReconnect);
+            return;
+          }
+        }
+        _stopReconnectPermanently(reason: e.toString());
         return;
       }
       LogUtils.e('[Realtime] connect failed', e, st);
       _scheduleReconnect(reason: e.toString());
     }
+  }
+
+  void _stopReconnectPermanently({required String reason}) {
+    _manualDisconnect = true;
+    _reconnectTimer?.cancel();
+    _setState(RealtimeConnectionState.disconnected);
+    LogUtils.w('[Realtime] stop reconnect: $reason');
   }
 
   void _listenInbound() {
@@ -306,7 +339,7 @@ class AppRealtimeClientImpl implements AppRealtimeClient {
   }
 
   void _scheduleReconnect({required String reason}) {
-    if (_manualDisconnect) return;
+    if (_manualDisconnect || !AuthLifecycle.isLoggedIn) return;
     _reconnectCount++;
     _setState(RealtimeConnectionState.reconnecting);
     final delay = _reconnectPolicy.nextDelay();

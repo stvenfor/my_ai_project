@@ -5,6 +5,9 @@ abstract final class NetworkCodes {
   static const int invalidAuth = 100;
   static const int invalidMember = 301;
   static const int expireToken = 401;
+
+  /// HTTP 403：无权限（与 [expireToken] 不同，不触发登出）。
+  static const int forbidden = 403;
   static const int busy = 429;
   static const int invalidAccount = 500;
 

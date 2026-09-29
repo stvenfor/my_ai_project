@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:module_auth/api/user_profile_api.dart';
 import 'package:module_auth/api/user_profile_models.dart';
 import 'package:module_core/core.dart';
+import 'package:module_http/module_http.dart';
 import 'package:module_utils/module_utils.dart';
 
 /// 将会话 [User] 与正式 profile 合并，并在登录后 / 资料页拉取。
@@ -20,7 +21,7 @@ abstract final class UserProfileSync {
 
   /// 拉取 `/profiles/me` 并写入 [UserService]；失败不抛出、不登出。
   ///
-  /// 若期间用户已切换（换号登录），丢弃本次结果，避免旧账号资料盖住新会话。
+  /// 若期间用户已切换（换号登录）或已退出，丢弃本次结果，避免旧账号资料盖住新会话。
   static Future<bool> hydrateQuietly({UserService? userService}) async {
     if (!Get.isRegistered<UserService>()) return false;
     final service = userService ?? Get.find<UserService>();
@@ -36,6 +37,7 @@ abstract final class UserProfileSync {
 
       final latest = service.currentUser.value;
       if (latest == null || latest.id != expectedUserId) return false;
+      if (latest.token.isEmpty) return false;
 
       final profileId = profile.userId.isNotEmpty
           ? profile.userId
@@ -51,9 +53,41 @@ abstract final class UserProfileSync {
       await service.setUser(mergeProfile(latest, profile));
       return true;
     } catch (error, stack) {
+      // 退出 / 作废 / 鉴权失效：预期失败，勿打红栈吓用户。
+      if (epoch != _hydrateEpoch ||
+          service.currentUser.value == null ||
+          (service.currentUser.value?.token.isEmpty ?? true) ||
+          _isExpectedAuthMiss(error)) {
+        LogUtils.i('[UserProfileSync] hydrate skipped: $error');
+        return false;
+      }
       LogUtils.w('[UserProfileSync] hydrate failed', error, stack);
       return false;
     }
+  }
+
+  static bool _isExpectedAuthMiss(Object error) {
+    if (error is SessionClearedFailure) return true;
+    if (error is AuthFailure) {
+      final m = error.message;
+      return m.contains('token 无效') ||
+          m.contains('登录已失效') ||
+          m.contains('未授权') ||
+          m.contains('会话无效');
+    }
+    if (error is HttpRequestException) {
+      if (error.statusCode == 401) return true;
+      final m = error.message;
+      return m.contains('token 无效') ||
+          m.contains('未提供 Authorization') ||
+          m.contains('未授权');
+    }
+    // Dio cancel after session clear
+    if (error.toString().contains('SessionClearedFailure') ||
+        error.toString().contains('登录已失效')) {
+      return true;
+    }
+    return false;
   }
 
   static Future<UserProfile> updateAndPersist(

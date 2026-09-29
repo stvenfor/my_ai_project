@@ -43,6 +43,28 @@ class ResponseHandlerInterceptor extends Interceptor {
       return handler.next(response);
     }
 
+    if (response.statusCode == NetworkCodes.forbidden) {
+      final data = response.data;
+      String message = '无权限';
+      if (data is Map) {
+        final m = data['message']?.toString();
+        if (m != null && m.isNotEmpty) message = m;
+      }
+      final err = WysNetworkError.business(
+        code: NetworkCodes.forbidden,
+        message: message,
+        responseBody: data,
+      );
+      onForbidden?.call(err);
+      if (autoToastOnFailure && !_silentMessages.contains(message)) {
+        notifyToast(message);
+      }
+      if (throwOnBusinessError) {
+        return handler.reject(_businessException(response, err));
+      }
+      return handler.next(response);
+    }
+
     final data = response.data;
     if (data is! Map) {
       return handler.next(response);
@@ -80,6 +102,26 @@ class ResponseHandlerInterceptor extends Interceptor {
         responseBody: map,
       );
       onTokenExpired?.call(err);
+      if (throwOnBusinessError) {
+        return handler.reject(_businessException(response, err));
+      }
+      return handler.next(response);
+    }
+
+    if (code == NetworkCodes.forbidden) {
+      final err = WysNetworkError.business(
+        code: code,
+        message: message.isNotEmpty ? message : '无权限',
+        responseBody: map,
+      );
+      onForbidden?.call(err);
+      if (autoToastOnFailure &&
+          message.isNotEmpty &&
+          !_silentMessages.contains(message)) {
+        notifyToast(message);
+      } else if (autoToastOnFailure && message.isEmpty) {
+        notifyToast('无权限');
+      }
       if (throwOnBusinessError) {
         return handler.reject(_businessException(response, err));
       }
@@ -152,6 +194,15 @@ class ResponseHandlerInterceptor extends Interceptor {
     if (status == NetworkCodes.expireToken &&
         !tf.message.contains('用户不存在')) {
       onTokenExpired?.call(tf);
+    } else if (status == NetworkCodes.forbidden || tf.isForbidden) {
+      onForbidden?.call(tf);
+      if (autoToastOnFailure) {
+        final msg = tf.message.isNotEmpty &&
+                tf.message != WysNetworkError.defaultMessage
+            ? tf.message
+            : '无权限';
+        notifyToast(msg);
+      }
     } else if (status == NetworkCodes.busy || tf.isBusy) {
       onNetworkBusy?.call(tf);
       if (autoToastOnFailure) {

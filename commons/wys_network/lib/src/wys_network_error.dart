@@ -63,6 +63,11 @@ class WysNetworkError implements Exception {
       httpStatusCode == NetworkCodes.expireToken ||
       code == NetworkCodes.expireToken;
 
+  /// HTTP / 业务码 403：无权限，不表示 token 失效。
+  bool get isForbidden =>
+      httpStatusCode == NetworkCodes.forbidden ||
+      code == NetworkCodes.forbidden;
+
   bool get isBusy =>
       httpStatusCode == NetworkCodes.busy || code == NetworkCodes.busy;
 }

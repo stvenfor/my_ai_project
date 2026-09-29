@@ -35,6 +35,11 @@ void main() {
       );
       expect(isLogoutSessionGone(const SessionReplacedFailure()), isTrue);
       expect(isLogoutSessionGone(const SessionInvalidFailure()), isTrue);
+      expect(isLogoutSessionGone(const SessionClearedFailure()), isTrue);
+      expect(
+        isLogoutSessionGone(const UnknownAuthFailure('token 无效')),
+        isTrue,
+      );
       expect(
         isLogoutSessionGone(const NetworkAuthFailure()),
         isFalse,

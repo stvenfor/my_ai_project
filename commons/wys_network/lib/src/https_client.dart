@@ -143,6 +143,7 @@ class HttpsClient {
     Response<dynamic> response, {
     T Function(dynamic data)? dataParser,
   }) {
+    // 仅 401 走登出语义；403（forbidden）不得进入此分支。
     if (response.statusCode == NetworkCodes.expireToken) {
       final body = response.data;
       var message = '已退出登录，请重新登录';
@@ -164,7 +165,9 @@ class HttpsClient {
         response.statusCode! >= 400 &&
         response.data is! Map) {
       return ApiResponse<T>(
-        code: response.statusCode!,
+        code: response.statusCode == NetworkCodes.forbidden
+            ? NetworkCodes.forbidden
+            : response.statusCode!,
         message: WysNetworkError.defaultMessage,
         raw: response.data,
       );

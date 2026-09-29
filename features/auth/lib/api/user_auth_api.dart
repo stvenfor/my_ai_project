@@ -212,26 +212,58 @@ class UserAuthApi {
 
   AuthFailure _mapFailure(int? code, String? message) {
     final text = message?.trim() ?? '';
-    if (code == AuthBizCode.sessionReplaced) {
-      return text.isNotEmpty
-          ? SessionReplacedFailure(text)
-          : const SessionReplacedFailure();
+
+    // 1) 业务码优先（与 Go response.Code* 对齐）。
+    switch (code) {
+      case AuthBizCode.sessionReplaced:
+        return text.isNotEmpty
+            ? SessionReplacedFailure(text)
+            : const SessionReplacedFailure();
+      case AuthBizCode.sessionInvalid:
+        return text.isNotEmpty
+            ? SessionInvalidFailure(text)
+            : const SessionInvalidFailure();
+      case AuthBizCode.tokenInvalid:
+        return text.isNotEmpty
+            ? SessionInvalidFailure(text)
+            : const SessionInvalidFailure('登录已失效，请重新登录');
+      case AuthBizCode.unauthorized:
+        return const InvalidCredentialsFailure();
+      case AuthBizCode.invalidOtp:
+        return const InvalidOtpFailure();
+      case AuthBizCode.accountNotRegistered:
+        return const AccountNotRegisteredFailure();
+      case AuthBizCode.internalError:
+        if (text.contains('认证服务暂时不可用') ||
+            text.contains('无法连接 Supabase') ||
+            text.contains('Supabase 未配置')) {
+          return BackendServiceFailure(
+            text.isNotEmpty
+                ? text
+                : '认证服务暂时不可用，请检查 Go 后端配置',
+          );
+        }
+        return UnknownAuthFailure(
+          text.isNotEmpty ? text : '服务端异常，请稍后重试',
+        );
     }
-    if (code == AuthBizCode.sessionInvalid) {
-      return text.isNotEmpty
-          ? SessionInvalidFailure(text)
-          : const SessionInvalidFailure();
-    }
-    if (code == AuthBizCode.accountNotRegistered ||
-        text.contains('账号未注册') ||
-        text.contains('请先注册')) {
+
+    // 2) 旧包 / 无 code：文案兜底（勿在新逻辑继续加）。
+    if (text.contains('账号未注册') || text.contains('请先注册')) {
       return const AccountNotRegisteredFailure();
     }
-    if (code == AuthBizCode.unauthorized ||
-        text.contains('密码错误') ||
+    if (text.contains('密码错误') ||
         text.contains('用户名或密码错误') ||
         text.contains('Unauthorized')) {
       return const InvalidCredentialsFailure();
+    }
+    if (text.contains('token 无效') ||
+        text.contains('token 已过期') ||
+        text.contains('未授权') ||
+        text.contains('未提供 Authorization')) {
+      return text.isNotEmpty
+          ? SessionInvalidFailure(text)
+          : const SessionInvalidFailure('登录已失效，请重新登录');
     }
     if (text.contains('验证邮件')) {
       return const EmailConfirmationRequiredFailure();
@@ -266,7 +298,7 @@ class UserAuthApi {
         '认证服务暂时不可用，请检查 Go 后端 Supabase 配置（$baseUrl）',
       );
     }
-    if (code == AuthBizCode.internalError || text.contains('服务器内部错误')) {
+    if (text.contains('服务器内部错误')) {
       return UnknownAuthFailure(
         text.isNotEmpty ? text : '服务端异常，请稍后重试',
       );
